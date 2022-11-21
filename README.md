@@ -1,2 +1,3 @@
-# trlc
-Treat Requirements Like Code
+# Treat Requirements Like Code
+
+[Language Reference Manual](language-reference-manual/README.md)
