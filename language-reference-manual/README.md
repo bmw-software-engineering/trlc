@@ -1,6 +1,6 @@
-# TRCL Language Reference Manual
+# TRLC Language Reference Manual
 
-This is the language reference manual for the TRCL 2.0 language. It
+This is the language reference manual for the TRLC 2.0 language. It
 aims to provides grammar, static and dynamic semantics, and some
 helpful guidance on how to use it all.
 
