@@ -27,7 +27,7 @@ TRLC is an evolving language that we plan to extend. We would like to
 identify several features that are definitely planned:
 
 * Extend integer domain with a special `HEAD` value allowing you to
-  talk about an a HEAD revision instead of a specific versions.
+  talk about a HEAD revision instead of a specific versions.
 * Add user-defined tuple types to allow e.g. a item + revision pairing
   of data.
 * Allow check specifications directly in the `.rsl` files.
