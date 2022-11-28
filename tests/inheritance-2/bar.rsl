@@ -1,0 +1,13 @@
+          package bar
+
+
+
+            type MyType {
+                name String
+                length Integer
+            }
+
+
+            type Type2 extends MyType {
+
+            }

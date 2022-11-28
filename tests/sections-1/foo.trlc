@@ -1,0 +1,21 @@
+package Foo
+
+section "Section 1" {
+
+   T Test_1 {}
+
+   section "Secton 1.1" {
+
+      T Test_2 {}
+
+   }
+
+   section "Secton 1.1" {
+
+      T Test_3 {}
+
+   }
+
+}
+
+T Test_4 {}

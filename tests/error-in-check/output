@@ -1,0 +1,2 @@
+      trlc:startsXwith(name, "Q"), error "name must start with Q", name
+      ^^^^^^^^^^^^^^^^ checks.check:4: error: unknown symbol trlc:startsXwith, did you mean trlc:startswith?

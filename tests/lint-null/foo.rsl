@@ -1,0 +1,6 @@
+package Foo
+
+type T {
+   x optional Integer
+   y optional Integer
+}

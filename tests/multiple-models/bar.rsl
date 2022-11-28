@@ -1,0 +1,5 @@
+package Bar
+import Foo
+
+type T extends Foo.T {
+}

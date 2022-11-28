@@ -1,0 +1,8 @@
+         package instances
+	 import bar
+
+            bar.MyType SomeThing {
+                quote = "\t\""
+                tick = "\t\'"
+                nonJavaEscape = "\~"
+            }

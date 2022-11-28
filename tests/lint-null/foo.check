@@ -1,0 +1,6 @@
+package Foo
+
+checks T {
+   (x == y), fatal "values must be equal"
+   x != null implies y > 5, "potato"
+}

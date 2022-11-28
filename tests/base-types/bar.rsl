@@ -1,0 +1,15 @@
+          package bar
+
+
+
+            type MyType {
+                 string_ok String
+                 string_nok String
+                 string_null optional String
+
+                 int_ok Integer
+                 int_nok Integer
+                 int_null optional Integer
+
+
+            }

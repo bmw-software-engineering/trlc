@@ -1,0 +1,2 @@
+type MyType2 extends MyType3 {
+                     ^^^^^^^ bar.rsl:5: error: unknown symbol MyType3

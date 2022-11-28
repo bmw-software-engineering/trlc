@@ -1,0 +1,31 @@
+  package bar
+
+
+type MyType {
+   name optional String
+   mult String [5..5]
+ }
+
+ type MyTypeUnbound {
+    name String
+   mult String [0..*]
+
+ }
+
+  type ZeroMult {
+    name String
+   mult String [0..0]
+
+ }
+
+   type WrongOrder {
+    name String
+    mult String [5..3]
+
+ }
+
+    type DefinedLimits {
+   name String
+    mult String [3..5]
+
+ }

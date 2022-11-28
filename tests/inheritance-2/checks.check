@@ -1,0 +1,5 @@
+ package bar
+
+ checks MyType {
+      name != null and trlc:len(name) == length, "name must have specific length" , name
+  }

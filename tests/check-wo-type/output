@@ -1,0 +1,2 @@
+ checks {
+        ^ checks.check:3: error: expected IDENTIFIER, encountered C_BRA instead

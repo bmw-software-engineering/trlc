@@ -1,0 +1,10 @@
+package  A
+
+
+A.L L1 {
+
+}
+
+A.L Localref {
+	l = L1
+}

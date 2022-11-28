@@ -1,0 +1,8 @@
+package bar
+
+ checks MyType {
+      trlc:matches(name, "^D.*"), error "name must start with D", name
+      trlc:matches(name, "^E.*"), error "name must start with E", name
+      trlc:matches(name, "^W.*"), warning "name must start with W", name
+      trlc:matches(name, "^I.*"),  warning "name must start with I", name
+  }

@@ -1,0 +1,10 @@
+package Foo
+
+T Test {
+   one = 1
+   two = 2
+   yay = true
+   nay = false
+   foo = "foo"
+   foobar = "foobar"
+}

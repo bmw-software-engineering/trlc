@@ -1,0 +1,6 @@
+package Foo
+
+type T {
+   foo optional String
+   values optional String [2 .. 5]
+}

@@ -1,0 +1,5 @@
+ package bar
+
+ checks Type2 {
+     trlc:len(name) == length, error "name must have specific length" , name
+  }

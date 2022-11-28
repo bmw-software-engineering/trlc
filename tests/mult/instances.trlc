@@ -1,0 +1,27 @@
+ package instances
+ import bar
+
+bar.MyType SomeThing {
+    name = "Qbert" // does start with Q
+    mult = [ "A", "B"]
+}
+
+bar.MyTypeUnbound SomeThing2 {
+    name = "Qbert" // does start with Q
+    mult = [ "A", "B"]
+}
+
+bar.WrongOrder SomeThing4 {
+    name = "Qbert" // does start with Q
+    mult = [ "A", "B"]
+}
+
+bar.DefinedLimits SomeThing5 {
+    name = "Qbert" // does start with Q
+    mult = [ "A", "B"]
+}
+
+bar.ZeroMult SomeThing3 {
+    name = "Qbert" // does start with Q
+    mult = []
+}

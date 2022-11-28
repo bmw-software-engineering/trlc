@@ -1,0 +1,10 @@
+package Foo
+
+type T {
+   one    Integer
+   two    Integer
+   yay    Boolean
+   nay    Boolean
+   foo    String
+   foobar String
+}

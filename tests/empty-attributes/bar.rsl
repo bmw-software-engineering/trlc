@@ -1,0 +1,16 @@
+          package bar
+
+
+enum ASIL {
+	A
+	B
+	C
+	D
+}
+
+
+
+type BaseRequirement {
+	description optional String
+	asil optional ASIL
+}

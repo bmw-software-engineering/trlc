@@ -1,0 +1,6 @@
+         package instances
+	 import bar
+
+            bar.MyType SomeThing {
+                name = "xbert" // does start with Q
+            }

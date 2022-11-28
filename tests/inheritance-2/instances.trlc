@@ -1,0 +1,6 @@
+         package bar
+            
+            bar.Type2 SomeThing {
+                name  = "Qbert" 
+                length = 6
+            } 

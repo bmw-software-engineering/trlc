@@ -1,0 +1,5 @@
+package bar
+ checks MyType {
+      status == bar.Status.NEW , "Status must be NEW"
+      status != null , "Internal error when evaluating enum value"
+  }

@@ -1,0 +1,81 @@
+package Foo
+
+checks T {
+   yay and yay and yay, "01: good and"
+   yay and nay and yay, warning "01: bad and"
+
+   nay or yay or nay, "02: or"
+   nay or nay or nay, warning "02: bad or"
+
+   nay xor yay, "03: good xor"
+   yay xor yay, warning "03: bad xor"
+
+   yay implies yay, "04: good implies"
+   yay implies nay, warning "04: bad implies"
+
+   one < two, "05: good <"
+   one < one, warning "05: bad <"
+
+   one <= one, "06: good <="
+   two <= one, warning "06: bad <="
+
+   two > one, "07: good >"
+   two > two, warning "07: bad >"
+
+   two >= one, "08: good >="
+   one >= two, warning "08: bad >="
+
+   one == one, "09: good =="
+   one == two, warning "09: bad =="
+
+   one != two, "10: good !="
+   one != one, warning "10: bad !="
+
+   one in 0 .. 10, "11: good range in"
+   one in 5 .. 10, warning "11: bad range in"
+
+   one not in 5 .. 10, "12: good range not in"
+   one not in 0 .. 10, warning "12: bad range not in"
+
+   foo in foobar, "13: good substring"
+   foobar in foo, warning "13: bad substring"
+
+   (-one) + one + two == two, "14: good adding"
+   (+one) + one + two == two, warning "14: bad adding (1/2)"
+   (-one) + one - two == two, warning "14: bad adding (2/2)"
+
+   one * two * one * two == two + two, "15: good *"
+   one * two * two * two == two + two, warning "15: bad *"
+
+   10 / two / two == two, "15: good /"
+   10 / two / two == 3, warning "15: bad /"
+
+   10 % 5 == 0,        "16: good % (1/12)"
+   11 % 5 == 1,        "16: good % (2/12)"
+   14 % 5 == 4,        "16: good % (3/12)"
+   (-10) % 5 == 0,     "16: good % (4/12)"
+   (-11) % 5 == -1,    "16: good % (5/12)"
+   (-14) % 5 == -4,    "16: good % (6/12)"
+   10 % (-5) == 0,     "16: good % (7/12)"
+   11 % (-5) == 1,     "16: good % (8/12)"
+   14 % (-5) == 4,     "16: good % (9/12)"
+   (-10) % (-5) == 0,  "16: good % (10/12)"
+   (-11) % (-5) == -1, "16: good % (11/12)"
+   (-14) % (-5) == -4, "16: good % (12/12)"
+   (-11) % 5 == 4,     warning "16: bad % (1/4)"
+   (-14) % 5 == 1,     warning "16: bad % (2/4)"
+   11 % (-5) == -4,    warning "16: bad % (3/4)"
+   14 % (-5) == -1,    warning "16: bad % (4/4)"
+
+   two ** (2 + 1) == 8, "17: good exp"
+   two ** (2 + 1) == 9, warning "17: bad exp"
+
+   not nay, "18: good lnot"
+   not yay, warning "18: bad lnot"
+
+   abs (one - two) == one, "19: good abs"
+   abs (one - two) == (-one), "19: bad abs"
+
+   (if yay then one else two) == one, "20: good ifexpr"
+   (if nay then one else two) == one, "20: bad ifexpr"
+}

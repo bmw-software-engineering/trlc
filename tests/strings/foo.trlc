@@ -1,0 +1,44 @@
+package Foo
+
+T Test_01 {
+  txt = '''foo
+           bar
+           baz'''
+  len = 11
+}
+
+T Test_02 {
+  txt = '''
+    foo
+    bar
+    baz
+  '''
+  len = 11
+}
+
+T Test_03 {
+  txt = '''
+	foo
+	bar
+	baz
+  '''
+  len = 11
+}
+
+T Test_04 {
+  txt = '''
+	  foo
+	  bar
+	  baz
+  '''
+  len = 11
+}
+
+T Test_05 {
+  txt = '''
+	  foo
+	 bar
+	  baz
+  '''
+  len = 12
+}

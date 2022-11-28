@@ -1,0 +1,24 @@
+                name = "Qbert" // does start with Q
+                       ^^^^^^^ instances.trlc:5: check error: name must start with D
+                name = "Qbert" // does start with Q
+                       ^^^^^^^ instances.trlc:5: check error: name must start with E
+                name = "Qbert" // does start with Q
+                       ^^^^^^^ instances.trlc:5: check warning: name must start with W
+                name = "Qbert" // does start with Q
+                       ^^^^^^^ instances.trlc:5: check warning: name must start with I
+                name = "Abert"
+                       ^^^^^^^ instances.trlc:9: check error: name must start with D
+                name = "Abert"
+                       ^^^^^^^ instances.trlc:9: check error: name must start with E
+                name = "Abert"
+                       ^^^^^^^ instances.trlc:9: check warning: name must start with W
+                name = "Abert"
+                       ^^^^^^^ instances.trlc:9: check warning: name must start with I
+                name = "BBert"
+                       ^^^^^^^ instances.trlc:13: check error: name must start with D
+                name = "BBert"
+                       ^^^^^^^ instances.trlc:13: check error: name must start with E
+                name = "BBert"
+                       ^^^^^^^ instances.trlc:13: check warning: name must start with W
+                name = "BBert"
+                       ^^^^^^^ instances.trlc:13: check warning: name must start with I

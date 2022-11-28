@@ -1,0 +1,11 @@
+  package bar
+
+
+    type MyType {
+        name String
+    }
+
+
+    type Type2 extends bar.MyType {
+    	length Integer
+    }

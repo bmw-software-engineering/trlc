@@ -1,0 +1,15 @@
+ package instances
+ import bar
+
+    bar.MyType Übergrößenträger {
+        name = "dep" // does start with Q
+       // status = bar.Status.DEPRECATED
+
+    }
+
+     bar.MyType NewXR {
+        name = "new" // does start with Q
+//        status = bar.Status.NEW
+
+      link = Übergrößenträger
+    }

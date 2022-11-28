@@ -1,0 +1,12 @@
+  package bar
+
+
+
+type MyType2 extends MyType3 {
+	middle String
+}
+
+type MyType3 extends MyType2 {
+	name String
+
+}

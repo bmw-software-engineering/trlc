@@ -1,0 +1,14 @@
+         package instances
+	 import bar
+
+            bar.MyType SomeThing {
+                string_ok = "Qbert"
+                string_nok = "Abert"
+
+
+                int_ok = 42
+                int_nok = 24
+
+
+
+            }

@@ -1,0 +1,5 @@
+package Bar
+
+checks T {
+   trlc:endswith(name, "kitten"), "also not a good name"
+}

@@ -1,0 +1,6 @@
+package Foo
+
+checks T {
+   (if x > y then x else y) <= x, "potato"
+   (if b then b else x > 5), "kitten"
+}

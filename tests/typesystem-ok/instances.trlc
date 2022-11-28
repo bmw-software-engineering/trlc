@@ -1,0 +1,7 @@
+         package instances
+	 import bar
+
+            bar.MyType SomeThing {
+                name = "String"
+                intvalue = 12
+            }

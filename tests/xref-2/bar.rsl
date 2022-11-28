@@ -1,0 +1,13 @@
+ package bar
+
+
+enum Status {
+	NEW
+	OLD
+	DEPRECATED
+}
+type MyType {
+    name String
+  status optional Status
+   link  optional MyType
+ }

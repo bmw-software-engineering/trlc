@@ -1,0 +1,3 @@
+package Bar
+import Foo
+import Baz

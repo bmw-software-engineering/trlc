@@ -1,0 +1,36 @@
+package Bulk_Test
+
+enum VerificationMethodEnum {
+	UnitTest
+	SWComponentTest
+	OnTargetIntegrationTest
+	ECUTest
+	Analysis
+	Test
+}
+
+enum SecurityEnum {
+	No
+	Yes
+	Privacy_relevant
+	Security_relevant
+}
+
+type Technical_Requirement {
+   cb_id Integer
+   name optional String
+   description optional String
+   teams optional Technical_Requirement [0..*]
+   machine optional Technical_Requirement [0..*]
+   verificationmethod optional VerificationMethodEnum [0..*]
+   rationale optional String
+   asil optional Technical_Requirement
+   security optional SecurityEnum [0..*]
+   satisfiedby optional Technical_Requirement [0..*]
+   exportto optional Technical_Requirement [0..*]
+   validfrom optional Technical_Requirement
+   validuntil optional Technical_Requirement
+   implementationstatus optional Technical_Requirement
+   origin optional Technical_Requirement
+   parent_requirements optional Technical_Requirement [0..*]
+}

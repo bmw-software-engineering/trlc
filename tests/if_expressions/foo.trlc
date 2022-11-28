@@ -1,0 +1,7 @@
+package Foo
+
+T test_01 {
+   x = 5
+   y = 10
+   b = false
+}

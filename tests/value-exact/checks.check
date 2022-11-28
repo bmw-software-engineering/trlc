@@ -1,0 +1,6 @@
+
+package bar
+
+ checks MyType {
+     name != null and name == "Qbert", error "name must be 'Qbert'", name
+  }

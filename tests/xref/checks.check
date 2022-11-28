@@ -1,0 +1,6 @@
+ package bar
+
+ checks MyType {
+
+     link != null , "Must be linked"
+  }

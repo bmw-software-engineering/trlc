@@ -1,0 +1,7 @@
+ package instances
+ import bar
+
+    bar.MyType SomeThing {
+        name = "Qbert" // does start with Q
+        status = bar.Status.DEPRECATED
+    }

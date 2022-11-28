@@ -1,0 +1,15 @@
+ package bar
+    
+    bar.MyType deprecatedR {
+        name = "dep" // does start with Q
+       // status = bar.Status.DEPRECATED
+       link = bar.deprecatedR      
+    } 
+ 
+     bar.MyType newXR {
+        name = "new" // does start with Q
+//        status = bar.Status.NEW
+        
+      link = bar.deprecatedR
+    }
+  

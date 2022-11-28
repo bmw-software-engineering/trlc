@@ -1,0 +1,15 @@
+package Foo
+
+T Test_1 {
+   a = 5
+}
+
+T Test_2 {
+   a = 5
+   b = 5
+}
+
+T Test_3 {
+   a = 5
+   b = 6
+}

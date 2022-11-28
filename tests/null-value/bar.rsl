@@ -1,0 +1,6 @@
+          package bar
+
+            type MyType {
+                name String
+                other MyType
+            }

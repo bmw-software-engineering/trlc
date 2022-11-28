@@ -1,0 +1,6 @@
+package Foo
+
+checks T {
+   b != null, fatal "please define b", b
+   a < b, "a must be less than b", a
+}

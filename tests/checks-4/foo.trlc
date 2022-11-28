@@ -1,0 +1,10 @@
+package Foo
+
+T Test_1 {
+   foo = "kitten"
+}
+
+T Test_2 {
+   foo = "kitten"
+   values = ["x", "kitten", "z"]
+}
