@@ -656,11 +656,11 @@ pkg.sym      // refers to the record object sym from pkg
 pkg.sym.lit  // refers to the enum literal lit
 foo[1]       // refers to the second element of foo
 
-len("potato")                 // computes 6
-startswith("potato", "p")     // returns true
-matches("potato", "^P")       // returns false
-matches("potato", "^" + "p")  // returns true
-matches("potato", myfield)    // error: myfield is not a constant
+trlc:len("potato")                 // computes 6
+trlc:startswith("potato", "p")     // returns true
+trlc:matches("potato", "^P")       // returns false
+trlc:matches("potato", "^" + "p")  // returns true
+trlc:matches("potato", myfield)    // error: myfield is not a constant
 ```
 
 ## Operators
