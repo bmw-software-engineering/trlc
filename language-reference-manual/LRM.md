@@ -648,6 +648,16 @@ matched by the regular expression given in the second parameter.
 ### Name resolution
 Name resolution is case sensitive.
 
+### Implementation recommendations
+The parsing of unary minus can be confusing: `-a % b` is actually `-
+(a % b)`. The semantics of `%` are carefully specified so that this
+does not matter. It does also mean that `-a / -b` is not legal and
+needs to be written as either `-a / (-b)` or even better `(-a) /
+(-b)`.
+
+It is recommended that a linter warns whenever a unary minus is
+encountered that has a non-trivial `term` or `factor` as its operand.
+
 ### Examples
 
 ```
