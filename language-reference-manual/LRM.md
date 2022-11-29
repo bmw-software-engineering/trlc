@@ -206,7 +206,7 @@ this is
 example
 ```
 
-We can see two tranformations in action here: first the trailing
+We can see two transformations in action here: first the trailing
 whitespace (the trailing newline) is removed providing us with a
 trimmed string. Then the common whitespace (three spaces) is removed
 from each line starting from the second.
@@ -836,7 +836,7 @@ conditional_expression ::=
 
 ### Static semantics
 
-The condition expressions must be of boolean type.
+The condition expressions must be of Boolean type.
 
 The dependent expressions must all be of the same type, and the type
 of the conditional expression is also of that type.
