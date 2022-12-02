@@ -454,7 +454,7 @@ type Requirement {
 }
 
 type Supplier_Requirement extends Requirement {
-   Integer supplier_id
+   supplier_id Integer
 }
 ```
 
