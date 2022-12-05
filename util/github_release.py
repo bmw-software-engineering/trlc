@@ -48,7 +48,7 @@ def main():
     api_endpoint = "https://api.github.com/repos/%s/%s/releases" % \
         ("bmw_software_engineering", "trlc")
 
-    tag_name = TRLC_VERSION
+    tag_name = "trlc-%s" % TRLC_VERSION
     rel_name = "Release %s" % TRLC_VERSION
     rel_body = "### %s\n\n%s" % (TRLC_VERSION, util.changelog.current_section())
 

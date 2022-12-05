@@ -22,6 +22,9 @@ package:
 	@git clean -xdf
 	@python3 setup.py sdist bdist_wheel
 
+upload_main: package
+        python3 -m twine upload --repository pypi dist/*
+
 release:
 	python3 -m util.release
 
