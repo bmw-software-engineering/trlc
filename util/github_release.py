@@ -46,7 +46,7 @@ def main():
     auth = requests.auth.HTTPBasicAuth(username, token)
 
     api_endpoint = "https://api.github.com/repos/%s/%s/releases" % \
-        ("bmw_software_engineering", "trlc")
+        ("bmw-software-engineering", "trlc")
 
     tag_name = "trlc-%s" % TRLC_VERSION
     rel_name = "Release %s" % TRLC_VERSION
