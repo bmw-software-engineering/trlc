@@ -29,6 +29,8 @@ The Python implementation can be used for several purposes:
 
 * [Tutorial](TUTORIAL.md) (read this as a first introduction)
 * [Release Notes](CHANGELOG.md) (read this to find out whats new)
+* [Python API Documentation](https://bmw-software-engineering.github.io/trlc/)
+  (user guide for using the API)
 * [Language Reference Manual](language-reference-manual/README.md)
   (for language lawyers)
 * [License](LICENSE)
