@@ -28,14 +28,16 @@ import util.changelog
 # Update version.py to remove the -dev (or if given) use a different
 # version number.
 
+VERSION_FILE = os.path.join("trlc", "version.py")
+
 tmp = ""
-with open("trlc/version.py", "r") as fd:
+with open(VERSION_FILE, "r") as fd:
     for raw_line in fd:
         if raw_line.startswith("VERSION_SUFFIX"):
             raw_line = 'VERSION_SUFFIX = ""\n'
-
         tmp += raw_line
-with open("trlc/version.py", "w") as fd:
+
+with open(VERSION_FILE, "w") as fd:
     fd.write(tmp)
 
 from trlc.version import TRLC_VERSION
@@ -45,9 +47,8 @@ print(TRLC_VERSION)
 # version.
 
 util.changelog.set_current_title(TRLC_VERSION)
-os.system("make doc")
 
 # Commit & tag
 
-os.system("git add CHANGELOG.md docs trlc/version.py")
-os.system('git commit -m "Release %s"' % TRLC_VERSION)
+os.system("git add CHANGELOG.md trlc/version.py")
+os.system('git commit -m "TRLC Release %s"' % TRLC_VERSION)
