@@ -27,8 +27,10 @@ The Python implementation can be used for several purposes:
 
 ## Documentation
 
-* [Release Notes](CHANGELOG.md)
+* [Tutorial](TUTORIAL.md) (read this as a first introduction)
+* [Release Notes](CHANGELOG.md) (read this to find out whats new)
 * [Language Reference Manual](language-reference-manual/README.md)
+  (for language lawyers)
 * [License](LICENSE)
 
 ## Dependencies

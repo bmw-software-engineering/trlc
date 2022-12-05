@@ -1,0 +1,15 @@
+package Example
+
+enum ASIL {
+  QM
+  A
+  B
+  C
+  D
+}
+
+type Requirement {
+  description  String
+  functional   Boolean
+  integrity    optional ASIL
+}

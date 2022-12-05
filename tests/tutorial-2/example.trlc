@@ -1,0 +1,7 @@
+package Example
+
+Requirement foo {
+  description = "potato"
+  functional  = true
+  integrity   = ASIL.D
+}

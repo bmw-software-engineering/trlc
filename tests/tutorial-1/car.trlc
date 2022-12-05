@@ -1,0 +1,15 @@
+package Example
+
+Requirement shape {
+  description = "Our car shall have four wheels."
+  critical    = false
+}
+
+Requirement safety {
+  description = "Our car shall not explode."
+  critical    = true
+}
+
+Requirement fuel {
+  description = "The car shall not use any fossil fuels."
+}
