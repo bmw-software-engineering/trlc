@@ -1,9 +1,14 @@
 # TRLC Tutorial
 
-* [Installing](TUTORIAL-INSTALL.md)
-* [Basic Concepts](TUTORIAL-BASIC.md)
-* [Enumerations](TUTORIAL-ENUM.md)
-* [Arrays](TUTORIAL-ARRAYS.md)
-* [References and Extensions](TUTORIAL-ADVANCED.md)
-* [User defined checks](TUTORIAL-CHECKS.md)
-* [Packages and Sections](TUTORIAL-PACKAGE.md)
+* [Installing](TUTORIAL-INSTALL.md): how to install the tools and test
+  if everything works
+* [Basic Concepts](TUTORIAL-BASIC.md): learn how to write your first
+  requirement
+* [Enumerations](TUTORIAL-ENUM.md): creating user-defined datatypes
+* [Arrays](TUTORIAL-ARRAYS.md): creating lists of attributes
+* [References and Extensions](TUTORIAL-ADVANCED.md): linking
+  requirements to other requirements
+* [User defined checks](TUTORIAL-CHECKS.md): enforcing process/policy
+  for requirements
+* [Packages and Sections](TUTORIAL-PACKAGE.md): dealing with big
+  organisations and big projects
