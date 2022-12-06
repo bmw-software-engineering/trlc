@@ -1,0 +1,32 @@
+package Example
+
+Requirement good_1 {
+  description = "this is a good example"
+}
+
+Requirement good_2 {
+  description  = "this is another good example"
+  illustration = "example.png"
+}
+
+Requirement bad_1 {
+  description  = "this is a bad example"
+  illustration = "bad.png"
+}
+
+Extended_Requirement good_3 {
+  description = "this is a good example"
+  critical    = false
+}
+
+Extended_Requirement good_4 {
+  description  = "this is another good example"
+  illustration = "example.png"
+  critical    = false
+}
+
+Extended_Requirement bad_2 {
+  description  = "this is a bad example"
+  illustration = "bad.png"
+  critical    = false
+}

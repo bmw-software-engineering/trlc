@@ -1693,6 +1693,26 @@ class Record_Type(Type):
             yield from self.parent.iter_checks()
         yield from self.checks
 
+    def is_subclass_of(self, record_type):
+        """ Checks if this record type is or inherits from the given type
+
+        :param record_type: check if are or extend this type
+        :type record_type: Record_Type
+
+        :returns: true if we are or extend the given type
+        :rtype: Boolean
+
+        """
+        assert isinstance(record_type, Record_Type)
+
+        ptr = self
+        while ptr:
+            if ptr is record_type:
+                return True
+            else:
+                ptr = ptr.parent
+        return False
+
 
 class Record_Component(Entity):
     """Component in a record.
@@ -1998,6 +2018,49 @@ class Symbol_Table:
                 return True
 
         return False
+
+    def lookup_assuming(self, mh, name, required_subclass=None):
+        """Retrieve an object from the table assuming its there
+
+        This is intended for the API specifically where you want to
+        e.g. find some used-defined types you know are there.
+
+        :param mh: The message handler to use
+        :type mh: Message_Handler
+
+        :param name: The name to search for
+        :type name: str
+
+        :param required_subclass: If set, creates an error if the object \
+        is not an instance of the given class
+        :type required_subclass: type
+
+        :raise TRLC_Error: if the object is not of the required subclass
+        :returns: the specified entity (or None if it does not exist)
+        :rtype: Entity
+
+        """
+        assert isinstance(mh, Message_Handler)
+        assert isinstance(name, str)
+        assert isinstance(required_subclass, type) or required_subclass is None
+
+        ptr = self
+        for ptr in [self] + self.imported:
+            while ptr:
+                if name in ptr.table:
+                    rv = ptr.table[name]
+                    if required_subclass is not None and \
+                       not isinstance(rv, required_subclass):
+                        mh.error(rv.location,
+                                 "%s %s is not a %s" %
+                                 (rv.__class__.__name__,
+                                  name,
+                                  required_subclass.__name__))
+                    return rv
+                else:
+                    ptr = ptr.parent
+
+        return None
 
     def lookup_direct(self, mh, name, error_location, required_subclass=None):
         """Retrieve an object from the table

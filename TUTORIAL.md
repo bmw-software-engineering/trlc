@@ -12,3 +12,4 @@
   for requirements
 * [Packages and Sections](TUTORIAL-PACKAGE.md): dealing with big
   organisations and big projects
+* [Python API](TUTORIAL-API.md): writing a custom check with the API

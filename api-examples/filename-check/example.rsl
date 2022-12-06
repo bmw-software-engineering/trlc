@@ -1,0 +1,10 @@
+package Example
+
+type Requirement {
+   description           String
+   illustration optional String
+}
+
+type Extended_Requirement extends Requirement {
+   critical Boolean
+}
