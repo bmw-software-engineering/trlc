@@ -1,0 +1,2 @@
+package Example
+        ^^^^^^^ a.rsl:1: error: duplicate definition, previous definition at b.rsl:1

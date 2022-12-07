@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 2.0 of TRLC language reference manual.
+Up to date with version 2.1 of TRLC language reference manual.
 
 ## Limitations
 
@@ -13,14 +13,17 @@ None.
 
 ### 1.0.6-dev
 
-
+* [LRM, TRLC] Support declarations of checks in the `.rsl` files. This
+  means you don't need to have a separate check file, allowing you to
+  implement your process or business logic closer to the type
+  declarations. Dedicated check files continue to be supported.
 
 ### 1.0.5
 
-* Add `--brief` mode intended for CI. Expand tutorial to explain how
-  it works.
+* [TRLC] Add `--brief` mode intended for CI. Expand tutorial to
+  explain how it works.
 
-* Add two new API functions (a [simpler
+* [TRLC] Add two new API functions (a [simpler
   lookup](https://bmw-software-engineering.github.io/trlc/manual/ast.html#trlc.ast.Symbol_Table.lookup_assuming)
   and [inheritence
   checking](https://bmw-software-engineering.github.io/trlc/manual/ast.html#trlc.ast.Record_Type.is_subclass_of)
@@ -28,4 +31,4 @@ None.
 
 ### 1.0.4
 
-* First public release
+* [LRM, TRLC] First public release

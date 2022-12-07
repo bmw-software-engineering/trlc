@@ -1,0 +1,10 @@
+package Example
+
+type T {
+  a Integer
+  b Integer
+}
+
+checks T {
+  a < b, error "potato"
+}

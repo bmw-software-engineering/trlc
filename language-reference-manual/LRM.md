@@ -30,7 +30,6 @@ identify several features that are definitely planned:
   talk about a HEAD revision instead of a specific versions.
 * Add user-defined tuple types to allow e.g. a item + revision pairing
   of data.
-* Allow check specifications directly in the `.rsl` files.
 * Add subtypes of integral or string types with special semantics
   (e.g. Markdown) or positive integers.
 
@@ -61,8 +60,10 @@ The grammar uses the following symbols and conventions:
 
 There are three types of files:
 
-* `.rls` They contains the user-defined type definitions
-* `.check` They contain user-defined warning or error messages for these types
+* `.rls` They contains the user-defined type definitions and
+  optionally user-defined warnings or checks
+* `.check` They contain only user-defined warning or error messages
+  for types declared in `.rsl` files
 * `.trlc` They contain instances of the types (this is where your
   requirements go)
 
@@ -242,7 +243,7 @@ type declarations.
 ```
 rls_file ::= package_indication
              { import_clause }
-             { type_declaration }
+             { type_declaration | check_block }
 
 package_indication ::= 'package' IDENTIFIER_name
 
@@ -494,9 +495,10 @@ indicated, or is not a record type.
 In a check declaration, it is an error to refer to a component name
 that does not belong to the record indicated.
 
-*(Note that it is not possible to add checks to a type from a foreign
-package, as you cannot have import clauses or qualified names in a
-check declaration.)*
+*(Note that it is never possible to add checks to a type from a
+foreign package. In check files this is more obvious as you cannot
+have an import clause, but this is also true for checks declared in
+rsl files since it is not possible to specify a qalified name.)*
 
 ### Dynamic semantics
 

@@ -1,0 +1,5 @@
+package Example
+
+checks T {
+   a < b, error "blah"
+}

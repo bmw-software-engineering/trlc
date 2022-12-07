@@ -891,8 +891,13 @@ class Parser:
     def parse_rsl_file(self):
         assert self.pkg is not None
 
-        while self.peek_kw("enum") or self.peek_kw("type"):
-            self.parse_type_declaration()
+        while self.peek_kw("enum") or \
+              self.peek_kw("type") or \
+              self.peek_kw("checks"):
+            if self.peek_kw("enum") or self.peek_kw("type"):
+                self.parse_type_declaration()
+            else:
+                self.parse_check_block()
 
         self.match_eof()
 

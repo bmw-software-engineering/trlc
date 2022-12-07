@@ -1,0 +1,6 @@
+package Example
+
+type T {
+  a Integer
+  b Integer
+}

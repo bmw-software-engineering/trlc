@@ -1,0 +1,6 @@
+package Example
+
+T foo {
+  a = 5
+  b = 5
+}
