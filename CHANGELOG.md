@@ -11,7 +11,7 @@ None.
 ## Changelog
 
 
-### 1.0.5-dev
+### 1.0.5
 
 * Add `--brief` mode intended for CI. Expand tutorial to explain how
   it works.
