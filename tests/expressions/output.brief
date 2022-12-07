@@ -1,0 +1,25 @@
+foo.trlc:3:3: trlc check warning: 01: bad and
+foo.trlc:3:3: trlc check warning: 02: bad or
+foo.trlc:3:3: trlc check warning: 03: bad xor
+foo.trlc:3:3: trlc check warning: 04: bad implies
+foo.trlc:3:3: trlc check warning: 05: bad <
+foo.trlc:3:3: trlc check warning: 06: bad <=
+foo.trlc:3:3: trlc check warning: 07: bad >
+foo.trlc:3:3: trlc check warning: 08: bad >=
+foo.trlc:3:3: trlc check warning: 09: bad ==
+foo.trlc:3:3: trlc check warning: 10: bad !=
+foo.trlc:3:3: trlc check warning: 11: bad range in
+foo.trlc:3:3: trlc check warning: 12: bad range not in
+foo.trlc:3:3: trlc check warning: 13: bad substring
+foo.trlc:3:3: trlc check warning: 14: bad adding (1/2)
+foo.trlc:3:3: trlc check warning: 14: bad adding (2/2)
+foo.trlc:3:3: trlc check warning: 15: bad *
+foo.trlc:3:3: trlc check warning: 15: bad /
+foo.trlc:3:3: trlc check warning: 16: bad % (1/4)
+foo.trlc:3:3: trlc check warning: 16: bad % (2/4)
+foo.trlc:3:3: trlc check warning: 16: bad % (3/4)
+foo.trlc:3:3: trlc check warning: 16: bad % (4/4)
+foo.trlc:3:3: trlc check warning: 17: bad exp
+foo.trlc:3:3: trlc check warning: 18: bad lnot
+foo.trlc:3:3: trlc check error: 19: bad abs
+foo.trlc:3:3: trlc check error: 20: bad ifexpr

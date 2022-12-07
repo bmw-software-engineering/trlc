@@ -155,15 +155,22 @@ class Source_Manager:
                             pkg["deps"] <= processed_packages]
 
             if not work_list:
-                conflicts = list(self.packages)
-                for name in sorted(conflicts):
-                    print("> %s depends on %s" %
-                          (name,
-                           ", ".join(sorted(set(self.packages[name]["deps"]) -
-                                            processed_packages))))
-                self.mh.error(
-                    Location(list(self.packages.values())[0]["file"]),
-                    "circular inheritence")
+                conflicts = list(sorted(self.packages))
+                if self.mh.brief:
+                    self.mh.error(
+                        Location(list(self.packages.values())[0]["file"]),
+                        "circular inheritence between %s" %
+                        " | ".join(conflicts))
+                else:
+                    for name in conflicts:
+                        deps = sorted(set(self.packages[name]["deps"]) -
+                                      processed_packages)
+                        print("> %s depends on %s" %
+                              (name,
+                               ", ".join(deps)))
+                    self.mh.error(
+                        Location(list(self.packages.values())[0]["file"]),
+                        "circular inheritence")
 
             for pkg in work_list:
                 self.rsl_files[self.packages[pkg]["file"]].parse_rsl_file()
@@ -292,11 +299,15 @@ def main():
                     default=False,
                     action="store_true",
                     help="sanity check models and checks")
+    ap.add_argument("--brief",
+                    default=False,
+                    action="store_true",
+                    help="simpler output intended for CI")
     ap.add_argument("dir_name",
                     metavar="DIR")
     options = ap.parse_args()
 
-    mh = Message_Handler()
+    mh = Message_Handler(options.brief)
     sm = Source_Manager(mh)
 
     if not os.path.isdir(options.dir_name):

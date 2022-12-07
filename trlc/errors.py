@@ -111,9 +111,13 @@ class Message_Handler:
     :class:`~trlc.ast.Node` then you also get context provided for
     free.
 
+    :attribute brief: When true displays as much context as possible
+    :type: Boolean
+
     """
-    def __init__(self):
-        pass
+    def __init__(self, brief=False):
+        assert isinstance(brief, bool)
+        self.brief = brief
 
     def emit(self, location, kind, message, fatal=True):
         assert isinstance(location, Location)
@@ -121,10 +125,17 @@ class Message_Handler:
         assert isinstance(message, str)
         assert isinstance(fatal, bool)
 
-        context = location.context_lines()
-        msg = "%s: %s: %s" % (location.to_string(len(context) == 0),
-                              kind,
-                              message)
+        if self.brief:
+            context = None
+            msg = "%s: trlc %s: %s" % (location.to_string(),
+                                       kind,
+                                       message)
+
+        else:
+            context = location.context_lines()
+            msg = "%s: %s: %s" % (location.to_string(len(context) == 0),
+                                  kind,
+                                  message)
 
         if context:
             assert len(context) == 2

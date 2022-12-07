@@ -48,7 +48,7 @@
 <h1>Error handling and reporting<a class="headerlink" href="#error-handling-and-reporting" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="trlc.errors.Message_Handler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.errors.</span></span><span class="sig-name descname"><span class="pre">Message_Handler</span></span><a class="headerlink" href="#trlc.errors.Message_Handler" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.errors.</span></span><span class="sig-name descname"><span class="pre">Message_Handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">brief</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.errors.Message_Handler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Universal message handler</p>
 <p>All messages from TRLC are processed by this class. If you want to
@@ -58,6 +58,14 @@ statements.</p>
 <p>If the location comes from the location attribute of
 <a class="reference internal" href="ast.html#trlc.ast.Node" title="trlc.ast.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a> then you also get context provided for
 free.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute brief<span class="colon">:</span></dt>
+<dd class="field-odd"><p>When true displays as much context as possible</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Boolean</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="trlc.errors.Message_Handler.error">
 <span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fatal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.errors.Message_Handler.error" title="Permalink to this definition">¶</a></dt>
