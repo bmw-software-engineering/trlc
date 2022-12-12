@@ -1,0 +1,3 @@
+   -a * b > 0, "potato"
+   ^ example.rsl:9: warning: expression means -(a * b), place explicit brackets to clarify intent
+Verified 1 model(s) and check(s) and found 1 warning(s)

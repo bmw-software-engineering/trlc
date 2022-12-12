@@ -1,0 +1,13 @@
+package Example
+
+type T {
+   a Integer
+   b Integer
+}
+
+checks T {
+   -a * b > 0, "potato"
+   -(a * b) > 0, "potato"
+   (-a) * b > 0, "potato"
+   -a + (a + b) > 0, "potato"
+}

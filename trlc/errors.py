@@ -114,10 +114,18 @@ class Message_Handler:
     :attribute brief: When true displays as much context as possible
     :type: Boolean
 
+    :attribute warnings: Number of system or user warnings raised
+    :type: int
+
+    :attribute error: Number of system or user errors raised
+    :type: int
+
     """
     def __init__(self, brief=False):
         assert isinstance(brief, bool)
-        self.brief = brief
+        self.brief    = brief
+        self.warnings = 0
+        self.errors   = 0
 
     def emit(self, location, kind, message, fatal=True):
         assert isinstance(location, Location)
@@ -151,6 +159,7 @@ class Message_Handler:
         assert isinstance(location, Location)
         assert isinstance(message, str)
 
+        self.errors += 1
         self.emit(location, "lex error", message)
 
     def error(self, location, message, fatal=True, user=False):
@@ -189,6 +198,7 @@ class Message_Handler:
         else:
             kind = "error"
 
+        self.errors += 1
         self.emit(location, kind, message, fatal)
 
     def warning(self, location, message, user=False):
@@ -209,11 +219,13 @@ class Message_Handler:
         else:
             kind = "warning"
 
+        self.warnings += 1
         self.emit(location, kind, message, fatal=False)
 
     def ice_loc(self, location, message):  # pragma: no cover
         assert isinstance(location, Location)
         assert isinstance(message, str)
 
+        self.errors += 1
         self.emit(location, "ICE", message, fatal=False)
         sys.exit(1)

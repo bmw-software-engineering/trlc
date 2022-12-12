@@ -30,17 +30,19 @@ class Parser:
     ADDING_OPERATOR = ("+", "-")
     MULTIPLYING_OPERATOR = ("*", "/", "%")
 
-    def __init__(self, mh, stab, file_name):
+    def __init__(self, mh, stab, file_name, lint_mode):
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, ast.Symbol_Table)
         assert isinstance(file_name, str)
-        self.mh       = mh
-        self.lexer    = create_lexer(mh, file_name)
-        self.stab     = stab
-        self.pkg      = None
-        self.raw_deps = []
-        self.deps     = []
-        self.imports  = set()
+        assert isinstance(lint_mode, bool)
+        self.mh        = mh
+        self.lint_mode = lint_mode
+        self.lexer     = create_lexer(mh, file_name)
+        self.stab      = stab
+        self.pkg       = None
+        self.raw_deps  = []
+        self.deps      = []
+        self.imports   = set()
 
         self.ct = None
         self.nt = self.lexer.token()
@@ -374,11 +376,19 @@ class Parser:
            self.nt.value in Parser.ADDING_OPERATOR:
             self.match("OPERATOR")
             t_unary = self.ct
+            has_explicit_brackets = self.peek("BRA")
         else:
             t_unary = None
 
         n_lhs = self.parse_term(scope)
         if t_unary:
+            if self.lint_mode and \
+               isinstance(n_lhs, ast.Binary_Expression) and \
+               not has_explicit_brackets:
+                self.mh.warning(t_unary.location,
+                                "expression means -(%s), place explicit "
+                                "brackets to clarify intent" %
+                                n_lhs.to_string())
             n_lhs = ast.Unary_Expression(
                 mh        = self.mh,
                 location  = t_unary.location,
@@ -566,6 +576,13 @@ class Parser:
         assert isinstance(scope, ast.Scope)
         assert isinstance(n_name, ast.Builtin_Function)
         assert isinstance(t_name, Token)
+
+        # Lint: complain about old functions
+        if self.lint_mode and n_name.deprecated:
+            self.mh.warning(
+                t_name.location,
+                "deprecated feature, please use function %s instead" %
+                n_name.name.replace("trlc:", ""))
 
         # Parse the arguments.
         parameters = []

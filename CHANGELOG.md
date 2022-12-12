@@ -25,6 +25,10 @@ None.
 
 * [TRLC] Fix bug in array parsing and evaluation.
 
+* [TRLC] Add the first two checks to the `--lint` option: one about
+  misleading unary operators, and another on using deprecated
+  functions.
+
 ### 1.0.5
 
 * [TRLC] Add `--brief` mode intended for CI. Expand tutorial to

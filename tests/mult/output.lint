@@ -1,0 +1,5 @@
+   mult String [0..0]
+                   ^ bar.rsl:17: error: this array makes no sense
+    mult String [5..3]
+                    ^ bar.rsl:23: error: upper bound must be at least 5
+Verified 2 model(s) and check(s) and found 2 error(s)

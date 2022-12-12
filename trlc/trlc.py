@@ -38,21 +38,30 @@ class Source_Manager:
     :param mh: The message handler to use
     :type mh: Message_Handler
 
+    :param lint_mode: If true check rules and models. If false actually \
+    process objects.
+    :type mh: Message_Handler
+
     """
-    def __init__(self, mh):
+    def __init__(self, mh, lint_mode=False):
         assert isinstance(mh, Message_Handler)
+        assert isinstance(lint_mode, bool)
+
         self.mh          = mh
         self.stab        = ast.Symbol_Table.create_global_table(mh)
         self.rsl_files   = {}
         self.check_files = {}
         self.trlc_files  = {}
         self.packages    = {}
+        self.lint_mode   = lint_mode
 
     def create_parser(self, file_name):
         assert os.path.isfile(file_name)
+
         return Parser(mh           = self.mh,
                       stab         = self.stab,
-                      file_name    = file_name)
+                      file_name    = file_name,
+                      lint_mode    = self.lint_mode)
 
     def register_package(self, package_name, file_name=None):
         if package_name in self.packages:
@@ -228,18 +237,12 @@ class Source_Manager:
                     ok = False
         return ok
 
-    def process(self, lint_mode=False):
+    def process(self):
         """Parse all registered files.
-
-        :param lint_mode: don't parse instances and perform static \
-        analysis on the model and checks instead
-        :type lint_mode: bool
 
         :return: a symbol table (or None if there were any errors)
         :rtype: Symbol_Table
         """
-        assert isinstance(lint_mode, bool)
-
         # Parse RSL files (topologically sorted, in order to deal with
         # dependencies)
         try:
@@ -255,16 +258,24 @@ class Source_Manager:
 
         # If we run in lint mode, then we perform the checks now and then
         # stop. We do not process the TRLC files.
-        if lint_mode:
+        if self.lint_mode:
             if not ok:
                 return None
-            if not self.perform_sanity_checks():
-                return None
-            print("Verified %u model(s) and check(s), and found no issues." %
-                  (len(self.rsl_files) + len(self.check_files)))
-            print("Note: The lint option is a placeholder and does"
-                  " not do anything yet.")
-            return self.stab
+            self.perform_sanity_checks()
+            summary = "Verified %u model(s) and check(s)" % \
+                (len(self.rsl_files) + len(self.check_files))
+            summary += " and found"
+            if self.mh.errors and self.mh.warnings:
+                summary += " %u warning(s)" % self.mh.warnings
+                summary += " and %u error(s)" % self.mh.errors
+            elif self.mh.warnings:
+                summary += " %u warning(s)" % self.mh.warnings
+            elif self.mh.errors:
+                summary += " %u error(s)" % self.mh.errors
+            else:
+                summary += " no issues"
+            print(summary)
+            return None if self.mh.errors or self.mh.warnings else self.stab
 
         # Parse TRLC files. Almost all the semantic analysis and name
         # resolution happens here, with the notable exception of resolving
@@ -308,7 +319,7 @@ def main():
     options = ap.parse_args()
 
     mh = Message_Handler(options.brief)
-    sm = Source_Manager(mh)
+    sm = Source_Manager(mh, options.lint)
 
     if not os.path.isdir(options.dir_name):
         ap.error("%s is not a directory" % options.dir_name)
@@ -329,7 +340,7 @@ def main():
     if not ok:
         return 1
 
-    if sm.process(lint_mode = options.lint) is None:
+    if sm.process() is None:
         return 1
     else:
         if options.debug_dump:
