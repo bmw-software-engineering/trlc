@@ -1,0 +1,9 @@
+  description = "potato"
+                ^^^^^^^^ example.trlc:4: check warning: this is not very descriptive
+{
+  "foo": {
+    "description": "potato",
+    "functional": true,
+    "integrity": "D"
+  }
+}

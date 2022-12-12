@@ -19,6 +19,7 @@
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import json
 from argparse import ArgumentParser
 
 from trlc import ast
@@ -320,6 +321,10 @@ def main():
                     default=False,
                     action="store_true",
                     help="dump symbol table")
+    ap.add_argument("--debug-api-dump",
+                    default=False,
+                    action="store_true",
+                    help="dump json")
     ap.add_argument("--lint",
                     default=False,
                     action="store_true",
@@ -348,6 +353,11 @@ def main():
     else:
         if options.debug_dump:
             sm.stab.dump()
+        if options.debug_api_dump:
+            tmp = {}
+            for obj in sm.stab.iter_record_objects():
+                tmp = {obj.name: obj.to_python_dict()}
+            print(json.dumps(tmp, indent=2, sort_keys=True))
         return 0
 
 

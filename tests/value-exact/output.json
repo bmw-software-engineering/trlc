@@ -1,0 +1,2 @@
+                name = "xbert" // does start with Q
+                       ^^^^^^^ instances.trlc:5: check error: name must be 'Qbert'

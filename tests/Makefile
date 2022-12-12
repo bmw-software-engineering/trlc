@@ -3,14 +3,15 @@ RAW_TARGETS=$(filter-out bulk, $(subst ./,,$(shell find . -mindepth 1 -maxdepth 
 TARGETS=\
 	$(addsuffix /output, $(RAW_TARGETS)) \
 	$(addsuffix /output.brief, $(RAW_TARGETS)) \
-	$(addsuffix /output.lint, $(RAW_TARGETS))
+	$(addsuffix /output.lint, $(RAW_TARGETS)) \
+	$(addsuffix /output.json, $(RAW_TARGETS))
 
 fast: $(TARGETS)
 	coverage combine
 	coverage html --rcfile=coverage.cfg
 	coverage report --rcfile=coverage.cfg
 
-all: $(TARGETS) bulk/output bulk/output.brief bulk/output.lint
+all: $(TARGETS) bulk/output bulk/output.brief bulk/output.lint bulk/output.json
 	coverage combine
 	coverage html --rcfile=coverage.cfg
 	coverage report --rcfile=coverage.cfg
@@ -24,3 +25,6 @@ all: $(TARGETS) bulk/output bulk/output.brief bulk/output.lint
 
 %/output.lint:
 	-coverage run -p --rcfile=coverage.cfg --branch ../trlc.py --lint $(dir $@) > $@
+
+%/output.json:
+	-coverage run -p --rcfile=coverage.cfg --branch ../trlc.py --debug-api-dump $(dir $@) > $@

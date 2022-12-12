@@ -1,0 +1,8 @@
+   len = 2
+         ^ example.trlc:10: check warning: potato
+{
+  "Test_2": {
+    "len": 2,
+    "str": "bar"
+  }
+}

@@ -1,0 +1,50 @@
+T Test {
+  ^^^^ foo.trlc:3: check warning: 01: bad and
+T Test {
+  ^^^^ foo.trlc:3: check warning: 02: bad or
+T Test {
+  ^^^^ foo.trlc:3: check warning: 03: bad xor
+T Test {
+  ^^^^ foo.trlc:3: check warning: 04: bad implies
+T Test {
+  ^^^^ foo.trlc:3: check warning: 05: bad <
+T Test {
+  ^^^^ foo.trlc:3: check warning: 06: bad <=
+T Test {
+  ^^^^ foo.trlc:3: check warning: 07: bad >
+T Test {
+  ^^^^ foo.trlc:3: check warning: 08: bad >=
+T Test {
+  ^^^^ foo.trlc:3: check warning: 09: bad ==
+T Test {
+  ^^^^ foo.trlc:3: check warning: 10: bad !=
+T Test {
+  ^^^^ foo.trlc:3: check warning: 11: bad range in
+T Test {
+  ^^^^ foo.trlc:3: check warning: 12: bad range not in
+T Test {
+  ^^^^ foo.trlc:3: check warning: 13: bad substring
+T Test {
+  ^^^^ foo.trlc:3: check warning: 14: bad adding (1/2)
+T Test {
+  ^^^^ foo.trlc:3: check warning: 14: bad adding (2/2)
+T Test {
+  ^^^^ foo.trlc:3: check warning: 15: bad *
+T Test {
+  ^^^^ foo.trlc:3: check warning: 15: bad /
+T Test {
+  ^^^^ foo.trlc:3: check warning: 16: bad % (1/4)
+T Test {
+  ^^^^ foo.trlc:3: check warning: 16: bad % (2/4)
+T Test {
+  ^^^^ foo.trlc:3: check warning: 16: bad % (3/4)
+T Test {
+  ^^^^ foo.trlc:3: check warning: 16: bad % (4/4)
+T Test {
+  ^^^^ foo.trlc:3: check warning: 17: bad exp
+T Test {
+  ^^^^ foo.trlc:3: check warning: 18: bad lnot
+T Test {
+  ^^^^ foo.trlc:3: check error: 19: bad abs
+T Test {
+  ^^^^ foo.trlc:3: check error: 20: bad ifexpr

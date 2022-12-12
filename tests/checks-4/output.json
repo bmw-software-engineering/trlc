@@ -1,0 +1,4 @@
+T Test_1 {
+  ^^^^^^ foo.trlc:3: error: values in quantified expression (forall v in values => v != foo) (foo.check:4) must not be null
+   values = ["x", "kitten", "z"]
+            ^ foo.trlc:9: check error: value cannot be same as value of foo
