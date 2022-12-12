@@ -84,18 +84,28 @@ class Source_Manager:
         :raise AssertionError: if the file does not exist
         :raise AssertionError: if the file is registed more than once
         :raise TRLC_Error: if the file is not a rsl/check/trlc file
+
+        :return: true if the file could be registered without issues
+        :rtype: bool
         """
         assert os.path.isfile(file_name)
 
+        ok = True
         if file_name.endswith(".rsl"):
-            self.register_rsl_file(file_name)
+            try:
+                self.register_rsl_file(file_name)
+            except TRLC_Error:
+                ok = False
         elif file_name.endswith(".check"):
             self.register_check_file(file_name)
         elif file_name.endswith(".trlc"):
             self.register_trlc_file(file_name)
         else:
+            ok = False
             self.mh.error(Location(os.path.basename(file_name)),
                           "is not a rsl, check, or trlc file")
+
+        return ok
 
     def register_directory(self, dir_name):
         """Schedule a directory tree for parsing.
@@ -105,17 +115,21 @@ class Source_Manager:
         :raise AssertionError: if the directory does not exist
         :raise AssertionError: if any item in the directory is already \
         registered
+        :raise TRLC_Error: on any parse errors
+
+        :return: true if the directory could be registered without issues
+        :rtype: bool
         """
         assert os.path.isdir(dir_name)
 
+        ok = True
         for path, _, files in os.walk(dir_name):
             for file_name in files:
-                if file_name.endswith(".rsl"):
-                    self.register_rsl_file(os.path.join(path, file_name))
-                elif file_name.endswith(".check"):
-                    self.register_check_file(os.path.join(path, file_name))
-                elif file_name.endswith(".trlc"):
-                    self.register_trlc_file(os.path.join(path, file_name))
+                if os.path.splitext(file_name)[1] in (".rsl",
+                                                      ".check",
+                                                      ".trlc"):
+                    ok &= self.register_file(os.path.join(path, file_name))
+        return ok
 
     def register_rsl_file(self, file_name):
         assert os.path.isfile(file_name)
@@ -325,18 +339,7 @@ def main():
         ap.error("%s is not a directory" % options.dir_name)
 
     # Process input files
-    ok = True
-    for path, _, files in os.walk(options.dir_name):
-        for file_name in files:
-            if file_name.endswith(".rsl"):
-                try:
-                    sm.register_rsl_file(os.path.join(path, file_name))
-                except TRLC_Error:
-                    ok = False
-            elif file_name.endswith(".check"):
-                sm.register_check_file(os.path.join(path, file_name))
-            elif file_name.endswith(".trlc"):
-                sm.register_trlc_file(os.path.join(path, file_name))
+    ok = sm.register_directory(options.dir_name)
     if not ok:
         return 1
 
