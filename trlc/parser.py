@@ -112,11 +112,16 @@ class Parser:
         else:
             return name, None
 
-    def parse_qualified_name(self, scope, required_subclass=None):
+    def parse_qualified_name(self,
+                             scope,
+                             required_subclass=None,
+                             match_ident=True):
         assert isinstance(scope, ast.Scope)
         assert isinstance(required_subclass, type)
+        assert isinstance(match_ident, bool)
 
-        self.match("IDENTIFIER")
+        if match_ident:
+            self.match("IDENTIFIER")
         sym = scope.lookup(self.mh, self.ct)
 
         if isinstance(sym, ast.Package):
@@ -557,133 +562,163 @@ class Parser:
 
         return rv
 
+    def parse_builtin(self, scope, n_name, t_name):
+        assert isinstance(scope, ast.Scope)
+        assert isinstance(n_name, ast.Builtin_Function)
+        assert isinstance(t_name, Token)
+
+        # Parse the arguments.
+        parameters = []
+        self.match("BRA")
+        while not self.peek("KET"):
+            parameters.append(self.parse_expression(scope))
+            if self.peek("COMMA"):
+                self.match("COMMA")
+            else:
+                break
+        self.match("KET")
+
+        # Enforce arity
+        if n_name.arity != len(parameters):
+            self.mh.error(t_name.location,
+                          "function %requires %u parameters" %
+                          n_name.arity)
+
+        # Enforce types
+        if n_name.name in ("len", "trlc:len"):
+            if parameters[0].typ == self.builtin_str:
+                return ast.Unary_Expression(
+                    mh        = self.mh,
+                    location  = t_name.location,
+                    typ       = self.builtin_int,
+                    operator  = ast.Unary_Operator.STRING_LENGTH,
+                    n_operand = parameters[0])
+            else:
+                return ast.Unary_Expression(
+                    mh        = self.mh,
+                    location  = t_name.location,
+                    typ       = self.builtin_int,
+                    operator  = ast.Unary_Operator.ARRAY_LENGTH,
+                    n_operand = parameters[0])
+
+        elif n_name.name in ("startswith",
+                             "endswith",
+                             "trlc:startswith",
+                             "trlc:endswith"):
+            return ast.Binary_Expression(
+                mh       = self.mh,
+                location = t_name.location,
+                typ      = self.builtin_bool,
+                operator = (ast.Binary_Operator.STRING_STARTSWITH
+                            if "startswith" in n_name.name
+                            else ast.Binary_Operator.STRING_ENDSWITH),
+                n_lhs    = parameters[0],
+                n_rhs    = parameters[1])
+
+        elif n_name.name in ("matches", "trlc:matches"):
+            parameters[1].ensure_type(self.mh, ast.Builtin_String)
+            try:
+                # TODO: Fix scope for evaluate()
+                value = parameters[1].evaluate(self.mh, None)
+                assert isinstance(value.typ, ast.Builtin_String)
+                re.compile(value.value)
+            except re.error as err:
+                self.mh.error(value.location,
+                              str(err))
+            return ast.Binary_Expression(
+                mh       = self.mh,
+                location = t_name.location,
+                typ      = self.builtin_bool,
+                operator = ast.Binary_Operator.STRING_REGEX,
+                n_lhs    = parameters[0],
+                n_rhs    = parameters[1])
+
+        else:
+            self.mh.ice_loc(t_name.location,
+                            "unexpected builtin")
+
     def parse_name(self, scope):
         # This is a bit more complex. The grammar is:
+        #
+        # qualified_name ::= [ IDENTIFIER_package_name '.' ] IDENTIFIER_name
         #
         # name ::= qualified_name
         #        | qualified_name ['.' IDENTIFIER_literal]
         #        | name '[' expression ']'
+        #        | IDENTIFIER_builtin_function '(' parameter_list ')'
         #        | BUILTIN '(' parameter_list ')'
         #
         # parameter_list ::= expression { ',' expression }
-
         assert isinstance(scope, ast.Scope)
 
         if self.peek("BUILTIN"):
+            # Legacy builtin function call. The lookup in the root
+            # scope is not an error.
             self.match("BUILTIN")
-            n_name = scope.lookup(self.mh, self.ct, ast.Builtin_Function)
-            t_name = self.ct
+            n_name = self.stab.lookup(self.mh, self.ct, ast.Builtin_Function)
+            return self.parse_builtin(scope, n_name, self.ct)
 
-            # If the name refers to a builtin, then we have to parse
-            # the arguments.
-            parameters = []
-            self.match("BRA")
-            while not self.peek("KET"):
-                parameters.append(self.parse_expression(scope))
-                if self.peek("COMMA"):
-                    self.match("COMMA")
-                else:
-                    break
-            self.match("KET")
-            if n_name.arity != len(parameters):
-                self.mh.error(t_name.location,
-                              "function %requires %u parameters" %
-                              n_name.arity)
+        else:
+            self.match("IDENTIFIER")
 
-            if n_name.name == "trlc:len":
-                if parameters[0].typ == self.builtin_str:
-                    return ast.Unary_Expression(
-                        mh        = self.mh,
-                        location  = t_name.location,
-                        typ       = self.builtin_int,
-                        operator  = ast.Unary_Operator.STRING_LENGTH,
-                        n_operand = parameters[0])
-                else:
-                    return ast.Unary_Expression(
-                        mh        = self.mh,
-                        location  = t_name.location,
-                        typ       = self.builtin_int,
-                        operator  = ast.Unary_Operator.ARRAY_LENGTH,
-                        n_operand = parameters[0])
+            if self.peek("S_BRA"):
+                # Must be an array index on a record field
+                #        | name '[' expression ']'
+                n_name = scope.lookup(self.mh, self.ct, ast.Entity)
+                if not isinstance(n_name.typ, ast.Array_Type):
+                    self.mh.error(n_name.location,
+                                  "is not of an array type")
+                n_lhs = ast.Name_Reference(location = self.ct.location,
+                                           entity   = n_name)
 
-            elif n_name.name in ("trlc:startswith",
-                                 "trlc:endswith"):
+                self.match("S_BRA")
+                t_bracket = self.ct
+                n_index = self.parse_expression(scope)
+                self.match("S_KET")
                 return ast.Binary_Expression(
                     mh       = self.mh,
-                    location = t_name.location,
-                    typ      = self.builtin_bool,
-                    operator = (ast.Binary_Operator.STRING_STARTSWITH
-                                if n_name.name == "trlc:startswith"
-                                else ast.Binary_Operator.STRING_ENDSWITH),
-                    n_lhs    = parameters[0],
-                    n_rhs    = parameters[1])
+                    location = t_bracket.location,
+                    typ      = n_name.typ.element_type,
+                    operator = ast.Binary_Operator.INDEX,
+                    n_lhs    = n_lhs,
+                    n_rhs    = n_index)
 
-            elif n_name.name == "trlc:matches":
-                parameters[1].ensure_type(self.mh, ast.Builtin_String)
-                try:
-                    # TODO: Fix scope for evaluate()
-                    value = parameters[1].evaluate(self.mh, None)
-                    assert isinstance(value.typ, ast.Builtin_String)
-                    re.compile(value.value)
-                except re.error as err:
-                    self.mh.error(value.location,
-                                  str(err))
-                return ast.Binary_Expression(
-                    mh       = self.mh,
-                    location = t_name.location,
-                    typ      = self.builtin_bool,
-                    operator = ast.Binary_Operator.STRING_REGEX,
-                    n_lhs    = parameters[0],
-                    n_rhs    = parameters[1])
+            elif self.peek("BRA"):
+                # Must be a builtin call
+                #        | IDENTIFIER_builtin_function '(' parameter_list ')'
+                # The lookup in the root scope is not an error. We do
+                # this to avoid finding record fields that happen to
+                # have the same name.
+                n_name = self.stab.lookup(self.mh,
+                                          self.ct,
+                                          ast.Builtin_Function)
+                return self.parse_builtin(scope, n_name, self.ct)
 
             else:
-                self.mh.ice_loc(t_name.location,
-                                "unexpected builtin")
+                # Must be a qualified name or enumeration
+                # name ::= qualified_name
+                #        | qualified_name ['.' IDENTIFIER_literal]
+                n_name = self.parse_qualified_name(
+                    scope             = scope,
+                    required_subclass = ast.Entity,
+                    match_ident       = False)
+                t_name = self.ct
 
-        n_name = self.parse_qualified_name(scope, ast.Entity)
-        t_name = self.ct
+                if isinstance(n_name, ast.Enumeration_Type):
+                    # If the (qualified) name refers to a enum, then
+                    # we have to narrow it down to a literal.
+                    self.match("DOT")
+                    self.match("IDENTIFIER")
+                    lit = n_name.literals.lookup(self.mh,
+                                                 self.ct,
+                                                 ast.Enumeration_Literal_Spec)
+                    return ast.Enumeration_Literal(location = self.ct.location,
+                                                   literal  = lit)
 
-        if isinstance(n_name, ast.Enumeration_Type):
-            # If the (qualified) name refers to a enum, then we have
-            # to narrow it down to a literal.
-            self.match("DOT")
-            self.match("IDENTIFIER")
-            lit = n_name.literals.lookup(self.mh,
-                                         self.ct,
-                                         ast.Enumeration_Literal_Spec)
-            return ast.Enumeration_Literal(location = self.ct.location,
-                                           literal  = lit)
-
-        # Otherwise we have just a boring name. We do need to
-        # ensure it's referring to something sane though.
-        if not isinstance(n_name, (ast.Record_Component,
-                                   ast.Quantified_Variable)):
-            self.mh.error(t_name.location,
-                          "is a %s, expected record component or "
-                          "quantified variable" %
-                          n_name.__class__.__name__)
-        n_lhs = ast.Name_Reference(location = t_name.location,
-                                   entity   = n_name)
-
-        # Finally, if there are [] brackets, then we generate an array
-        # index.
-        if self.peek("S_BRA"):
-            self.match("S_BRA")
-            t_bracket = self.ct
-            n_index = self.parse_expression(scope)
-            self.match("S_KET")
-            if not isinstance(n_name.typ, ast.Array_Type):
-                self.mh.error(n_name.location,
-                              "is not of an array type")
-            n_lhs = ast.Binary_Expression(
-                mh       = self.mh,
-                location = t_bracket.location,
-                typ      = n_name.typ.element_type,
-                operator = ast.Binary_Operator.INDEX,
-                n_lhs    = n_lhs,
-                n_rhs    = n_index)
-
-        return n_lhs
+                else:
+                    # Otherwise we're done
+                    return ast.Name_Reference(location = t_name.location,
+                                              entity   = n_name)
 
     def parse_check_block(self):
         self.match_kw("checks")

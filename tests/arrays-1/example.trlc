@@ -1,0 +1,9 @@
+package Example
+
+T Test_1 {
+   arr = [3, 2, 1]
+}
+
+T Test_2 {
+   arr = [1, 2, 3]
+}

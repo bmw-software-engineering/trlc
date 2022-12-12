@@ -1,0 +1,9 @@
+package Example
+
+type T {
+   arr Integer
+}
+
+checks T {
+   arr[0] == len(arr), "potato", arr
+}

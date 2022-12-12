@@ -1,0 +1,10 @@
+package Legacy
+
+type T {
+   str String
+   len Integer
+}
+
+checks T {
+   len == trlc:len(str), warning "potato", len
+}

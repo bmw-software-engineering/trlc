@@ -106,7 +106,12 @@ or underscores.
 
 ```
 IDENTIFIER ::= [a-zA-Z][a-zA-Z0-9_]*
+```
 
+There is also a legacy "builtin" identifier that is deprecated. It
+will be removed in a future major release.
+
+```
 BUILTIN_IDENTIFIER ::= [a-z]+:[a-zA-Z][a-zA-Z0-9_]*
 ```
 
@@ -284,10 +289,10 @@ length of a String is implementation defined, but shall be at least
 A package also includes a number of builtin functions that are made
 available:
 
-* `trlc:len`
-* `trlc:startswith`
-* `trlc:endswith`
-* `trlc:matches`
+* `len`
+* `startswith`
+* `endswith`
+* `matches`
 
 ## Described names
 
@@ -609,6 +614,7 @@ description != null implies "potato" in description
 name ::= qualified_name
        | qualified_name ['.' IDENTIFIER_literal]
        | name '[' expression ']'
+       | IDENTIFIER_builtin_function '(' parameter_list ')'
        | BUILTIN_IDENTIFIER '(' parameter_list ')'
 
 parameter_list ::= expression { ',' expression }
@@ -616,35 +622,35 @@ parameter_list ::= expression { ',' expression }
 
 ### Static semantics
 
-The builtin function `trlc:len` is of arity 1. Its parameter must be of
+The builtin function `len` is of arity 1. Its parameter must be of
 type `String` or an array type. Its return type is `Integer`.
 
-The builtin functions `trlc:startswith` and `trlc:endswith` are of
+The builtin functions `startswith` and `endswith` are of
 arity 2. All of their parameters must be of type `String`. The return
 type of either function is `Boolean`.
 
-The builtin function `trlc:matches` is of arity 2. Its parameters must
+The builtin function `matches` is of arity 2. Its parameters must
 be of type `String`. The return type is `Boolean`. The function's
 second parameter must be a valid regular expression. *(It is
 implementation defined which regular expression language is used, but
 it is highly, _highly_ recommended to implement the standard POSIX
 regular expressions.)*
 
-In addition, the second parameter to the `trlc:matches` function must
+In addition, the second parameter to the `matches` function must
 be a static compile-time constant, i.e. it must not depend on the
 value of a record field or the value of a quantified variable.
 
 ### Dynamic semantics
 
-The `trlc:len` function computes the length of the given string or array.
+The `len` function computes the length of the given string or array.
 
-The `trlc:startswith` function returns true iff the first parameter
+The `startswith` function returns true iff the first parameter
 fully contains the second parameter at its start.
 
-The `trlc:endswith` function returns true iff the first parameter
+The `endswith` function returns true iff the first parameter
 fully contains the second parameter at its end.
 
-The `trlc:matches` function returns true iff the first parameter is
+The `matches` function returns true iff the first parameter is
 matched by the regular expression given in the second parameter.
 
 ### Name resolution
@@ -668,11 +674,11 @@ pkg.sym      // refers to the record object sym from pkg
 pkg.sym.lit  // refers to the enum literal lit
 foo[1]       // refers to the second element of foo
 
-trlc:len("potato")                 // computes 6
-trlc:startswith("potato", "p")     // returns true
-trlc:matches("potato", "^P")       // returns false
-trlc:matches("potato", "^" + "p")  // returns true
-trlc:matches("potato", myfield)    // error: myfield is not a constant
+len("potato")                 // computes 6
+startswith("potato", "p")     // returns true
+matches("potato", "^P")       // returns false
+matches("potato", "^" + "p")  // returns true
+matches("potato", myfield)    // error: myfield is not a constant
 ```
 
 ## Operators

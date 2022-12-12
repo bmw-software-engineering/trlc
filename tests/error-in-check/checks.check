@@ -1,5 +1,5 @@
  package bar
 
  checks MyType {
-      trlc:startsXwith(name, "Q"), error "name must start with Q", name
+      startsXwith(name, "Q"), error "name must start with Q", name
   }

@@ -1,5 +1,5 @@
 package Foo
 
 checks T {
-   trlc:len (txt) == len, warning "length is not as expected"
+   len (txt) == len, warning "length is not as expected"
 }

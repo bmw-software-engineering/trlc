@@ -1,5 +1,5 @@
  package bar
 
  checks MyType {
-      trlc:len(mult) == 3, "mult must have 3 elements"
+      len(mult) == 3, "mult must have 3 elements"
   }

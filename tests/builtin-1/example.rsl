@@ -1,0 +1,10 @@
+package Example
+
+type T {
+   str String
+   len Integer
+}
+
+checks T {
+   len (str) == len, warning "potato", len
+}

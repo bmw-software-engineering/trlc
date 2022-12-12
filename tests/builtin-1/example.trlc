@@ -1,0 +1,11 @@
+package Example
+
+T Test_1 {
+   str = "foo"
+   len = 3
+}
+
+T Test_2 {
+   str = "bar"
+   len = 2
+}

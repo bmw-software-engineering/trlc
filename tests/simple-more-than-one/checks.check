@@ -1,5 +1,5 @@
 package bar
 
  checks MyType {
-      trlc:matches(name, "^Q.*"),  error "name must start with Q", name
+      matches(name, "^Q.*"),  error "name must start with Q", name
   }

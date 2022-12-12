@@ -90,7 +90,7 @@ checks Requirement {
   functional implies integrity != null,
     error "a functional requirement requires an integrity"
 
-  integrity == ASIL.D implies trlc:len(description) > 10,
+  integrity == ASIL.D implies len(description) > 10,
     warning "this is not very descriptive",
     description  // this anchors the check
 }
@@ -119,20 +119,20 @@ check the message now looks like this:
 As seen in the above example, there are some built-in functions that
 you can use. They are:
 
-* `trlc:len` can be used to get the length of a string or array
-* `trlc:startswith` can be used to test the beginning of a string
-* `trlc:endswith` can be used to test the end of a string
-* `trlc:matches` tests if a regular expression matches a string
+* `len` can be used to get the length of a string or array
+* `startswith` can be used to test the beginning of a string
+* `endswith` can be used to test the end of a string
+* `matches` tests if a regular expression matches a string
 
 For example:
 
 ```
 checks Requirement {
-   trlc:endswith(description, "."),
+   endswith(description, "."),
      warning "description should end in a full-stop",
 	 description
 
-   not trlc:matches(description, "[Ff]ight club"),
+   not matches(description, "[Ff]ight club"),
      error "we do not talk about fight club",
 	 description
 }
@@ -180,7 +180,7 @@ for this:
 
 ```
 checks Requirement {
-  (forall tag in tags => not trlc:startswith(tag, "#")),
+  (forall tag in tags => not startswith(tag, "#")),
     warning "please don't use hashtags"
 }
 ```

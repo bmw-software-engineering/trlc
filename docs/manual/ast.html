@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>AST &#8212; TRLC 1.0.5-dev documentation</title>
+    <title>AST &#8212; TRLC 1.0.6-dev documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
     
@@ -30,7 +30,7 @@
         <li class="right" >
           <a href="errors.html" title="Error handling and reporting"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.5-dev documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.6-dev documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">AST</a></li> 
       </ul>
     </div>  
@@ -93,6 +93,10 @@ output like this:</p>
    <span class="n">Builtin_Function</span> <span class="n">trlc</span><span class="p">:</span><span class="nb">len</span>
    <span class="n">Builtin_Function</span> <span class="n">trlc</span><span class="p">:</span><span class="n">matches</span>
    <span class="n">Builtin_Function</span> <span class="n">trlc</span><span class="p">:</span><span class="n">startswith</span>
+   <span class="n">Builtin_Function</span> <span class="n">endswith</span>
+   <span class="n">Builtin_Function</span> <span class="nb">len</span>
+   <span class="n">Builtin_Function</span> <span class="n">matches</span>
+   <span class="n">Builtin_Function</span> <span class="n">startswith</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -708,8 +712,8 @@ refers to a <a class="reference internal" href="#trlc.ast.Record_Component" titl
 <li><p>Unary_Operator.MINUS (e.g. <code class="docutils literal notranslate"><span class="pre">-5</span></code>)</p></li>
 <li><p>Unary_Operator.ABSOLUTE_VALUE (e.g. <code class="docutils literal notranslate"><span class="pre">abs</span> <span class="pre">42</span></code>)</p></li>
 <li><p>Unary_Operator.LOGICAL_NOT (e.g. <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">True</span></code>)</p></li>
-<li><p>Unary_Operator.STRING_LENGTH (e.g. <code class="docutils literal notranslate"><span class="pre">trlc::len(&quot;foobar&quot;)</span></code>)</p></li>
-<li><p>Unary_Operator.ARRAY_LENGTH (e.g. <code class="docutils literal notranslate"><span class="pre">trlc::len(component_name)</span></code>)</p></li>
+<li><p>Unary_Operator.STRING_LENGTH (e.g. <code class="docutils literal notranslate"><span class="pre">len(&quot;foobar&quot;)</span></code>)</p></li>
+<li><p>Unary_Operator.ARRAY_LENGTH (e.g. <code class="docutils literal notranslate"><span class="pre">len(component_name)</span></code>)</p></li>
 </ul>
 <p>Note that several builtin functions are mapped to unary operators.</p>
 <dl class="field-list simple">
@@ -746,9 +750,9 @@ refers to a <a class="reference internal" href="#trlc.ast.Record_Component" titl
 <li><p>Binary_Operator.COMP_GT (e.g. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&gt;</span> <span class="pre">b</span></code>)</p></li>
 <li><p>Binary_Operator.COMP_GEQ (e.g. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&gt;=</span> <span class="pre">b</span></code>)</p></li>
 <li><p>Binary_Operator.STRING_CONTAINS (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;foo&quot;</span> <span class="pre">in</span> <span class="pre">&quot;foobar&quot;</span></code>)</p></li>
-<li><p>Binary_Operator.STRING_STARTSWITH (e.g. <code class="docutils literal notranslate"><span class="pre">trlc::startswith(&quot;foo&quot;,</span> <span class="pre">&quot;f&quot;)</span></code>)</p></li>
-<li><p>Binary_Operator.STRING_ENDSWITH (e.g. <code class="docutils literal notranslate"><span class="pre">trlc::endswith(&quot;foo&quot;,</span> <span class="pre">&quot;o&quot;)</span></code>)</p></li>
-<li><p>Binary_Operator.STRING_REGEX (e.g. <code class="docutils literal notranslate"><span class="pre">trlc::matches(&quot;foo&quot;,</span> <span class="pre">&quot;.o.</span></code>)</p></li>
+<li><p>Binary_Operator.STRING_STARTSWITH (e.g. <code class="docutils literal notranslate"><span class="pre">startswith(&quot;foo&quot;,</span> <span class="pre">&quot;f&quot;)</span></code>)</p></li>
+<li><p>Binary_Operator.STRING_ENDSWITH (e.g. <code class="docutils literal notranslate"><span class="pre">endswith(&quot;foo&quot;,</span> <span class="pre">&quot;o&quot;)</span></code>)</p></li>
+<li><p>Binary_Operator.STRING_REGEX (e.g. <code class="docutils literal notranslate"><span class="pre">matches(&quot;foo&quot;,</span> <span class="pre">&quot;.o.</span></code>)</p></li>
 <li><p>Binary_Operator.PLUS (e.g. <code class="docutils literal notranslate"><span class="pre">42</span> <span class="pre">+</span> <span class="pre">b</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;foo&quot;</span> <span class="pre">+</span> <span class="pre">bar</span></code>)</p></li>
 <li><p>Binary_Operator.MINUS (e.g. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-</span> <span class="pre">1</span></code>)</p></li>
 <li><p>Binary_Operator.TIMES (e.g. <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">x</span></code>)</p></li>
@@ -1297,7 +1301,7 @@ Package, then the following error is issued:</p>
         <li class="right" >
           <a href="errors.html" title="Error handling and reporting"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.5-dev documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.6-dev documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">AST</a></li> 
       </ul>
     </div>

@@ -140,6 +140,10 @@ class Node:
                Builtin_Function trlc:len
                Builtin_Function trlc:matches
                Builtin_Function trlc:startswith
+               Builtin_Function endswith
+               Builtin_Function len
+               Builtin_Function matches
+               Builtin_Function startswith
 
         """
         assert isinstance(indent, int) and indent >= 0
@@ -731,8 +735,8 @@ class Unary_Expression(Expression):
     * Unary_Operator.MINUS (e.g. ``-5``)
     * Unary_Operator.ABSOLUTE_VALUE (e.g. ``abs 42``)
     * Unary_Operator.LOGICAL_NOT (e.g. ``not True``)
-    * Unary_Operator.STRING_LENGTH (e.g. ``trlc::len("foobar")``)
-    * Unary_Operator.ARRAY_LENGTH (e.g. ``trlc::len(component_name)``)
+    * Unary_Operator.STRING_LENGTH (e.g. ``len("foobar")``)
+    * Unary_Operator.ARRAY_LENGTH (e.g. ``len(component_name)``)
 
     Note that several builtin functions are mapped to unary operators.
 
@@ -823,9 +827,9 @@ class Binary_Expression(Expression):
     * Binary_Operator.COMP_GT (e.g. ``a > b``)
     * Binary_Operator.COMP_GEQ (e.g. ``a >= b``)
     * Binary_Operator.STRING_CONTAINS (e.g. ``"foo" in "foobar"``)
-    * Binary_Operator.STRING_STARTSWITH (e.g. ``trlc::startswith("foo", "f")``)
-    * Binary_Operator.STRING_ENDSWITH (e.g. ``trlc::endswith("foo", "o")``)
-    * Binary_Operator.STRING_REGEX (e.g. ``trlc::matches("foo", ".o.``)
+    * Binary_Operator.STRING_STARTSWITH (e.g. ``startswith("foo", "f")``)
+    * Binary_Operator.STRING_ENDSWITH (e.g. ``endswith("foo", "o")``)
+    * Binary_Operator.STRING_REGEX (e.g. ``matches("foo", ".o.``)
     * Binary_Operator.PLUS (e.g. ``42 + b`` or ``"foo" + bar``)
     * Binary_Operator.MINUS (e.g. ``a - 1``)
     * Binary_Operator.TIMES (e.g. ``2 * x``)
@@ -1137,20 +1141,21 @@ class Binary_Expression(Expression):
                          "index cannot be less than zero in %s (%s)" %
                          (self.to_string(),
                           self.location.to_string(False)))
-            elif v_rhs.value > v_lhs.typ.upper_bound:
+            elif v_lhs.typ.upper_bound is not None and \
+                 v_rhs.value > v_lhs.typ.upper_bound:
                 mh.error(v_rhs.location,
                          "index cannot be more than %u in %s (%s)" %
                          (v_lhs.typ.upper_bound,
                           self.to_string(),
                           self.location.to_string(False)))
-            elif v_rhs.value > len(v_lhs):
+            elif v_rhs.value > len(v_lhs.value):
                 mh.error(v_lhs.location,
                          "array is not big enough in %s (%s)" %
                          (self.to_string(),
                           self.location.to_string(False)))
 
             return Value(location = self.location,
-                         value    = v_lhs.value[v_rhs.value],
+                         value    = v_lhs.value[v_rhs.value].value,
                          typ      = self.typ)
 
         else:
@@ -2174,6 +2179,7 @@ class Symbol_Table:
         stab.register(mh, Builtin_Integer())
         stab.register(mh, Builtin_Boolean())
         stab.register(mh, Builtin_String())
+        # The legacy versions
         stab.register(mh,
                       Builtin_Function("trlc:len", 1))
         stab.register(mh,
@@ -2182,6 +2188,16 @@ class Symbol_Table:
                       Builtin_Function("trlc:endswith", 2))
         stab.register(mh,
                       Builtin_Function("trlc:matches", 2))
+
+        # The new-style functions
+        stab.register(mh,
+                      Builtin_Function("len", 1))
+        stab.register(mh,
+                      Builtin_Function("startswith", 2))
+        stab.register(mh,
+                      Builtin_Function("endswith", 2))
+        stab.register(mh,
+                      Builtin_Function("matches", 2))
 
         return stab
 

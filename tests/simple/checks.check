@@ -1,4 +1,4 @@
  package bar
  checks MyType {
-      trlc:len(name) > 1, "name must start with Q", name
+      len(name) > 1, "name must start with Q", name
   }

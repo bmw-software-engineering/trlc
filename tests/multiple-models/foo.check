@@ -1,5 +1,5 @@
 package Foo
 
 checks T {
-   trlc:startswith(name, "potato"), "this is not a good name"
+   startswith(name, "potato"), "this is not a good name"
 }
