@@ -1,0 +1,325 @@
+package LRM
+
+GFDL_License License {
+  invariant_sections = []
+}
+
+section "Design Goals" {
+
+  Text Goals {
+    text = '''It is important to have design goals for a language. The
+              design goals of TRLC are:'''
+
+    bullets = [
+      '''The intended domain is requirements writing in an industrial
+         safety-critical context, where requirements carry a
+         lot of meta-data and linkage.''',
+      '''Future language releases should be backwards compatible, as
+         we anticipate that there will be a large body of
+         requirements.''',
+      '''Language design should be extensible and flexible for future
+         changes.''',
+      '''Requirement files (but not necessarily model and check
+         files) should be human-readable with minimal
+         training or understanding of the language.''',
+      '''No business logic should be encoded in the language design.'''
+    ]
+  }
+
+}
+
+/***********************************************************************/
+
+section "Lexing" {
+
+  section "Encoding" {
+    Text File_Encoding {
+      text = '''All input files are encoded in UTF-8. Passing a file with a
+                different encoding to TRLC results in
+                undefined behaviour.'''
+    }
+
+    Recommendation File_Encoding_Fixed {
+      text = '''It is recommended to try to detect this in an implementation
+                and raise a fatal error; but in the interest
+                of compatibility and sanity an
+                implementation shall not provide a way to
+                switch the encoding (at the command-line or
+                otherwise).'''
+    }
+  }
+
+  section "Whitespace and comments" {
+    Text Whitespace {
+      text = "Whitespace is ignored."
+    }
+
+    Text Comments {
+      text = '''Comments are C-Style `/* .. */` and C++ style `//`, and are
+                ignored. The matching for C-style comments
+                is non-greedy.'''
+    }
+  }
+
+  section "Identifiers and keywords" {
+    Terminal Identifier {
+      text = '''Identifiers start with a letter and are followed by letters,
+                numbers, or underscores.'''
+      def = "IDENTIFIER ::= [a-zA-Z][a-zA-Z0-9_]*"
+    }
+
+    Terminal Builtin_Identifier {
+      text = '''There is also a legacy "builtin" identifier that is
+                deprecated. It will be removed in a future major release.'''
+      def = "BUILTIN_IDENTIFIER ::= [a-z]+:[a-zA-Z][a-zA-Z0-9_]*"
+    }
+
+    Keywords TRLC_Keywords {
+      text = '''A keyword is an identifier that is one of the following
+                reserved words:'''
+      bullets = [
+        "abs",
+        "and",
+        "checks",
+        "else",
+        "elsif",
+        "enum",
+        "error",
+        "extends",
+        "false",
+        "fatal",
+        "if",
+        "implies",
+        "import",
+        "in",
+        "not",
+        "null",
+        "optional",
+        "or",
+        "package",
+        "section",
+        "then",
+        "true",
+        "type",
+        "warning",
+        "xor"
+      ]
+    }
+
+  }
+
+  section "Punctuation" {
+    Punctuation Single_Delimiters {
+      text = "Single character delimiters:"
+      bullets = [
+        "Brackets: `(` `)` `[` `]` `{` `}`",
+        "Punctuation: `,` `.` `=`",
+        "Operators: `*` `/` `%` `+` `-`",
+        "Boolean operators: `<` `>`"
+      ]
+    }
+
+    Punctuation Double_Delimiters {
+      text = "Double character delimiters:"
+      bullets = [
+        "Operators: `**`",
+        "Boolean operators: `==` `<=` `>=` `!=`",
+        "Punctuation: `=>`"
+      ]
+    }
+
+    Text Lexing_Disambiguation {
+      text = '''Preference is (obviously) given to longer delimiters if
+                there is ambiguity; i.e. `==` takes
+                precedence over two `=` tokens.'''
+    }
+  }
+
+  section "Integers" {
+    Terminal Integers {
+      text = '''Integers are base 10, and leading zeros are
+                effectively ignored.'''
+      def = "INTEGER ::= [0-9]+"
+    }
+  }
+
+  section "Strings" {
+    Terminal Strings {
+      text = '''There are two versions of a string, double quoted and
+                triple quoted:'''
+      def = '''STRING ::= "([^"]|(\\"))*"
+                        | '{3}.*?'{3}
+            '''
+    }
+
+    Semantics Simple_String_Value {
+      kind = Kind.Static
+      text = '''The value of a double quoted string is precisely the
+                characters between the two double quotes,
+                with all instances of the `\"` escape
+                sequence being replaced with `"`.'''
+    }
+
+    Semantics Complex_String_Value {
+      kind = Kind.Static
+      text = '''The value of a triple quoted string is the whitespace
+                trimmed string of characters between the
+                triple quotes (including the line breaks),
+                however the common whitespace at the
+                beginning of each line starting at the
+                second is removed. There is no escaping in a
+                triple quoted string.'''
+    }
+  }
+
+}
+
+/***********************************************************************/
+
+section "Layout and file structure" {
+
+  Text Layout {
+    text = "There are three types of files:"
+    bullets = [
+      '''`.rls` They contains the user-defined type definitions and
+         optionally user-defined warnings or checks''',
+      '''`.check` They contain only user-defined warning or error messages
+         for types declared in `.rsl` files''',
+      '''`.trlc` They contain instances of the types (this is where
+         your requirements go)'''
+    ]
+  }
+
+  Semantics File_Parsing_Order {
+    kind = Kind.Dynamic
+    text = '''
+First, all `.rls` files are parsed. Then, if no errors are
+raised, all `.check` files are parsed. Finally, if no errors
+are raised, all `.trlc` files are parsed.
+'''
+  }
+
+  Semantics File_Parsing_References {
+    kind = Kind.Dynamic
+    text = '''
+After all files are parsed, references are resolved and
+user-defined checks are applied.
+'''
+  }
+
+  Recommendation Errors_In_TRLC_Files {
+    text = '''
+It is unspecified how an implementation treats errors in
+`.trlc` files, but it is recommended to not stop processing
+after the first error.
+'''
+  }
+
+}
+
+/***********************************************************************/
+
+section "Preamble" {
+
+  Grammar Preamble {
+    text = '''All TRLC files starts with a package indication.'''
+    bnf = '''
+file_preamble ::= package_indication
+                  { import_clause }
+
+package_indication ::= 'package' IDENTIFIER_name
+
+import_clause ::= 'import' IDENTIFIER_name
+'''
+  }
+
+  Semantics Current_Package {
+    kind = Kind.Static
+    text = '''The package indication defines the "current package".'''
+  }
+
+  Semantics Import_Visibility {
+    kind = Kind.Static
+    text = '''A previously declared package may be imported, in which case
+              its name may be used as the prefix of a
+              `qualified_name`.'''
+  }
+
+  Semantics Self_Imports {
+    kind = Kind.Static
+    text = '''A package may not import itself.'''
+  }
+
+}
+
+/***********************************************************************/
+
+section "Metamodel (RLS) files" {
+
+  Grammar RLS_File {
+    text = '''A `.rls` file starts with a package declaration and is
+              followed by type declarations.'''
+    bnf = '''
+rls_file ::= preamble
+             { type_declaration | check_block }
+'''
+  }
+
+  Semantics Package_Declaration {
+    kind = Kind.Static
+    text = '''A package indication in an `.rls` file declares a
+              package. Any given package name may only be
+              declared once globally.'''
+  }
+
+  Semantics Circular_Dependencies {
+    kind = Kind.Static
+    text = '''In a `.rsl` file, a package may not import a package that
+              imports itself, directly or indirectly.'''
+  }
+
+  Semantics Builtin_Types {
+    kind = Kind.Static
+    text = '''An implementation shall support the following builtin types,
+              that shall be made available for all packages:'''
+    bullets = [
+      "Boolean",
+      "Integer",
+      "String"
+    ]
+  }
+
+  Semantics Boolean_Values {
+    kind = Kind.Static
+    text = "A `Boolean` has two values, `false` and `true`."
+  }
+
+  Semantics Integer_Values {
+    kind = Kind.Static
+    text = '''An `Integer` is a signed integer, with an implementation
+              defined range. This range shall be at least
+              -1000 to 1000, and this can be infinite.'''
+  }
+
+  Semantics String_Values {
+    kind = Kind.Static
+    text = '''A `String` is a sequence of implementation defined
+              characters. *(The decision to support unicode
+              or not is left unspecified.)* The maximum
+              length of a String, if any, is implementation
+              defined, but shall be at least 1000.'''
+  }
+
+  Semantics Builtin_Functions {
+    kind = Kind.Static
+    text = '''A package also includes a number of builtin functions that
+              are made available:'''
+    bullets = [
+      "len",
+      "startswith",
+      "endswith",
+      "matches"
+    ]
+  }
+
+}

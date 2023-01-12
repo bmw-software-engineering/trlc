@@ -1,1 +1,2 @@
-f1.trlc:4:5: trlc error: duplicate definition, previous definition at f2.trlc:3
+f1.trlc:4:5: trlc error: required component l (see def.rsl:4) is not defined
+f2.trlc:3:5: trlc error: duplicate definition, previous definition at f1.trlc:4

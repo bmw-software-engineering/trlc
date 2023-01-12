@@ -3,11 +3,11 @@
     "title": "Potato One"
   },
   "Potato_2": {
-    "parent": "Potato_1",
-    "title": "Potato Two"
+    "title": "Potato Two",
+    "parent": "Potato_1"
   },
   "Potato_3": {
-    "parent": "Potato_2",
-    "title": "Potato 3"
+    "title": "Potato 3",
+    "parent": "Potato_2"
   }
 }

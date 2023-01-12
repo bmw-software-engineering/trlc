@@ -1,0 +1,42 @@
+package LRM
+
+type GFDL_License {
+  invariant_sections          String [0 .. *]
+  front_cover        optional String
+  back_cover         optional String
+}
+
+type Text {
+  text    optional String
+  bullets optional String [2 .. *]
+}
+
+type Grammar extends Text {
+  bnf String
+}
+
+type Terminal extends Text {
+  def String
+}
+
+type Keywords extends Text {}
+
+type Punctuation extends Text {}
+
+enum Kind {
+  Static
+  Dynamic
+}
+
+type Semantics extends Text {
+  kind Kind
+}
+
+type Recommendation extends Text {
+}
+
+type Example extends Text {
+  rsl_content  optional String
+  trcl_content optional String
+  fragment optional String
+}

@@ -23,6 +23,7 @@ import re
 from copy import copy
 from difflib import get_close_matches
 from enum import Enum, auto
+from collections import OrderedDict
 
 from trlc.errors import Location, Message_Handler
 from trlc.lexer import Token
@@ -1961,7 +1962,7 @@ class Symbol_Table:
         assert isinstance(parent, Symbol_Table) or parent is None
         self.parent   = parent
         self.imported = []
-        self.table    = {}
+        self.table    = OrderedDict()
 
     def all_names(self):
         """ All names in the symbol table
@@ -2174,7 +2175,7 @@ class Symbol_Table:
             new_indent = indent + 1
         ptr = self
         while ptr:
-            for name in sorted(ptr.table):
+            for name in ptr.table:
                 ptr.table[name].dump(new_indent)
             ptr = ptr.parent
 
