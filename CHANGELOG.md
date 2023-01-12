@@ -29,6 +29,9 @@ None.
   misleading unary operators, and another on using deprecated
   functions.
 
+* [TRLC] Fix a bug where a record reference to a type extension
+  instead of the base type was not permitted, when it should be.
+
 ### 1.0.5
 
 * [TRLC] Add `--brief` mode intended for CI. Expand tutorial to
