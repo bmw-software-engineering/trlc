@@ -11,7 +11,7 @@ None.
 ## Changelog
 
 
-### 1.0.6-dev
+### 1.0.6
 
 * [LRM, TRLC] Support declarations of checks in the `.rsl` files. This
   means you don't need to have a separate check file, allowing you to
