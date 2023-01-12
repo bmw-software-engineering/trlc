@@ -870,7 +870,7 @@ class Parser:
                 rv.target = the_pkg.symbols.lookup(self.mh,
                                                    t_name,
                                                    ast.Record_Object)
-                if rv.target.e_typ != typ:
+                if not rv.target.e_typ.is_subclass_of(typ):
                     self.mh.error(t_name.location,
                                   "incorrect type, expected %s but %s is %s" %
                                   (typ.name,

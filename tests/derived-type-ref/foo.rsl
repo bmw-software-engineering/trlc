@@ -1,0 +1,9 @@
+package Example
+
+type RootNode {
+    title "Short title of the node" String
+}
+
+type Node extends RootNode {
+    parent "Parent node of the node" RootNode
+}

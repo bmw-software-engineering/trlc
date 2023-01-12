@@ -1,5 +1,11 @@
 {
+  "L1": {
+    "l": null
+  },
   "Localref": {
+    "l": "L1"
+  },
+  "Xfileref": {
     "l": "L1"
   }
 }

@@ -1,4 +1,20 @@
 {
+  "Test_01": {
+    "len": 11,
+    "txt": "foo\nbar\nbaz"
+  },
+  "Test_02": {
+    "len": 11,
+    "txt": "foo\nbar\nbaz"
+  },
+  "Test_03": {
+    "len": 11,
+    "txt": "foo\nbar\nbaz"
+  },
+  "Test_04": {
+    "len": 11,
+    "txt": "foo\nbar\nbaz"
+  },
   "Test_05": {
     "len": 12,
     "txt": "foo\nbar\n baz"

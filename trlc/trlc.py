@@ -356,7 +356,7 @@ def main():
         if options.debug_api_dump:
             tmp = {}
             for obj in sm.stab.iter_record_objects():
-                tmp = {obj.name: obj.to_python_dict()}
+                tmp[obj.name] = obj.to_python_dict()
             print(json.dumps(tmp, indent=2, sort_keys=True))
         return 0
 
