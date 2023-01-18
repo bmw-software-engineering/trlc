@@ -1,0 +1,6 @@
+  val = -5
+        ^ foo.trlc:4: check warning: potato
+  val = 5
+        ^ foo.trlc:10: check warning: potato
+  val = +5
+        ^ foo.trlc:13: check warning: potato

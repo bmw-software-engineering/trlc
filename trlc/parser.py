@@ -812,8 +812,24 @@ class Parser:
         assert isinstance(typ, ast.Type)
 
         if isinstance(typ, ast.Builtin_Integer):
+            if self.peek("OPERATOR") and \
+               self.nt.value in Parser.ADDING_OPERATOR:
+                self.match("OPERATOR")
+                t_op = self.ct
+                e_op = (ast.Unary_Operator.PLUS
+                        if t_op.value == "+"
+                        else ast.Unary_Operator.MINUS)
+            else:
+                t_op = None
             self.match("INTEGER")
-            return ast.Integer_Literal(self.ct, self.builtin_int)
+            rv = ast.Integer_Literal(self.ct, self.builtin_int)
+            if t_op:
+                rv = ast.Unary_Expression(mh        = self.mh,
+                                          location  = t_op.location,
+                                          typ       = self.builtin_int,
+                                          operator  = e_op,
+                                          n_operand = rv)
+            return rv
 
         elif isinstance(typ, ast.Builtin_String):
             self.match("STRING")

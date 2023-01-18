@@ -1,0 +1,9 @@
+package Foo
+
+type T {
+  val Integer
+}
+
+checks T {
+  val == 0, warning "potato", val
+}

@@ -13,7 +13,8 @@ None.
 
 ### 1.0.7-dev
 
-
+* [TRLC] Implement missing feature: integer values in record
+  declarations can be prefixed by a unary `+` or `-`.
 
 ### 1.0.6
 

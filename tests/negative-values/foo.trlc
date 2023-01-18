@@ -1,0 +1,14 @@
+package Foo
+
+T Test_1 {
+  val = -5
+}
+T Test_2 {
+  val = 0
+}
+T Test_3 {
+  val = 5
+}
+T Test_4 {
+  val = +5
+}

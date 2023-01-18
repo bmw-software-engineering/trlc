@@ -1892,7 +1892,8 @@ class Record_Object(Entity):
         assert isinstance(value, (Literal,
                                   Array_Aggregate,
                                   Record_Reference,
-                                  Implicit_Null))
+                                  Implicit_Null,
+                                  Unary_Expression))
         self.field[component.name] = value
 
     def dump(self, indent=0):  # pragma: no cover
