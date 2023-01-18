@@ -11,7 +11,7 @@ None.
 ## Changelog
 
 
-### 1.0.7-dev
+### 1.0.7
 
 * [TRLC] Implement missing feature: integer values in record
   declarations can be prefixed by a unary `+` or `-`.
