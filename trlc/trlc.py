@@ -125,7 +125,7 @@ class Source_Manager:
 
         ok = True
         for path, _, files in os.walk(dir_name):
-            for file_name in files:
+            for file_name in sorted(files):
                 if os.path.splitext(file_name)[1] in (".rsl",
                                                       ".check",
                                                       ".trlc"):
