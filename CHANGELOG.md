@@ -16,6 +16,10 @@ None.
 * [TRLC] Implement missing feature: integer values in record
   declarations can be prefixed by a unary `+` or `-`.
 
+* [TRLC] Make parse order of files more predictable (which also makes
+  error messages more predictable) and not so dependent on filesystem
+  ordering.
+
 ### 1.0.6
 
 * [LRM, TRLC] Support declarations of checks in the `.rsl` files. This
