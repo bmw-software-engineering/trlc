@@ -196,25 +196,25 @@ class Source_Manager:
                         Location(list(self.packages.values())[0]["file"]),
                         "circular inheritence")
 
-            for pkg in work_list:
+            for pkg in sorted(work_list):
                 self.rsl_files[self.packages[pkg]["file"]].parse_rsl_file()
                 processed_packages.add(pkg)
                 del self.packages[pkg]
 
     def parse_check_files(self):
         ok = True
-        for parser in self.check_files.values():
+        for name in sorted(self.check_files):
             try:
-                parser.parse_check_file()
+                self.check_files[name].parse_check_file()
             except TRLC_Error:
                 ok = False
         return ok
 
     def parse_trlc_files(self):
         ok = True
-        for parser in self.trlc_files.values():
+        for name in sorted(self.trlc_files):
             try:
-                parser.parse_trlc_file()
+                self.trlc_files[name].parse_trlc_file()
             except TRLC_Error:
                 ok = False
         return ok
