@@ -811,6 +811,15 @@ class Unary_Expression(Expression):
             mh.ice_loc(self.location,
                        "unexpected unary operation %s" % self.operator)
 
+    def to_python_object(self):
+        assert self.operator in (Unary_Operator.MINUS,
+                                 Unary_Operator.PLUS)
+        val = self.n_operand.to_python_object()
+        if self.operator == Unary_Operator.MINUS:
+            return -val
+        else:
+            return val
+
 
 class Binary_Expression(Expression):
     """Expression with two operands
