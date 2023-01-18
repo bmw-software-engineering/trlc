@@ -1,12 +1,12 @@
 {
   "DeprecatedR": {
-    "status": null,
     "link": "DeprecatedR",
-    "name": "dep"
+    "name": "dep",
+    "status": null
   },
   "NewXR": {
-    "status": null,
     "link": "DeprecatedR",
-    "name": "new"
+    "name": "new",
+    "status": null
   }
 }

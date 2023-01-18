@@ -2,8 +2,8 @@
                 ^^^^^^^^ example.trlc:4: check warning: this is not very descriptive
 {
   "foo": {
-    "integrity": "D",
     "description": "potato",
-    "functional": true
+    "functional": true,
+    "integrity": "D"
   }
 }

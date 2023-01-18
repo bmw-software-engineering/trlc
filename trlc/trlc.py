@@ -21,7 +21,6 @@
 import os
 import json
 from argparse import ArgumentParser
-from collections import OrderedDict
 
 from trlc import ast
 from trlc import lint
@@ -355,10 +354,10 @@ def main():
         if options.debug_dump:
             sm.stab.dump()
         if options.debug_api_dump:
-            tmp = OrderedDict()
+            tmp = {}
             for obj in sm.stab.iter_record_objects():
                 tmp[obj.name] = obj.to_python_dict()
-            print(json.dumps(tmp, indent=2))
+            print(json.dumps(tmp, indent=2, sort_keys=True))
         return 0
 
 

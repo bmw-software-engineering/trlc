@@ -2,11 +2,11 @@
          ^ example.trlc:10: check warning: potato
 {
   "Test_1": {
-    "str": "foo",
-    "len": 3
+    "len": 3,
+    "str": "foo"
   },
   "Test_2": {
-    "str": "bar",
-    "len": 2
+    "len": 2,
+    "str": "bar"
   }
 }
