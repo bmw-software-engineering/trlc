@@ -21,7 +21,7 @@
 import re
 
 from trlc.lexer import Token, Lexer, create_lexer
-from trlc.errors import Message_Handler
+from trlc.errors import Location, Message_Handler
 from trlc import ast
 
 
@@ -73,6 +73,9 @@ class Parser:
     def match(self, kind):
         assert kind in Token.KIND
         if self.nt is None:
+            # Note we do not need to handle the case where self.ct is
+            # None like we do in match_kw, since parsing always starts
+            # with a match_kw. At that point we will always have a ct.
             self.mh.error(self.ct.location,
                           "expected %s, encountered end-of-file instead" %
                           kind)
@@ -91,9 +94,15 @@ class Parser:
     def match_kw(self, value):
         assert value in Lexer.KEYWORDS
         if self.nt is None:
-            self.mh.error(self.ct.location,
-                          "expected %s, encountered end-of-file instead" %
-                          value)
+            if self.ct is None:
+                # Special case if we encounter an empty file.
+                self.mh.error(Location(self.lexer.file_name, 1, 1),
+                              "expected %s, encountered end-of-file instead" %
+                              value)
+            else:
+                self.mh.error(self.ct.location,
+                              "expected %s, encountered end-of-file instead" %
+                              value)
         elif self.nt.kind != "KEYWORD":
             self.mh.error(self.nt.location,
                           "expected %s, encountered %s instead" %

@@ -13,7 +13,7 @@ None.
 
 ### 1.0.8-dev
 
-
+* [TRLC] Fix ICE when attempting to parse completely empty files.
 
 ### 1.0.7
 
