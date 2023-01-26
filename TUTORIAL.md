@@ -1,5 +1,7 @@
 # TRLC Tutorial
 
+## The basics
+
 * [Installing](TUTORIAL-INSTALL.md): how to install the tools and test
   if everything works
 * [Basic Concepts](TUTORIAL-BASIC.md): learn how to write your first
@@ -10,7 +12,12 @@
   requirements to other requirements
 * [User defined checks](TUTORIAL-CHECKS.md): enforcing process/policy
   for requirements
+
+## Using TRLC in big organisations
+
 * [Packages and Sections](TUTORIAL-PACKAGE.md): dealing with big
   organisations and big projects
+* [Catch-all base types](TUTORIAL-OPTIONAL-BASE.md): dealing with
+  large types with lots of optional fields
 * [Python API](TUTORIAL-API.md): writing a custom check with the API
 * [CI Integration](TUTORIAL-CI.md): tips on how to integrate in your CI
