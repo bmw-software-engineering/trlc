@@ -17,6 +17,9 @@ Don't forget to adjust your `PATH` so that `.local/bin` (or the
 equivalent on Windows) is on it; so that the `trlc` executable can be
 run.
 
+Note that the above just installs command-line tools and the Python
+API. There is no IDE integration yet.
+
 ## From source (not recommended)
 
 You can also run the tools directly from a git checkout:
