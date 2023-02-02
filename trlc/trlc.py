@@ -317,6 +317,11 @@ def main():
     ap = ArgumentParser(
         description="TRLC %s (Python reference implementation)" % TRLC_VERSION
     )
+    op_mode = ap.add_mutually_exclusive_group()
+    op_mode.add_argument("--lint",
+                         default=False,
+                         action="store_true",
+                         help="sanity check models and checks")
     ap.add_argument("--debug-dump",
                     default=False,
                     action="store_true",
@@ -325,10 +330,6 @@ def main():
                     default=False,
                     action="store_true",
                     help="dump json")
-    ap.add_argument("--lint",
-                    default=False,
-                    action="store_true",
-                    help="sanity check models and checks")
     ap.add_argument("--brief",
                     default=False,
                     action="store_true",
