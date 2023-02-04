@@ -39,10 +39,76 @@ $ trlc --help
 
 To check if the API is working start a Python interpreter and do:
 
-```
+```python
 from trlc.version import TRLC_VERSION
 print(TRLC_VERSION)
 ```
 
 This should print the current TRLC version string matching what
 `trlc --help` prints.
+
+## Editor / IDE Integration
+
+### EMACS
+
+You can paste this in your `.emacs` file to have some basic support
+for TRLC. This is a bit of a hack and not a real language support, but
+it is better than nothing.
+
+```emacs
+(defvar trlc-keywords
+  '("abs"
+    "and"
+    "checks"
+    "enum"
+    "else"
+    "elsif"
+    "error"
+    "extends"
+    "false"
+    "fatal"
+    "forall"
+    "if"
+    "implies"
+    "import"
+    "in"
+    "not"
+    "null"
+    "optional"
+    "or"
+    "package"
+    "section"
+    "then"
+    "true"
+    "type"
+    "warning"
+    "xor"))
+
+(defvar trlc-types
+  '("String"
+    "Integer"
+    "Boolean"))
+
+ (defvar trlc-font-lock-defaults
+   `((
+      ( ,(regexp-opt trlc-keywords 'words) . font-lock-keyword-face)
+      ( ,(regexp-opt trlc-types 'words) . font-lock-builtin-face)
+      )))
+
+(define-derived-mode trlc-mode js-mode "TRLC"
+  "TRLC mode is a major mode for editing TRLC files"
+
+  (setq font-lock-defaults trlc-font-lock-defaults)
+  (setq js-indent-level 2)
+  (setq fill-column 60)
+
+  )
+
+(provide 'trlc-mode)
+(add-hook 'trlc-mode-hook 'flyspell-mode)
+(add-hook 'trlc-mode-hook 'flyspell-buffer)
+
+(add-to-list 'auto-mode-alist '("\\.rsl\\'" . trlc-mode))
+(add-to-list 'auto-mode-alist '("\\.check\\'" . trlc-mode))
+(add-to-list 'auto-mode-alist '("\\.trlc\\'" . trlc-mode))
+```
