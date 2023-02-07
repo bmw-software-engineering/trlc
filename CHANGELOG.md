@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 2.2 of TRLC language reference manual.
+Up to date with version 2.3 of TRLC language reference manual.
 
 ## Limitations
 
@@ -14,6 +14,10 @@ None.
 ### 1.0.8-dev
 
 * [TRLC] Fix ICE when attempting to parse completely empty files.
+
+* [LRM, TRLC] Two minor improvements for the handling of triple quoted
+  strings: empty lines are now ignored when removing common leading
+  whitespace, and trailing whitespace is stripped.
 
 ### 1.0.7
 

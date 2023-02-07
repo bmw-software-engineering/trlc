@@ -163,12 +163,12 @@ section "Lexing" {
     Semantics Complex_String_Value {
       kind = Kind.Static
       text = '''The value of a triple quoted string is the whitespace
-                trimmed string of characters between the
-                triple quotes (including the line breaks),
-                however the common whitespace at the
-                beginning of each line starting at the
-                second is removed. There is no escaping in a
-                triple quoted string.'''
+                trimmed string of characters between the triple quotes
+                (including the line breaks), The common whitespace at
+                the beginning of each line (ignoring blank lines) starting
+                at the second is removed. The trailing whitespace on
+                every line is removed. There is no escaping in a triple
+                quoted string.'''
     }
   }
 

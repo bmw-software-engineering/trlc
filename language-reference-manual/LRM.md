@@ -187,9 +187,9 @@ sequence being replaced with `"`.
 
 The value of a triple quoted string is the whitespace trimmed string
 of characters between the triple quotes (including the line breaks),
-however the common whitespace at the beginning of each line starting
-at the second is removed. There is no escaping in a triple quoted
-string.
+The common whitespace at the beginning of each line (ignoring blank
+lines) starting at the second is removed. The trailing whitespace on
+every line is removed. There is no escaping in a triple quoted string.
 
 #### Examples
 
@@ -199,6 +199,7 @@ The value of
 
 ```
 '''this is
+
      a wonderful
    example
 '''
@@ -208,6 +209,7 @@ is
 
 ```
 this is
+
   a wonderful
 example
 ```
@@ -215,7 +217,8 @@ example
 We can see two transformations in action here: first the trailing
 whitespace (the trailing newline) is removed providing us with a
 trimmed string. Then the common whitespace (three spaces) is removed
-from each line starting from the second.
+from each line starting from the second; however we ignore the blank
+line.
 
 Note that mixing tabs and spaces will have unexpected results, for
 example:

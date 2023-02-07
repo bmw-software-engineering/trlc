@@ -32,11 +32,13 @@ def triple_quoted_string_value(raw_value):
     if not lines:
         return ""
 
+    non_empty_lines = [line for line in lines if line.strip()]
+
     value      = lines[0]
     common_ws  = ""
     common_len = 0
-    if len(lines) >= 2:
-        for c in lines[1]:
+    if len(non_empty_lines) >= 2:
+        for c in non_empty_lines[1]:
             if c not in (" \t"):
                 break
             common_ws  += c
@@ -45,6 +47,8 @@ def triple_quoted_string_value(raw_value):
         return value
 
     for line in lines[2:]:
+        if not line.strip():
+            continue
         for idx in range(common_len):
             if idx < len(line) and line[idx] == common_ws[idx]:
                 pass
@@ -53,7 +57,7 @@ def triple_quoted_string_value(raw_value):
                 break
 
     for line in lines[1:]:
-        value += "\n" + line[common_len:]
+        value += "\n" + line[common_len:].rstrip()
 
     return value
 

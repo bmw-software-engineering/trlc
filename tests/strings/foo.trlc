@@ -42,3 +42,12 @@ T Test_05 {
   '''
   len = 12
 }
+
+T Test_06 {
+  txt = '''
+	  foo
+
+	  baz
+  '''
+  len = 8
+}
