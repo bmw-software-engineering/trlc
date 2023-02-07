@@ -11,7 +11,7 @@ None.
 ## Changelog
 
 
-### 1.0.8-dev
+### 1.0.8
 
 * [TRLC] Fix ICE when attempting to parse completely empty files.
 
