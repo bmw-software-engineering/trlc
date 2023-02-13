@@ -222,7 +222,7 @@ after the first error.
 section "Preamble" {
 
   Grammar Preamble {
-    text = '''All TRLC files starts with a package indication.'''
+    text = '''All TRLC files start with a package indication.'''
     bnf = '''
 file_preamble ::= package_indication
                   { import_clause }
