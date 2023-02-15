@@ -260,8 +260,7 @@ section "Metamodel (RLS) files" {
     text = '''A `.rls` file starts with a package declaration and is
               followed by type declarations.'''
     bnf = '''
-rls_file ::= preamble
-             { type_declaration | check_block }
+rls_file ::= preamble { type_declaration | check_block }
 '''
   }
 
