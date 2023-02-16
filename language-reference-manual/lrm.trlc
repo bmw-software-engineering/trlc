@@ -260,8 +260,9 @@ section "Metamodel (RLS) files" {
     text = '''A `.rls` file starts with a package declaration and is
               followed by type declarations.'''
     bnf = '''
-rls_file ::= preamble { type_declaration | check_block }
-'''
+      rls_file ::= preamble
+                   { type_declaration | check_block }
+    '''
   }
 
   Semantics Package_Declaration {
@@ -303,7 +304,7 @@ rls_file ::= preamble { type_declaration | check_block }
   Semantics String_Values {
     kind = Kind.Static
     text = '''A `String` is a sequence of implementation defined
-              characters. *(The decision to support unicode
+              characters. *(The decision to support Unicode
               or not is left unspecified.)* The maximum
               length of a String, if any, is implementation
               defined, but shall be at least 1000.'''
@@ -319,6 +320,105 @@ rls_file ::= preamble { type_declaration | check_block }
       "endswith",
       "matches"
     ]
+  }
+}
+
+section "Described Names" {
+
+  Grammar Described_Names {
+    bnf = '''
+      described_name ::= IDENTIFIER_name [ STRING_description ]
+    '''
+  }
+
+  Semantics Described_Name_Description {
+    kind = Kind.Static
+    text = '''A described name names an entity. The optional string
+              description has no static or dynamic
+              semantics.'''
+  }
+
+  Semantics Described_Name_Equality {
+    kind = Kind.Static
+    text = '''Two described names are considered equal if their names are
+              equal.'''
+  }
+
+  Text Described_Name_Notes {
+    text = '''The description has no bearing on equality. The string
+              description should be exported to the API, so
+              that downstream tools can make use of it. This
+              way we don't have to give some comments special meaning,
+              and we don't have to implement error-prone heuristics in
+              downstream tools for discovering these descriptions.'''
+  }
+
+}
+
+section "Type declarations" {
+
+  Grammar Type_Declarations {
+    bnf = '''
+      type_declaration ::= 'enum' described_name enumeration_declaration
+                         | 'type' described_name record_declaration
+    '''
+  }
+
+  Semantics Duplicate_Types {
+    kind = Kind.Static
+    text = '''It is an error to create a type with a name that already
+              exists in the current package. (Note: this
+              especially includes shadowing one of the
+              builtin types.)'''
+  }
+
+}
+
+section "Enumerations" {
+
+  Grammar Enumeration_Declaration {
+    bnf = '''
+      enumeration_declaration ::= '{' { enumeration_literal_specification } '}'
+
+      enumeration_literal_specification ::= described_name
+    '''
+  }
+
+  Semantics Unique_Enumeration_Literals {
+    kind = Kind.Static
+    text = '''Each described name declares an enumeration literal
+              specification, which shall have a unique name
+              in that enumeration.'''
+  }
+
+  Text Shared_Literals {
+    text = '''It is not an error to have the same literal specification
+              for different enumerations.'''
+  }
+
+  Text Literals_Shadowing_Permitted {
+    text = '''It is not an error to have an enumeration literal with the
+              same name as a record or enumeration - as
+              there is no ambiguity - but it is recommended
+              that an implementation emits a warning in this
+              case.'''
+  }
+
+  Example Enumeration_Example {
+    rsl_content = '''
+      package Example
+
+      enum ASIL {
+        QM "Not safety relevant"
+        A B C D
+      }
+
+      enum My_Boolean {
+        yes
+        no
+        file_not_found
+      }
+    '''
   }
 
 }
