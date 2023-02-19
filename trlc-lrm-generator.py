@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # TRLC - Treat Requirements Like Code
-# Copyright (C) 2022 Florian Schanda
+# Copyright (C) 2022-2023 Florian Schanda
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -18,14 +18,16 @@
 # You should have received a copy of the GNU General Public License
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
-from trlc.errors import Message_Handler
-from trlc.trlc import Source_Manager
-from trlc.lexer import Token
-from trlc import ast
+# pylint: disable=invalid-name
+
 import sys
-import os
 import html
 import re
+
+from trlc.errors import Message_Handler, TRLC_Error
+from trlc.trlc import Source_Manager
+from trlc.lexer import Source_Reference
+from trlc import ast
 
 BMW_BLUE_1 = "#0066B1"
 BMW_BLUE_2 = "#003D78"
@@ -33,22 +35,438 @@ BMW_RED    = "#E22718"
 BMW_GREY   = "#6f6f6f"
 BMW_SILVER = "#d6d6d6"
 
+
 class BNF_Token:
-    def __init__(self,  source, kind, value):
-        assert isinstance(source, Token)
+    KIND = (
+        "NONTERMINAL",     # foo   foo_NAME
+        "TERMINAL",        # FOO   FOO_name
+        "PRODUCTION",      # ::=
+        "ALTERNATIVE",     # |
+        "SYMBOL",          # 'potato'
+        "S_BRA", "S_KET",  # []
+        "C_BRA", "C_KET",  # {}
+        "RULE_END",        # two or more newlines
+    )
+
+    def __init__(self, kind, value, start, end, location):
+        assert kind in BNF_Token.KIND
+        assert isinstance(start, int)
+        assert isinstance(end, int) and start <= end
+        assert isinstance(location, Source_Reference)
+
+        self.kind     = kind
+        self.value    = value
+        self.location = location
+        self.start    = start
+        self.end      = end
+
+    def __repr__(self):
+        return "BNF_Token(%s, %s, <loc>)" % (self.kind, self.value)
 
 
 class BNF_Lexer:
-    def __init__(self, fragment):
+    def __init__(self, mh, fragment, original_location):
+        assert isinstance(mh, Message_Handler)
         assert isinstance(fragment, str)
-        self.fragment = fragment
+        assert isinstance(original_location, Source_Reference)
+        self.mh                = mh
+        self.fragment          = fragment
+        self.original_location = original_location
+        self.fragment_length   = len(self.fragment)
+
+        self.lexpos  = -2
+        self.line_no = 0
+        self.col_no  = 0
+        self.cc = None
+        self.nc = None
+        self.eof_token_generated = False
+
+        self.advance()
+
+    def advance(self):
+        self.lexpos += 1
+        if self.cc == "\n" or self.lexpos == 0:
+            self.line_no += 1
+            self.col_no = 0
+        if self.nc is not None:
+            self.col_no += 1
+        self.cc = self.nc
+        self.nc = (self.fragment[self.lexpos + 1]
+                   if self.lexpos + 1 < self.fragment_length
+                   else None)
+
+    def token(self):
+        # Skip whitespace and comments
+        num_nl = 0
+        start_pos  = self.lexpos
+        start_line = self.line_no
+        start_col  = self.col_no
+        while self.nc and self.nc.isspace():
+            self.advance()
+            if self.cc == "\n":
+                num_nl += 1
+        if num_nl < 2:
+            self.advance()
+
+        if self.cc is None:
+            if not self.eof_token_generated:
+                self.eof_token_generated = True
+                return BNF_Token(kind     = "RULE_END",
+                                 value    = None,
+                                 start    = self.lexpos,
+                                 end      = self.lexpos,
+                                 location = self.mk_location(start_line,
+                                                             start_col,
+                                                             self.lexpos,
+                                                             self.lexpos))
+            return None
+
+        # If we have more than one empty line then this is the end of
+        # a rule.
+        if num_nl >= 2:
+            return BNF_Token(kind     = "RULE_END",
+                             value    = None,
+                             start    = start_pos,
+                             end      = self.lexpos,
+                             location = self.mk_location(self.line_no,
+                                                         start_col,
+                                                         start_pos,
+                                                         self.lexpos))
+
+        start_pos  = self.lexpos
+        start_line = self.line_no
+        start_col  = self.col_no
+
+        if self.cc == "[":
+            kind = "S_BRA"
+
+        elif self.cc == "]":
+            kind = "S_KET"
+
+        elif self.cc == "{":
+            kind = "C_BRA"
+
+        elif self.cc == "}":
+            kind = "C_KET"
+
+        elif self.cc == "|":
+            kind = "ALTERNATIVE"
+
+        elif self.cc == ":":
+            kind = "PRODUCTION"
+            self.advance()
+            if self.cc != ":":
+                self.lex_error("malformed ::= operator")
+            self.advance()
+            if self.cc != "=":
+                self.lex_error("malformed ::= operator")
+
+        elif self.cc.islower():
+            # Either nonterm or nonterm_NAME
+            kind = "NONTERMINAL"
+            while self.nc and (self.nc.isalpha() or self.nc == "_"):
+                self.advance()
+
+        elif self.cc.isupper():
+            # Either TERMINAL or TERMINAL_name
+            kind = "TERMINAL"
+            while self.nc and (self.nc.isalpha() or self.nc == "_"):
+                self.advance()
+
+        elif self.cc == "'":
+            kind = "SYMBOL"
+            while self.nc and self.nc != "'":
+                self.advance()
+            if self.nc is None:
+                self.lex_error("unclosed token literal")
+            self.advance()
+
+        else:
+            self.lex_error("unexpected character %s" % self.cc)
+
+        end_pos  = self.lexpos
+        raw_text = self.fragment[start_pos:end_pos + 1]
+
+        return BNF_Token(kind     = kind,
+                         value    = raw_text,
+                         start    = start_pos,
+                         end      = end_pos,
+                         location = self.mk_location(start_line,
+                                                     start_col,
+                                                     start_pos,
+                                                     end_pos))
+
+    def mk_location(self, start_line, start_col, start_pos, end_pos):
+        sref = Source_Reference(
+            lexer      = self.original_location.lexer,
+            start_line = self.original_location.line_no + (start_line - 1),
+            start_col  = (self.original_location.col_no + 3
+                          if start_line == 1
+                          else start_col),
+            start_pos  = self.original_location.start_pos + 3 + start_pos,
+            end_pos    = self.original_location.start_pos + 3 + end_pos)
+        return sref
+
+    def lex_error(self, message):
+        self.mh.error(self.mk_location(self.line_no, self.col_no,
+                                       self.lexpos, self.lexpos),
+                      message)
+
+
+class BNF_AST_Node:
+    def __init__(self, location):
+        assert isinstance(location, Source_Reference)
+        self.location = location
+
+
+class BNF_Expansion(BNF_AST_Node):
+    pass
+
+
+class BNF_Literal(BNF_Expansion):
+    def __init__(self, location, kind, value):
+        super().__init__(location)
+        assert kind in ("TERMINAL",
+                        "NONTERMINAL",
+                        "SYMBOL")
+        assert isinstance(value, str)
+
+        self.kind  = kind
+        self.value = value
+
+    def __str__(self):
+        return self.value
+
+
+class BNF_Optional(BNF_Expansion):
+    def __init__(self, location, expansion):
+        super().__init__(location)
+        assert isinstance(expansion, BNF_Expansion)
+
+        self.expansion = expansion
+
+    def __str__(self):
+        return "[ %s ]" % str(self.expansion)
+
+
+class BNF_One_Or_More(BNF_Expansion):
+    def __init__(self, location, expansion):
+        super().__init__(location)
+        assert isinstance(expansion, BNF_Expansion)
+
+        self.expansion = expansion
+
+    def __str__(self):
+        return "{ %s }" % str(self.expansion)
+
+
+class BNF_String(BNF_Expansion):
+    def __init__(self, members):
+        assert isinstance(members, list) and len(members) >= 2
+        for member in members:
+            assert isinstance(member, BNF_Expansion)
+        super().__init__(members[0].location)
+
+        self.members = members
+
+    def __str__(self):
+        return " ".join(map(str, self.members))
+
+
+class BNF_Alternatives(BNF_Expansion):
+    def __init__(self, members):
+        assert isinstance(members, list) and len(members) >= 2
+        for member in members:
+            assert isinstance(member, BNF_Expansion)
+        super().__init__(members[0].location)
+
+        self.members = members
+
+    def __str__(self):
+        return " | ".join(map(str, self.members))
+
+
+class BNF_Parser:
+    def __init__(self, mh):
+        assert isinstance(mh, Message_Handler)
+
+        self.mh = mh
+
+        # Lexer state
+        self.current_lexer = None
+        self.ct            = None
+        self.nt            = None
+
+        # Symbol table
+        self.productions = {}
+
+    def advance(self):
+        assert self.current_lexer is not None
+
+        self.ct = self.nt
+        self.nt = self.current_lexer.token()
+
+    def error(self, token, message):
+        assert isinstance(token, BNF_Token)
+        assert isinstance(message, str)
+
+        self.mh.error(token.location, message)
+
+    def peek(self, kind):
+        assert kind in BNF_Token.KIND
+
+        return self.nt and self.nt.kind == kind
+
+    def match(self, kind):
+        assert kind in BNF_Token.KIND
+
+        if self.nt is None:
+            self.error(self.ct, "expected %s, encountered EOS instead" % kind)
+        elif self.nt.kind != kind:
+            self.error(self.nt, "expected %s, encountered %s instead" %
+                       (kind, self.nt.kind))
+
+        self.advance()
+
+    def parse(self, bnf_lexer):
+        assert self.current_lexer is None
+        assert isinstance(bnf_lexer, BNF_Lexer)
+
+        self.current_lexer = bnf_lexer
+        self.ct = None
+        self.nt = bnf_lexer.token()
+
+        while self.nt:
+            self.parse_production()
+            self.match("RULE_END")
+
+        self.current_lexer = None
+        self.ct            = None
+        self.nt            = None
+
+    def sem(self):
+        for production in self.productions:
+            self.sem_production(production)
+
+    def sem_production(self, production):
+        n_exp = self.productions[production]
+
+        self.sem_expansion(n_exp)
+
+    def sem_expansion(self, n_exp):
+        assert isinstance(n_exp, BNF_Expansion)
+
+        if isinstance(n_exp, (BNF_One_Or_More,
+                              BNF_Optional)):
+            self.sem_expansion(n_exp.expansion)
+
+        elif isinstance(n_exp, (BNF_String,
+                                BNF_Alternatives)):
+            for n_member in n_exp.members:
+                self.sem_expansion(n_member)
+
+        else:
+            self.sem_literal(n_exp)
+
+    def sem_literal(self, n_literal):
+        assert isinstance(n_literal, BNF_Literal)
+
+        if n_literal.kind == "SYMBOL":
+            # TODO
+            pass
+
+        elif n_literal.kind == "TERMINAL":
+            # TODO
+            pass
+
+        else:
+            assert n_literal.kind == "NONTERMINAL"
+            if n_literal.value not in self.productions:
+                self.mh.warning(n_literal.location,
+                                "unknown production")
+
+    def parse_production(self):
+        # production ::= expansion
+
+        self.match("NONTERMINAL")
+        if self.ct.value in self.productions:
+            self.error(self.ct, "duplicated definition")
+        prod_name = self.ct.value
+        self.match("PRODUCTION")
+        self.productions[prod_name] = self.parse_expansion()
+
+    def parse_expansion(self):
+        # expansion ::= string { '|' string }
+        #
+        # string ::= fragment { fragment }
+        #
+        # fragment ::= '{' expansion '}'
+        #            | '[' expansion ']'
+        #            | TERMINAL
+        #            | NONTERMINAL
+        #            | SYMBOL
+
+        rv = [self.parse_string()]
+        while self.peek("ALTERNATIVE"):
+            self.match("ALTERNATIVE")
+            rv.append(self.parse_string())
+
+        if len(rv) == 1:
+            return rv[0]
+        else:
+            return BNF_Alternatives(rv)
+
+    def parse_string(self):
+        rv = [self.parse_fragment()]
+        while self.nt.kind in ("C_BRA", "S_BRA",
+                               "TERMINAL",
+                               "NONTERMINAL",
+                               "SYMBOL"):
+            rv.append(self.parse_fragment())
+
+        if len(rv) == 1:
+            return rv[0]
+        else:
+            return BNF_String(rv)
+
+    def parse_fragment(self):
+        loc = self.nt.location
+
+        if self.peek("C_BRA"):
+            self.match("C_BRA")
+            rv = self.parse_expansion()
+            self.match("C_KET")
+            return BNF_One_Or_More(loc, rv)
+
+        elif self.peek("S_BRA"):
+            self.match("S_BRA")
+            rv = self.parse_expansion()
+            self.match("S_KET")
+            return BNF_Optional(loc, rv)
+
+        elif self.peek("TERMINAL"):
+            self.match("TERMINAL")
+            return BNF_Literal(loc, self.ct.kind, self.ct.value)
+
+        elif self.peek("NONTERMINAL"):
+            self.match("NONTERMINAL")
+            return BNF_Literal(loc, self.ct.kind, self.ct.value)
+
+        elif self.peek("SYMBOL"):
+            self.match("SYMBOL")
+            return BNF_Literal(loc, self.ct.kind, self.ct.value)
+
+        self.error(self.nt,
+                   "expected bnf fragment")
 
 
 def write_heading(fd, name, depth):
     fd.write("<h%u>%s</h%u>\n" % (depth,
                                   html.escape(name),
                                   depth))
-def write_header(fd):
+
+
+def write_header(fd, obj_license):
     fd.write("<!DOCTYPE html>\n")
     fd.write("<html>\n")
     fd.write("<head>\n")
@@ -80,14 +498,47 @@ def write_header(fd):
     fd.write("</style>\n")
     fd.write("</head>\n")
     fd.write("<body>\n")
-    write_heading(fd, "TRLC Language Reference Manual", 1)
 
-def write_footer(fd):
+    write_heading(fd, "TRLC Language Reference Manual", 1)
+    lic = obj_license.to_python_dict()
+    fd.write("<div>\n")
+    fd.write("Permission is granted to copy, distribute and/or"
+             " modify this document under the terms of the GNU Free"
+             " Documentation License, Version 1.3 or any later version"
+             " published by the Free SoftwareFoundation;")
+    if not lic["invariant_sections"]:
+        fd.write(" with no Invariant Sections,")
+    else:
+        assert False
+    if lic["front_cover"]:
+        assert False
+    else:
+        fd.write(" no Front-Cover Texts,")
+    if lic["back_cover"]:
+        assert False
+    else:
+        fd.write(" and no Back-Cover Texts.")
+    fd.write("\n")
+    fd.write("A copy of the license is included in the section"
+             " entitled \"Appendix A: GNU Free Documentation License\".\n")
+    fd.write("</div>\n")
+
+
+def write_footer(fd, script_name):
+    write_heading(fd, "Appendix A: GNU Free Documentation License", 1)
+    with open("language-reference-manual/LICENSE.html_fragment", "r",
+              encoding="UTF-8") as fd_lic:
+        fd.write(fd_lic.read())
     fd.write("</body>\n")
     fd.write("<footer>\n")
-    fd.write("Generated by trlc-lrm-generator.py\n")
+    gh_root = "https://github.com/bmw-software-engineering"
+    gh_project = "trlc"
+    fd.write("Generated by the <a href=\"%s/%s/blob/main/%s\">" %
+             (gh_root, gh_project, script_name))
+    fd.write("TRLC LRM Generator</a>\n")
     fd.write("</footer>\n")
     fd.write("</html>\n")
+
 
 def section_list(section):
     assert isinstance(section, ast.Section)
@@ -96,6 +547,7 @@ def section_list(section):
     else:
         return [section.name]
 
+
 def section_depth(section):
     assert isinstance(section, ast.Section)
     if section.parent:
@@ -103,11 +555,13 @@ def section_depth(section):
     else:
         return 1
 
+
 def fmt_text(text):
     text = " ".join(text.replace("\n", " ").split())
     text = html.escape(text)
     text = re.sub("`(.*?)`", "<tt>\\1</tt>", text)
     return text
+
 
 def write_text_object(fd, obj, context):
     data = obj.to_python_dict()
@@ -180,19 +634,43 @@ def main():
         sys.exit(1)
 
     pkg_lrm = symbols.lookup_assuming(mh, "LRM", ast.Package)
-    obj_license = None
+    obj_license = pkg_lrm.symbols.lookup_assuming(mh,
+                                                  "License",
+                                                  ast.Record_Object)
     typ_text = pkg_lrm.symbols.lookup_assuming(mh, "Text", ast.Record_Type)
     typ_gram = pkg_lrm.symbols.lookup_assuming(mh, "Grammar", ast.Record_Type)
+
+    # Process grammer
+    parser = BNF_Parser(mh)
+    for obj in pkg_lrm.symbols.iter_record_objects():
+        if obj.e_typ.is_subclass_of(typ_gram):
+            orig_text = obj.field["bnf"].location.text()
+            if not orig_text.startswith("'''"):
+                mh.error(obj.field["bnf"].location,
+                         "BNF text must use ''' strings")
+            orig_text = orig_text[3:-3]
+            lexer = BNF_Lexer(mh,
+                              orig_text,
+                              obj.field["bnf"].location)
+            try:
+                parser.parse(lexer)
+            except TRLC_Error:
+                return
+    try:
+        parser.sem()
+    except TRLC_Error:
+        return
 
     context = {
         "old_section": None
     }
-    with open("docs/lrm.html", "w") as fd:
-        write_header(fd)
+    with open("docs/lrm.html", "w", encoding="UTF-8") as fd:
+        write_header(fd, obj_license)
         for obj in pkg_lrm.symbols.iter_record_objects():
             if obj.e_typ.is_subclass_of(typ_text):
                 write_text_object(fd, obj, context)
-        write_footer(fd)
+        write_footer(fd, __file__)
+
 
 if __name__ == "__main__":
     main()

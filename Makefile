@@ -2,10 +2,10 @@
 
 lint: style
 	@python3 -m pylint --rcfile=pylint3.cfg \
-		--reports=no trlc
+		--reports=no trlc trlc*.py
 
 style:
-	@python3 -m pycodestyle trlc
+	@python3 -m pycodestyle trlc trlc*.py
 
 test:
 	make -C tests -B -j6 fast
