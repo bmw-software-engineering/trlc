@@ -187,8 +187,46 @@ class BNF_Lexer:
         end_pos  = self.lexpos
         raw_text = self.fragment[start_pos:end_pos + 1]
 
+        if kind == "TERMINAL":
+            t_kind = ""
+            t_name = None
+            in_kind = True
+            for c in raw_text:
+                if in_kind and c.islower():
+                    assert t_kind.endswith("_")
+                    t_kind = t_kind[:-1]
+                    in_kind = False
+                    t_name = c
+                elif in_kind:
+                    t_kind += c
+                else:
+                    t_name += c
+            value = (t_kind, t_name)
+
+        elif kind == "NONTERMINAL":
+            t_prod = ""
+            t_name = None
+            in_prod = True
+            for c in raw_text:
+                if in_prod and c.isupper():
+                    assert t_prod.endswith("_")
+                    t_prod = t_prod[:-1]
+                    in_prod = False
+                    t_name = c
+                elif in_prod:
+                    t_prod += c
+                else:
+                    t_name += c
+            value = (t_prod, t_name)
+
+        elif kind == "SYMBOL":
+            value = raw_text[1:-1]
+
+        else:
+            value = None
+
         return BNF_Token(kind     = kind,
-                         value    = raw_text,
+                         value    = value,
                          start    = start_pos,
                          end      = end_pos,
                          location = self.mk_location(start_line,
@@ -224,15 +262,17 @@ class BNF_Expansion(BNF_AST_Node):
 
 
 class BNF_Literal(BNF_Expansion):
-    def __init__(self, location, kind, value):
+    def __init__(self, location, kind, value, name=None):
         super().__init__(location)
         assert kind in ("TERMINAL",
                         "NONTERMINAL",
                         "SYMBOL")
         assert isinstance(value, str)
+        assert isinstance(name, str) or name is None
 
         self.kind  = kind
         self.value = value
+        self.name  = name
 
     def __str__(self):
         return self.value
@@ -403,9 +443,9 @@ class BNF_Parser:
         # production ::= expansion
 
         self.match("NONTERMINAL")
-        if self.ct.value in self.productions:
+        prod_name = self.ct.value[0]
+        if prod_name in self.productions:
             self.error(self.ct, "duplicated definition")
-        prod_name = self.ct.value
         self.match("PRODUCTION")
         self.productions[prod_name] = self.parse_expansion()
         return prod_name
@@ -461,11 +501,17 @@ class BNF_Parser:
 
         elif self.peek("TERMINAL"):
             self.match("TERMINAL")
-            return BNF_Literal(loc, self.ct.kind, self.ct.value)
+            return BNF_Literal(loc,
+                               self.ct.kind,
+                               self.ct.value[0],
+                               self.ct.value[1])
 
         elif self.peek("NONTERMINAL"):
             self.match("NONTERMINAL")
-            return BNF_Literal(loc, self.ct.kind, self.ct.value)
+            return BNF_Literal(loc,
+                               self.ct.kind,
+                               self.ct.value[0],
+                               self.ct.value[1])
 
         elif self.peek("SYMBOL"):
             self.match("SYMBOL")
@@ -508,6 +554,15 @@ def write_header(fd, obj_license):
     fd.write("  border-radius: 1em;\n")
     fd.write("  padding: 1em;\n")
     fd.write("  background-color: %s;\n" % BMW_SILVER)
+    fd.write("}\n")
+    fd.write("a {\n")
+    fd.write("  color: %s;\n" % BMW_BLUE_1)
+    fd.write("}\n")
+    fd.write("pre a {\n")
+    fd.write("  text-decoration: none;\n")
+    fd.write("}\n")
+    fd.write("pre a:hover {\n")
+    fd.write("  text-decoration: underline;\n")
     fd.write("}\n")
     fd.write("</style>\n")
     fd.write("</style>\n")
@@ -651,7 +706,7 @@ def write_text_object(fd, obj, context, bnf_parser):
 
 def write_production(fd, production, bnf_parser):
     # Write indicator with anchor
-    fd.write("<a name=\"bnf-%s\">%s</a> ::= " %
+    fd.write("<a name=\"bnf-%s\"></a>%s ::= " %
              (production, production))
     n_exp = bnf_parser.productions[production]
 
@@ -702,14 +757,22 @@ def write_expansion(fd, n_exp):
         assert isinstance(n_exp, BNF_Literal)
 
         if n_exp.kind == "SYMBOL":
+            fd.write("'")
             fd.write(n_exp.value)
+            fd.write("'")
 
         elif n_exp.kind == "TERMINAL":
             fd.write(n_exp.value)
+            if n_exp.name:
+                fd.write("<i>_%s</i>" % n_exp.name)
 
         else:
             assert n_exp.kind == "NONTERMINAL"
+            fd.write("<a href=\"#bnf-%s\">" % n_exp.value)
             fd.write(n_exp.value)
+            fd.write("</a>")
+            if n_exp.name:
+                fd.write("<i>_%s</i>" % n_exp.name)
 
 
 def main():
