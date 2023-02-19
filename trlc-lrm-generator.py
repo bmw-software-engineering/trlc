@@ -299,6 +299,7 @@ class BNF_Parser:
 
         # Symbol table
         self.productions = {}
+        self.bundles     = {}
 
     def advance(self):
         assert self.current_lexer is not None
@@ -327,22 +328,6 @@ class BNF_Parser:
                        (kind, self.nt.kind))
 
         self.advance()
-
-    def parse(self, bnf_lexer):
-        assert self.current_lexer is None
-        assert isinstance(bnf_lexer, BNF_Lexer)
-
-        self.current_lexer = bnf_lexer
-        self.ct = None
-        self.nt = bnf_lexer.token()
-
-        while self.nt:
-            self.parse_production()
-            self.match("RULE_END")
-
-        self.current_lexer = None
-        self.ct            = None
-        self.nt            = None
 
     def sem(self):
         for production in self.productions:
@@ -385,6 +370,35 @@ class BNF_Parser:
                 self.mh.warning(n_literal.location,
                                 "unknown production")
 
+    def parse(self, obj):
+        assert self.current_lexer is None
+        assert isinstance(obj, ast.Record_Object)
+        assert obj.e_typ.name == "Grammar"
+
+        # Get original text (without the ''' whitespace
+        # simplifications)
+        orig_text = obj.field["bnf"].location.text()
+        if not orig_text.startswith("'''"):
+            self.mh.error(obj.field["bnf"].location,
+                     "BNF text must use ''' strings")
+        orig_text = orig_text[3:-3]
+
+        # Create nested lexer
+        self.current_lexer = BNF_Lexer(self.mh,
+                                       orig_text,
+                                       obj.field["bnf"].location)
+        self.ct = None
+        self.nt = self.current_lexer.token()
+
+        self.bundles[obj.name] = []
+        while self.nt:
+            self.bundles[obj.name].append(self.parse_production())
+            self.match("RULE_END")
+
+        self.current_lexer = None
+        self.ct            = None
+        self.nt            = None
+
     def parse_production(self):
         # production ::= expansion
 
@@ -394,6 +408,7 @@ class BNF_Parser:
         prod_name = self.ct.value
         self.match("PRODUCTION")
         self.productions[prod_name] = self.parse_expansion()
+        return prod_name
 
     def parse_expansion(self):
         # expansion ::= string { '|' string }
@@ -563,7 +578,7 @@ def fmt_text(text):
     return text
 
 
-def write_text_object(fd, obj, context):
+def write_text_object(fd, obj, context, bnf_parser):
     data = obj.to_python_dict()
 
     # Build current section
@@ -614,14 +629,87 @@ def write_text_object(fd, obj, context):
             fd.write("  <li>%s</li>\n" % fmt_text(item))
         fd.write("</ul>\n")
     fd.write("</div>\n")
+
+    # Emit additional data with semantics
     if obj.e_typ.name == "Terminal":
         fd.write("<div class='code'>")
         fd.write("<code>%s</code>\n" % data["def"])
         fd.write("</div>\n")
     elif obj.e_typ.name == "Grammar":
         fd.write("<div class='code'>")
-        fd.write("<pre>%s</pre>\n" % data["bnf"])
+        fd.write("<pre>\n")
+        first = True
+        for production in bnf_parser.bundles[obj.name]:
+            if first:
+                first = False
+            else:
+                fd.write("\n")
+            write_production(fd, production, bnf_parser)
+        fd.write("</pre>\n")
         fd.write("</div>\n")
+
+
+def write_production(fd, production, bnf_parser):
+    # Write indicator with anchor
+    fd.write("<a name=\"bnf-%s\">%s</a> ::= " %
+             (production, production))
+    n_exp = bnf_parser.productions[production]
+
+    if isinstance(n_exp, BNF_Alternatives):
+        alt_offset = len(production) + 3
+        write_expansion(fd, n_exp.members[0])
+        fd.write("\n")
+        for n_member in n_exp.members[1:]:
+            fd.write(" " * alt_offset + "| ")
+            write_expansion(fd, n_member)
+            fd.write("\n")
+
+    else:
+        write_expansion(fd, n_exp)
+        fd.write("\n")
+
+
+def write_expansion(fd, n_exp):
+    if isinstance(n_exp, BNF_Alternatives):
+        first = True
+        for n_member in n_exp.members:
+            if first:
+                first = False
+            else:
+                fd.write(" | ")
+            write_expansion(fd, n_member)
+
+    elif isinstance(n_exp, BNF_String):
+        first = True
+        for n_member in n_exp.members:
+            if first:
+                first = False
+            else:
+                fd.write(" ")
+            write_expansion(fd, n_member)
+
+    elif isinstance(n_exp, BNF_Optional):
+        fd.write("[ ")
+        write_expansion(fd, n_exp.expansion)
+        fd.write(" ]")
+
+    elif isinstance(n_exp, BNF_One_Or_More):
+        fd.write("{ ")
+        write_expansion(fd, n_exp.expansion)
+        fd.write(" }")
+
+    else:
+        assert isinstance(n_exp, BNF_Literal)
+
+        if n_exp.kind == "SYMBOL":
+            fd.write(n_exp.value)
+
+        elif n_exp.kind == "TERMINAL":
+            fd.write(n_exp.value)
+
+        else:
+            assert n_exp.kind == "NONTERMINAL"
+            fd.write(n_exp.value)
 
 
 def main():
@@ -644,16 +732,8 @@ def main():
     parser = BNF_Parser(mh)
     for obj in pkg_lrm.symbols.iter_record_objects():
         if obj.e_typ.is_subclass_of(typ_gram):
-            orig_text = obj.field["bnf"].location.text()
-            if not orig_text.startswith("'''"):
-                mh.error(obj.field["bnf"].location,
-                         "BNF text must use ''' strings")
-            orig_text = orig_text[3:-3]
-            lexer = BNF_Lexer(mh,
-                              orig_text,
-                              obj.field["bnf"].location)
             try:
-                parser.parse(lexer)
+                parser.parse(obj)
             except TRLC_Error:
                 return
     try:
@@ -668,7 +748,7 @@ def main():
         write_header(fd, obj_license)
         for obj in pkg_lrm.symbols.iter_record_objects():
             if obj.e_typ.is_subclass_of(typ_text):
-                write_text_object(fd, obj, context)
+                write_text_object(fd, obj, context, parser)
         write_footer(fd, __file__)
 
 
