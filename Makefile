@@ -16,6 +16,7 @@ test-all:
 docs:
 	rm -rf docs
 	sphinx-build -c sphinx -b html . docs
+	@python3 trlc-lrm-generator.py
 	git add docs
 
 package:
