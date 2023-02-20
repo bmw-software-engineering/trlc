@@ -24,6 +24,7 @@ import sys
 import html
 import re
 import os
+import re
 
 from trlc.errors import Message_Handler, TRLC_Error
 from trlc.trlc import Source_Manager
@@ -339,6 +340,7 @@ class BNF_Parser:
         self.nt            = None
 
         # Symbol table
+        self.terminals   = set()
         self.productions = {}
         self.bundles     = {}
 
@@ -398,8 +400,9 @@ class BNF_Parser:
         assert isinstance(n_literal, BNF_Literal)
 
         if n_literal.kind == "SYMBOL":
-            # TODO
-            pass
+            if n_literal.value not in self.terminals:
+                self.mh.warning(n_literal.location,
+                                "unknown terminal")
 
         elif n_literal.kind == "TERMINAL":
             # TODO
@@ -410,6 +413,30 @@ class BNF_Parser:
             if n_literal.value not in self.productions:
                 self.mh.warning(n_literal.location,
                                 "unknown production")
+
+    def register_terminal(self, obj):
+        assert isinstance(obj, ast.String_Literal)
+
+        if obj.value in self.terminals:
+            self.mh.error(obj.location,
+                          "duplicate definition of terminal")
+        self.terminals.add(obj.value)
+
+    def register_backtick_terminals(self, obj):
+        assert isinstance(obj, ast.String_Literal)
+
+        for match in re.finditer("`([^`]*)`", obj.value):
+            terminal = match.group(1)
+            if terminal:
+                if terminal in self.terminals:
+                    self.mh.error(obj.location,
+                                  "duplicate definition of terminal '%s'" %
+                                  terminal)
+                else:
+                    self.terminals.add(terminal)
+            else:
+                self.mh.error(obj.location,
+                              "empty terminal is not permitted")
 
     def parse(self, obj):
         assert self.current_lexer is None
@@ -790,6 +817,8 @@ def main():
                                                   ast.Record_Object)
     typ_text = pkg_lrm.symbols.lookup_assuming(mh, "Text", ast.Record_Type)
     typ_gram = pkg_lrm.symbols.lookup_assuming(mh, "Grammar", ast.Record_Type)
+    typ_kword = pkg_lrm.symbols.lookup_assuming(mh, "Keywords", ast.Record_Type)
+    typ_punct = pkg_lrm.symbols.lookup_assuming(mh, "Punctuation", ast.Record_Type)
 
     # Process grammer
     parser = BNF_Parser(mh)
@@ -799,6 +828,18 @@ def main():
                 parser.parse(obj)
             except TRLC_Error:
                 return
+        elif obj.e_typ.is_subclass_of(typ_kword):
+            for kwobj in obj.field["bullets"].value:
+                try:
+                    parser.register_terminal(kwobj)
+                except TRLC_Error:
+                    return
+        elif obj.e_typ.is_subclass_of(typ_punct):
+            for kwobj in obj.field["bullets"].value:
+                try:
+                    parser.register_backtick_terminals(kwobj)
+                except TRLC_Error:
+                    return
     try:
         parser.sem()
     except TRLC_Error:
