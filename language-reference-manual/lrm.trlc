@@ -66,12 +66,16 @@ section "Lexing" {
       text = '''Identifiers start with a letter and are followed by letters,
                 numbers, or underscores.'''
       def = "IDENTIFIER ::= [a-zA-Z][a-zA-Z0-9_]*"
+      examples = ["foo",
+                  "Potato123",
+                  "Kitten_Exploder"]
     }
 
     Terminal Builtin_Identifier {
       text = '''There is also a legacy "builtin" identifier that is
                 deprecated. It will be removed in a future major release.'''
       def = "BUILTIN_IDENTIFIER ::= [a-z]+:[a-zA-Z][a-zA-Z0-9_]*"
+      examples = ["trlc:len"]
     }
 
     Keywords TRLC_Keywords {
@@ -140,6 +144,7 @@ section "Lexing" {
       text = '''Integers are base 10, and leading zeros are
                 effectively ignored.'''
       def = "INTEGER ::= [0-9]+"
+      examples = ["0", "42", "007"]
     }
   }
 
@@ -147,9 +152,10 @@ section "Lexing" {
     Terminal Strings {
       text = '''There are two versions of a string, double quoted and
                 triple quoted:'''
-      def = '''STRING ::= "([^"]|(\\"))*"
-                        | '{3}.*?'{3}
-            '''
+      def = '''STRING ::= ("([^"]|(\"))*")|('{3}.*?'{3})'''
+      examples = ["\"foobar\"",
+                  "'''potato'''",
+                  '''"example with \"quotes\""''']
     }
 
     Semantics Simple_String_Value {

@@ -75,9 +75,21 @@ Identifiers start with a letter and are followed by letters, numbers, or undersc
 <div class='code'><code>IDENTIFIER ::= [a-zA-Z][a-zA-Z0-9_]*</code>
 </div>
 <div>
+Examples:<ul>
+  <li>foo</li>
+  <li>Potato123</li>
+  <li>Kitten_Exploder</li>
+</ul>
+</div>
+<div>
 There is also a legacy &quot;builtin&quot; identifier that is deprecated. It will be removed in a future major release.
 </div>
 <div class='code'><code>BUILTIN_IDENTIFIER ::= [a-z]+:[a-zA-Z][a-zA-Z0-9_]*</code>
+</div>
+<div>
+Examples:<ul>
+  <li>trlc:len</li>
+</ul>
 </div>
 <div>
 A keyword is an identifier that is one of the following reserved words:
@@ -136,12 +148,25 @@ Integers are base 10, and leading zeros are effectively ignored.
 </div>
 <div class='code'><code>INTEGER ::= [0-9]+</code>
 </div>
+<div>
+Examples:<ul>
+  <li>0</li>
+  <li>42</li>
+  <li>007</li>
+</ul>
+</div>
 <h3>Strings</h3>
 <div>
 There are two versions of a string, double quoted and triple quoted:
 </div>
-<div class='code'><code>STRING ::= "([^"]|(\\"))*"
-| '{3}.*?'{3}</code>
+<div class='code'><code>STRING ::= (&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</code>
+</div>
+<div>
+Examples:<ul>
+  <li>&quot;foobar&quot;</li>
+  <li>&#x27;&#x27;&#x27;potato&#x27;&#x27;&#x27;</li>
+  <li>&quot;example with \&quot;quotes\&quot;&quot;</li>
+</ul>
 </div>
 <h4>Static Semantics</h4>
 <div>

@@ -16,7 +16,8 @@ type Grammar extends Text {
 }
 
 type Terminal extends Text {
-  def String
+  def      String
+  examples String [1 .. *]
 }
 
 type Keywords extends Text {}
@@ -27,7 +28,6 @@ checks Keywords {
 }
 
 type Punctuation extends Text {}
-
 
 checks Punctuation {
   bullets != null and len(bullets) >= 1,

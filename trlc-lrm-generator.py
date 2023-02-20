@@ -440,8 +440,9 @@ class BNF_Parser:
                 self.mh.error(obj.location,
                               "empty terminal is not permitted")
 
-    def register_token(self, obj):
+    def register_token(self, obj, examples):
         assert isinstance(obj, ast.String_Literal)
+        assert isinstance(examples, ast.Array_Aggregate)
 
         match = re.match("([A-Z_]+) *::= *(.*)", obj.value)
         if match is None:
@@ -453,10 +454,20 @@ class BNF_Parser:
                           "duplicate definition of %s" % match.group(1))
 
         try:
-            _ = re.compile(match.group(2))
+            pattern = re.compile(match.group(2))
         except re.error as err:
             self.mh.error(obj.location,
                           err.msg)
+
+        for example in examples.value:
+            ex_match = pattern.match(example.value)
+            if ex_match is None:
+                self.mh.error(example.location,
+                              "does not match %s" % match.group(2))
+            elif ex_match.group(0) != example.value:
+                self.mh.error(example.location,
+                              "only %s is matched" %
+                              (ex_match.group(0)))
 
         self.token_kinds.add(match.group(1))
 
@@ -737,8 +748,16 @@ def write_text_object(fd, obj, context, bnf_parser):
     # Emit additional data with semantics
     if obj.e_typ.name == "Terminal":
         fd.write("<div class='code'>")
-        fd.write("<code>%s</code>\n" % data["def"])
+        fd.write("<code>%s</code>\n" % html.escape(data["def"]))
         fd.write("</div>\n")
+        fd.write("<div>\n")
+        fd.write("Examples:")
+        fd.write("<ul>\n")
+        for item in data["examples"]:
+            fd.write("  <li>%s</li>\n" % html.escape(item))
+        fd.write("</ul>\n")
+        fd.write("</div>\n")
+
     elif obj.e_typ.name == "Grammar":
         fd.write("<div class='code'>")
         fd.write("<pre>\n")
@@ -865,7 +884,7 @@ def main():
                     return
         elif obj.e_typ.is_subclass_of(typ_terminal):
             try:
-                parser.register_token(obj.field["def"])
+                parser.register_token(obj.field["def"], obj.field["examples"])
             except TRLC_Error:
                 return
     try:
