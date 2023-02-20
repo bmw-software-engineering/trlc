@@ -340,6 +340,7 @@ class BNF_Parser:
         self.nt            = None
 
         # Symbol table
+        self.token_kinds = set()
         self.terminals   = set()
         self.productions = {}
         self.bundles     = {}
@@ -402,17 +403,18 @@ class BNF_Parser:
         if n_literal.kind == "SYMBOL":
             if n_literal.value not in self.terminals:
                 self.mh.warning(n_literal.location,
-                                "unknown terminal")
+                                "unknown terminal '%s'" % n_literal.value)
 
         elif n_literal.kind == "TERMINAL":
-            # TODO
-            pass
+            if n_literal.value not in self.token_kinds:
+                self.mh.warning(n_literal.location,
+                                "unknown terminal %s" % n_literal.value)
 
         else:
             assert n_literal.kind == "NONTERMINAL"
             if n_literal.value not in self.productions:
                 self.mh.warning(n_literal.location,
-                                "unknown production")
+                                "unknown production %s" % n_literal.value)
 
     def register_terminal(self, obj):
         assert isinstance(obj, ast.String_Literal)
@@ -437,6 +439,26 @@ class BNF_Parser:
             else:
                 self.mh.error(obj.location,
                               "empty terminal is not permitted")
+
+    def register_token(self, obj):
+        assert isinstance(obj, ast.String_Literal)
+
+        match = re.match("([A-Z_]+) *::= *(.*)", obj.value)
+        if match is None:
+            self.mh.error(obj.location,
+                          "malformed token definition")
+
+        if match.group(1) in self.token_kinds:
+            self.mh.error(obj.location,
+                          "duplicate definition of %s" % match.group(1))
+
+        try:
+            _ = re.compile(match.group(2))
+        except re.error as err:
+            self.mh.error(obj.location,
+                          err.msg)
+
+        self.token_kinds.add(match.group(1))
 
     def parse(self, obj):
         assert self.current_lexer is None
@@ -819,6 +841,7 @@ def main():
     typ_gram = pkg_lrm.symbols.lookup_assuming(mh, "Grammar", ast.Record_Type)
     typ_kword = pkg_lrm.symbols.lookup_assuming(mh, "Keywords", ast.Record_Type)
     typ_punct = pkg_lrm.symbols.lookup_assuming(mh, "Punctuation", ast.Record_Type)
+    typ_terminal = pkg_lrm.symbols.lookup_assuming(mh, "Terminal", ast.Record_Type)
 
     # Process grammer
     parser = BNF_Parser(mh)
@@ -840,6 +863,11 @@ def main():
                     parser.register_backtick_terminals(kwobj)
                 except TRLC_Error:
                     return
+        elif obj.e_typ.is_subclass_of(typ_terminal):
+            try:
+                parser.register_token(obj.field["def"])
+            except TRLC_Error:
+                return
     try:
         parser.sem()
     except TRLC_Error:
