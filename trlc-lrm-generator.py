@@ -23,6 +23,7 @@
 import sys
 import html
 import re
+import os
 
 from trlc.errors import Message_Handler, TRLC_Error
 from trlc.trlc import Source_Manager
@@ -532,6 +533,8 @@ def write_header(fd, obj_license):
     fd.write("<html>\n")
     fd.write("<head>\n")
     fd.write("<title>TRLC Language Reference Manual</title>\n")
+    fd.write("<meta name=\"viewport\" "
+             "content=\"width=device-width, initial-scale=1.0\">\n")
     fd.write("<style>\n")
     fd.write("body {\n")
     fd.write("  font-family: sans;\n")
@@ -546,11 +549,8 @@ def write_header(fd, obj_license):
     fd.write("  margin-top: 0.2em;\n")
     fd.write("}\n")
     fd.write("div.code {\n")
-    fd.write("  margin-left: 2em;\n")
     fd.write("  margin-top: 1.5em;\n")
     fd.write("  margin-bottom: 1.5em;\n")
-    fd.write("}\n")
-    fd.write("pre, code {\n")
     fd.write("  border-radius: 1em;\n")
     fd.write("  padding: 1em;\n")
     fd.write("  background-color: %s;\n" % BMW_SILVER)
@@ -812,7 +812,7 @@ def main():
         for obj in pkg_lrm.symbols.iter_record_objects():
             if obj.e_typ.is_subclass_of(typ_text):
                 write_text_object(fd, obj, context, parser)
-        write_footer(fd, __file__)
+        write_footer(fd, os.path.relpath(__file__))
 
 
 if __name__ == "__main__":
