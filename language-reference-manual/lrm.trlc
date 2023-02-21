@@ -411,9 +411,8 @@ section "Enumerations" {
   }
 
   Example Enumeration_Example {
-    rsl_content = '''
-      package Example
-
+    hidden_rsl = "package Example"
+    rsl = '''
       enum ASIL {
         QM "Not safety relevant"
         A B C D

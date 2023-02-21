@@ -47,7 +47,13 @@ type Semantics extends Text {
 type Recommendation extends Text {}
 
 type Example extends Text {
-  rsl_content  optional String
-  trcl_content optional String
-  fragment optional String
+  hidden_rsl  optional String
+  rsl         optional String
+  hidden_trlc optional String
+  trlc        optional String
+}
+
+checks Example {
+  rsl != null xor trlc != null,
+    "either RSL or TRLC content must be shown, but not both"
 }

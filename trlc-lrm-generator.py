@@ -771,6 +771,16 @@ def write_text_object(fd, obj, context, bnf_parser):
         fd.write("</pre>\n")
         fd.write("</div>\n")
 
+    elif obj.e_typ.name == "Example":
+        fd.write("<div class='code'>")
+        fd.write("<pre>\n")
+        if data["rsl"]:
+            fd.write(html.escape(data["rsl"]))
+        else:
+            fd.write(html.escape(data["trlc"]))
+        fd.write("</pre>\n")
+        fd.write("</div>\n")
+
 
 def write_production(fd, production, bnf_parser):
     # Write indicator with anchor
