@@ -23,14 +23,13 @@ type Terminal extends Text {
 type Keywords extends Text {}
 
 checks Keywords {
-  bullets != null and len(bullets) >= 1,
-    error "You need to give at least one keyword", bullets
+  bullets != null, error "You need to give at least one keyword", bullets
 }
 
 type Punctuation extends Text {}
 
 checks Punctuation {
-  bullets != null and len(bullets) >= 1,
+  bullets != null,
     fatal "You need to provide at least one token", bullets
   (forall item in bullets => "`" in item),
     error "You need to use `` to enclose punctuation tokens", bullets
@@ -45,8 +44,7 @@ type Semantics extends Text {
   kind Kind
 }
 
-type Recommendation extends Text {
-}
+type Recommendation extends Text {}
 
 type Example extends Text {
   rsl_content  optional String

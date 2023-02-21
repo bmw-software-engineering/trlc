@@ -128,7 +128,7 @@ section "Lexing" {
       bullets = [
         "Operators: `**`",
         "Boolean operators: `==` `<=` `>=` `!=`",
-        "Punctuation: `=>`"
+        "Punctuation: `=>` `..`"
       ]
     }
 
@@ -425,6 +425,95 @@ section "Enumerations" {
         file_not_found
       }
     '''
+  }
+
+}
+
+section "Qualified names" {
+
+  Grammar Qualified_Name {
+    bnf = '''
+      qualified_name ::= [ IDENTIFIER_package_name '.' ] IDENTIFIER_name
+    '''
+  }
+
+  Semantics Valid_Qualifier {
+    kind = Kind.Static
+    text = '''The package name of a qualified name must be the current
+              package or an imported package.'''
+  }
+
+  Semantics Valid_Name {
+    kind = Kind.Static
+    text = '''The name must be a valid symbol in the current scope (if no
+              package is provided) or a valid symbol of the
+              indicated package.'''
+  }
+
+}
+
+section "Record declarations" {
+
+  Grammar Record_Declaration {
+    bnf = '''
+      record_declaration ::= [ 'extends' qualified_name_ROOT_TYPE ]
+                             '{' { component_declaration } '}'
+
+      component_declaration ::=
+        described_name [ 'optional' ]
+        qualified_name_COMPONENT_TYPE  [ array_declaration ]
+
+      array_declaration ::= '[' INTEGER_lower '..' '*' ']'
+                          | '[' INTEGER_lower '..' INTEGER_upper ']'
+    '''
+  }
+
+  Semantics Valid_Root_Type {
+    kind = Kind.Static
+    text = "The root type for a record extension must be a valid record type."
+  }
+
+  Semantics Unique_Record_Components {
+    kind = Kind.Static
+    text = '''Each component declaration shall have a unique name in that
+              record declaration, or any of its root
+              types. *(Two separate record extensions may
+              defined the same component, and they may even
+              have different types. But you cannot re-define
+              a component from a parent type.)*'''
+  }
+
+  Semantics Valid_Component_Type {
+    kind = Kind.Static
+    text = '''Each component type shall refer to a valid type, or to the
+              name of the record type itself. It is an error
+              to refer to a type that has not been declared
+              yet. *(As there are no forward declarations in
+              the language, this forces the user type
+              hierarchy to be a DAG, but permitting
+              self-references.)*'''
+  }
+
+  Semantics Anonymous_Arrays {
+    kind = Kind.Static
+    text = '''A component with an array declaration introduces an
+              anonymous array type. This means the type of
+              the record component is not the type as
+              specified, but rather an array where the
+              element type is that type.'''
+  }
+
+  Semantics Upper_Bound_Greater_Than_Lower_Bound {
+    kind = Kind.Static
+    text = '''It is an error to specify an upper bound that is less than
+              the lower bound. *(Note that it is permitted
+              for them to be equal.)*'''
+  }
+
+  Semantics Array_Indexing {
+    kind = Kind.Dynamic
+    text = '''Arrays are indexed by natural numbers and the first index is
+              0.'''
   }
 
 }
