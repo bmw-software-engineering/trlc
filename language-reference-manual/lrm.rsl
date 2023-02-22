@@ -44,6 +44,8 @@ type Semantics extends Text {
   kind Kind
 }
 
+type Name_Resolution extends Text {}
+
 type Recommendation extends Text {}
 
 type Example extends Text {

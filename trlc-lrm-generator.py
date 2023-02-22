@@ -613,7 +613,8 @@ def write_header(fd, obj_license):
     fd.write("  margin-bottom: 1.5em;\n")
     fd.write("  border-radius: 1em;\n")
     fd.write("  padding: 1em;\n")
-    fd.write("  background-color: %s;\n" % BMW_SILVER)
+    fd.write("  border-left: 0.2em solid %s;\n" % BMW_SILVER)
+    fd.write("  border-bottom: 0.2em solid %s;\n" % BMW_SILVER)
     fd.write("}\n")
     fd.write("a {\n")
     fd.write("  color: %s;\n" % BMW_BLUE_1)
@@ -690,11 +691,20 @@ def fmt_text(text):
     text = " ".join(text.replace("\n", " ").split())
     text = html.escape(text)
     text = re.sub("`(.*?)`", "<tt>\\1</tt>", text)
+    text = re.sub("\*\((.*?)\)\*", "<i>(\\1)</i>", text)
     return text
 
 
 def write_text_object(fd, obj, context, bnf_parser):
     data = obj.to_python_dict()
+
+    # Close merged grammar section
+    if context["in_grammar"] and (obj.e_typ.name != "Grammar" or
+                                  data["text"] or
+                                  data["bullets"]):
+        context["in_grammar"] = False
+        fd.write("</pre>\n")
+        fd.write("</div class='code'>")
 
     # Build current section
     if obj.section:
@@ -709,6 +719,8 @@ def write_text_object(fd, obj, context, bnf_parser):
         pass
     elif obj.e_typ.name == "Semantics":
         new_section.append(data["kind"] + " Semantics")
+    elif obj.e_typ.name == "Name_Resolution":
+        new_section.append("Name resolution")
     elif obj.e_typ.name == "Recommendation":
         new_section.append("Implementation Recommendation")
     elif obj.e_typ.name == "Example":
@@ -735,15 +747,24 @@ def write_text_object(fd, obj, context, bnf_parser):
     context["old_section"] = new_section
 
     # Emit
-    fd.write("<div>\n")
-    if data["text"]:
-        fd.write(fmt_text(data["text"]) + "\n")
-    if data["bullets"]:
-        fd.write("<ul>\n")
-        for item in data["bullets"]:
-            fd.write("  <li>%s</li>\n" % fmt_text(item))
-        fd.write("</ul>\n")
-    fd.write("</div>\n")
+    if data["text"] or data["bullets"]:
+        fd.write("<div>\n")
+        if data["text"]:
+            fd.write(fmt_text(data["text"]) + "\n")
+        if data["bullets"]:
+            fd.write("<ul>\n")
+            for item in data["bullets"]:
+                fd.write("  <li>%s</li>\n" % fmt_text(item))
+            fd.write("</ul>\n")
+        fd.write("</div>\n")
+
+    if obj.e_typ.name == "Grammar":
+        if context["in_grammar"]:
+            fd.write("\n")
+        else:
+            context["in_grammar"] = True
+            fd.write("<div class='code'>")
+            fd.write("<pre>\n")
 
     # Emit additional data with semantics
     if obj.e_typ.name == "Terminal":
@@ -759,8 +780,6 @@ def write_text_object(fd, obj, context, bnf_parser):
         fd.write("</div>\n")
 
     elif obj.e_typ.name == "Grammar":
-        fd.write("<div class='code'>")
-        fd.write("<pre>\n")
         first = True
         for production in bnf_parser.bundles[obj.name]:
             if first:
@@ -768,8 +787,6 @@ def write_text_object(fd, obj, context, bnf_parser):
             else:
                 fd.write("\n")
             write_production(fd, production, bnf_parser)
-        fd.write("</pre>\n")
-        fd.write("</div>\n")
 
     elif obj.e_typ.name == "Example":
         fd.write("<div class='code'>")
@@ -903,13 +920,19 @@ def main():
         return
 
     context = {
-        "old_section": None
+        "old_section" : None,
+        "in_grammar"  : False
     }
     with open("docs/lrm.html", "w", encoding="UTF-8") as fd:
         write_header(fd, obj_license)
         for obj in pkg_lrm.symbols.iter_record_objects():
             if obj.e_typ.is_subclass_of(typ_text):
                 write_text_object(fd, obj, context, parser)
+        if context["in_grammar"]:
+            context["in_grammar"] = False
+            fd.write("</pre>\n")
+            fd.write("</div class='code'>")
+
         write_footer(fd, os.path.relpath(__file__))
 
 

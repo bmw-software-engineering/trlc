@@ -515,4 +515,530 @@ section "Record declarations" {
               0.'''
   }
 
+  Semantics Array_Lower_Bound {
+    kind = Kind.Dynamic
+    text = '''An instance of an array shall not have fewer elements than
+              its lower bound.'''
+  }
+
+  Semantics Array_Upper_Bound {
+    kind = Kind.Dynamic
+    text = '''An array type has no upper bound if `*` is specified. An
+              array instance for an array type with an upper
+              bound shall not have more elements than its
+              upper bound.'''
+  }
+
+  Semantics Array_Implementation_Upper_Bound {
+    kind = Kind.Dynamic
+    text = '''An implementation may impose an arbitrary limit to the
+              actual upper bound of an array *(that is treat
+              the `*` as if it was that limit)*. This limit,
+              if it exists, shall be greater than or equal
+              to 1000.'''
+  }
+
+  Semantics Type_Extensions_Inherit_Everything {
+    kind = Kind.Dynamic
+    text = '''A record type that extends another inherits all components
+              and user defined checks specified for its root
+              type.'''
+  }
+
+  Semantics Type_Extensions_Polymorphism {
+    kind = Kind.Dynamic
+    text = '''Instances of an extension may be
+              provided as a reference where a root type is
+              required; but not the other way around. *(This
+              provide a limited form of polymorphism, but
+              with the Liskov substitution principle
+              guaranteed.)*'''
+  }
+
+  Recommendation Zero_Upper_Bound {
+    text = '''It is recommended to emit an error on array types with an
+              upper bound of zero.'''
+  }
+
+  Recommendation Arrays_Sized_One {
+    text = '''It is recommended to emit a warning on array types with an
+              upper bound of one.'''
+  }
+
+  Example Record_Examples {
+    hidden_rsl = '''
+      package Example
+      enum ASIL { QM A B C D }
+    '''
+    rsl = '''
+      type Requirement {
+        summary "A short summary of the requirement."
+          String
+
+        description "The actual requirement text."
+          String
+
+        asil optional ASIL
+
+        codebeamer_link Integer [1..*]
+      }
+
+      type Supplier_Requirement extends Requirement {
+        supplier_id Integer
+      }
+    '''
+  }
+
+}
+
+section "Check Files" {
+
+  Grammar Check_File {
+    text = '''A `.check` file is simply a set of check blocks.'''
+    bnf = '''
+      check_file ::= package_indication
+                     { check_block }
+    '''
+  }
+
+  Semantics Cannot_Declare_In_Check_File {
+    kind = Kind.Static
+    text = '''It is an error to indicate a package that has not been
+              declared in an RSL file.'''
+  }
+
+}
+
+section "Checks" {
+
+  Grammar Check_Block {
+    bnf = '''
+      check_block ::= 'checks' IDENTIFIER_record_name
+                      '{' { check_declaration } '}'
+
+      check_declaration ::= expression ',' [ severity ] STRING_message
+                            [ ',' IDENTIFIER_component_name ]
+
+      severity ::= 'warning'
+                 | 'error'
+                 | 'fatal'
+    '''
+  }
+
+  Semantics Applicable_Types {
+    kind = Kind.Static
+    text = '''It is an error to refer to a type that does not exist in the
+              current package, or is not a record type.'''
+  }
+
+  Semantics Applicable_Components {
+    kind = Kind.Static
+    text = '''In a check declaration or expression, it is an error to
+              refer to a component name that does not belong
+              to the record indicated.'''
+  }
+
+  Text Only_Current_Package {
+    text = '''Note that it is never possible to add checks to a type from
+              a foreign package. In check files this is more
+              obvious as you cannot have an import clause,
+              but this is also true for checks declared in
+              `.rsl` files since it is not possible to
+              specify a qalified name.'''
+  }
+
+  Semantics Check_Evaluation_Order {
+    kind = Kind.Dynamic
+    text = '''Each check inside a check block evaluated in the specified
+              order.'''
+  }
+
+  Semantics Check_Evaluation_Order_Across_Blocks {
+    kind = Kind.Dynamic
+    text = '''If multiple check blocks are declared for the same record,
+              then the order of evaluation of each check
+              block is unspecified.'''
+  }
+
+  Semantics Check_Evaluation_Order_For_Extensions {
+    kind = Kind.Dynamic
+    text = '''For record extensions, all checks for the base record must
+              be evaluated before any check of the record
+              extension is evaluated.'''
+  }
+
+  Semantics Check_Messages {
+    kind  = Kind.Dynamic
+    text = '''If the evaluated expression is true, no action is taken. If
+              it is false, then a message emitted with the
+              specified message text.'''
+  }
+
+  Semantics Check_Severity {
+    kind = Kind.Dynamic
+    text = '''The severity, if provided, controls how future errors are
+              treated, and how the TRLC implementation
+              terminates.'''
+    bullets = ['''A warning has no effect other than emitting the message.''',
+               '''An error (the default, in case severity is not specified)
+                  causes an implementation to eventually
+                  return a non-zero error code, but further
+                  checks will be evaluated (potentially
+                  creating more messages).''',
+               '''A fatal message is like an error, except that no further
+                  checks from this check block shall be
+                  evaluated for this record instance.''']
+  }
+
+  Text Anchoring {
+    text = '''The component name (if specified) is a hint where the
+              message should be anchored. It is
+              implementation defined how or if this is taken
+              into account. A suitable anchoring for a
+              message without a component could be the
+              record object declaration itself. If only a
+              single component is used in the expression
+              then the message could be anchored the same
+              way as if the component was indicated
+              explicitly in the check.'''
+  }
+
+  Text Sane_Typing {
+    text = '''It is an important design goal to keep the type system sane
+              and following LSP. I.e. each subtype may only
+              narrow the values permitted in a type. This
+              means for a record R and its extension RE; any
+              valid instance of RE is always a valid
+              instance of R if a new binding of R is created
+              considering only the fields that are in R. It
+              will never be possible to delete, suppress,
+              widen, or omit checks in record extensions.'''
+  }
+
+  Example Check_Examples {
+    hidden_rsl = '''
+      package Example
+      type Requirement {
+        summary optional String
+      }
+      type OverflowGuard {
+        value Integer
+      }
+    '''
+    rsl = '''
+      checks Requirement {
+        summary != null, warning "You should specify a summary", summary
+      }
+
+      check OverflowGuard {
+        value >= -100, fatal "Value must be at least -100"
+        value <= 100,  fatal "Value must be at most 100"
+        // These bound value, and effectively guard against integer
+        // overflow in the below expression
+
+        value ** 2 == 25, warning "Value is not 5 or -5"
+      }
+    '''
+  }
+
+}
+
+section "Expressions" {
+
+  Grammar Expression {
+    bnf = '''
+      expression ::= relation { 'and' relation }
+                   | relation { 'or' relation }
+                   | relation [ 'xor' relation ]
+                   | relation [ 'implies' relation ]
+    '''
+  }
+
+  Grammar Relation {
+    bnf = '''
+      relation ::= simple_expression [ comparison_operator simple_expression ]
+                 | simple_expression [ 'not' ] 'in' membership_choice
+                 | simple_expression [ 'not' ] 'in' simple_expression
+
+      membership_choice ::= simple_expression '..' simple_expression
+    '''
+  }
+
+  Grammar Simple_Expression {
+    bnf = '''
+      simple_expression ::= [ adding_operator ]
+                            term { adding_operator term }
+    '''
+  }
+
+  Grammar Term {
+    bnf = '''term ::= factor { multiplying_operator factor }'''
+  }
+
+  Grammar Factor {
+    bnf = '''
+      factor ::= primary [ '**' primary ]
+               | 'not' primary
+               | 'abs' primary
+    '''
+  }
+
+  Grammar Primary {
+    bnf = '''
+      primary ::= INTEGER
+                | STRING
+                | 'null'
+                | name
+                | '(' expression ')'
+                | '(' quantified_expression ')'
+                | '(' conditional_expression ')'
+    '''
+  }
+
+  Recommendation Unary_Minus_Parsing {
+    text = '''The parsing of unary minus can be confusing: `-a % b` is
+              actually `- (a % b)`. The semantics of `%` are
+              carefully specified so that this does not
+              matter. It does also mean that `-a / -b` is
+              not legal and needs to be written as either
+              `-a / (-b)` or even better `(-a) / (-b)`. It
+              is recommended that a linter warns whenever a
+              unary minus is encountered that has a
+              non-trivial `term` or `factor` as its operand.'''
+  }
+
+  Example Expression_Examples {
+    hidden_rsl = '''
+      package Example
+      enum ASIL { QM A B C D }
+      Type Expression_Examples {
+        asil ASIL
+        summary String
+        description String
+        codebeamer_link Integer [1 .. *]
+      }
+    '''
+    rsl = '''
+       checks Expression_Examples {
+         asil != ASIL.QM, "must be safety related"
+
+         len(summary) + len(description) > 10, "too short"
+
+         description != null implies "potato" in description,
+           "description must mention the best vegetable"
+
+         (forall item in codebeamer_link => item > 50000),
+           warning "cb link is suspiciously small"
+       }
+    '''
+  }
+
+}
+
+section "Names" {
+
+  Grammar Names {
+    bnf = '''
+      name ::= qualified_name
+             | qualified_name ['.' IDENTIFIER_literal]
+             | name '[' expression ']'
+             | IDENTIFIER_builtin_function '(' parameter_list ')'
+             | BUILTIN_IDENTIFIER '(' parameter_list ')'
+
+      parameter_list ::= expression { ',' expression }
+    '''
+  }
+
+  Semantics Signature_Len {
+    kind = Kind.Static
+    text = '''The builtin function `len` is of arity 1. Its parameter must
+              be of type `String` or an array type. Its
+              return type is `Integer`.'''
+  }
+
+  Semantics Signature_String_End_Functions {
+    kind = Kind.Static
+    text = '''The builtin functions `startswith` and `endswith` are of
+              arity 2. All of their parameters must be of
+              type `String`. The return type of either
+              function is `Boolean`.'''
+  }
+
+  Semantics Signature_Matches {
+    kind = Kind.Static
+    text = '''The builtin function `matches` is of arity 2. Its parameters
+              must be of type `String`. The return type is
+              `Boolean`. The second parameter must be a
+              valid regular expression. *(It is
+              implementation defined which regular
+              expression language is used, but it is highly,
+              _highly_ recommended to implement the standard
+              POSIX regular expressions.)*'''
+  }
+
+  Semantics Static_Regular_Expression {
+    kind = Kind.Static
+    text = '''In addition, the second parameter to the `matches` function
+              must be a static compile-time constant,
+              i.e. it must not depend on the value of a
+              record field or the value of a quantified
+              variable.'''
+  }
+
+  Semantics Len_Semantics {
+    kind = Kind.Dynamic
+    text = '''The `len` function computes the length of the given string
+              or array.'''
+  }
+
+  Semantics Startswith_Semantics {
+    kind = Kind.Dynamic
+    text = '''The `startswith` function returns true iff the first
+              parameter fully contains the second parameter
+              at its start.'''
+  }
+
+  Semantics Endswith_Semantics {
+    kind = Kind.Dynamic
+    text = '''The `endswith` function returns true iff the first parameter
+              fully contains the second parameter at its
+              end.'''
+  }
+
+  Semantics Matches_Semantics {
+    kind = Kind.Dynamic
+    text = '''The `matches` function returns true iff the first parameter
+              is matched by the regular expression given in
+              the second parameter.'''
+  }
+
+  Name_Resolution Case_Sensitive {
+    text = '''Name resolution is case sensitive.'''
+  }
+
+  Example Name_Examples {
+    hidden_rsl = '''
+      package Example
+      enum ASIL { QM A B C D }
+      type Name_Examples {
+         foo Boolean
+         bar Name_Examples
+         asil ASIL
+         potato Integer [0 .. *]
+         field String
+      }
+    '''
+    rsl = '''
+      Checks Name_Examples {
+        foo, "foo"
+        // names the record field foo
+
+        len(field) > 0, "foo"
+        // name that is a function call
+
+        potato[3] < potato[2], "foo"
+        // name that is an array index
+      }
+    '''
+  }
+
+}
+
+section "Operators" {
+  Grammar Operators {
+    bnf = '''
+      comparison_operator ::= '==' | '!=' | '<' | '<=' | '>' | '>='
+
+      adding_operator ::= '+' | '-'
+
+      multiplying_operator ::= '*' | '/' | '%'
+    '''
+  }
+
+  Semantics Association {
+    kind = Kind.Static
+    text = '''For a chain of operators of the same category, the
+              association is left to right.'''
+  }
+
+  section "Logical operators" {
+
+    Semantics Logical_Operators {
+      kind = Kind.Static
+      text = '''There are five Boolean operators defined (not, and, or, xor,
+                implies) for expressions of Boolean type.
+                The type of the result is Boolean.'''
+    }
+
+    Semantics Shortcut_Logical_Operators {
+      kind = Kind.Dynamic
+      text = '''Operators with short-cut semantics are `and`, `or`, and
+                `implies`. They first evaluate their
+                left-hand side and proceed to evaluate the
+                right-hand side if it could influence the
+                final result. The semantics of these
+                operators are the usual ones.'''
+    }
+
+    Semantics Regular_Logical_Operators {
+      kind = Kind.Dynamic
+      text = '''Operators with standard semantics are `xor`, and `not`. They
+                do the usual thing.'''
+    }
+
+  }
+
+  section "Relational operators and membership tests" {
+
+    Semantics Equality_Domain {
+      kind = Kind.Static
+      text = '''The equality operators `==` and `!=` are defined for all
+                types, as long as the types are compatible,
+                i.e. they are the same types or one type is
+                a (transitive) extension of the other. The
+                result is a Boolean.'''
+    }
+
+    Semantics Relational_Domain {
+      kind = Kind.Static
+      text = '''The ordering relations `<`, `<=`, `>=`, and `>` are defined
+                for integers only. The result is a Boolean.'''
+    }
+
+    Semantics Membership_Domain {
+      kind = Kind.Static
+      text = '''Range membership tests `not in` and `in` are defined for
+                Integers only. The result is a Boolean.'''
+    }
+
+    Semantics Substring_Domain {
+      kind = Kind.Static
+      text = '''Substring tests `not in` and `in` are defined for
+                Strings only. The result is a Boolean.'''
+    }
+
+    Semantics Simple_Relational_Semantics {
+      kind = Kind.Dynamic
+      text = '''The meaning of the relationship operators and substring
+                tests are the usual.'''
+    }
+
+    Semantics Inclusive_Membership_Test_Semantics {
+      kind = Kind.Dynamic
+      text = '''An inclusive range membership test `x in a .. b` has the
+                same meaning as the Boolean expression `x >=
+                a and x <= b`. *(This means if a is less
+                than b, it is not an error. Instead the
+                result of such a test is always false.)*'''
+    }
+
+    Semantics Exclusive_Membership_Test_Semantics {
+      kind = Kind.Dynamic
+      text = '''An exclusive range membership test `x not in a .. b` has the
+                same meaning as the Boolean expression `x <
+                a or x > b`.'''
+    }
+
+  }
+
 }
