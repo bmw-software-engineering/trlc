@@ -4,7 +4,9 @@ linking) requirements with meta-data.
 
 The repository contains:
 
-* The language reference manual for TRLC.
+* The [language reference
+  manual](https://bmw-software-engineering.github.io/trlc/lrm.html)
+  for TRLC.
 
 * A pure Python reference implementation of TRLC.
 
@@ -31,7 +33,7 @@ The Python implementation can be used for several purposes:
 * [Release Notes](CHANGELOG.md) (read this to find out whats new)
 * [Python API Documentation](https://bmw-software-engineering.github.io/trlc/)
   (user guide for using the API)
-* [Language Reference Manual](language-reference-manual/README.md)
+* [Language Reference Manual](https://bmw-software-engineering.github.io/trlc/lrm.html)
   (for language lawyers)
 * [License](LICENSE)
 
