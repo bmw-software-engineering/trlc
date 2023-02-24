@@ -731,7 +731,7 @@ section "Checks" {
         summary != null, warning "You should specify a summary", summary
       }
 
-      check OverflowGuard {
+      checks OverflowGuard {
         value >= -100, fatal "Value must be at least -100"
         value <= 100,  fatal "Value must be at most 100"
         // These bound value, and effectively guard against integer
@@ -812,7 +812,7 @@ section "Expressions" {
     hidden_rsl = '''
       package Example
       enum ASIL { QM A B C D }
-      Type Expression_Examples {
+      type Expression_Examples {
         asil ASIL
         summary String
         description String
@@ -930,7 +930,7 @@ section "Names" {
       }
     '''
     rsl = '''
-      Checks Name_Examples {
+      checks Name_Examples {
         foo, "foo"
         // names the record field foo
 

@@ -486,7 +486,7 @@ checks Requirement {
   summary != null, warning &quot;You should specify a summary&quot;, summary
 }
 
-check OverflowGuard {
+checks OverflowGuard {
   value &gt;= -100, fatal &quot;Value must be at least -100&quot;
   value &lt;= 100,  fatal &quot;Value must be at most 100&quot;
   // These bound value, and effectively guard against integer
@@ -591,7 +591,7 @@ Name resolution is case sensitive.
 <h3>Example</h3>
 <div class='code'>
 <pre>
-Checks Name_Examples {
+checks Name_Examples {
   foo, &quot;foo&quot;
   // names the record field foo
 

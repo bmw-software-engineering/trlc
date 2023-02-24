@@ -26,8 +26,9 @@ import re
 import os
 
 from trlc.errors import Message_Handler, TRLC_Error
-from trlc.trlc import Source_Manager
 from trlc.lexer import Source_Reference, Lexer, Python_Lexer
+from trlc.parser import Parser
+from trlc.trlc import Source_Manager
 from trlc import ast
 
 BMW_BLUE_1 = "#0066B1"
@@ -858,15 +859,39 @@ def write_example(fd, mh, obj):
     assert isinstance(obj, ast.Record_Object)
     assert obj.e_typ.name == "Example"
 
-    # pylint: disable=unused-variable
+    stab = ast.Symbol_Table.create_global_table(mh)
 
-    sm = Source_Manager(mh)
+    # Parse virtual RSL file
     sources = []
-    if obj.field["hidden_rsl"]:
+    if isinstance(obj.field["hidden_rsl"], ast.String_Literal):
         sources.append(obj.field["hidden_rsl"])
-    if obj.field["rsl"]:
+    if isinstance(obj.field["rsl"], ast.String_Literal):
         sources.append(obj.field["rsl"])
     lexer = Chained_Lexer(sources)
+    rsl_parser = Parser(mh        = mh,
+                    stab      = stab,
+                    file_name = obj.location.file_name,
+                    lint_mode = False,
+                    lexer     = lexer)
+    rsl_parser.parse_rsl_header()
+    rsl_parser.parse_rsl_file()
+
+    # Parse virtual TRLC file
+    sources = []
+    if isinstance(obj.field["hidden_trlc"], ast.String_Literal):
+        sources.append(obj.field["hidden_trlc"])
+    if isinstance(obj.field["trlc"], ast.String_Literal):
+        sources.append(obj.field["trlc"])
+    if sources:
+        lexer = Chained_Lexer(sources)
+        trlc_parser = Parser(mh        = mh,
+                             stab      = stab,
+                             file_name = obj.location.file_name,
+                             lint_mode = False,
+                             lexer     = lexer)
+        trlc_parser.parse_trlc_file()
+    else:
+        trlc_parser = None
 
     data = obj.to_python_dict()
     if data["rsl"]:
@@ -1018,7 +1043,10 @@ def main():
         write_header(fd, obj_license)
         for obj in pkg_lrm.symbols.iter_record_objects():
             if obj.e_typ.is_subclass_of(typ_text):
-                write_text_object(fd, mh, obj, context, parser)
+                try:
+                    write_text_object(fd, mh, obj, context, parser)
+                except TRLC_Error:
+                    return
         if context["in_grammar"]:
             context["in_grammar"] = False
             fd.write("</pre>\n")
