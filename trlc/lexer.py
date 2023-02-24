@@ -192,10 +192,14 @@ class Lexer:
 
 
 class Python_Lexer(Lexer):
-    def __init__(self, mh, file_name):
+    def __init__(self, mh, file_name, file_content=None):
         super().__init__(mh, file_name)
-        with open(file_name, "r", encoding="UTF-8") as fd:
-            self.file_content = fd.read()
+        if file_content:
+            self.file_content = file_content
+        else:
+            with open(file_name, "r", encoding="UTF-8") as fd:
+                self.file_content = fd.read()
+
         self.file_length  = len(self.file_content)
 
         self.lexpos = -2

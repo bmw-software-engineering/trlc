@@ -28,7 +28,8 @@ import re
 
 from trlc.errors import Message_Handler, TRLC_Error
 from trlc.trlc import Source_Manager
-from trlc.lexer import Source_Reference
+from trlc.lexer import Source_Reference, Lexer, Python_Lexer
+from trlc.parser import Parser
 from trlc import ast
 
 BMW_BLUE_1 = "#0066B1"
@@ -291,7 +292,7 @@ class BNF_Optional(BNF_Expansion):
         return "[ %s ]" % str(self.expansion)
 
 
-class BNF_One_Or_More(BNF_Expansion):
+class BNF_Zero_Or_More(BNF_Expansion):
     def __init__(self, location, expansion):
         super().__init__(location)
         assert isinstance(expansion, BNF_Expansion)
@@ -385,7 +386,7 @@ class BNF_Parser:
     def sem_expansion(self, n_exp):
         assert isinstance(n_exp, BNF_Expansion)
 
-        if isinstance(n_exp, (BNF_One_Or_More,
+        if isinstance(n_exp, (BNF_Zero_Or_More,
                               BNF_Optional)):
             self.sem_expansion(n_exp.expansion)
 
@@ -552,7 +553,7 @@ class BNF_Parser:
             self.match("C_BRA")
             rv = self.parse_expansion()
             self.match("C_KET")
-            return BNF_One_Or_More(loc, rv)
+            return BNF_Zero_Or_More(loc, rv)
 
         elif self.peek("S_BRA"):
             self.match("S_BRA")
@@ -695,7 +696,10 @@ def fmt_text(text):
     return text
 
 
-def write_text_object(fd, obj, context, bnf_parser):
+def write_text_object(fd, mh, obj, context, bnf_parser):
+    assert isinstance(mh, Message_Handler)
+    assert isinstance(obj, ast.Record_Object)
+
     data = obj.to_python_dict()
 
     # Close merged grammar section
@@ -704,7 +708,7 @@ def write_text_object(fd, obj, context, bnf_parser):
                                   data["bullets"]):
         context["in_grammar"] = False
         fd.write("</pre>\n")
-        fd.write("</div class='code'>")
+        fd.write("</div>\n")
 
     # Build current section
     if obj.section:
@@ -741,6 +745,10 @@ def write_text_object(fd, obj, context, bnf_parser):
         else:
             identical = False
         if not identical:
+            if context["in_grammar"]:
+                context["in_grammar"] = False
+                fd.write("</pre>\n")
+                fd.write("</div>\n")
             write_heading(fd, heading, idx + 2)
 
     # Store new section
@@ -763,12 +771,12 @@ def write_text_object(fd, obj, context, bnf_parser):
             fd.write("\n")
         else:
             context["in_grammar"] = True
-            fd.write("<div class='code'>")
+            fd.write("<div class='code'>\n")
             fd.write("<pre>\n")
 
     # Emit additional data with semantics
     if obj.e_typ.name == "Terminal":
-        fd.write("<div class='code'>")
+        fd.write("<div class='code'>\n")
         fd.write("<code>%s</code>\n" % html.escape(data["def"]))
         fd.write("</div>\n")
         fd.write("<div>\n")
@@ -789,8 +797,9 @@ def write_text_object(fd, obj, context, bnf_parser):
             write_production(fd, production, bnf_parser)
 
     elif obj.e_typ.name == "Example":
-        fd.write("<div class='code'>")
+        fd.write("<div class='code'>\n")
         fd.write("<pre>\n")
+        write_example(fd, mh, obj)
         if data["rsl"]:
             fd.write(html.escape(data["rsl"]))
         else:
@@ -799,20 +808,97 @@ def write_text_object(fd, obj, context, bnf_parser):
         fd.write("</div>\n")
 
 
+class Nested_Lexer(Python_Lexer):
+    def __init__(self, string_literal):
+        assert isinstance(string_literal, ast.String_Literal)
+        mh = string_literal.location.lexer.mh
+        if not string_literal.location.text().startswith("'''"):
+            mh.error(string_literal.location,
+                     "only ''' strings are supported for examples")
+        super().__init__(
+            mh           = mh,
+            file_name    = string_literal.location.lexer.file_name,
+            file_content = string_literal.location.text()[3:-3])
+        self.base = string_literal.location
+
+    def token(self):
+        tok = super().token()
+        if tok:
+            sref = Source_Reference(
+                lexer      = self.base.lexer,
+                start_line = self.base.line_no + (tok.location.line_no - 1),
+                start_col  = (self.base.col_no + 3
+                              if tok.location.line_no == 1
+                              else tok.location.col_no),
+                start_pos  = self.base.start_pos + 3 + tok.location.start_pos,
+                end_pos    = self.base.start_pos + 3 + tok.location.end_pos)
+            tok.location = sref
+        return tok
+
+
+class Chained_Lexer(Lexer):
+    def __init__(self, literals):
+        assert isinstance(literals, list) and len(literals) >= 1
+        for literal in literals:
+            assert isinstance(literal, ast.String_Literal)
+        lexers = list(map(Nested_Lexer, literals))
+        self.current   = lexers[0]
+        self.literals  = lexers[1:]
+        super().__init__(literals[0].location.lexer.mh,
+                         literals[0].location.file_name)
+
+    def token(self):
+        while self.current:
+            tok = self.current.token()
+            if tok:
+                return tok
+            elif self.literals:
+                self.current  = self.literals[0]
+                self.literals = self.literals[1:]
+            else:
+                self.current = None
+        return None
+
+
+def write_example(fd, mh, obj):
+    assert isinstance(obj, ast.Record_Object)
+    assert obj.e_typ.name == "Example"
+
+    sm = Source_Manager(mh)
+    sources = []
+    if obj.field["hidden_rsl"]:
+        sources.append(obj.field["hidden_rsl"])
+    if obj.field["rsl"]:
+        sources.append(obj.field["rsl"])
+    lexer = Chained_Lexer(sources)
+
+
 def write_production(fd, production, bnf_parser):
     # Write indicator with anchor
     fd.write("<a name=\"bnf-%s\"></a>%s ::= " %
              (production, production))
     n_exp = bnf_parser.productions[production]
+    alt_offset = len(production) + 3
 
     if isinstance(n_exp, BNF_Alternatives):
-        alt_offset = len(production) + 3
         write_expansion(fd, n_exp.members[0])
         fd.write("\n")
         for n_member in n_exp.members[1:]:
             fd.write(" " * alt_offset + "| ")
             write_expansion(fd, n_member)
             fd.write("\n")
+
+    elif isinstance(n_exp, BNF_String):
+        write_expansion(fd, n_exp.members[0])
+        current_line = n_exp.members[0].location.line_no
+        for n_member in n_exp.members[1:]:
+            if n_member.location.line_no == current_line:
+                fd.write(" ")
+            else:
+                current_line = n_member.location.line_no
+                fd.write("\n" + " " * (alt_offset + 2))
+            write_expansion(fd, n_member)
+        fd.write("\n")
 
     else:
         write_expansion(fd, n_exp)
@@ -843,7 +929,7 @@ def write_expansion(fd, n_exp):
         write_expansion(fd, n_exp.expansion)
         fd.write(" ]")
 
-    elif isinstance(n_exp, BNF_One_Or_More):
+    elif isinstance(n_exp, BNF_Zero_Or_More):
         fd.write("{ ")
         write_expansion(fd, n_exp.expansion)
         fd.write(" }")
@@ -927,11 +1013,11 @@ def main():
         write_header(fd, obj_license)
         for obj in pkg_lrm.symbols.iter_record_objects():
             if obj.e_typ.is_subclass_of(typ_text):
-                write_text_object(fd, obj, context, parser)
+                write_text_object(fd, mh, obj, context, parser)
         if context["in_grammar"]:
             context["in_grammar"] = False
             fd.write("</pre>\n")
-            fd.write("</div class='code'>")
+            fd.write("</div>\n")
 
         write_footer(fd, os.path.relpath(__file__))
 

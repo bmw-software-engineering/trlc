@@ -30,14 +30,17 @@ class Parser:
     ADDING_OPERATOR = ("+", "-")
     MULTIPLYING_OPERATOR = ("*", "/", "%")
 
-    def __init__(self, mh, stab, file_name, lint_mode):
+    def __init__(self, mh, stab, file_name, lint_mode, lexer=None):
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, ast.Symbol_Table)
         assert isinstance(file_name, str)
         assert isinstance(lint_mode, bool)
         self.mh        = mh
         self.lint_mode = lint_mode
-        self.lexer     = create_lexer(mh, file_name)
+        if lexer:
+            self.lexer = lexer
+        else:
+            self.lexer = create_lexer(mh, file_name)
         self.stab      = stab
         self.pkg       = None
         self.raw_deps  = []
