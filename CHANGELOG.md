@@ -15,8 +15,8 @@ None.
 
 * [LRM] The LRM for TRLC is [now written in
   TRLC](https://github.com/bmw-software-engineering/trlc/tree/main/language-reference-manual). There
-  is also a (HTML
-  version)[https://bmw-software-engineering.github.io/trlc/lrm.html]
+  is also a [HTML
+  version](https://bmw-software-engineering.github.io/trlc/lrm.html)
   available for easier reading. During conversion we fixed a number of
   issues in the LRM (missing keywords, etc.) and made a few cleanups
   and simplifications; however the language and its semantics have not
