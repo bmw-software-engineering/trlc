@@ -24,12 +24,10 @@ import sys
 import html
 import re
 import os
-import re
 
 from trlc.errors import Message_Handler, TRLC_Error
 from trlc.trlc import Source_Manager
 from trlc.lexer import Source_Reference, Lexer, Python_Lexer
-from trlc.parser import Parser
 from trlc import ast
 
 BMW_BLUE_1 = "#0066B1"
@@ -482,7 +480,7 @@ class BNF_Parser:
         orig_text = obj.field["bnf"].location.text()
         if not orig_text.startswith("'''"):
             self.mh.error(obj.field["bnf"].location,
-                     "BNF text must use ''' strings")
+                          "BNF text must use ''' strings")
         orig_text = orig_text[3:-3]
 
         # Create nested lexer
@@ -691,8 +689,8 @@ def section_depth(section):
 def fmt_text(text):
     text = " ".join(text.replace("\n", " ").split())
     text = html.escape(text)
-    text = re.sub("`(.*?)`", "<tt>\\1</tt>", text)
-    text = re.sub("\*\((.*?)\)\*", "<i>(\\1)</i>", text)
+    text = re.sub(r"`(.*?)`", "<tt>\\1</tt>", text)
+    text = re.sub(r"\*\((.*?)\)\*", "<i>(\\1)</i>", text)
     return text
 
 
@@ -800,10 +798,6 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
         fd.write("<div class='code'>\n")
         fd.write("<pre>\n")
         write_example(fd, mh, obj)
-        if data["rsl"]:
-            fd.write(html.escape(data["rsl"]))
-        else:
-            fd.write(html.escape(data["trlc"]))
         fd.write("</pre>\n")
         fd.write("</div>\n")
 
@@ -864,6 +858,8 @@ def write_example(fd, mh, obj):
     assert isinstance(obj, ast.Record_Object)
     assert obj.e_typ.name == "Example"
 
+    # pylint: disable=unused-variable
+
     sm = Source_Manager(mh)
     sources = []
     if obj.field["hidden_rsl"]:
@@ -871,6 +867,12 @@ def write_example(fd, mh, obj):
     if obj.field["rsl"]:
         sources.append(obj.field["rsl"])
     lexer = Chained_Lexer(sources)
+
+    data = obj.to_python_dict()
+    if data["rsl"]:
+        fd.write(html.escape(data["rsl"]))
+    else:
+        fd.write(html.escape(data["trlc"]))
 
 
 def write_production(fd, production, bnf_parser):
@@ -971,9 +973,12 @@ def main():
                                                   ast.Record_Object)
     typ_text = pkg_lrm.symbols.lookup_assuming(mh, "Text", ast.Record_Type)
     typ_gram = pkg_lrm.symbols.lookup_assuming(mh, "Grammar", ast.Record_Type)
-    typ_kword = pkg_lrm.symbols.lookup_assuming(mh, "Keywords", ast.Record_Type)
-    typ_punct = pkg_lrm.symbols.lookup_assuming(mh, "Punctuation", ast.Record_Type)
-    typ_terminal = pkg_lrm.symbols.lookup_assuming(mh, "Terminal", ast.Record_Type)
+    typ_kword = pkg_lrm.symbols.lookup_assuming(mh, "Keywords",
+                                                ast.Record_Type)
+    typ_punct = pkg_lrm.symbols.lookup_assuming(mh, "Punctuation",
+                                                ast.Record_Type)
+    typ_terminal = pkg_lrm.symbols.lookup_assuming(mh, "Terminal",
+                                                   ast.Record_Type)
 
     # Process grammer
     parser = BNF_Parser(mh)
