@@ -602,6 +602,8 @@ def write_header(fd, obj_version, obj_license):
     fd.write("<style>\n")
     fd.write("body {\n")
     fd.write("  font-family: sans;\n")
+    fd.write("  margin-left: 1em;\n")
+    fd.write("  margin-right: 1em;\n")
     fd.write("}\n")
     fd.write("footer {\n")
     fd.write("  color: %s;\n" % BMW_BLUE_2)
