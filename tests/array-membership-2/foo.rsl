@@ -1,0 +1,10 @@
+package Example
+
+type T {
+  ival Integer
+  arr  String [0 .. *]
+}
+
+checks T {
+  ival in arr, warning "potato"
+}

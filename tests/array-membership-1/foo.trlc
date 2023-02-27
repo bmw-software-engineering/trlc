@@ -1,0 +1,37 @@
+package Foo
+
+T valid_1 {
+  arr    = [40, 41, 42, 43, 44, 45]
+  is_in  = true
+  is_not = false
+}
+
+T invalid_1 {
+  arr    = [40, 41, 42, 43, 44, 45]
+  is_in  = false
+  is_not = true
+}
+
+T valid_2 {
+  arr    = [1, 2, 3]
+  is_in  = false
+  is_not = true
+}
+
+T invalid_2 {
+  arr    = [1, 2, 3]
+  is_in  = true
+  is_not = false
+}
+
+T valid_3 {
+  arr    = []
+  is_in  = false
+  is_not = true
+}
+
+T invalid_3 {
+  arr    = []
+  is_in  = true
+  is_not = false
+}

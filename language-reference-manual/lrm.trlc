@@ -1047,6 +1047,14 @@ section "Operators" {
                 Strings only. The result is a Boolean.'''
     }
 
+    Semantics Array_Membership_Domain {
+      kind = Kind.Static
+      text = '''Array membership tests `not in` and `in` are defined for all
+                arrays. The type of the left-hand side must
+                match the element type of the array. The
+                result is a Boolean.'''
+    }
+
     Semantics Simple_Relational_Semantics {
       kind = Kind.Dynamic
       text = '''The meaning of the relationship operators are the usual.'''
@@ -1074,6 +1082,15 @@ section "Operators" {
                 the substring test is of course performed on
                 the value of the string, not the original
                 literal.)*'''
+    }
+
+    Semantics Array_Membership_Semantics {
+      kind = Kind.Dynamic
+      text = '''The array membership test `X in A` is equivalent to `(exists
+                item in A => item == X)`. The array
+                non-membership test `X not in A` is
+                equivalent to `(forall item in A => item !=
+                X)`.'''
     }
 
   }

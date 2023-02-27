@@ -660,6 +660,9 @@ Range membership tests <tt>not in</tt> and <tt>in</tt> are defined for Integers 
 <div>
 Substring tests <tt>not in</tt> and <tt>in</tt> are defined for Strings only. The result is a Boolean.
 </div>
+<div>
+Array membership tests <tt>not in</tt> and <tt>in</tt> are defined for all arrays. The type of the left-hand side must match the element type of the array. The result is a Boolean.
+</div>
 <h4>Dynamic Semantics</h4>
 <div>
 The meaning of the relationship operators are the usual.
@@ -672,6 +675,9 @@ An exclusive range membership test <tt>x not in a .. b</tt> has the same meaning
 </div>
 <div>
 The meaning of the substring test is the usual. <i>(Note that the substring test is of course performed on the value of the string, not the original literal.)</i>
+</div>
+<div>
+The array membership test <tt>X in A</tt> is equivalent to <tt>(exists item in A =&gt; item == X)</tt>. The array non-membership test <tt>X not in A</tt> is equivalent to <tt>(forall item in A =&gt; item != X)</tt>.
 </div>
 <h3>Adding operators</h3>
 <h4>Static Semantics</h4>

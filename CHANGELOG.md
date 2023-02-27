@@ -26,6 +26,10 @@ None.
 * [LRM, TRLC] Add support for existential quantification. This
   introduces a new keywords `exists`.
 
+* [LRM, TRLC] Also permit `in` and `not in` for arrays. This is a
+  convenient short-cut for existential quantification over an array to
+  test for membership.
+
 * [LRM, TRLC] Fix oversight in the LRM, not allowing `true` and
   `false` to appear as values.
 

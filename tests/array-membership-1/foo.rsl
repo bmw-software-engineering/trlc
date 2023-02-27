@@ -1,0 +1,12 @@
+package Foo
+
+type T {
+  arr    Integer [0 .. *]
+  is_in  Boolean
+  is_not Boolean
+}
+
+checks T {
+  is_in == (42 in arr), warning "42 is not in array", arr
+  is_not == (42 not in arr), warning "42 is in array", arr
+}

@@ -1,0 +1,11 @@
+package Example
+
+type T {
+  arr T [0 .. *]
+}
+
+type Q {}
+
+checks T {
+  kitten in arr, warning "does not reference kitten"
+}

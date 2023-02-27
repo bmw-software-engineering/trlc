@@ -1,0 +1,6 @@
+foo.trlc:10:12: trlc check warning: 42 is not in array
+foo.trlc:10:12: trlc check warning: 42 is in array
+foo.trlc:22:12: trlc check warning: 42 is not in array
+foo.trlc:22:12: trlc check warning: 42 is in array
+foo.trlc:34:12: trlc check warning: 42 is not in array
+foo.trlc:34:12: trlc check warning: 42 is in array

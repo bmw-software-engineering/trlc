@@ -75,6 +75,9 @@ class Value:
         self.value    = value
         self.typ      = typ
 
+    def __eq__(self, other):
+        return self.value == other.value
+
     def __repr__(self):  # pragma: no cover
         return "Value(%s)" % self.value
 
@@ -266,6 +269,8 @@ class Binary_Operator(Enum):
     STRING_STARTSWITH = auto()
     STRING_ENDSWITH   = auto()
     STRING_REGEX      = auto()
+
+    ARRAY_CONTAINS = auto()
 
     PLUS      = auto()
     MINUS     = auto()
@@ -840,6 +845,7 @@ class Binary_Expression(Expression):
     * Binary_Operator.STRING_STARTSWITH (e.g. ``startswith("foo", "f")``)
     * Binary_Operator.STRING_ENDSWITH (e.g. ``endswith("foo", "o")``)
     * Binary_Operator.STRING_REGEX (e.g. ``matches("foo", ".o.``)
+    * Binary_Operator.ARRAY_CONTAINS (e.g. ``42 in arr``)
     * Binary_Operator.PLUS (e.g. ``42 + b`` or ``"foo" + bar``)
     * Binary_Operator.MINUS (e.g. ``a - 1``)
     * Binary_Operator.TIMES (e.g. ``2 * x``)
@@ -907,6 +913,10 @@ class Binary_Expression(Expression):
             self.n_lhs.ensure_type(mh, Builtin_String)
             self.n_rhs.ensure_type(mh, Builtin_String)
 
+        elif operator == Binary_Operator.ARRAY_CONTAINS:
+            self.n_rhs.ensure_type(mh, Array_Type)
+            self.n_lhs.ensure_type(mh, self.n_rhs.typ.element_type.__class__)
+
         elif operator == Binary_Operator.PLUS:
             if isinstance(self.n_lhs.typ, Builtin_Integer):
                 self.n_rhs.ensure_type(mh, Builtin_Integer)
@@ -949,6 +959,7 @@ class Binary_Expression(Expression):
             Binary_Operator.COMP_GT         : ">",
             Binary_Operator.COMP_GEQ        : ">=",
             Binary_Operator.STRING_CONTAINS : "in",
+            Binary_Operator.ARRAY_CONTAINS  : "in",
             Binary_Operator.PLUS            : "+",
             Binary_Operator.MINUS           : "-",
             Binary_Operator.TIMES           : "*",
@@ -1084,6 +1095,13 @@ class Binary_Expression(Expression):
             return Value(location = self.location,
                          value    = re.match(v_rhs.value,
                                              v_lhs.value) is not None,
+                         typ      = self.typ)
+
+        elif self.operator == Binary_Operator.ARRAY_CONTAINS:
+            assert isinstance(v_rhs.value, list)
+
+            return Value(location = self.location,
+                         value    = v_lhs in v_rhs.value,
                          typ      = self.typ)
 
         elif self.operator == Binary_Operator.PLUS:

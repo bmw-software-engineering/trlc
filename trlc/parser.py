@@ -353,7 +353,7 @@ class Parser:
                     n_lower  = n_a,
                     n_upper  = n_b)
 
-            else:
+            elif isinstance(n_a.typ, ast.Builtin_String):
                 rv = ast.Binary_Expression(
                     mh       = self.mh,
                     location = t_in.location,
@@ -361,6 +361,21 @@ class Parser:
                     operator = ast.Binary_Operator.STRING_CONTAINS,
                     n_lhs    = n_lhs,
                     n_rhs    = n_a)
+
+            elif isinstance(n_a.typ, ast.Array_Type):
+                rv = ast.Binary_Expression(
+                    mh       = self.mh,
+                    location = t_in.location,
+                    typ      = self.builtin_bool,
+                    operator = ast.Binary_Operator.ARRAY_CONTAINS,
+                    n_lhs    = n_lhs,
+                    n_rhs    = n_a)
+
+            else:
+                self.mh.error(
+                    n_a.location,
+                    "membership test only defined for Strings and Arrays,"
+                    " not for %s" % n_a.typ.name)
 
             if t_not is not None:
                 rv = ast.Unary_Expression(
