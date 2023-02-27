@@ -869,10 +869,10 @@ def write_example(fd, mh, obj):
         sources.append(obj.field["rsl"])
     lexer = Chained_Lexer(sources)
     rsl_parser = Parser(mh        = mh,
-                    stab      = stab,
-                    file_name = obj.location.file_name,
-                    lint_mode = False,
-                    lexer     = lexer)
+                        stab      = stab,
+                        file_name = obj.location.file_name,
+                        lint_mode = False,
+                        lexer     = lexer)
     rsl_parser.parse_rsl_header()
     rsl_parser.parse_rsl_file()
 
