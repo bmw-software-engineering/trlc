@@ -37,6 +37,8 @@ BMW_RED    = "#E22718"
 BMW_GREY   = "#6f6f6f"
 BMW_SILVER = "#d6d6d6"
 
+EMACS_STRING = "#8d2153"
+
 
 class BNF_Token:
     KIND = (
@@ -634,6 +636,17 @@ def write_header(fd, obj_version, obj_license):
     fd.write("pre i {\n")
     fd.write("  color: %s;\n" % BMW_GREY)
     fd.write("}\n")
+    fd.write("span.TRLC_COMMENT {\n")
+    fd.write("  font-style: italic;\n")
+    fd.write("  color: %s;\n" % BMW_GREY)
+    fd.write("}\n")
+    fd.write("span.TRLC_KEYWORD {\n")
+    fd.write("  font-weight: bold;\n")
+    fd.write("  color: %s;\n" % BMW_BLUE_2)
+    fd.write("}\n")
+    fd.write("span.TRLC_STRING {\n")
+    fd.write("  color: %s;\n" % EMACS_STRING)
+    fd.write("}\n")
     fd.write("</style>\n")
     fd.write("</style>\n")
     fd.write("</head>\n")
@@ -840,14 +853,54 @@ class Nested_Lexer(Python_Lexer):
         return tok
 
 
+class Token_Buffer(Lexer):
+    def __init__(self, lexer):
+        assert isinstance(lexer, Lexer)
+        super().__init__(mh        = lexer.mh,
+                         file_name = lexer.file_name)
+        self.lexer  = lexer
+        self.tokens = []
+
+    def token(self):
+        tok = self.lexer.token()
+        if tok:
+            self.tokens.append(tok)
+        return tok
+
+    def as_html(self):
+        if not self.tokens:
+            return ""
+
+        rv = ""
+
+        min_col = min(tok.location.col_no for tok in self.tokens)
+
+        cl = self.tokens[0].location.line_no
+        cc = min_col
+        for tok in self.tokens:
+            if tok.location.line_no != cl:
+                rv += "\n" * (tok.location.line_no - cl)
+                cc = min_col
+                cl = tok.location.line_no
+            spaces = tok.location.col_no - cc
+            rv += " " * spaces
+            cc += spaces
+            rv += "<span class=\"TRLC_%s\">" % tok.kind
+            rv += html.escape(tok.location.text())
+            rv += "</span>"
+            cc += len(tok.location.text())
+
+        return rv
+
+
 class Chained_Lexer(Lexer):
     def __init__(self, literals):
         assert isinstance(literals, list) and len(literals) >= 1
         for literal in literals:
             assert isinstance(literal, ast.String_Literal)
-        lexers = list(map(Nested_Lexer, literals))
-        self.current   = lexers[0]
-        self.literals  = lexers[1:]
+        self.lexers  = list(map(Token_Buffer, map(Nested_Lexer, literals)))
+        self.current = self.lexers[0]
+        self.future  = self.lexers[1:]
         super().__init__(literals[0].location.lexer.mh,
                          literals[0].location.file_name)
 
@@ -856,9 +909,9 @@ class Chained_Lexer(Lexer):
             tok = self.current.token()
             if tok:
                 return tok
-            elif self.literals:
-                self.current  = self.literals[0]
-                self.literals = self.literals[1:]
+            elif self.future:
+                self.current = self.future[0]
+                self.future  = self.future[1:]
             else:
                 self.current = None
         return None
@@ -871,42 +924,42 @@ def write_example(fd, mh, obj):
     stab = ast.Symbol_Table.create_global_table(mh)
 
     # Parse virtual RSL file
-    sources = []
+    rsl_sources = []
     if isinstance(obj.field["hidden_rsl"], ast.String_Literal):
-        sources.append(obj.field["hidden_rsl"])
+        rsl_sources.append(obj.field["hidden_rsl"])
     if isinstance(obj.field["rsl"], ast.String_Literal):
-        sources.append(obj.field["rsl"])
-    lexer = Chained_Lexer(sources)
+        rsl_sources.append(obj.field["rsl"])
+    rsl_lexers = Chained_Lexer(rsl_sources)
     rsl_parser = Parser(mh        = mh,
                         stab      = stab,
                         file_name = obj.location.file_name,
                         lint_mode = False,
-                        lexer     = lexer)
+                        lexer     = rsl_lexers)
     rsl_parser.parse_rsl_header()
     rsl_parser.parse_rsl_file()
 
     # Parse virtual TRLC file
-    sources = []
+    trlc_sources = []
     if isinstance(obj.field["hidden_trlc"], ast.String_Literal):
-        sources.append(obj.field["hidden_trlc"])
+        trlc_sources.append(obj.field["hidden_trlc"])
     if isinstance(obj.field["trlc"], ast.String_Literal):
-        sources.append(obj.field["trlc"])
-    if sources:
-        lexer = Chained_Lexer(sources)
+        trlc_sources.append(obj.field["trlc"])
+    if trlc_sources:
+        trlc_lexers = Chained_Lexer(trlc_sources)
         trlc_parser = Parser(mh        = mh,
                              stab      = stab,
                              file_name = obj.location.file_name,
                              lint_mode = False,
-                             lexer     = lexer)
+                             lexer     = trlc_lexers)
         trlc_parser.parse_trlc_file()
     else:
         trlc_parser = None
 
     data = obj.to_python_dict()
     if data["rsl"]:
-        fd.write(html.escape(data["rsl"]))
+        fd.write(rsl_lexers.lexers[-1].as_html())
     else:
-        fd.write(html.escape(data["trlc"]))
+        fd.write(trlc_lexers.lexers[-1].as_html())
 
 
 def write_production(fd, production, bnf_parser):

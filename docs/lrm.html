@@ -38,6 +38,17 @@ pre a:hover {
 pre i {
   color: #6f6f6f;
 }
+span.TRLC_COMMENT {
+  font-style: italic;
+  color: #6f6f6f;
+}
+span.TRLC_KEYWORD {
+  font-weight: bold;
+  color: #003D78;
+}
+span.TRLC_STRING {
+  color: #8d2153;
+}
 </style>
 </style>
 </head>
@@ -322,16 +333,16 @@ It is not an error to have an enumeration literal with the same name as a record
 <h3>Example</h3>
 <div class='code'>
 <pre>
-enum ASIL {
-  QM &quot;Not safety relevant&quot;
-  A B C D
-}
+<span class="TRLC_KEYWORD">enum</span> <span class="TRLC_IDENTIFIER">ASIL</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">QM</span> <span class="TRLC_STRING">&quot;Not safety relevant&quot;</span>
+  <span class="TRLC_IDENTIFIER">A</span> <span class="TRLC_IDENTIFIER">B</span> <span class="TRLC_IDENTIFIER">C</span> <span class="TRLC_IDENTIFIER">D</span>
+<span class="TRLC_C_KET">}</span>
 
-enum My_Boolean {
-  yes
-  no
-  file_not_found
-}</pre>
+<span class="TRLC_KEYWORD">enum</span> <span class="TRLC_IDENTIFIER">My_Boolean</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">yes</span>
+  <span class="TRLC_IDENTIFIER">no</span>
+  <span class="TRLC_IDENTIFIER">file_not_found</span>
+<span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2>Qualified names</h2>
 <div class='code'>
@@ -404,21 +415,21 @@ It is recommended to emit a warning on array types with an upper bound of one.
 <h3>Example</h3>
 <div class='code'>
 <pre>
-type Requirement {
-  summary &quot;A short summary of the requirement.&quot;
-    String
+<span class="TRLC_KEYWORD">type</span> <span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">summary</span> <span class="TRLC_STRING">&quot;A short summary of the requirement.&quot;</span>
+    <span class="TRLC_IDENTIFIER">String</span>
 
-  description &quot;The actual requirement text.&quot;
-    String
+  <span class="TRLC_IDENTIFIER">description</span> <span class="TRLC_STRING">&quot;The actual requirement text.&quot;</span>
+    <span class="TRLC_IDENTIFIER">String</span>
 
-  asil optional ASIL
+  <span class="TRLC_IDENTIFIER">asil</span> <span class="TRLC_KEYWORD">optional</span> <span class="TRLC_IDENTIFIER">ASIL</span>
 
-  codebeamer_link Integer [1..*]
-}
+  <span class="TRLC_IDENTIFIER">codebeamer_link</span> <span class="TRLC_IDENTIFIER">Integer</span> <span class="TRLC_S_BRA">[</span><span class="TRLC_INTEGER">1</span><span class="TRLC_RANGE">..</span><span class="TRLC_OPERATOR">*</span><span class="TRLC_S_KET">]</span>
+<span class="TRLC_C_KET">}</span>
 
-type Supplier_Requirement extends Requirement {
-  supplier_id Integer
-}</pre>
+<span class="TRLC_KEYWORD">type</span> <span class="TRLC_IDENTIFIER">Supplier_Requirement</span> <span class="TRLC_KEYWORD">extends</span> <span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">supplier_id</span> <span class="TRLC_IDENTIFIER">Integer</span>
+<span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2>Check Files</h2>
 <div>
@@ -488,18 +499,18 @@ It is an important design goal to keep the type system sane and following LSP. I
 <h3>Example</h3>
 <div class='code'>
 <pre>
-checks Requirement {
-  summary != null, warning &quot;You should specify a summary&quot;, summary
-}
+<span class="TRLC_KEYWORD">checks</span> <span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">summary</span> <span class="TRLC_OPERATOR">!=</span> <span class="TRLC_KEYWORD">null</span><span class="TRLC_COMMA">,</span> <span class="TRLC_KEYWORD">warning</span> <span class="TRLC_STRING">&quot;You should specify a summary&quot;</span><span class="TRLC_COMMA">,</span> <span class="TRLC_IDENTIFIER">summary</span>
+<span class="TRLC_C_KET">}</span>
 
-checks OverflowGuard {
-  value &gt;= -100, fatal &quot;Value must be at least -100&quot;
-  value &lt;= 100,  fatal &quot;Value must be at most 100&quot;
-  // These bound value, and effectively guard against integer
-  // overflow in the below expression
+<span class="TRLC_KEYWORD">checks</span> <span class="TRLC_IDENTIFIER">OverflowGuard</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">value</span> <span class="TRLC_OPERATOR">&gt;=</span> <span class="TRLC_OPERATOR">-</span><span class="TRLC_INTEGER">100</span><span class="TRLC_COMMA">,</span> <span class="TRLC_KEYWORD">fatal</span> <span class="TRLC_STRING">&quot;Value must be at least -100&quot;</span>
+  <span class="TRLC_IDENTIFIER">value</span> <span class="TRLC_OPERATOR">&lt;=</span> <span class="TRLC_INTEGER">100</span><span class="TRLC_COMMA">,</span>  <span class="TRLC_KEYWORD">fatal</span> <span class="TRLC_STRING">&quot;Value must be at most 100&quot;</span>
+  <span class="TRLC_COMMENT">// These bound value, and effectively guard against integer</span>
+  <span class="TRLC_COMMENT">// overflow in the below expression</span>
 
-  value ** 2 == 25, warning &quot;Value is not 5 or -5&quot;
-}</pre>
+  <span class="TRLC_IDENTIFIER">value</span> <span class="TRLC_OPERATOR">**</span> <span class="TRLC_INTEGER">2</span> <span class="TRLC_OPERATOR">==</span> <span class="TRLC_INTEGER">25</span><span class="TRLC_COMMA">,</span> <span class="TRLC_KEYWORD">warning</span> <span class="TRLC_STRING">&quot;Value is not 5 or -5&quot;</span>
+<span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2>Expressions</h2>
 <div class='code'>
@@ -542,17 +553,17 @@ The parsing of unary minus can be confusing: <tt>-a % b</tt> is actually <tt>- (
 <h3>Example</h3>
 <div class='code'>
 <pre>
-checks Expression_Examples {
-  asil != ASIL.QM, &quot;must be safety related&quot;
+<span class="TRLC_KEYWORD">checks</span> <span class="TRLC_IDENTIFIER">Expression_Examples</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">asil</span> <span class="TRLC_OPERATOR">!=</span> <span class="TRLC_IDENTIFIER">ASIL</span><span class="TRLC_DOT">.</span><span class="TRLC_IDENTIFIER">QM</span><span class="TRLC_COMMA">,</span> <span class="TRLC_STRING">&quot;must be safety related&quot;</span>
 
-  len(summary) + len(description) &gt; 10, &quot;too short&quot;
+  <span class="TRLC_IDENTIFIER">len</span><span class="TRLC_BRA">(</span><span class="TRLC_IDENTIFIER">summary</span><span class="TRLC_KET">)</span> <span class="TRLC_OPERATOR">+</span> <span class="TRLC_IDENTIFIER">len</span><span class="TRLC_BRA">(</span><span class="TRLC_IDENTIFIER">description</span><span class="TRLC_KET">)</span> <span class="TRLC_OPERATOR">&gt;</span> <span class="TRLC_INTEGER">10</span><span class="TRLC_COMMA">,</span> <span class="TRLC_STRING">&quot;too short&quot;</span>
 
-  description != null implies &quot;potato&quot; in description,
-    &quot;description must mention the best vegetable&quot;
+  <span class="TRLC_IDENTIFIER">description</span> <span class="TRLC_OPERATOR">!=</span> <span class="TRLC_KEYWORD">null</span> <span class="TRLC_KEYWORD">implies</span> <span class="TRLC_STRING">&quot;potato&quot;</span> <span class="TRLC_KEYWORD">in</span> <span class="TRLC_IDENTIFIER">description</span><span class="TRLC_COMMA">,</span>
+    <span class="TRLC_STRING">&quot;description must mention the best vegetable&quot;</span>
 
-  (forall item in codebeamer_link =&gt; item &gt; 50000),
-    warning &quot;cb link is suspiciously small&quot;
-}</pre>
+  <span class="TRLC_BRA">(</span><span class="TRLC_KEYWORD">forall</span> <span class="TRLC_IDENTIFIER">item</span> <span class="TRLC_KEYWORD">in</span> <span class="TRLC_IDENTIFIER">codebeamer_link</span> <span class="TRLC_ARROW">=&gt;</span> <span class="TRLC_IDENTIFIER">item</span> <span class="TRLC_OPERATOR">&gt;</span> <span class="TRLC_INTEGER">50000</span><span class="TRLC_KET">)</span><span class="TRLC_COMMA">,</span>
+    <span class="TRLC_KEYWORD">warning</span> <span class="TRLC_STRING">&quot;cb link is suspiciously small&quot;</span>
+<span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2>Names</h2>
 <div class='code'>
@@ -599,16 +610,16 @@ Name resolution is case sensitive.
 <h3>Example</h3>
 <div class='code'>
 <pre>
-checks Name_Examples {
-  foo, &quot;foo&quot;
-  // names the record field foo
+<span class="TRLC_KEYWORD">checks</span> <span class="TRLC_IDENTIFIER">Name_Examples</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">foo</span><span class="TRLC_COMMA">,</span> <span class="TRLC_STRING">&quot;foo&quot;</span>
+  <span class="TRLC_COMMENT">// names the record field foo</span>
 
-  len(field) &gt; 0, &quot;foo&quot;
-  // name that is a function call
+  <span class="TRLC_IDENTIFIER">len</span><span class="TRLC_BRA">(</span><span class="TRLC_IDENTIFIER">field</span><span class="TRLC_KET">)</span> <span class="TRLC_OPERATOR">&gt;</span> <span class="TRLC_INTEGER">0</span><span class="TRLC_COMMA">,</span> <span class="TRLC_STRING">&quot;foo&quot;</span>
+  <span class="TRLC_COMMENT">// name that is a function call</span>
 
-  potato[3] &lt; potato[2], &quot;foo&quot;
-  // name that is an array index
-}</pre>
+  <span class="TRLC_IDENTIFIER">potato</span><span class="TRLC_S_BRA">[</span><span class="TRLC_INTEGER">3</span><span class="TRLC_S_KET">]</span> <span class="TRLC_OPERATOR">&lt;</span> <span class="TRLC_IDENTIFIER">potato</span><span class="TRLC_S_BRA">[</span><span class="TRLC_INTEGER">2</span><span class="TRLC_S_KET">]</span><span class="TRLC_COMMA">,</span> <span class="TRLC_STRING">&quot;foo&quot;</span>
+  <span class="TRLC_COMMENT">// name that is an array index</span>
+<span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2>Operators</h2>
 <div class='code'>
