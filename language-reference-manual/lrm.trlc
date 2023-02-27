@@ -794,6 +794,8 @@ section "Expressions" {
     bnf = '''
       primary ::= INTEGER
                 | STRING
+                | 'true'
+                | 'false'
                 | 'null'
                 | name
                 | '(' expression ')'

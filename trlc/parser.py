@@ -498,6 +498,10 @@ class Parser:
             self.match("STRING")
             return ast.String_Literal(self.ct, self.builtin_str)
 
+        elif self.peek_kw("true") or self.peek_kw("false"):
+            self.match("KEYWORD")
+            return ast.Boolean_Literal(self.ct, self.builtin_bool)
+
         elif self.peek_kw("null"):
             self.match_kw("null")
             return ast.Null_Literal(self.ct)

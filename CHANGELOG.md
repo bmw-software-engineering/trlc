@@ -26,6 +26,9 @@ None.
 * [LRM, TRLC] Add support for existential quantification. This
   introduces a new keywords `exists`.
 
+* [LRM, TRLC] Fix oversight in the LRM, not allowing `true` and
+  `false` to appear as values.
+
 ### 1.0.8
 
 * [TRLC] Fix ICE when attempting to parse completely empty files.
