@@ -504,7 +504,7 @@ class Parser:
 
         elif self.peek("BRA"):
             self.match("BRA")
-            if self.peek_kw("forall"):
+            if self.peek_kw("forall") or self.peek_kw("exists"):
                 rv = self.parse_quantified_expression(scope)
             elif self.peek_kw("if"):
                 rv = self.parse_conditional_expression(scope)
@@ -519,7 +519,12 @@ class Parser:
     def parse_quantified_expression(self, scope):
         assert isinstance(scope, ast.Scope)
 
-        self.match_kw("forall")
+        if self.peek_kw("forall"):
+            self.match_kw("forall")
+            universal = True
+        else:
+            self.match_kw("exists")
+            universal = False
         loc = self.ct.location
         self.match("IDENTIFIER")
         t_qv = self.ct
@@ -552,6 +557,7 @@ class Parser:
         return ast.Quantified_Expression(mh         = self.mh,
                                          location   = loc,
                                          typ        = self.builtin_bool,
+                                         universal  = universal,
                                          n_variable = n_var,
                                          n_source   = n_source,
                                          n_expr     = n_expr)

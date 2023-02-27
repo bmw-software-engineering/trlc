@@ -2,7 +2,8 @@
 
 ## Language support
 
-Up to date with version 2.3 of TRLC language reference manual.
+Up to date with version 2.4 of [TRLC language reference
+manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
 
@@ -21,6 +22,9 @@ None.
   issues in the LRM (missing keywords, etc.) and made a few cleanups
   and simplifications; however the language and its semantics have not
   changed.
+
+* [LRM, TRLC] Add support for existential quantification. This
+  introduces a new keywords `exists`.
 
 ### 1.0.8
 

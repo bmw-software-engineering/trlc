@@ -1,0 +1,61 @@
+package Foo
+
+T valid_1 {
+  arr = []
+  a   = true
+  e   = false
+}
+
+T invalid_1 {
+  arr = []
+  a   = false
+  e   = true
+}
+
+T valid_2 {
+  arr = [40, 41, 42, 43, 44]
+  a   = false
+  e   = true
+}
+
+T invalid_2 {
+  arr = [40, 41, 42, 43, 44]
+  a   = true
+  e   = false
+}
+
+T valid_3 {
+  arr = [1, 2, 3]
+  a   = false
+  e   = false
+}
+
+T invalid_3 {
+  arr = [1, 2, 3]
+  a   = true
+  e   = true
+}
+
+T valid_4 {
+  arr = [42, 0, 42]
+  a   = false
+  e   = true
+}
+
+T invalid_4 {
+  arr = [42, 0, 42]
+  a   = true
+  e   = false
+}
+
+T valid_5 {
+  arr = [42, 42]
+  a   = true
+  e   = true
+}
+
+T invalid_5 {
+  arr = [42, 42]
+  a   = false
+  e   = false
+}

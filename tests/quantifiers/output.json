@@ -1,0 +1,106 @@
+  arr = []
+        ^ foo.trlc:10: check warning: not everything is 42
+  arr = []
+        ^ foo.trlc:10: check warning: nothing is 42
+  arr = [40, 41, 42, 43, 44]
+        ^ foo.trlc:22: check warning: not everything is 42
+  arr = [40, 41, 42, 43, 44]
+        ^ foo.trlc:22: check warning: nothing is 42
+  arr = [1, 2, 3]
+        ^ foo.trlc:34: check warning: not everything is 42
+  arr = [1, 2, 3]
+        ^ foo.trlc:34: check warning: nothing is 42
+  arr = [42, 0, 42]
+        ^ foo.trlc:46: check warning: not everything is 42
+  arr = [42, 0, 42]
+        ^ foo.trlc:46: check warning: nothing is 42
+  arr = [42, 42]
+        ^ foo.trlc:58: check warning: not everything is 42
+  arr = [42, 42]
+        ^ foo.trlc:58: check warning: nothing is 42
+{
+  "invalid_1": {
+    "a": false,
+    "arr": [],
+    "e": true
+  },
+  "invalid_2": {
+    "a": true,
+    "arr": [
+      40,
+      41,
+      42,
+      43,
+      44
+    ],
+    "e": false
+  },
+  "invalid_3": {
+    "a": true,
+    "arr": [
+      1,
+      2,
+      3
+    ],
+    "e": true
+  },
+  "invalid_4": {
+    "a": true,
+    "arr": [
+      42,
+      0,
+      42
+    ],
+    "e": false
+  },
+  "invalid_5": {
+    "a": false,
+    "arr": [
+      42,
+      42
+    ],
+    "e": false
+  },
+  "valid_1": {
+    "a": true,
+    "arr": [],
+    "e": false
+  },
+  "valid_2": {
+    "a": false,
+    "arr": [
+      40,
+      41,
+      42,
+      43,
+      44
+    ],
+    "e": true
+  },
+  "valid_3": {
+    "a": false,
+    "arr": [
+      1,
+      2,
+      3
+    ],
+    "e": false
+  },
+  "valid_4": {
+    "a": false,
+    "arr": [
+      42,
+      0,
+      42
+    ],
+    "e": true
+  },
+  "valid_5": {
+    "a": true,
+    "arr": [
+      42,
+      42
+    ],
+    "e": true
+  }
+}

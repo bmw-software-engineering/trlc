@@ -1,5 +1,10 @@
 package LRM
 
+type Versioning {
+  major Integer
+  minor Integer
+}
+
 type GFDL_License {
   invariant_sections          String [0 .. *]
   front_cover        optional String

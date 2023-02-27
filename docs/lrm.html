@@ -108,6 +108,7 @@ A keyword is an identifier that is one of the following reserved words:
   <li>false</li>
   <li>fatal</li>
   <li>forall</li>
+  <li>exists</li>
   <li>if</li>
   <li>implies</li>
   <li>import</li>
@@ -736,8 +737,11 @@ The definition of logical negation <tt>not</tt> is the usual one.
 <h2>Quantification</h2>
 <div class='code'>
 <pre>
-<a name="bnf-quantified_expression"></a>quantified_expression ::= 'forall' IDENTIFIER<i>_name</i> 'in' IDENTIFIER<i>_component_name</i> '=>'
+<a name="bnf-quantified_expression"></a>quantified_expression ::= <a href="#bnf-quantifier">quantifier</a> IDENTIFIER<i>_name</i> 'in' IDENTIFIER<i>_component_name</i> '=>'
                           <a href="#bnf-expression">expression</a><i>_PREDICATE</i>
+
+<a name="bnf-quantifier"></a>quantifier ::= 'forall'
+             | 'exists'
 </pre>
 </div>
 <h3>Name resolution</h3>
@@ -757,6 +761,9 @@ During evaluation of the quantified expression, each element of the array is eva
 </div>
 <div>
 For universal <i>(forall)</i> quantification the final value is true iff all predicates evaluate to true. <i>(This means universal quantification over an empty array is vacuously true.)</i>
+</div>
+<div>
+For existential <i>(exists)</i> quantification the final value is true iff the predicate evaluate to true at least once. <i>(This means existential quantification over an empty array is vacuously false.)</i>
 </div>
 <h3>Implementation Recommendation</h3>
 <div>

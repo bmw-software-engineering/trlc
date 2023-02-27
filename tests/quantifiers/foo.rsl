@@ -1,0 +1,12 @@
+package Foo
+
+type T {
+  arr Integer [0 .. *]
+  e   Boolean
+  a   Boolean
+}
+
+checks T {
+  a == (forall item in arr => item == 42), warning "not everything is 42", arr
+  e == (exists item in arr => item == 42), warning "nothing is 42", arr
+}

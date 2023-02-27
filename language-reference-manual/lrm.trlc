@@ -1,5 +1,10 @@
 package LRM
 
+Versioning Version {
+  major = 2
+  minor = 4
+}
+
 GFDL_License License {
   invariant_sections = []
 }
@@ -93,6 +98,7 @@ section "Lexing" {
         "false",
         "fatal",
         "forall",
+	"exists",
         "if",
         "implies",
         "import",
@@ -1197,8 +1203,10 @@ section "Quantification" {
   Grammar Quantified_Expression {
     bnf = '''
       quantified_expression ::=
-        'forall' IDENTIFIER_name 'in' IDENTIFIER_component_name '=>'
+        quantifier IDENTIFIER_name 'in' IDENTIFIER_component_name '=>'
         expression_PREDICATE
+
+      quantifier ::= 'forall' | 'exists'
     '''
   }
 
@@ -1239,6 +1247,15 @@ section "Quantification" {
               true iff all predicates evaluate to
               true. *(This means universal quantification
               over an empty array is vacuously true.)*'''
+  }
+
+  Semantics Existential_Quantification_Semantics {
+    kind = Kind.Dynamic
+    text = '''For existential *(exists)* quantification the final value is
+              true iff the predicate evaluate to true at
+              least once. *(This means existential
+              quantification over an empty array is
+              vacuously false.)*'''
   }
 
   Recommendation Quantification_Short_Circuit_Evaluation {

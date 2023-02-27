@@ -1388,7 +1388,7 @@ class Quantified_Expression(Expression):
     For example::
 
       (forall x in array_component => x > 0)
-              ^1   ^2                 ^^^^^3
+       ^4     ^1   ^2                 ^^^^^3
 
     A quantified expression introduces and binds a
     :class:`Quantified_Variable` (see 1) from a specified source (see
@@ -1404,27 +1404,43 @@ class Quantified_Expression(Expression):
     :attribute n_expr: The body of the quantifier (see 3)
     :type: Expression
 
+    :attribute universal: True means forall, false means exists (see 4)
+    :type: Boolean
+
     """
-    def __init__(self, mh, location, typ, n_variable, n_source, n_expr):
+    def __init__(self, mh, location,
+                 typ,
+                 universal,
+                 n_variable,
+                 n_source,
+                 n_expr):
         super().__init__(location, typ)
+        assert isinstance(typ, Builtin_Boolean)
+        assert isinstance(universal, bool)
         assert isinstance(n_variable, Quantified_Variable)
         assert isinstance(n_expr, Expression)
         assert isinstance(n_source, Name_Reference)
-        assert isinstance(typ, Builtin_Boolean)
-        self.n_var    = n_variable
-        self.n_expr   = n_expr
-        self.n_source = n_source
+        self.universal = universal
+        self.n_var     = n_variable
+        self.n_expr    = n_expr
+        self.n_source  = n_source
         self.n_expr.ensure_type(mh, Builtin_Boolean)
 
     def dump(self, indent=0):  # pragma: no cover
-        self.write_indent(indent, "Quantified expression")
+        if self.universal:
+            self.write_indent(indent, "Universal quantified expression")
+        else:
+            self.write_indent(indent, "Existential quantified expression")
         self.n_var.dump(indent + 1)
         self.n_expr.dump(indent + 1)
 
     def to_string(self):
-        return "(forall %s in %s => %s)" % (self.n_var.name,
-                                            self.n_source.to_string(),
-                                            self.n_expr.to_string())
+        return "(%s %s in %s => %s)" % ("forall"
+                                        if self.universal
+                                        else "exists",
+                                        self.n_var.name,
+                                        self.n_source.to_string(),
+                                        self.n_expr.to_string())
 
     def evaluate(self, mh, context):
         assert isinstance(mh, Message_Handler)
@@ -1450,19 +1466,23 @@ class Quantified_Expression(Expression):
         else:
             assert isinstance(array_values, Array_Aggregate)
 
-        ok = True
+        rv  = self.universal
         loc = self.location
         for binding in array_values.value:
             new_ctx[self.n_var.name] = binding
             result = self.n_expr.evaluate(mh, new_ctx)
             assert isinstance(result.value, bool)
-            if not result.value:
-                ok  = False
+            if self.universal and not result.value:
+                rv  = False
+                loc = binding.location
+                break
+            elif not self.universal and result.value:
+                rv  = True
                 loc = binding.location
                 break
 
         return Value(location = loc,
-                     value    = ok,
+                     value    = rv,
                      typ      = self.typ)
 
 

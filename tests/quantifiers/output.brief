@@ -1,0 +1,10 @@
+foo.trlc:10:9: trlc check warning: not everything is 42
+foo.trlc:10:9: trlc check warning: nothing is 42
+foo.trlc:22:9: trlc check warning: not everything is 42
+foo.trlc:22:9: trlc check warning: nothing is 42
+foo.trlc:34:9: trlc check warning: not everything is 42
+foo.trlc:34:9: trlc check warning: nothing is 42
+foo.trlc:46:9: trlc check warning: not everything is 42
+foo.trlc:46:9: trlc check warning: nothing is 42
+foo.trlc:58:9: trlc check warning: not everything is 42
+foo.trlc:58:9: trlc check warning: nothing is 42
