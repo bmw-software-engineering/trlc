@@ -588,11 +588,15 @@ def write_heading(fd, name, depth):
                                   depth))
 
 
-def write_header(fd, obj_license):
+def write_header(fd, obj_version, obj_license):
+    ver = obj_version.to_python_dict()
+    title = "TRLC Language Reference Manual, Version %u.%u" % (ver["major"],
+                                                               ver["minor"])
+
     fd.write("<!DOCTYPE html>\n")
     fd.write("<html>\n")
     fd.write("<head>\n")
-    fd.write("<title>TRLC Language Reference Manual</title>\n")
+    fd.write("<title>%s</title>\n" % title)
     fd.write("<meta name=\"viewport\" "
              "content=\"width=device-width, initial-scale=1.0\">\n")
     fd.write("<style>\n")
@@ -630,7 +634,7 @@ def write_header(fd, obj_license):
     fd.write("</head>\n")
     fd.write("<body>\n")
 
-    write_heading(fd, "TRLC Language Reference Manual", 1)
+    write_heading(fd, title, 1)
     lic = obj_license.to_python_dict()
     fd.write("<div>\n")
     fd.write("Permission is granted to copy, distribute and/or"
@@ -996,6 +1000,9 @@ def main():
     obj_license = pkg_lrm.symbols.lookup_assuming(mh,
                                                   "License",
                                                   ast.Record_Object)
+    obj_version = pkg_lrm.symbols.lookup_assuming(mh,
+                                                  "Version",
+                                                  ast.Record_Object)
     typ_text = pkg_lrm.symbols.lookup_assuming(mh, "Text", ast.Record_Type)
     typ_gram = pkg_lrm.symbols.lookup_assuming(mh, "Grammar", ast.Record_Type)
     typ_kword = pkg_lrm.symbols.lookup_assuming(mh, "Keywords",
@@ -1040,7 +1047,7 @@ def main():
         "in_grammar"  : False
     }
     with open("docs/lrm.html", "w", encoding="UTF-8") as fd:
-        write_header(fd, obj_license)
+        write_header(fd, obj_version, obj_license)
         for obj in pkg_lrm.symbols.iter_record_objects():
             if obj.e_typ.is_subclass_of(typ_text):
                 try:
