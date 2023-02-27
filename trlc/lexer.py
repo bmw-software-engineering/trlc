@@ -103,7 +103,8 @@ class Source_Reference(Location):
 
 
 class Token:
-    KIND = frozenset(["IDENTIFIER",
+    KIND = frozenset(["COMMENT",
+                      "IDENTIFIER",
                       "BUILTIN",
                       "KEYWORD",
                       "BRA", "KET",
@@ -121,7 +122,8 @@ class Token:
     def __init__(self, location, kind, value=None):
         assert isinstance(location, Location)
         assert kind in Token.KIND
-        if kind in ("IDENTIFIER", "BUILTIN", "KEYWORD", "OPERATOR", "STRING"):
+        if kind in ("COMMENT", "IDENTIFIER", "BUILTIN",
+                    "KEYWORD", "OPERATOR", "STRING"):
             assert isinstance(value, str)
         elif kind == "INTEGER":
             assert isinstance(value, int)
@@ -249,29 +251,29 @@ class Python_Lexer(Lexer):
                                 end_pos    = self.lexpos)
 
     def token(self):
-        # Skip whitespace and comments
-        while True:
-            while self.nc and self.nc.isspace():
-                self.advance()
-            if self.nc is None:
-                return None
+        # Skip whitespace and move to the next char
+        while self.nc and self.nc.isspace():
             self.advance()
-
-            if self.cc == "/" and self.nc == "/":
-                while self.cc and self.cc != "\n":
-                    self.advance()
-            elif self.cc == "/" and self.nc == "*":
-                while self.nc and not (self.cc == "*" and self.nc == "/"):
-                    self.advance()
-                self.advance()
-            else:
-                break
+        if self.nc is None:
+            return None
+        self.advance()
 
         start_pos  = self.lexpos
         start_line = self.line_no
         start_col  = self.col_no
 
-        if self.is_alpha(self.cc):
+        if self.cc == "/" and self.nc == "/":
+            kind = "COMMENT"
+            while self.cc and self.nc != "\n":
+                self.advance()
+
+        elif self.cc == "/" and self.nc == "*":
+            kind = "COMMENT"
+            while self.nc and not (self.cc == "*" and self.nc == "/"):
+                self.advance()
+            self.advance()
+
+        elif self.is_alpha(self.cc):
             kind = "IDENTIFIER"
             while self.nc and (self.is_alnum(self.nc) or
                                self.nc == "_" or
@@ -408,6 +410,16 @@ class Python_Lexer(Lexer):
 
         elif kind == "INTEGER":
             value = int(sref.text())
+
+        elif kind == "COMMENT":
+            value = sref.text()
+            if value.startswith("//"):
+                value = value[2:].strip()
+            else:
+                value = value[2:]
+                if value.endswith("*/"):
+                    value = value[:-2]
+                value = value.strip()
 
         else:
             value = None

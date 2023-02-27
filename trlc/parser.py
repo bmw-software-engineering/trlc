@@ -48,7 +48,8 @@ class Parser:
         self.imports   = set()
 
         self.ct = None
-        self.nt = self.lexer.token()
+        self.nt = None
+        self.advance()
 
         self.builtin_bool = stab.table["Boolean"]
         self.builtin_int  = stab.table["Integer"]
@@ -60,7 +61,10 @@ class Parser:
 
     def advance(self):
         self.ct = self.nt
-        self.nt = self.lexer.token()
+        while True:
+            self.nt = self.lexer.token()
+            if self.nt is None or self.nt.kind != "COMMENT":
+                break
 
     def peek(self, kind):
         assert kind in Token.KIND
