@@ -24,6 +24,8 @@ import sys
 import html
 import re
 import os
+import hashlib
+from collections import OrderedDict
 
 from trlc.errors import Message_Handler, TRLC_Error
 from trlc.lexer import Source_Reference, Lexer, Python_Lexer
@@ -584,10 +586,12 @@ class BNF_Parser:
                    "expected bnf fragment")
 
 
-def write_heading(fd, name, depth):
-    fd.write("<h%u>%s</h%u>\n" % (depth,
-                                  html.escape(name),
-                                  depth))
+def write_heading(fd, name, depth, anchor=None):
+    fd.write("<h%u>" % depth)
+    if anchor:
+        fd.write("<a name=\"%s\"></a>" % anchor)
+    fd.write(html.escape(name))
+    fd.write("</h%u>\n" % depth)
 
 
 def write_header(fd, obj_version, obj_license):
@@ -709,6 +713,25 @@ def section_depth(section):
         return 1
 
 
+def section_hash(section):
+    assert isinstance(section, ast.Section)
+    m = hashlib.sha1()
+    ptr = section
+    while ptr:
+        m.update(ptr.name.encode("UTF-8"))
+        m.update(b"::")
+        ptr = ptr.parent
+    return m.hexdigest()
+
+
+def section_hashes(section):
+    assert isinstance(section, ast.Section)
+    if section.parent:
+        return section_hashes(section.parent) + [section_hash(section)]
+    else:
+        return [section_hash(section)]
+
+
 def fmt_text(text):
     text = " ".join(text.replace("\n", " ").split())
     text = html.escape(text)
@@ -734,6 +757,7 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
     # Build current section
     if obj.section:
         new_section = section_list(obj.section)
+        new_hashes  = section_hashes(obj.section)
     else:
         new_section = []
 
@@ -770,7 +794,11 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
                 context["in_grammar"] = False
                 fd.write("</pre>\n")
                 fd.write("</div>\n")
-            write_heading(fd, heading, idx + 2)
+            if idx < len(new_hashes):
+                anchor = "sec:%s" % new_hashes[idx]
+            else:
+                anchor = None
+            write_heading(fd, heading, idx + 2, anchor)
 
     # Store new section
     context["old_section"] = new_section
@@ -1045,6 +1073,51 @@ def write_expansion(fd, n_exp):
                 fd.write("<i>_%s</i>" % n_exp.name)
 
 
+def write_toc_section(fd, tree, level):
+    if len(tree) == 0:
+        return
+
+    indent = " " * (4 * (level - 1))
+    fd.write(indent + "<ol>\n")
+    for item in tree.values():
+        fd.write(indent + "  <li><a href=\"#sec:%s\">%s</a>\n" %
+                 (section_hash(item["obj"]),
+                  item["name"]))
+        write_toc_section(fd, item["sub"], level + 1)
+        fd.write(indent + "  </li>\n")
+    fd.write(indent + "</ol>\n")
+
+
+def write_toc(fd, pkg_lrm):
+    tree = OrderedDict()
+
+    old_section = None
+    for obj in pkg_lrm.symbols.iter_record_objects():
+        if not obj.section:
+            continue
+        if old_section == obj.section:
+            continue
+        old_section = obj.section
+
+        sections = []
+        ptr = obj.section
+        while ptr:
+            sections = [ptr] + sections
+            ptr = ptr.parent
+
+        ptr = tree
+        for section in sections:
+            if section.name not in ptr:
+                ptr[section.name] = {
+                    "name" : section.name,
+                    "obj"  : section,
+                    "sub"  : OrderedDict()
+                }
+            ptr = ptr[section.name]["sub"]
+
+    write_toc_section(fd, tree, 1)
+
+
 def main():
     mh = Message_Handler()
     sm = Source_Manager(mh)
@@ -1106,6 +1179,7 @@ def main():
     }
     with open("docs/lrm.html", "w", encoding="UTF-8") as fd:
         write_header(fd, obj_version, obj_license)
+        write_toc(fd, pkg_lrm)
         for obj in pkg_lrm.symbols.iter_record_objects():
             if obj.e_typ.is_subclass_of(typ_text):
                 try:
