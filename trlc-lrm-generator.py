@@ -344,7 +344,7 @@ class BNF_Parser:
         self.nt            = None
 
         # Symbol table
-        self.token_kinds = set()
+        self.token_kinds = {}
         self.terminals   = set()
         self.productions = {}
         self.bundles     = {}
@@ -473,7 +473,7 @@ class BNF_Parser:
                               "only %s is matched" %
                               (ex_match.group(0)))
 
-        self.token_kinds.add(match.group(1))
+        self.token_kinds[match.group(1)] = match.group(2)
 
     def parse(self, obj):
         assert self.current_lexer is None
@@ -651,6 +651,23 @@ def write_header(fd, obj_version, obj_license):
     fd.write("span.TRLC_STRING {\n")
     fd.write("  color: %s;\n" % EMACS_STRING)
     fd.write("}\n")
+    fd.write(".tooltip {\n")
+    fd.write("  position: relative;\n")
+    fd.write("  display: inline-block;\n")
+    fd.write("}\n")
+    fd.write(".tooltip .tooltiptext {\n")
+    fd.write("  visibility: hidden;\n")
+    fd.write("  background-color: %s;\n" % BMW_SILVER)
+    fd.write("  border-radius: 6px;\n")
+    fd.write("  padding: 5px;\n")
+    fd.write("  position: absolute;\n")
+    fd.write("  z-index: 1;\n")
+    fd.write("  top: 150%;\n")
+    fd.write("  left: 50%;\n")
+    fd.write("}\n")
+    fd.write(".tooltip:hover .tooltiptext {\n")
+    fd.write("  visibility: visible;\n")
+    fd.write("}\n")
     fd.write("</style>\n")
     fd.write("</style>\n")
     fd.write("</head>\n")
@@ -825,7 +842,9 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
 
     # Emit additional data with semantics
     if obj.e_typ.name == "Terminal":
+        match = re.match("([A-Z_]+) *::= *(.*)", data["def"])
         fd.write("<div class='code'>\n")
+        fd.write("<a name=\"bnf-%s\"></a>" % match.group(1))
         fd.write("<code>%s</code>\n" % html.escape(data["def"]))
         fd.write("</div>\n")
         fd.write("<div>\n")
@@ -998,15 +1017,15 @@ def write_production(fd, production, bnf_parser):
     alt_offset = len(production) + 3
 
     if isinstance(n_exp, BNF_Alternatives):
-        write_expansion(fd, n_exp.members[0])
+        write_expansion(fd, n_exp.members[0], bnf_parser)
         fd.write("\n")
         for n_member in n_exp.members[1:]:
             fd.write(" " * alt_offset + "| ")
-            write_expansion(fd, n_member)
+            write_expansion(fd, n_member, bnf_parser)
             fd.write("\n")
 
     elif isinstance(n_exp, BNF_String):
-        write_expansion(fd, n_exp.members[0])
+        write_expansion(fd, n_exp.members[0], bnf_parser)
         current_line = n_exp.members[0].location.line_no
         for n_member in n_exp.members[1:]:
             if n_member.location.line_no == current_line:
@@ -1014,15 +1033,15 @@ def write_production(fd, production, bnf_parser):
             else:
                 current_line = n_member.location.line_no
                 fd.write("\n" + " " * (alt_offset + 2))
-            write_expansion(fd, n_member)
+            write_expansion(fd, n_member, bnf_parser)
         fd.write("\n")
 
     else:
-        write_expansion(fd, n_exp)
+        write_expansion(fd, n_exp, bnf_parser)
         fd.write("\n")
 
 
-def write_expansion(fd, n_exp):
+def write_expansion(fd, n_exp, bnf_parser):
     if isinstance(n_exp, BNF_Alternatives):
         first = True
         for n_member in n_exp.members:
@@ -1030,7 +1049,7 @@ def write_expansion(fd, n_exp):
                 first = False
             else:
                 fd.write(" | ")
-            write_expansion(fd, n_member)
+            write_expansion(fd, n_member, bnf_parser)
 
     elif isinstance(n_exp, BNF_String):
         first = True
@@ -1039,16 +1058,16 @@ def write_expansion(fd, n_exp):
                 first = False
             else:
                 fd.write(" ")
-            write_expansion(fd, n_member)
+            write_expansion(fd, n_member, bnf_parser)
 
     elif isinstance(n_exp, BNF_Optional):
         fd.write("[ ")
-        write_expansion(fd, n_exp.expansion)
+        write_expansion(fd, n_exp.expansion, bnf_parser)
         fd.write(" ]")
 
     elif isinstance(n_exp, BNF_Zero_Or_More):
         fd.write("{ ")
-        write_expansion(fd, n_exp.expansion)
+        write_expansion(fd, n_exp.expansion, bnf_parser)
         fd.write(" }")
 
     else:
@@ -1060,15 +1079,37 @@ def write_expansion(fd, n_exp):
             fd.write("'")
 
         elif n_exp.kind == "TERMINAL":
+            if n_exp.value in bnf_parser.token_kinds:
+                fd.write("<span class=\"tooltip\">")
+                fd.write("<a href=\"#bnf-%s\">" % n_exp.value)
             fd.write(n_exp.value)
+            if n_exp.value in bnf_parser.token_kinds:
+                fd.write("</a>")
+                fd.write("<span class=\"tooltiptext\">%s</span>" %
+                         bnf_parser.token_kinds[n_exp.value])
+                fd.write("</span>")
             if n_exp.name:
                 fd.write("<i>_%s</i>" % n_exp.name)
 
         else:
             assert n_exp.kind == "NONTERMINAL"
-            fd.write("<a href=\"#bnf-%s\">" % n_exp.value)
+            if n_exp.value in bnf_parser.productions:
+                tooltip_text = str(bnf_parser.productions[n_exp.value])
+                if len(tooltip_text) > 50:
+                    tooltip_text = None
+            else:
+                tooltip_text = None
+            if tooltip_text:
+                fd.write("<span class=\"tooltip\">")
+            if n_exp.value in bnf_parser.productions:
+                fd.write("<a href=\"#bnf-%s\">" % n_exp.value)
             fd.write(n_exp.value)
-            fd.write("</a>")
+            if n_exp.value in bnf_parser.productions:
+                fd.write("</a>")
+            if tooltip_text:
+                fd.write("<span class=\"tooltiptext\">%s</span>" %
+                         tooltip_text)
+                fd.write("</span>")
             if n_exp.name:
                 fd.write("<i>_%s</i>" % n_exp.name)
 
