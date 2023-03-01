@@ -9,5 +9,5 @@ Requirement Good_Potato {
 Requirement Bad_Potato {
   description = "This is a dodgy potato."
   dim         = (42, 666)
-  cb_link     = 12345      // Equivalent to 12345@HEAD
+  cb_link     = 12345      // Equivalent to 12345@null
 }
