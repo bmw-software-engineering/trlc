@@ -1,0 +1,2 @@
+tuple Dimension {
+^^^^^ foo.rsl:3: error: expected end-of-file, encountered IDENTIFIER instead

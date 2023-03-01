@@ -1,0 +1,28 @@
+package Example
+
+tuple Dimension {
+  x Integer
+  y Integer
+}
+
+tuple Codebeamer {
+  item Integer
+  separator @
+  version optional Integer = HEAD
+}
+
+checks Codebeamer {
+  item >= 1, error "CB Reference must be strictly positive", item
+  version >= 1, error "CB Version must be strictly positive", version
+}
+
+type Requirement {
+  description String
+  dim         Dimension
+  cb_link     Codebeamer
+}
+
+checks Requirement {
+  cb_link.item >= 10000, warning "CB Item is suspiciously low", cb_link
+  cb_link.version != HEAD, warning "Please link to a specific version", cb_link
+}
