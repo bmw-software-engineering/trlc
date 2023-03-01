@@ -712,10 +712,10 @@ Name resolution is case sensitive.
 <pre>
 <a name="bnf-comparison_operator"></a>comparison_operator ::= '=='
                       | '!='
-                      | '<'
-                      | '<='
-                      | '>'
-                      | '>='
+                      | '&lt;'
+                      | '&lt;='
+                      | '&gt;'
+                      | '&gt;='
 
 <a name="bnf-adding_operator"></a>adding_operator ::= '+'
                   | '-'
@@ -847,7 +847,7 @@ The definition of logical negation <code>not</code> is the usual one.
 <h2><a name="sec:bcc19cc6284b0508f332d585fa6ddb294172206c"></a>Quantification</h2>
 <div class='code'>
 <pre>
-<a name="bnf-quantified_expression"></a>quantified_expression ::= <span class="tooltip"><a href="#bnf-quantifier">quantifier</a><span class="tooltiptext">forall | exists</span></span> <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i> 'in' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component_name</i> '=>'
+<a name="bnf-quantified_expression"></a>quantified_expression ::= <span class="tooltip"><a href="#bnf-quantifier">quantifier</a><span class="tooltiptext">forall | exists</span></span> <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i> 'in' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component_name</i> '=&gt;'
                           <a href="#bnf-expression">expression</a><i>_PREDICATE</i>
 
 <a name="bnf-quantifier"></a>quantifier ::= 'forall'

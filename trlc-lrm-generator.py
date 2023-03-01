@@ -1074,13 +1074,13 @@ def write_expansion(fd, n_exp, bnf_parser):
 
         if n_exp.kind == "SYMBOL":
             fd.write("'")
-            fd.write(n_exp.value)
+            fd.write(html.escape(n_exp.value))
             fd.write("'")
 
         elif n_exp.kind == "TERMINAL":
             if n_exp.value in bnf_parser.token_kinds:
                 fd.write("<span class=\"tooltip\">")
-                fd.write("<a href=\"#bnf-%s\">" % n_exp.value)
+                fd.write("<a href=\"#bnf-%s\">" % html.escape(n_exp.value))
             fd.write(n_exp.value)
             if n_exp.value in bnf_parser.token_kinds:
                 fd.write("</a>")
@@ -1101,7 +1101,7 @@ def write_expansion(fd, n_exp, bnf_parser):
             if tooltip_text:
                 fd.write("<span class=\"tooltip\">")
             if n_exp.value in bnf_parser.productions:
-                fd.write("<a href=\"#bnf-%s\">" % n_exp.value)
+                fd.write("<a href=\"#bnf-%s\">" % html.escape(n_exp.value))
             fd.write(n_exp.value)
             if n_exp.value in bnf_parser.productions:
                 fd.write("</a>")
