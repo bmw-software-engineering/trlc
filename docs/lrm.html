@@ -144,7 +144,7 @@ A copy of the license is included in the section entitled "Appendix A: GNU Free 
   <li><a href="#sec:cfe9573cce03cb2912c44176c44378eb3eaec3c5">Null Values</a>
   </li>
 </ol>
-<h2><a name="sec:1babfba499a35bc8dd53df02b58c26f65fe9b497"></a>Design Goals</h2>
+<h2 id="sec:1babfba499a35bc8dd53df02b58c26f65fe9b497">Design Goals</h2>
 <div>
 It is important to have design goals for a language. The design goals of TRLC are:
 <ul>
@@ -155,8 +155,8 @@ It is important to have design goals for a language. The design goals of TRLC ar
   <li>No business logic should be encoded in the language design.</li>
 </ul>
 </div>
-<h2><a name="sec:a7d832e9bb00d9ab844f20e6fbf5d1d776afbacf"></a>Lexing</h2>
-<h3><a name="sec:6fae88d0d44b306c96b9a5cadd3577b36e2cec22"></a>Encoding</h3>
+<h2 id="sec:a7d832e9bb00d9ab844f20e6fbf5d1d776afbacf">Lexing</h2>
+<h3 id="sec:6fae88d0d44b306c96b9a5cadd3577b36e2cec22">Encoding</h3>
 <div>
 All input files are encoded in UTF-8. Passing a file with a different encoding to TRLC results in undefined behaviour.
 </div>
@@ -164,19 +164,19 @@ All input files are encoded in UTF-8. Passing a file with a different encoding t
 <div>
 It is recommended to try to detect this in an implementation and raise a fatal error; but in the interest of compatibility and sanity an implementation shall not provide a way to switch the encoding (at the command-line or otherwise).
 </div>
-<h3><a name="sec:2fffbe8811832e6bc87d8e87f5fe868af27c5884"></a>Whitespace and comments</h3>
+<h3 id="sec:2fffbe8811832e6bc87d8e87f5fe868af27c5884">Whitespace and comments</h3>
 <div>
 Whitespace is ignored.
 </div>
 <div>
 Comments are C-Style <code>/* .. */</code> and C++ style <code>//</code>, and are ignored. The matching for C-style comments is non-greedy.
 </div>
-<h3><a name="sec:e8ffb2f75005b380605ac7cd84bd1e8135d8d484"></a>Identifiers and keywords</h3>
+<h3 id="sec:e8ffb2f75005b380605ac7cd84bd1e8135d8d484">Identifiers and keywords</h3>
 <div>
 Identifiers start with a letter and are followed by letters, numbers, or underscores.
 </div>
 <div class='code'>
-<a name="bnf-IDENTIFIER"></a><code>IDENTIFIER ::= [a-zA-Z][a-zA-Z0-9_]*</code>
+<code id="bnf-IDENTIFIER">IDENTIFIER ::= [a-zA-Z][a-zA-Z0-9_]*</code>
 </div>
 <div>
 Examples:<ul>
@@ -189,7 +189,7 @@ Examples:<ul>
 There is also a legacy &quot;builtin&quot; identifier that is deprecated. It will be removed in a future major release.
 </div>
 <div class='code'>
-<a name="bnf-BUILTIN_IDENTIFIER"></a><code>BUILTIN_IDENTIFIER ::= [a-z]+:[a-zA-Z][a-zA-Z0-9_]*</code>
+<code id="bnf-BUILTIN_IDENTIFIER">BUILTIN_IDENTIFIER ::= [a-z]+:[a-zA-Z][a-zA-Z0-9_]*</code>
 </div>
 <div>
 Examples:<ul>
@@ -228,7 +228,7 @@ A keyword is an identifier that is one of the following reserved words:
   <li>xor</li>
 </ul>
 </div>
-<h3><a name="sec:aecefa911f304b068a66634b6c79442544731fcd"></a>Punctuation</h3>
+<h3 id="sec:aecefa911f304b068a66634b6c79442544731fcd">Punctuation</h3>
 <div>
 Single character delimiters:
 <ul>
@@ -249,12 +249,12 @@ Double character delimiters:
 <div>
 Preference is (obviously) given to longer delimiters if there is ambiguity; i.e. <code>==</code> takes precedence over two <code>=</code> tokens.
 </div>
-<h3><a name="sec:707590991971c8cbba0fcbbab41d495f5267f09b"></a>Integers</h3>
+<h3 id="sec:707590991971c8cbba0fcbbab41d495f5267f09b">Integers</h3>
 <div>
 Integers are base 10, and leading zeros are effectively ignored.
 </div>
 <div class='code'>
-<a name="bnf-INTEGER"></a><code>INTEGER ::= [0-9]+</code>
+<code id="bnf-INTEGER">INTEGER ::= [0-9]+</code>
 </div>
 <div>
 Examples:<ul>
@@ -263,12 +263,12 @@ Examples:<ul>
   <li>007</li>
 </ul>
 </div>
-<h3><a name="sec:a1e5f01b700e2c39a01c965ab74b3939b47b1a27"></a>Strings</h3>
+<h3 id="sec:a1e5f01b700e2c39a01c965ab74b3939b47b1a27">Strings</h3>
 <div>
 There are two versions of a string, double quoted and triple quoted:
 </div>
 <div class='code'>
-<a name="bnf-STRING"></a><code>STRING ::= (&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</code>
+<code id="bnf-STRING">STRING ::= (&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</code>
 </div>
 <div>
 Examples:<ul>
@@ -284,7 +284,7 @@ The value of a double quoted string is precisely the characters between the two 
 <div>
 The value of a triple quoted string is the whitespace trimmed string of characters between the triple quotes (including the line breaks), The common whitespace at the beginning of each line (ignoring blank lines) starting at the second is removed. The trailing whitespace on every line is removed. There is no escaping in a triple quoted string.
 </div>
-<h2><a name="sec:405023229ad0daa7843f23de4264ea6671dbd124"></a>Layout and file structure</h2>
+<h2 id="sec:405023229ad0daa7843f23de4264ea6671dbd124">Layout and file structure</h2>
 <div>
 There are three types of files:
 <ul>
@@ -304,18 +304,18 @@ After all files are parsed, references are resolved and user-defined checks are 
 <div>
 It is unspecified how an implementation treats errors in <code>.trlc</code> files, but it is recommended to not stop processing after the first error.
 </div>
-<h2><a name="sec:1b5022091302172b7af39971681b5b026fc2fa64"></a>Preamble</h2>
+<h2 id="sec:1b5022091302172b7af39971681b5b026fc2fa64">Preamble</h2>
 <div>
 All TRLC files start with a package indication.
 </div>
 <div class='code'>
 <pre>
-<a name="bnf-file_preamble"></a>file_preamble ::= <span class="tooltip"><a href="#bnf-package_indication">package_indication</a><span class="tooltiptext">package IDENTIFIER</span></span>
+<span id="bnf-file_preamble">file_preamble</span> ::= <span class="tooltip"><a href="#bnf-package_indication">package_indication</a><span class="tooltiptext">package IDENTIFIER</span></span>
                   { <span class="tooltip"><a href="#bnf-import_clause">import_clause</a><span class="tooltiptext">import IDENTIFIER</span></span> }
 
-<a name="bnf-package_indication"></a>package_indication ::= 'package' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i>
+<span id="bnf-package_indication">package_indication</span> ::= 'package' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i>
 
-<a name="bnf-import_clause"></a>import_clause ::= 'import' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i>
+<span id="bnf-import_clause">import_clause</span> ::= 'import' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i>
 </pre>
 </div>
 <h3>Static Semantics</h3>
@@ -328,13 +328,13 @@ A package declared in an RSL file may be imported, in which case its name may be
 <div>
 A package may not import itself.
 </div>
-<h2><a name="sec:347156ba7288ce580b92312542aba49980af6614"></a>Metamodel (RLS) files</h2>
+<h2 id="sec:347156ba7288ce580b92312542aba49980af6614">Metamodel (RLS) files</h2>
 <div>
 A <code>.rls</code> file starts with a package declaration and is followed by type declarations.
 </div>
 <div class='code'>
 <pre>
-<a name="bnf-rls_file"></a>rls_file ::= <span class="tooltip"><a href="#bnf-file_preamble">file_preamble</a><span class="tooltiptext">package_indication { import_clause }</span></span>
+<span id="bnf-rls_file">rls_file</span> ::= <span class="tooltip"><a href="#bnf-file_preamble">file_preamble</a><span class="tooltiptext">package_indication { import_clause }</span></span>
              { <a href="#bnf-type_declaration">type_declaration</a> | <span class="tooltip"><a href="#bnf-check_block">check_block</a><span class="tooltiptext">checks IDENTIFIER { { check_declaration } }</span></span> }
 </pre>
 </div>
@@ -371,10 +371,10 @@ A package also includes a number of builtin functions that are made available:
   <li>matches</li>
 </ul>
 </div>
-<h2><a name="sec:43e328fe39e0b1e73d78dfa274ada761910daa8d"></a>Described Names</h2>
+<h2 id="sec:43e328fe39e0b1e73d78dfa274ada761910daa8d">Described Names</h2>
 <div class='code'>
 <pre>
-<a name="bnf-described_name"></a>described_name ::= <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i> [ <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span><i>_description</i> ]
+<span id="bnf-described_name">described_name</span> ::= <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i> [ <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span><i>_description</i> ]
 </pre>
 </div>
 <h3>Static Semantics</h3>
@@ -387,10 +387,10 @@ Two described names are considered equal if their names are equal.
 <div>
 The description has no bearing on equality. The string description should be exported to the API, so that downstream tools can make use of it. This way we don&#x27;t have to give some comments special meaning, and we don&#x27;t have to implement error-prone heuristics in downstream tools for discovering these descriptions.
 </div>
-<h2><a name="sec:2b0ce86a93da5b26c4b4929399d43cfb10393c60"></a>Type declarations</h2>
+<h2 id="sec:2b0ce86a93da5b26c4b4929399d43cfb10393c60">Type declarations</h2>
 <div class='code'>
 <pre>
-<a name="bnf-type_declaration"></a>type_declaration ::= 'enum' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> <span class="tooltip"><a href="#bnf-enumeration_declaration">enumeration_declaration</a><span class="tooltiptext">{ { enumeration_literal_specification } }</span></span>
+<span id="bnf-type_declaration">type_declaration</span> ::= 'enum' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> <span class="tooltip"><a href="#bnf-enumeration_declaration">enumeration_declaration</a><span class="tooltiptext">{ { enumeration_literal_specification } }</span></span>
                    | 'type' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> <a href="#bnf-record_declaration">record_declaration</a>
 </pre>
 </div>
@@ -398,12 +398,12 @@ The description has no bearing on equality. The string description should be exp
 <div>
 It is an error to create a type with a name that already exists in the current package. (Note: this especially includes shadowing one of the builtin types.)
 </div>
-<h2><a name="sec:541918791ee5c9789a3fa79a547a313c021b753a"></a>Enumerations</h2>
+<h2 id="sec:541918791ee5c9789a3fa79a547a313c021b753a">Enumerations</h2>
 <div class='code'>
 <pre>
-<a name="bnf-enumeration_declaration"></a>enumeration_declaration ::= '{' { <span class="tooltip"><a href="#bnf-enumeration_literal_specification">enumeration_literal_specification</a><span class="tooltiptext">described_name</span></span> } '}'
+<span id="bnf-enumeration_declaration">enumeration_declaration</span> ::= '{' { <span class="tooltip"><a href="#bnf-enumeration_literal_specification">enumeration_literal_specification</a><span class="tooltiptext">described_name</span></span> } '}'
 
-<a name="bnf-enumeration_literal_specification"></a>enumeration_literal_specification ::= <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span>
+<span id="bnf-enumeration_literal_specification">enumeration_literal_specification</span> ::= <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span>
 </pre>
 </div>
 <h3>Static Semantics</h3>
@@ -430,10 +430,10 @@ It is not an error to have an enumeration literal with the same name as a record
   <span class="TRLC_IDENTIFIER">file_not_found</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2><a name="sec:590aeb2db73432d982c1e15e21c6b28a649cc293"></a>Qualified names</h2>
+<h2 id="sec:590aeb2db73432d982c1e15e21c6b28a649cc293">Qualified names</h2>
 <div class='code'>
 <pre>
-<a name="bnf-qualified_name"></a>qualified_name ::= [ <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_package_name</i> '.' ] <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i>
+<span id="bnf-qualified_name">qualified_name</span> ::= [ <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_package_name</i> '.' ] <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i>
 </pre>
 </div>
 <h3>Static Semantics</h3>
@@ -443,16 +443,16 @@ The package name of a qualified name must be the current package or an imported 
 <div>
 The name must be a valid symbol in the current scope (if no package is provided) or a valid symbol of the indicated package.
 </div>
-<h2><a name="sec:9aedc52d18c85a678921842cf6748e8e21be3b0b"></a>Record declarations</h2>
+<h2 id="sec:9aedc52d18c85a678921842cf6748e8e21be3b0b">Record declarations</h2>
 <div class='code'>
 <pre>
-<a name="bnf-record_declaration"></a>record_declaration ::= [ 'extends' <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_ROOT_TYPE</i> ]
+<span id="bnf-record_declaration">record_declaration</span> ::= [ 'extends' <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_ROOT_TYPE</i> ]
                        '{' { <a href="#bnf-component_declaration">component_declaration</a> } '}'
 
-<a name="bnf-component_declaration"></a>component_declaration ::= <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> [ 'optional' ]
+<span id="bnf-component_declaration">component_declaration</span> ::= <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> [ 'optional' ]
                           <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_COMPONENT_TYPE</i> [ <span class="tooltip"><a href="#bnf-array_declaration">array_declaration</a><span class="tooltiptext">[ INTEGER .. * ] | [ INTEGER .. INTEGER ]</span></span> ]
 
-<a name="bnf-array_declaration"></a>array_declaration ::= '[' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span><i>_lower</i> '..' '*' ']'
+<span id="bnf-array_declaration">array_declaration</span> ::= '[' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span><i>_lower</i> '..' '*' ']'
                     | '[' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span><i>_lower</i> '..' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span><i>_upper</i> ']'
 </pre>
 </div>
@@ -517,13 +517,13 @@ It is recommended to emit a warning on array types with an upper bound of one.
   <span class="TRLC_IDENTIFIER">supplier_id</span> <span class="TRLC_IDENTIFIER">Integer</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2><a name="sec:5103569cc5a86b8e2f77bec0c907d17d4a4567da"></a>Check Files</h2>
+<h2 id="sec:5103569cc5a86b8e2f77bec0c907d17d4a4567da">Check Files</h2>
 <div>
 A <code>.check</code> file is simply a set of check blocks.
 </div>
 <div class='code'>
 <pre>
-<a name="bnf-check_file"></a>check_file ::= <span class="tooltip"><a href="#bnf-package_indication">package_indication</a><span class="tooltiptext">package IDENTIFIER</span></span>
+<span id="bnf-check_file">check_file</span> ::= <span class="tooltip"><a href="#bnf-package_indication">package_indication</a><span class="tooltiptext">package IDENTIFIER</span></span>
                { <span class="tooltip"><a href="#bnf-check_block">check_block</a><span class="tooltiptext">checks IDENTIFIER { { check_declaration } }</span></span> }
 </pre>
 </div>
@@ -531,16 +531,16 @@ A <code>.check</code> file is simply a set of check blocks.
 <div>
 It is an error to indicate a package that has not been declared in an <code>.rsl</code> file.
 </div>
-<h2><a name="sec:e927d676860613a7cb2f750b822d434b0064ea5e"></a>Checks</h2>
+<h2 id="sec:e927d676860613a7cb2f750b822d434b0064ea5e">Checks</h2>
 <div class='code'>
 <pre>
-<a name="bnf-check_block"></a>check_block ::= 'checks' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_record_name</i>
+<span id="bnf-check_block">check_block</span> ::= 'checks' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_record_name</i>
                 '{' { <span class="tooltip"><a href="#bnf-check_declaration">check_declaration</a><span class="tooltiptext">expression , [ severity ] STRING [ , IDENTIFIER ]</span></span> } '}'
 
-<a name="bnf-check_declaration"></a>check_declaration ::= <a href="#bnf-expression">expression</a> ',' [ <span class="tooltip"><a href="#bnf-severity">severity</a><span class="tooltiptext">warning | error | fatal</span></span> ] <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span><i>_message</i>
+<span id="bnf-check_declaration">check_declaration</span> ::= <a href="#bnf-expression">expression</a> ',' [ <span class="tooltip"><a href="#bnf-severity">severity</a><span class="tooltiptext">warning | error | fatal</span></span> ] <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span><i>_message</i>
                       [ ',' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component_name</i> ]
 
-<a name="bnf-severity"></a>severity ::= 'warning'
+<span id="bnf-severity">severity</span> ::= 'warning'
            | 'error'
            | 'fatal'
 </pre>
@@ -598,30 +598,30 @@ It is an important design goal to keep the type system sane and following LSP. I
   <span class="TRLC_IDENTIFIER">value</span> <span class="TRLC_OPERATOR">**</span> <span class="TRLC_INTEGER">2</span> <span class="TRLC_OPERATOR">==</span> <span class="TRLC_INTEGER">25</span><span class="TRLC_COMMA">,</span> <span class="TRLC_KEYWORD">warning</span> <span class="TRLC_STRING">&quot;Value is not 5 or -5&quot;</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2><a name="sec:fbcc36b7c40a2a111a9fac98725ee86aa48ae5a0"></a>Expressions</h2>
+<h2 id="sec:fbcc36b7c40a2a111a9fac98725ee86aa48ae5a0">Expressions</h2>
 <div class='code'>
 <pre>
-<a name="bnf-expression"></a>expression ::= <a href="#bnf-relation">relation</a> { 'and' <a href="#bnf-relation">relation</a> }
+<span id="bnf-expression">expression</span> ::= <a href="#bnf-relation">relation</a> { 'and' <a href="#bnf-relation">relation</a> }
              | <a href="#bnf-relation">relation</a> { 'or' <a href="#bnf-relation">relation</a> }
              | <a href="#bnf-relation">relation</a> [ 'xor' <a href="#bnf-relation">relation</a> ]
              | <a href="#bnf-relation">relation</a> [ 'implies' <a href="#bnf-relation">relation</a> ]
 
-<a name="bnf-relation"></a>relation ::= <span class="tooltip"><a href="#bnf-simple_expression">simple_expression</a><span class="tooltiptext">[ adding_operator ] term { adding_operator term }</span></span> [ <span class="tooltip"><a href="#bnf-comparison_operator">comparison_operator</a><span class="tooltiptext">== | != | &lt; | &lt;= | &gt; | &gt;=</span></span> <span class="tooltip"><a href="#bnf-simple_expression">simple_expression</a><span class="tooltiptext">[ adding_operator ] term { adding_operator term }</span></span> ]
+<span id="bnf-relation">relation</span> ::= <span class="tooltip"><a href="#bnf-simple_expression">simple_expression</a><span class="tooltiptext">[ adding_operator ] term { adding_operator term }</span></span> [ <span class="tooltip"><a href="#bnf-comparison_operator">comparison_operator</a><span class="tooltiptext">== | != | &lt; | &lt;= | &gt; | &gt;=</span></span> <span class="tooltip"><a href="#bnf-simple_expression">simple_expression</a><span class="tooltiptext">[ adding_operator ] term { adding_operator term }</span></span> ]
            | <span class="tooltip"><a href="#bnf-simple_expression">simple_expression</a><span class="tooltiptext">[ adding_operator ] term { adding_operator term }</span></span> [ 'not' ] 'in' <span class="tooltip"><a href="#bnf-membership_choice">membership_choice</a><span class="tooltiptext">simple_expression .. simple_expression</span></span>
            | <span class="tooltip"><a href="#bnf-simple_expression">simple_expression</a><span class="tooltiptext">[ adding_operator ] term { adding_operator term }</span></span> [ 'not' ] 'in' <span class="tooltip"><a href="#bnf-simple_expression">simple_expression</a><span class="tooltiptext">[ adding_operator ] term { adding_operator term }</span></span>
 
-<a name="bnf-membership_choice"></a>membership_choice ::= <span class="tooltip"><a href="#bnf-simple_expression">simple_expression</a><span class="tooltiptext">[ adding_operator ] term { adding_operator term }</span></span> '..' <span class="tooltip"><a href="#bnf-simple_expression">simple_expression</a><span class="tooltiptext">[ adding_operator ] term { adding_operator term }</span></span>
+<span id="bnf-membership_choice">membership_choice</span> ::= <span class="tooltip"><a href="#bnf-simple_expression">simple_expression</a><span class="tooltiptext">[ adding_operator ] term { adding_operator term }</span></span> '..' <span class="tooltip"><a href="#bnf-simple_expression">simple_expression</a><span class="tooltiptext">[ adding_operator ] term { adding_operator term }</span></span>
 
-<a name="bnf-simple_expression"></a>simple_expression ::= [ <span class="tooltip"><a href="#bnf-adding_operator">adding_operator</a><span class="tooltiptext">+ | -</span></span> ]
+<span id="bnf-simple_expression">simple_expression</span> ::= [ <span class="tooltip"><a href="#bnf-adding_operator">adding_operator</a><span class="tooltiptext">+ | -</span></span> ]
                       <span class="tooltip"><a href="#bnf-term">term</a><span class="tooltiptext">factor { multiplying_operator factor }</span></span> { <span class="tooltip"><a href="#bnf-adding_operator">adding_operator</a><span class="tooltiptext">+ | -</span></span> <span class="tooltip"><a href="#bnf-term">term</a><span class="tooltiptext">factor { multiplying_operator factor }</span></span> }
 
-<a name="bnf-term"></a>term ::= <span class="tooltip"><a href="#bnf-factor">factor</a><span class="tooltiptext">primary [ ** primary ] | not primary | abs primary</span></span> { <span class="tooltip"><a href="#bnf-multiplying_operator">multiplying_operator</a><span class="tooltiptext">* | / | %</span></span> <span class="tooltip"><a href="#bnf-factor">factor</a><span class="tooltiptext">primary [ ** primary ] | not primary | abs primary</span></span> }
+<span id="bnf-term">term</span> ::= <span class="tooltip"><a href="#bnf-factor">factor</a><span class="tooltiptext">primary [ ** primary ] | not primary | abs primary</span></span> { <span class="tooltip"><a href="#bnf-multiplying_operator">multiplying_operator</a><span class="tooltiptext">* | / | %</span></span> <span class="tooltip"><a href="#bnf-factor">factor</a><span class="tooltiptext">primary [ ** primary ] | not primary | abs primary</span></span> }
 
-<a name="bnf-factor"></a>factor ::= <a href="#bnf-primary">primary</a> [ '**' <a href="#bnf-primary">primary</a> ]
+<span id="bnf-factor">factor</span> ::= <a href="#bnf-primary">primary</a> [ '**' <a href="#bnf-primary">primary</a> ]
          | 'not' <a href="#bnf-primary">primary</a>
          | 'abs' <a href="#bnf-primary">primary</a>
 
-<a name="bnf-primary"></a>primary ::= <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span>
+<span id="bnf-primary">primary</span> ::= <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span>
           | <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span>
           | 'true'
           | 'false'
@@ -651,16 +651,16 @@ The parsing of unary minus can be confusing: <code>-a % b</code> is actually <co
     <span class="TRLC_KEYWORD">warning</span> <span class="TRLC_STRING">&quot;cb link is suspiciously small&quot;</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2><a name="sec:e45bf89f4cee2eb28d331c49b46029d82b15382c"></a>Names</h2>
+<h2 id="sec:e45bf89f4cee2eb28d331c49b46029d82b15382c">Names</h2>
 <div class='code'>
 <pre>
-<a name="bnf-name"></a>name ::= <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span>
+<span id="bnf-name">name</span> ::= <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span>
        | <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span> [ '.' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_literal</i> ]
        | <a href="#bnf-name">name</a> '[' <a href="#bnf-expression">expression</a> ']'
        | <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_builtin_function</i> '(' <span class="tooltip"><a href="#bnf-parameter_list">parameter_list</a><span class="tooltiptext">expression { , expression }</span></span> ')'
        | <span class="tooltip"><a href="#bnf-BUILTIN_IDENTIFIER">BUILTIN_IDENTIFIER</a><span class="tooltiptext">[a-z]+:[a-zA-Z][a-zA-Z0-9_]*</span></span> '(' <span class="tooltip"><a href="#bnf-parameter_list">parameter_list</a><span class="tooltiptext">expression { , expression }</span></span> ')'
 
-<a name="bnf-parameter_list"></a>parameter_list ::= <a href="#bnf-expression">expression</a> { ',' <a href="#bnf-expression">expression</a> }
+<span id="bnf-parameter_list">parameter_list</span> ::= <a href="#bnf-expression">expression</a> { ',' <a href="#bnf-expression">expression</a> }
 </pre>
 </div>
 <h3>Static Semantics</h3>
@@ -707,20 +707,20 @@ Name resolution is case sensitive.
   <span class="TRLC_COMMENT">// name that is an array index</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2><a name="sec:26bd85a87e980cbb3cc597e9842ced0133d46633"></a>Operators</h2>
+<h2 id="sec:26bd85a87e980cbb3cc597e9842ced0133d46633">Operators</h2>
 <div class='code'>
 <pre>
-<a name="bnf-comparison_operator"></a>comparison_operator ::= '=='
+<span id="bnf-comparison_operator">comparison_operator</span> ::= '=='
                       | '!='
                       | '&lt;'
                       | '&lt;='
                       | '&gt;'
                       | '&gt;='
 
-<a name="bnf-adding_operator"></a>adding_operator ::= '+'
+<span id="bnf-adding_operator">adding_operator</span> ::= '+'
                   | '-'
 
-<a name="bnf-multiplying_operator"></a>multiplying_operator ::= '*'
+<span id="bnf-multiplying_operator">multiplying_operator</span> ::= '*'
                        | '/'
                        | '%'
 </pre>
@@ -736,7 +736,7 @@ It is implementation defined if type checks (range or length) are performed for 
 <div>
 <i>(This means you either type check all the time, or you guarantee that any intermediate will not create an error in the implementation, as long as the final value fits in the relevant type. For example if A and B are maximum length Strings, then <code>&quot;potato&quot; in A + B</code> may either create an error when attempting to concatenate the strings, OR it must work correctly. What you cannot do is cause undefined behaviour in the evaluation.)</i>
 </div>
-<h3><a name="sec:1b7d2da842f3f6074070526b5a4a3c424dcc604a"></a>Logical operators</h3>
+<h3 id="sec:1b7d2da842f3f6074070526b5a4a3c424dcc604a">Logical operators</h3>
 <h4>Static Semantics</h4>
 <div>
 There are five Boolean operators defined (not, and, or, xor, implies) for expressions of Boolean type. The type of the result is Boolean.
@@ -748,7 +748,7 @@ Operators with short-cut semantics are <code>and</code>, <code>or</code>, and <c
 <div>
 Operators with standard semantics are <code>xor</code>, and <code>not</code>. They do the usual thing.
 </div>
-<h3><a name="sec:6853dd1f3f0e39c6d5d79baddfca46e8c9f0f9dc"></a>Relational operators and membership tests</h3>
+<h3 id="sec:6853dd1f3f0e39c6d5d79baddfca46e8c9f0f9dc">Relational operators and membership tests</h3>
 <h4>Static Semantics</h4>
 <div>
 The equality operators <code>==</code> and <code>!=</code> are defined for all types, as long as the types are compatible, i.e. they are the same types or one type is a (transitive) extension of the other. The result is a Boolean.
@@ -781,7 +781,7 @@ The meaning of the substring test is the usual. <i>(Note that the substring test
 <div>
 The array membership test <code>X in A</code> is equivalent to <code>(exists item in A =&gt; item == X)</code>. The array non-membership test <code>X not in A</code> is equivalent to <code>(forall item in A =&gt; item != X)</code>.
 </div>
-<h3><a name="sec:4cfc517e70194486df511c43ed091f8aacc89d72"></a>Adding operators</h3>
+<h3 id="sec:4cfc517e70194486df511c43ed091f8aacc89d72">Adding operators</h3>
 <h4>Static Semantics</h4>
 <div>
 The binary adding operator <code>+</code> is defined for both Integers and Strings. The binary subtraction operator <code>-</code> is defined for only Integers.
@@ -799,7 +799,7 @@ The definition of <code>+</code> and <code>-</code> for Integers is the usual on
 <div>
 The definition of <code>+</code> for Strings is String concatenation.
 </div>
-<h3><a name="sec:f5d45ad47a83ce6dd7573306a9ee187e6342f5bb"></a>Multiplying operators</h3>
+<h3 id="sec:f5d45ad47a83ce6dd7573306a9ee187e6342f5bb">Multiplying operators</h3>
 <h4>Static Semantics</h4>
 <div>
 The multiplying operators <code>*</code>, <code>/</code>, and <code>%</code> are defined only for Integer types. The result is an Integer.
@@ -821,7 +821,7 @@ The modulus division for <code>x % y</code> satisfies the relation <code>x = y*N
 <div>
 Division by zero or modulo division by 0 is an error.
 </div>
-<h3><a name="sec:775410b4cb9a8b0b8469f6d72d31fe25d0cbb54a"></a>Highest precedence operators</h3>
+<h3 id="sec:775410b4cb9a8b0b8469f6d72d31fe25d0cbb54a">Highest precedence operators</h3>
 <h4>Static Semantics</h4>
 <div>
 The exponentiation operator <code>**</code> is defined for Integers only, and returns an Integer.
@@ -844,13 +844,13 @@ The definition of absolute value <code>abs</code> is the usual one.
 <div>
 The definition of logical negation <code>not</code> is the usual one.
 </div>
-<h2><a name="sec:bcc19cc6284b0508f332d585fa6ddb294172206c"></a>Quantification</h2>
+<h2 id="sec:bcc19cc6284b0508f332d585fa6ddb294172206c">Quantification</h2>
 <div class='code'>
 <pre>
-<a name="bnf-quantified_expression"></a>quantified_expression ::= <span class="tooltip"><a href="#bnf-quantifier">quantifier</a><span class="tooltiptext">forall | exists</span></span> <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i> 'in' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component_name</i> '=&gt;'
+<span id="bnf-quantified_expression">quantified_expression</span> ::= <span class="tooltip"><a href="#bnf-quantifier">quantifier</a><span class="tooltiptext">forall | exists</span></span> <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i> 'in' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component_name</i> '=&gt;'
                           <a href="#bnf-expression">expression</a><i>_PREDICATE</i>
 
-<a name="bnf-quantifier"></a>quantifier ::= 'forall'
+<span id="bnf-quantifier">quantifier</span> ::= 'forall'
              | 'exists'
 </pre>
 </div>
@@ -883,10 +883,10 @@ In general Quantification is equivalent to a chain of <code>and</code> or <code>
   <li>For static analysis or linting, use non-short-circuit semantics, as using a quantifier as a complex guard is not reasonable.</li>
 </ul>
 </div>
-<h2><a name="sec:c3ae93a78e6ebf08327c53ca69b9e5d308148660"></a>Conditional expressions</h2>
+<h2 id="sec:c3ae93a78e6ebf08327c53ca69b9e5d308148660">Conditional expressions</h2>
 <div class='code'>
 <pre>
-<a name="bnf-conditional_expression"></a>conditional_expression ::= 'if' <a href="#bnf-expression">expression</a><i>_CONDITION</i> 'then' <a href="#bnf-expression">expression</a><i>_DEPENDENT</i>
+<span id="bnf-conditional_expression">conditional_expression</span> ::= 'if' <a href="#bnf-expression">expression</a><i>_CONDITION</i> 'then' <a href="#bnf-expression">expression</a><i>_DEPENDENT</i>
                            { 'elsif' <a href="#bnf-expression">expression</a><i>_CONDITION</i> 'then' <a href="#bnf-expression">expression</a><i>_DEPENDENT</i> }
                            'else' <a href="#bnf-expression">expression</a><i>_DEPENDENT</i>
 </pre>
@@ -902,41 +902,41 @@ Each condition is evaluated in sequence. Evaluation stops on the first condition
 <div>
 If all condition are evaluated to false, then the else dependent expression is evaluated and returned.
 </div>
-<h2><a name="sec:0a6f86b9bdb92972913eb249076315dce5a0d5db"></a>TRLC Files</h2>
+<h2 id="sec:0a6f86b9bdb92972913eb249076315dce5a0d5db">TRLC Files</h2>
 <div>
 A <code>.trlc</code> file is simply a set of record object declarations.
 </div>
 <div class='code'>
 <pre>
-<a name="bnf-trlc_file"></a>trlc_file ::= <span class="tooltip"><a href="#bnf-file_preamble">file_preamble</a><span class="tooltiptext">package_indication { import_clause }</span></span>
+<span id="bnf-trlc_file">trlc_file</span> ::= <span class="tooltip"><a href="#bnf-file_preamble">file_preamble</a><span class="tooltiptext">package_indication { import_clause }</span></span>
               { <span class="tooltip"><a href="#bnf-trlc_entry">trlc_entry</a><span class="tooltiptext">section_declaration | record_object_declaration</span></span> }
 
-<a name="bnf-trlc_entry"></a>trlc_entry ::= <span class="tooltip"><a href="#bnf-section_declaration">section_declaration</a><span class="tooltiptext">section STRING { { trlc_entry } }</span></span>
+<span id="bnf-trlc_entry">trlc_entry</span> ::= <span class="tooltip"><a href="#bnf-section_declaration">section_declaration</a><span class="tooltiptext">section STRING { { trlc_entry } }</span></span>
              | <a href="#bnf-record_object_declaration">record_object_declaration</a>
 </pre>
 </div>
 <div>
 <i>(Note that it is possible to indicate a package that has not been declared in an <code>.rsl</code> file, in which case it is declared by the package_indication. Note that such a package cannot be imported in by other <code>.trlc</code> files.)</i>
 </div>
-<h2><a name="sec:6c2981b99c4b49558783bd900a1dc95a00a454f0"></a>Sections</h2>
+<h2 id="sec:6c2981b99c4b49558783bd900a1dc95a00a454f0">Sections</h2>
 <div>
 A section has no semantic impact, and no impact on name resolution. Section names do not have to be unique. It may be exposed in an API, for example to section a HTML view of requirements.
 </div>
 <div class='code'>
 <pre>
-<a name="bnf-section_declaration"></a>section_declaration ::= 'section' <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span><i>_section_name</i>
+<span id="bnf-section_declaration">section_declaration</span> ::= 'section' <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span><i>_section_name</i>
                         '{' { <span class="tooltip"><a href="#bnf-trlc_entry">trlc_entry</a><span class="tooltiptext">section_declaration | record_object_declaration</span></span> } '}'
 </pre>
 </div>
-<h2><a name="sec:874acaf9dea40145e68e30cd5668278b883fb037"></a>Record object declarations</h2>
+<h2 id="sec:874acaf9dea40145e68e30cd5668278b883fb037">Record object declarations</h2>
 <div class='code'>
 <pre>
-<a name="bnf-record_object_declaration"></a>record_object_declaration ::= <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span> <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i>
+<span id="bnf-record_object_declaration">record_object_declaration</span> ::= <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span> <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i>
                               '{' { <span class="tooltip"><a href="#bnf-component_association">component_association</a><span class="tooltiptext">IDENTIFIER = value</span></span> } '}'
 
-<a name="bnf-component_association"></a>component_association ::= <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component_name</i> '=' <a href="#bnf-value">value</a>
+<span id="bnf-component_association">component_association</span> ::= <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component_name</i> '=' <a href="#bnf-value">value</a>
 
-<a name="bnf-value"></a>value ::= [ <span class="tooltip"><a href="#bnf-adding_operator">adding_operator</a><span class="tooltiptext">+ | -</span></span> ] <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span>
+<span id="bnf-value">value</span> ::= [ <span class="tooltip"><a href="#bnf-adding_operator">adding_operator</a><span class="tooltiptext">+ | -</span></span> ] <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span>
         | <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span>
         | <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_RECORD_OBJECT</i>
         | <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_ENUM_TYPE</i> '.' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_enumeration_literal</i>
@@ -991,7 +991,7 @@ When exposing record instances through the API, it is required to make the type 
   <li>Provide the type information through the type system of the API language (e.g. the Python type system).</li>
 </ul>
 </div>
-<h2><a name="sec:cfe9573cce03cb2912c44176c44378eb3eaec3c5"></a>Null Values</h2>
+<h2 id="sec:cfe9573cce03cb2912c44176c44378eb3eaec3c5">Null Values</h2>
 <h3>Static Semantics</h3>
 <div>
 The null value has a polymorphic type that matches the required type given by context.

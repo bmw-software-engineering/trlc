@@ -587,9 +587,10 @@ class BNF_Parser:
 
 
 def write_heading(fd, name, depth, anchor=None):
-    fd.write("<h%u>" % depth)
     if anchor:
-        fd.write("<a name=\"%s\"></a>" % anchor)
+        fd.write("<h%u id=\"%s\">" % (depth, anchor))
+    else:
+        fd.write("<h%u>" % depth)
     fd.write(html.escape(name))
     fd.write("</h%u>\n" % depth)
 
@@ -843,8 +844,9 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
     if obj.e_typ.name == "Terminal":
         match = re.match("([A-Z_]+) *::= *(.*)", data["def"])
         fd.write("<div class='code'>\n")
-        fd.write("<a name=\"bnf-%s\"></a>" % match.group(1))
-        fd.write("<code>%s</code>\n" % html.escape(data["def"]))
+        fd.write("<code id=\"bnf-%s\">%s</code>\n" %
+                 (match.group(1),
+                  html.escape(data["def"])))
         fd.write("</div>\n")
         fd.write("<div>\n")
         fd.write("Examples:")
@@ -1010,7 +1012,7 @@ def write_example(fd, mh, obj):
 
 def write_production(fd, production, bnf_parser):
     # Write indicator with anchor
-    fd.write("<a name=\"bnf-%s\"></a>%s ::= " %
+    fd.write("<span id=\"bnf-%s\">%s</span> ::= " %
              (production, production))
     n_exp = bnf_parser.productions[production]
     alt_offset = len(production) + 3
