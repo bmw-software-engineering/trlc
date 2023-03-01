@@ -8,9 +8,11 @@ style:
 	@python3 -m pycodestyle trlc trlc*.py
 
 test:
+	coverage run -p --rcfile=tests/coverage.cfg --branch --data-file tests/.coverage ./trlc-lrm-generator.py
 	make -C tests -B -j6 fast
 
 test-all:
+	coverage run -p --rcfile=tests/coverage.cfg --branch --data-file tests/.coverage ./trlc-lrm-generator.py
 	make -C tests -B -j6 all
 
 docs:
