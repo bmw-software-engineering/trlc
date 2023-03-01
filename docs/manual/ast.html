@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AST &#8212; TRLC 1.0.8 documentation</title>
+    <title>AST &#8212; TRLC 1.0.9 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
     
@@ -29,7 +29,7 @@
         <li class="right" >
           <a href="errors.html" title="Error handling and reporting"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.9 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">AST</a></li> 
       </ul>
     </div>  
@@ -758,6 +758,7 @@ refers to a <a class="reference internal" href="#trlc.ast.Record_Component" titl
 <li><p>Binary_Operator.STRING_STARTSWITH (e.g. <code class="docutils literal notranslate"><span class="pre">startswith(&quot;foo&quot;,</span> <span class="pre">&quot;f&quot;)</span></code>)</p></li>
 <li><p>Binary_Operator.STRING_ENDSWITH (e.g. <code class="docutils literal notranslate"><span class="pre">endswith(&quot;foo&quot;,</span> <span class="pre">&quot;o&quot;)</span></code>)</p></li>
 <li><p>Binary_Operator.STRING_REGEX (e.g. <code class="docutils literal notranslate"><span class="pre">matches(&quot;foo&quot;,</span> <span class="pre">&quot;.o.</span></code>)</p></li>
+<li><p>Binary_Operator.ARRAY_CONTAINS (e.g. <code class="docutils literal notranslate"><span class="pre">42</span> <span class="pre">in</span> <span class="pre">arr</span></code>)</p></li>
 <li><p>Binary_Operator.PLUS (e.g. <code class="docutils literal notranslate"><span class="pre">42</span> <span class="pre">+</span> <span class="pre">b</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;foo&quot;</span> <span class="pre">+</span> <span class="pre">bar</span></code>)</p></li>
 <li><p>Binary_Operator.MINUS (e.g. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">-</span> <span class="pre">1</span></code>)</p></li>
 <li><p>Binary_Operator.TIMES (e.g. <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">x</span></code>)</p></li>
@@ -896,12 +897,12 @@ of all actions and the else expression will match.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trlc.ast.Quantified_Expression">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Quantified_Expression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_expr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Quantified_Expression" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Quantified_Expression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">universal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_expr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Quantified_Expression" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">Expression</span></code></a></p>
 <p>A quantified expression</p>
 <p>For example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">forall</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">array_component</span> <span class="o">=&gt;</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="o">^</span><span class="mi">1</span>   <span class="o">^</span><span class="mi">2</span>                 <span class="o">^^^^^</span><span class="mi">3</span>
+ <span class="o">^</span><span class="mi">4</span>     <span class="o">^</span><span class="mi">1</span>   <span class="o">^</span><span class="mi">2</span>                 <span class="o">^^^^^</span><span class="mi">3</span>
 </pre></div>
 </div>
 <p>A quantified expression introduces and binds a
@@ -926,6 +927,12 @@ each component of the source in turn.</p>
 </dd>
 <dt class="field-even">Type</dt>
 <dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a></p>
+</dd>
+<dt class="field-odd">Attribute universal</dt>
+<dd class="field-odd"><p>True means forall, false means exists (see 4)</p>
+</dd>
+<dt class="field-even">Type</dt>
+<dd class="field-even"><p>Boolean</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1306,7 +1313,7 @@ Package, then the following error is issued:</p>
         <li class="right" >
           <a href="errors.html" title="Error handling and reporting"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.8 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.9 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">AST</a></li> 
       </ul>
     </div>
