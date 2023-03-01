@@ -703,7 +703,7 @@ def write_footer(fd, script_name):
     with open("language-reference-manual/LICENSE.html_fragment", "r",
               encoding="UTF-8") as fd_lic:
         fd.write(fd_lic.read())
-    fd.write("</body>\n")
+    fd.write("<hr>\n")
     fd.write("<footer>\n")
     gh_root = "https://github.com/bmw-software-engineering"
     gh_project = "trlc"
@@ -711,6 +711,7 @@ def write_footer(fd, script_name):
              (gh_root, gh_project, script_name))
     fd.write("TRLC LRM Generator</a>\n")
     fd.write("</footer>\n")
+    fd.write("</body>\n")
     fd.write("</html>\n")
 
 
