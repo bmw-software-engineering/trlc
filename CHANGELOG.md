@@ -12,7 +12,7 @@ None.
 ## Changelog
 
 
-### 1.0.9-dev
+### 1.0.9
 
 * [LRM] The LRM for TRLC is [now written in
   TRLC](https://github.com/bmw-software-engineering/trlc/tree/main/language-reference-manual). There
