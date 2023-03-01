@@ -600,7 +600,7 @@ def write_header(fd, obj_version, obj_license):
                                                                ver["minor"])
 
     fd.write("<!DOCTYPE html>\n")
-    fd.write("<html>\n")
+    fd.write("<html lang=\"en\">\n")
     fd.write("<head>\n")
     fd.write("<title>%s</title>\n" % title)
     fd.write("<meta name=\"viewport\" "
@@ -668,7 +668,6 @@ def write_header(fd, obj_version, obj_license):
     fd.write(".tooltip:hover .tooltiptext {\n")
     fd.write("  visibility: visible;\n")
     fd.write("}\n")
-    fd.write("</style>\n")
     fd.write("</style>\n")
     fd.write("</head>\n")
     fd.write("<body>\n")
@@ -752,7 +751,7 @@ def section_hashes(section):
 def fmt_text(text):
     text = " ".join(text.replace("\n", " ").split())
     text = html.escape(text)
-    text = re.sub(r"`(.*?)`", "<tt>\\1</tt>", text)
+    text = re.sub(r"`(.*?)`", "<code>\\1</code>", text)
     text = re.sub(r"\*\((.*?)\)\*", "<i>(\\1)</i>", text)
     return text
 
@@ -1086,7 +1085,7 @@ def write_expansion(fd, n_exp, bnf_parser):
             if n_exp.value in bnf_parser.token_kinds:
                 fd.write("</a>")
                 fd.write("<span class=\"tooltiptext\">%s</span>" %
-                         bnf_parser.token_kinds[n_exp.value])
+                         html.escape(bnf_parser.token_kinds[n_exp.value]))
                 fd.write("</span>")
             if n_exp.name:
                 fd.write("<i>_%s</i>" % n_exp.name)
@@ -1108,7 +1107,7 @@ def write_expansion(fd, n_exp, bnf_parser):
                 fd.write("</a>")
             if tooltip_text:
                 fd.write("<span class=\"tooltiptext\">%s</span>" %
-                         tooltip_text)
+                         html.escape(tooltip_text))
                 fd.write("</span>")
             if n_exp.name:
                 fd.write("<i>_%s</i>" % n_exp.name)
