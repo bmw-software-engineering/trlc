@@ -1,0 +1,11 @@
+package Example
+
+R potato {}
+
+R test_1 {
+  foo = 1 potato 2 potato = potato
+}
+
+R test_2 {
+  foo = 1 potato = potato
+}

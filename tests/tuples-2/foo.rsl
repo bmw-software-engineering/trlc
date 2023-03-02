@@ -1,0 +1,12 @@
+package Example
+
+tuple T {
+  x         Integer
+  separator potato
+  y         optional Integer
+}
+
+type R {
+  foo    optional T
+  potato optional R
+}
