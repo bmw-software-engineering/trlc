@@ -1,0 +1,9 @@
+package Foo
+
+List firstList {
+  values = ["one", "two", "three"]
+}
+
+anotherList secondList {
+  values = ["one"]
+}

@@ -17,6 +17,9 @@ None.
 * [TRLC] Fix issue where TRLC could sometimes return 0 instead of 1 if
   there were non-fatal errors.
 
+* [TRLC] Fix missing array length checks. Arrays now correctly have
+  their desired size enforced.
+
 ### 1.0.9
 
 * [LRM] The LRM for TRLC is [now written in

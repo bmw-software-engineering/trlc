@@ -1,0 +1,2 @@
+foo.trlc:4:27: trlc error: this array requires at most 2 elements (3 provided)
+foo.trlc:8:18: trlc error: this array requires at least 2 elements (only 1 provided)

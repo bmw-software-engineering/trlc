@@ -1,0 +1,9 @@
+package Foo
+
+type List {
+  values String [0 .. 2]
+}
+
+type anotherList {
+  values String [2 .. *]
+}

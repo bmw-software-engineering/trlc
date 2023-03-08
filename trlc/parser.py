@@ -888,6 +888,22 @@ class Parser:
                 if self.peek("COMMA"):
                     self.match("COMMA")
             self.match("S_KET")
+
+            if len(rv.value) < typ.lower_bound:
+                self.mh.error(self.ct.location,
+                              "this array requires at least %u elements "
+                              "(only %u provided)" %
+                              (typ.lower_bound,
+                               len(rv.value)),
+                              fatal=False)
+            if typ.upper_bound and len(rv.value) > typ.upper_bound:
+                self.mh.error(rv.value[typ.upper_bound].location,
+                              "this array requires at most %u elements "
+                              "(%u provided)" %
+                              (typ.upper_bound,
+                               len(rv.value)),
+                              fatal=False)
+
             # TODO: Check length
 
             return rv
