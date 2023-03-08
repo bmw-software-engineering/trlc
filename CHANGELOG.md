@@ -14,7 +14,8 @@ None.
 
 ### 1.0.10-dev
 
-
+* [TRLC] Fix issue where TRLC could sometimes return 0 instead of 1 if
+  there were non-fatal errors.
 
 ### 1.0.9
 

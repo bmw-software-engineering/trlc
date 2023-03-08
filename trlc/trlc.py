@@ -19,6 +19,7 @@
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import sys
 import json
 from argparse import ArgumentParser
 
@@ -359,8 +360,12 @@ def main():
             for obj in sm.stab.iter_record_objects():
                 tmp[obj.name] = obj.to_python_dict()
             print(json.dumps(tmp, indent=2, sort_keys=True))
+
+    if sm.mh.errors:
+        return 1
+    else:
         return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
