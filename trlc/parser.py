@@ -676,7 +676,7 @@ class Parser:
         elif n_name.name in ("matches", "trlc:matches"):
             parameters[1].ensure_type(self.mh, ast.Builtin_String)
             try:
-                # TODO: Fix scope for evaluate()
+                # scope is None on purpose to enforce static context
                 value = parameters[1].evaluate(self.mh, None)
                 assert isinstance(value.typ, ast.Builtin_String)
                 re.compile(value.value)
@@ -904,8 +904,6 @@ class Parser:
                                len(rv.value)),
                               fatal=False)
 
-            # TODO: Check length
-
             return rv
 
         elif isinstance(typ, ast.Enumeration_Type):
@@ -923,8 +921,6 @@ class Parser:
                                            lit)
 
         elif isinstance(typ, ast.Record_Type):
-            # TODO: Defer name resolution?
-            # TODO: Type check
             self.match("IDENTIFIER")
             t_name = self.ct
             if self.peek("DOT"):
