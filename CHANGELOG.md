@@ -14,7 +14,10 @@ None.
 
 ### 1.0.11-dev
 
-
+* [TRLC] You can now provide more than one directory on the
+  command-line to process, as well as individual files. If no files or
+  directories are provided the default is now to analyse the currenty
+  directory `.` including all sub-directories.
 
 ### 1.0.10
 

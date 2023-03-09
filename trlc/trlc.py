@@ -335,18 +335,34 @@ def main():
                     default=False,
                     action="store_true",
                     help="simpler output intended for CI")
-    ap.add_argument("dir_name",
-                    metavar="DIR")
+    ap.add_argument("items",
+                    nargs="*",
+                    metavar="DIR|FILE")
     options = ap.parse_args()
 
     mh = Message_Handler(options.brief)
     sm = Source_Manager(mh, options.lint)
 
-    if not os.path.isdir(options.dir_name):
-        ap.error("%s is not a directory" % options.dir_name)
+    for path_name in options.items:
+        if not (os.path.isdir(path_name) or
+                os.path.isfile(path_name)):
+            ap.error("%s is not a file or directory" % path_name)
 
-    # Process input files
-    ok = sm.register_directory(options.dir_name)
+    # Process input files, defaulting to the current directory if none
+    # given.
+    ok = True
+    if options.items:
+        for path_name in options.items:
+            if os.path.isdir(path_name):
+                ok &= sm.register_directory(path_name)
+            else:
+                try:
+                    ok &= sm.register_file(path_name)
+                except TRLC_Error:
+                    ok = False
+    else:
+        ok &= sm.register_directory(".")
+
     if not ok:
         return 1
 
