@@ -12,7 +12,7 @@ None.
 ## Changelog
 
 
-### 1.0.11-dev
+### 1.0.11
 
 * [TRLC] You can now provide more than one directory on the
   command-line to process, as well as individual files. If no files or
