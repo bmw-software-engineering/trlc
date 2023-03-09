@@ -20,6 +20,7 @@ docs:
 	sphinx-build -c sphinx -b html . docs
 	@python3 trlc-lrm-generator.py
 	git add docs
+	git commit -m "Re-generate documentation for release."
 
 package:
 	@git clean -xdf
@@ -28,7 +29,7 @@ package:
 upload_main: package
 	python3 -m twine upload --repository pypi dist/*
 
-release:
+remove_dev:
 	python3 -m util.release
 
 github_release:
@@ -37,3 +38,13 @@ github_release:
 
 bump:
 	python3 -m util.bump_version_post_release
+
+full_release:
+	make remove_dev
+	make docs
+	git push
+	make package
+	make upload_main
+	make github_release
+	make bump
+	git push
