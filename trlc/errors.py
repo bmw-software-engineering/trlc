@@ -126,6 +126,15 @@ class Message_Handler:
         self.brief    = brief
         self.warnings = 0
         self.errors   = 0
+        self.sm       = None
+
+    def cross_file_reference(self, location):
+        assert isinstance(location, Location)
+
+        if self.sm is None:
+            return location.to_string(include_column=False)
+        else:
+            return self.sm.cross_file_reference(location)
 
     def emit(self, location, kind, message, fatal=True):
         assert isinstance(location, Location)

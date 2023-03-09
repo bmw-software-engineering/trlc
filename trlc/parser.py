@@ -557,7 +557,7 @@ class Parser:
                           "shadows %s %s from %s" %
                           (pdef.__class__.__name__,
                            pdef.name,
-                           pdef.location.to_string(False)))
+                           self.mh.cross_file_reference(pdef.location)))
         self.match_kw("in")
         self.match("IDENTIFIER")
         field = scope.lookup(self.mh, self.ct, ast.Record_Component)
@@ -981,7 +981,7 @@ class Parser:
                         obj.location,
                         "required component %s (see %s) is not defined" %
                         (comp.name,
-                         comp.location.to_string(False)))
+                         self.mh.cross_file_reference(comp.location)))
                 else:
                     obj.assign(comp, ast.Implicit_Null(obj, comp))
 

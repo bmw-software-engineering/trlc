@@ -19,6 +19,11 @@ None.
   directories are provided the default is now to analyse the currenty
   directory `.` including all sub-directories.
 
+* [TRLC] In error messages that reference another file+location more
+  of the path is now shown to help you find the problem. For example
+  instead of `previous definition at foo.rsl:1` you now would get
+  `previous definition at potato/foo.rsl:1`.
+
 ### 1.0.10
 
 * [TRLC] Fix issue where TRLC could sometimes return 0 instead of 1 if

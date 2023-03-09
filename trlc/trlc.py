@@ -50,12 +50,38 @@ class Source_Manager:
         assert isinstance(lint_mode, bool)
 
         self.mh          = mh
+        self.mh.sm       = self
         self.stab        = ast.Symbol_Table.create_global_table(mh)
         self.rsl_files   = {}
         self.check_files = {}
         self.trlc_files  = {}
         self.packages    = {}
         self.lint_mode   = lint_mode
+
+        self.common_root    = None
+
+    def cross_file_reference(self, location):
+        assert isinstance(location, Location)
+
+        if self.common_root is None:
+            return location.to_string(False)
+        else:
+            return "%s:%u" % (os.path.relpath(location.file_name,
+                                              self.common_root),
+                              location.line_no)
+
+    def update_common_root(self, file_name):
+        assert isinstance(file_name, str)
+
+        if self.common_root is None:
+            self.common_root = os.path.dirname(os.path.abspath(file_name))
+        else:
+            new_root = os.path.dirname(os.path.abspath(file_name))
+            for n, (char_a, char_b) in enumerate(zip(self.common_root,
+                                                     new_root)):
+                if char_a != char_b:
+                    self.common_root = self.common_root[0:n]
+                    break
 
     def create_parser(self, file_name):
         assert os.path.isfile(file_name)
@@ -137,6 +163,8 @@ class Source_Manager:
         assert os.path.isfile(file_name)
         assert file_name not in self.rsl_files
 
+        self.update_common_root(file_name)
+
         self.rsl_files[file_name] = self.create_parser(file_name)
         self.rsl_files[file_name].parse_rsl_header()
 
@@ -152,12 +180,14 @@ class Source_Manager:
         assert os.path.isfile(file_name)
         assert file_name not in self.check_files
 
+        self.update_common_root(file_name)
         self.check_files[file_name] = self.create_parser(file_name)
 
     def register_trlc_file(self, file_name):
         assert os.path.isfile(file_name)
         assert file_name not in self.trlc_files
 
+        self.update_common_root(file_name)
         self.trlc_files[file_name] = self.create_parser(file_name)
 
     def parse_rsl_files(self):

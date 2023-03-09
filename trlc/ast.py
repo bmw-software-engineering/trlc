@@ -789,7 +789,7 @@ class Unary_Expression(Expression):
             mh.error(v_operand.location,
                      "input to unary expression %s (%s) must not be null" %
                      (self.to_string(),
-                      self.location.to_string(False)))
+                      mh.cross_file_reference(self.location)))
 
         if self.operator == Unary_Operator.MINUS:
             return Value(location = self.location,
@@ -1001,7 +1001,7 @@ class Binary_Expression(Expression):
             mh.error(v_lhs.location,
                      "lhs of check %s (%s) must not be null" %
                      (self.to_string(),
-                      self.location.to_string(False)))
+                      mh.cross_file_reference(self.location)))
 
         # Check for the short-circuit operators first
         if self.operator == Binary_Operator.LOGICAL_AND:
@@ -1035,7 +1035,7 @@ class Binary_Expression(Expression):
             mh.error(v_rhs.location,
                      "rhs of check %s (%s) must not be null" %
                      (self.to_string(),
-                      self.location.to_string(False)))
+                      mh.cross_file_reference(self.location)))
 
         if self.operator == Binary_Operator.LOGICAL_XOR:
             assert isinstance(v_lhs.value, bool)
@@ -1133,7 +1133,7 @@ class Binary_Expression(Expression):
                 mh.error(v_rhs.location,
                          "division by zero in %s (%s)" %
                          (self.to_string(),
-                          self.location.to_string(False)))
+                          mh.cross_file_reference(self.location)))
 
             return Value(location = self.location,
                          value    = v_lhs.value // v_rhs.value,
@@ -1147,7 +1147,7 @@ class Binary_Expression(Expression):
                 mh.error(v_rhs.location,
                          "division by zero in %s (%s)" %
                          (self.to_string(),
-                          self.location.to_string(False)))
+                          mh.cross_file_reference(self.location)))
 
             return Value(location = self.location,
                          value    = math.remainder(v_lhs.value, v_rhs.value),
@@ -1168,19 +1168,19 @@ class Binary_Expression(Expression):
                 mh.error(v_rhs.location,
                          "index cannot be less than zero in %s (%s)" %
                          (self.to_string(),
-                          self.location.to_string(False)))
+                          mh.cross_file_reference(self.location)))
             elif v_lhs.typ.upper_bound is not None and \
                  v_rhs.value > v_lhs.typ.upper_bound:
                 mh.error(v_rhs.location,
                          "index cannot be more than %u in %s (%s)" %
                          (v_lhs.typ.upper_bound,
                           self.to_string(),
-                          self.location.to_string(False)))
+                          mh.cross_file_reference(self.location)))
             elif v_rhs.value > len(v_lhs.value):
                 mh.error(v_lhs.location,
                          "array is not big enough in %s (%s)" %
                          (self.to_string(),
-                          self.location.to_string(False)))
+                          mh.cross_file_reference(self.location)))
 
             return Value(location = self.location,
                          value    = v_lhs.value[v_rhs.value].value,
@@ -1242,21 +1242,21 @@ class Range_Test(Expression):
             mh.error(v_lhs.location,
                      "lhs of range check %s (%s) see must not be null" %
                      (self.to_string(),
-                      self.location.to_string(False)))
+                      mh.cross_file_reference(self.location)))
 
         v_lower = self.n_lower.evaluate(mh, context)
         if v_lower.value is None:
             mh.error(v_lower.location,
                      "lower bound of range check %s (%s) must not be null" %
                      (self.to_string(),
-                      self.location.to_string(False)))
+                      mh.cross_file_reference(self.location)))
 
         v_upper = self.n_upper.evaluate(mh, context)
         if v_upper.value is None:
             mh.error(v_upper.location,
                      "upper bound of range check %s (%s) must not be null" %
                      (self.to_string(),
-                      self.location.to_string(False)))
+                      mh.cross_file_reference(self.location)))
 
         return Value(location = self.location,
                      value    = v_lower.value <= v_lhs.value <= v_upper.value,
@@ -1393,7 +1393,7 @@ class Conditional_Expression(Expression):
                 mh.error(v_cond.location,
                          "condition of %s (%s) must not be null" %
                          (action.to_string(),
-                          action.location.to_string(False)))
+                          mh.cross_file_reference(self.location)))
             if v_cond.value:
                 return action.n_expr.evaluate(mh, context)
 
@@ -1480,7 +1480,7 @@ class Quantified_Expression(Expression):
                      "must not be null" %
                      (self.n_source.to_string(),
                       self.to_string(),
-                      self.location.to_string(False)))
+                      mh.cross_file_reference(self.location)))
         else:
             assert isinstance(array_values, Array_Aggregate)
 
@@ -2054,7 +2054,7 @@ class Symbol_Table:
             pdef = self.lookup_direct(mh, entity.name, entity.location)
             mh.error(entity.location,
                      "duplicate definition, previous definition at %s" %
-                     pdef.location.to_string(include_column=False))
+                     mh.cross_file_reference(pdef.location))
 
         else:
             self.table[entity.name] = entity

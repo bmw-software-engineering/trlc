@@ -1,0 +1,2 @@
+package Foo
+        ^^^ bar.rsl:1: error: duplicate definition, previous definition at potato/foo.rsl:1
