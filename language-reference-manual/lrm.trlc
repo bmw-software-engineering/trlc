@@ -2,7 +2,7 @@ package LRM
 
 Versioning Version {
   major = 2
-  minor = 4
+  minor = 5
 }
 
 GFDL_License License {
@@ -155,6 +155,15 @@ section "Lexing" {
     }
   }
 
+  section "Decimals" {
+    Terminal Decimals {
+      text = '''Decimals are base 10, and leading and trailing zeros are
+                effectively ignored.'''
+      def = "DECIMAL ::= [0-9]+\.[0-9]+"
+      examples = ["12.0", "3.14", "0.0800"]
+    }
+  }
+
   section "Strings" {
     Terminal Strings {
       text = '''There are two versions of a string, double quoted and
@@ -298,6 +307,7 @@ section "Metamodel (RLS) files" {
     bullets = [
       "Boolean",
       "Integer",
+      "Decimal",
       "String"
     ]
   }
@@ -312,6 +322,18 @@ section "Metamodel (RLS) files" {
     text = '''An `Integer` is a signed integer, with an implementation
               defined range. This range shall be at least
               -1000 to 1000, and this can be infinite.'''
+  }
+
+  Semantics Decimal_Values {
+    kind = Kind.Static
+    text = '''A `Decimal` is a signed rational with a power-of-ten
+              denominator, with an implementation defined
+              range. This range for the numerator shall be
+              at least -1000 to 1000, and denominator is
+              always a natural number with a range of at
+              least 1 to 1000. Any of these ranges can be
+              infinite (but the denominator is always
+              non-negative).'''
   }
 
   Semantics String_Values {
@@ -332,6 +354,16 @@ section "Metamodel (RLS) files" {
       "startswith",
       "endswith",
       "matches"
+    ]
+  }
+
+  Semantics Builtin_Type_Conversion_Functions {
+    kind = Kind.Static
+    text = '''A package also makes available a number of numeric type
+              conversion functions:'''
+    bullets = [
+      "Integer",
+      "Decimal"
     ]
   }
 }
@@ -587,7 +619,7 @@ section "Record declarations" {
 
         asil optional ASIL
 
-        codebeamer_link Integer [1..*]
+        codebeamer_link Integer [1 .. *]
       }
 
       type Supplier_Requirement extends Requirement {
@@ -793,6 +825,7 @@ section "Expressions" {
   Grammar Primary {
     bnf = '''
       primary ::= INTEGER
+                | DECIMAL
                 | STRING
                 | 'true'
                 | 'false'
@@ -894,6 +927,15 @@ section "Names" {
               variable.'''
   }
 
+  Semantics Signature_Type_Conversion {
+    kind = Kind.Static
+    text = '''The numeric type conversion functions are of arity 1 and
+              polymorphic (they are defined for both integer and
+              rationals). They return the type indicated by the function
+              name. *(They are polymorphic in case we want to introduce
+              a true rational type, or a floating point type.)*'''
+  }
+
   Semantics Len_Semantics {
     kind = Kind.Dynamic
     text = '''The `len` function computes the length of the given string
@@ -921,6 +963,18 @@ section "Names" {
               the second parameter.'''
   }
 
+  Semantics Integer_Conversion_Semantics {
+    kind = Kind.Dynamic
+    text = '''The `Integer` type conversion rounds to the nearest
+              integral, away from zero in the case of ties.'''
+  }
+
+  Semantics Decimal_Conversion_Semantics {
+    kind = Kind.Dynamic
+    text = '''The `Decimal` type conversion simply converts
+              the given integer to the exact same rational.'''
+  }
+
   Name_Resolution Case_Sensitive {
     text = '''Name resolution is case sensitive.'''
   }
@@ -934,6 +988,7 @@ section "Names" {
          bar Name_Examples
          asil ASIL
          potato Integer [0 .. *]
+         wibble Decimal
          field String
       }
     '''
@@ -947,6 +1002,9 @@ section "Names" {
 
         potato[3] < potato[2], "foo"
         // name that is an array index
+
+        Decimal(potato[0]) < wibble, "foo"
+        // note that type conversion is necessary
       }
     '''
   }
@@ -1025,20 +1083,23 @@ section "Operators" {
       text = '''The equality operators `==` and `!=` are defined for all
                 types, as long as the types are compatible,
                 i.e. they are the same types or one type is
-                a (transitive) extension of the other. The
+                a (transitive) record extension of the other. The
                 result is a Boolean.'''
     }
 
     Semantics Relational_Domain {
       kind = Kind.Static
       text = '''The ordering relations `<`, `<=`, `>=`, and `>` are defined
-                for integers only. The result is a Boolean.'''
+                for pairs of integers or pairs of rationals only. The result
+                is a Boolean.'''
     }
 
     Semantics Membership_Domain {
       kind = Kind.Static
       text = '''Range membership tests `not in` and `in` are defined for
-                Integers only. The result is a Boolean.'''
+                integers and rationals only. All operands
+                must have the same type, and the result is a
+                Boolean.'''
     }
 
     Semantics Substring_Domain {
@@ -1099,15 +1160,17 @@ section "Operators" {
 
     Semantics Binary_Addition_Domain {
       kind = Kind.Static
-      text = '''The binary adding operator `+` is defined for both Integers
-                and Strings. The binary subtraction operator
-                `-` is defined for only Integers.'''
+      text = '''The binary adding operator `+` is defined for integers,
+                rationals, and strings. The binary
+                subtraction operator `-` is defined for only
+                integers and rationals.'''
     }
 
     Semantics Unary_Addition_Domain {
       kind = Kind.Static
       text = '''The unary adding operator `+`, and the unary subtraction
-                operator `-` is defined only for Integers.'''
+                operator `-` is defined only for integers
+                and rationals.'''
     }
 
     Semantics Adding_Types {
@@ -1115,17 +1178,19 @@ section "Operators" {
       text = '''For binary adding operators the types of the operands have
                 to match, and the result is the same type as
                 the two operands. For unary adding operators
-                the result is always Integer.'''
+                the result is always the same as the
+                operand.'''
     }
 
     Semantics Adding_Semantics {
       kind = Kind.Dynamic
-      text = '''The definition of `+` and `-` for Integers is the usual one.'''
+      text = '''The definition of `+` and `-` for integers and rationals is
+                the usual one.'''
     }
 
     Semantics Concatenation_Semantics {
       kind = Kind.Dynamic
-      text = '''The definition of `+` for Strings is String concatenation.'''
+      text = '''The definition of `+` for strings is string concatenation.'''
     }
 
   }
@@ -1134,8 +1199,11 @@ section "Operators" {
 
     Semantics Multiplying_Domain {
       kind = Kind.Static
-      text = '''The multiplying operators `*`, `/`, and `%` are defined only
-                for Integer types. The result is an Integer.'''
+      text = '''The multiplying operators `*`, `/` are defined for integers
+                and rational types. The remainder operator
+                `%` is defined for integers only. For any of
+                these the result is always the same type as
+                the operands.'''
 
     }
 
@@ -1144,10 +1212,16 @@ section "Operators" {
       text = '''The definition of `*` is the usual one.'''
     }
 
-    Semantics Division_Semantics {
+    Semantics Integer_Division_Semantics {
       kind = Kind.Dynamic
-      text = '''The definition of `/` is floor division. *(For example `-5 /
-                2` is `2` and `-5 / 2` is `-3`.)*'''
+      text = '''The definition of `/` for integers is floor division. *(For
+                example `-5 / 2` is `2` and `-5 / 2` is
+                `-3`.)*'''
+    }
+
+    Semantics Rational_Division_Semantics {
+      kind = Kind.Dynamic
+      text = '''The definition of `/` for rationals is the usual one.'''
     }
 
     Semantics Remainder_Semantics {
@@ -1172,8 +1246,10 @@ section "Operators" {
 
     Semantics Power_Domain {
       kind = Kind.Static
-      text = '''The exponentiation operator `**` is defined for Integers
-                only, and returns an Integer.'''
+      text = '''The exponentiation operator `**` is defined for integers and
+                rations bases, and returns the same type as
+                its base. The exponent type is always an
+                Integer.'''
     }
 
     Semantics Power_Static_Exponent {
@@ -1188,8 +1264,8 @@ section "Operators" {
     Semantics Absolute_Value_Domain {
       kind = Kind.Static
       text = '''The absolute value prefix operator `abs` is defined for
-                Integers only, and returns a (positive)
-                Integer.'''
+                integers and rationals, and returns a
+                (positive) integer or rational respectively.'''
     }
 
     Semantics Negation_Domain {
@@ -1379,6 +1455,7 @@ section "Record object declarations" {
       component_association ::= IDENTIFIER_component_name '=' value
 
       value ::= [ adding_operator ] INTEGER
+              | [ adding_operator ] DECIMAL
               | STRING
               | qualified_name_RECORD_OBJECT
               | qualified_name_ENUM_TYPE '.' IDENTIFIER_enumeration_literal

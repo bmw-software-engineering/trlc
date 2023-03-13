@@ -1,0 +1,9 @@
+package Foo
+
+type T {
+  D Decimal
+}
+
+checks T {
+  0.0 + D + D + D == 3.0 * D, warning "rounding error", D
+}

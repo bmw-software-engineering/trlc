@@ -1,0 +1,2 @@
+  D in 0 .. 10, warning "potato", D
+       ^ foo.rsl:8: error: expected expression of type Decimal, got Integer instead

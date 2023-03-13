@@ -13,69 +13,109 @@ checks T {
    yay implies yay, "04: good implies"
    yay implies nay, warning "04: bad implies"
 
-   one < two, "05: good <"
-   one < one, warning "05: bad <"
+   ione < itwo, "05: good i<"
+   ione < ione, warning "05: bad i<"
 
-   one <= one, "06: good <="
-   two <= one, warning "06: bad <="
+   done < dtwo, "06: good d<"
+   done < done, warning "06: bad d<"
 
-   two > one, "07: good >"
-   two > two, warning "07: bad >"
+   ione <= ione, "07: good i<="
+   itwo <= ione, warning "07: bad i<="
 
-   two >= one, "08: good >="
-   one >= two, warning "08: bad >="
+   done <= done, "08: good d<="
+   dtwo <= done, warning "08: bad d<="
 
-   one == one, "09: good =="
-   one == two, warning "09: bad =="
+   itwo > ione, "09: good i>"
+   itwo > itwo, warning "09: bad i>"
 
-   one != two, "10: good !="
-   one != one, warning "10: bad !="
+   dtwo > done, "10: good d>"
+   dtwo > dtwo, warning "10: bad d>"
 
-   one in 0 .. 10, "11: good range in"
-   one in 5 .. 10, warning "11: bad range in"
+   itwo >= ione, "11: good i>="
+   ione >= itwo, warning "11: bad i>="
 
-   one not in 5 .. 10, "12: good range not in"
-   one not in 0 .. 10, warning "12: bad range not in"
+   dtwo >= done, "12: good d>="
+   done >= dtwo, warning "12: bad d>="
 
-   foo in foobar, "13: good substring"
-   foobar in foo, warning "13: bad substring"
+   ione == ione, "13: good i=="
+   ione == itwo, warning "13: bad i=="
 
-   (-one) + one + two == two, "14: good adding"
-   (+one) + one + two == two, warning "14: bad adding (1/2)"
-   (-one) + one - two == two, warning "14: bad adding (2/2)"
+   done == done, "14: good d=="
+   done == dtwo, warning "14: bad d=="
 
-   one * two * one * two == two + two, "15: good *"
-   one * two * two * two == two + two, warning "15: bad *"
+   ione != itwo, "15: good i!="
+   ione != ione, warning "15: bad i!="
 
-   10 / two / two == two, "15: good /"
-   10 / two / two == 3, warning "15: bad /"
+   done != dtwo, "16: good d!="
+   done != done, warning "16: bad d!="
 
-   10 % 5 == 0,        "16: good % (1/12)"
-   11 % 5 == 1,        "16: good % (2/12)"
-   14 % 5 == 4,        "16: good % (3/12)"
-   (-10) % 5 == 0,     "16: good % (4/12)"
-   (-11) % 5 == -1,    "16: good % (5/12)"
-   (-14) % 5 == -4,    "16: good % (6/12)"
-   10 % (-5) == 0,     "16: good % (7/12)"
-   11 % (-5) == 1,     "16: good % (8/12)"
-   14 % (-5) == 4,     "16: good % (9/12)"
-   (-10) % (-5) == 0,  "16: good % (10/12)"
-   (-11) % (-5) == -1, "16: good % (11/12)"
-   (-14) % (-5) == -4, "16: good % (12/12)"
-   (-11) % 5 == 4,     warning "16: bad % (1/4)"
-   (-14) % 5 == 1,     warning "16: bad % (2/4)"
-   11 % (-5) == -4,    warning "16: bad % (3/4)"
-   14 % (-5) == -1,    warning "16: bad % (4/4)"
+   ione in 0 .. 10, "17: good range iin"
+   ione in 5 .. 10, warning "17: bad range iin"
 
-   two ** (2 + 1) == 8, "17: good exp"
-   two ** (2 + 1) == 9, warning "17: bad exp"
+   done in 0.0 .. 10.0, "18: good range din"
+   done in 5.0 .. 10.0, warning "18: bad range din"
 
-   not nay, "18: good lnot"
-   not yay, warning "18: bad lnot"
+   ione not in 5 .. 10, "19: good range not iin"
+   ione not in 0 .. 10, warning "19: bad range not iin"
 
-   abs (one - two) == one, "19: good abs"
-   abs (one - two) == (-one), "19: bad abs"
+   done not in 5.0 .. 10.0, "20: good range not din"
+   done not in 0.0 .. 10.0, warning "20: bad range not din"
 
-   (if yay then one else two) == one, "20: good ifexpr"
-   (if nay then one else two) == one, "20: bad ifexpr"
+   foo in foobar, "21: good substring"
+   foobar in foo, warning "21: bad substring"
+
+   (-ione) + ione + itwo == itwo, "22: good i adding"
+   (+ione) + ione + itwo == itwo, warning "22: bad i adding (1/2)"
+   (-ione) + ione - itwo == itwo, warning "22: bad i adding (2/2)"
+
+   (-done) + done + dtwo == dtwo, "23: good d adding"
+   (+done) + done + dtwo == dtwo, warning "23: bad d adding (1/2)"
+   (-done) + done - dtwo == dtwo, warning "23: bad d adding (2/2)"
+
+   ione * itwo * ione * itwo == itwo + itwo, "24: good i*"
+   ione * itwo * itwo * itwo == itwo + itwo, warning "24: bad i*"
+
+   done * dtwo * done * dtwo == dtwo + dtwo, "25: good d*"
+   done * dtwo * dtwo * dtwo == dtwo + dtwo, warning "25: bad d*"
+
+   10 / itwo / itwo == itwo, "26: good i/"
+   10 / itwo / itwo == 3, warning "26: bad i/"
+
+   10.0 / dtwo / dtwo == 2.5, "27: good d/"
+   10.0 / dtwo / dtwo == 2.0, warning "27: bad d/"
+
+   10 % 5 == 0,        "28: good % (1/12)"
+   11 % 5 == 1,        "28: good % (2/12)"
+   14 % 5 == 4,        "28: good % (3/12)"
+   (-10) % 5 == 0,     "28: good % (4/12)"
+   (-11) % 5 == -1,    "28: good % (5/12)"
+   (-14) % 5 == -4,    "28: good % (6/12)"
+   10 % (-5) == 0,     "28: good % (7/12)"
+   11 % (-5) == 1,     "28: good % (8/12)"
+   14 % (-5) == 4,     "28: good % (9/12)"
+   (-10) % (-5) == 0,  "28: good % (10/12)"
+   (-11) % (-5) == -1, "28: good % (11/12)"
+   (-14) % (-5) == -4, "28: good % (12/12)"
+   (-11) % 5 == 4,     warning "28: bad % (1/4)"
+   (-14) % 5 == 1,     warning "28: bad % (2/4)"
+   11 % (-5) == -4,    warning "28: bad % (3/4)"
+   14 % (-5) == -1,    warning "28: bad % (4/4)"
+
+   itwo ** (2 + 1) == 8, "29: good iexp"
+   itwo ** (2 + 1) == 9, warning "29: bad iexp"
+
+   dtwo ** (2 + 1) == 8.0, "30: good dexp"
+   dtwo ** (2 + 1) == 9.0, warning "30: bad dexp"
+
+   not nay, "31: good lnot"
+   not yay, warning "31: bad lnot"
+
+   abs (ione - itwo) == ione, "32: good iabs"
+   abs (ione - itwo) == (-ione), warning "32: bad iabs"
+
+   abs (done - dtwo) == done, "33: good dabs"
+   abs (done - dtwo) == (-done), warning "33: bad dabs"
+
+   (if yay then ione else itwo) == ione, "34: good ifexpr"
+   (if nay then ione else itwo) == ione, warning "34: bad ifexpr"
 }

@@ -1,0 +1,16 @@
+package Foo
+
+T Test_1 {
+  D = 4.9
+  I = 5
+}
+
+T Test_2 {
+  D = 5.0
+  I = 5
+}
+
+T Test_3 {
+  D = -5.0
+  I = -5
+}

@@ -18,6 +18,10 @@
 # You should have received a copy of the GNU General Public License
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
+from fractions import Fraction
+from math import floor, ceil
+
+
 def remainder(lhs, rhs):
     assert isinstance(lhs, int)
     assert isinstance(rhs, int)
@@ -28,3 +32,12 @@ def remainder(lhs, rhs):
         return mod
     else:
         return -mod
+
+
+def round_nearest_away(value):
+    assert isinstance(value, Fraction)
+
+    if value >= Fraction(0):
+        return floor(value + Fraction(1, 2))
+    else:
+        return ceil(value - Fraction(1, 2))

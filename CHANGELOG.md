@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 2.4 of [TRLC language reference
+Up to date with version 2.5 of [TRLC language reference
 manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
@@ -14,7 +14,15 @@ None.
 
 ### 1.0.12-dev
 
+* [TRLC, LRM] New type `Decimal` which allows you to specify values
+  such as `0.1` with infinite precision. These are a subset of
+  rational numbers.
 
+* [TRLC, LRM] New implicitly declared built-in functions `Integer` and
+  `Decimal` which can be used to convert a value to an `Integer` and
+  `Decimal` respectively. The language does not support implicit
+  conversion, you will have to make sure all types are converted
+  correctly yourself.
 
 ### 1.0.11
 

@@ -1,0 +1,20 @@
+  D = 5.0
+      ^^^ foo.trlc:9: check warning: D is not less that I
+  D = -5.0
+      ^ foo.trlc:14: check warning: D is not less that I
+  D = -5.0
+      ^ foo.trlc:14: check warning: D is not positive
+{
+  "Test_1": {
+    "D": 4.9,
+    "I": 5
+  },
+  "Test_2": {
+    "D": 5.0,
+    "I": 5
+  },
+  "Test_3": {
+    "D": -5.0,
+    "I": -5
+  }
+}

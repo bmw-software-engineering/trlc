@@ -24,6 +24,7 @@ from copy import copy
 from difflib import get_close_matches
 from enum import Enum, auto
 from collections import OrderedDict
+from fractions import Fraction
 
 from trlc.errors import Location, Message_Handler
 from trlc.lexer import Token
@@ -53,8 +54,8 @@ class Value:
     :type: Location
 
     :attribute value: the value or None (for null values)
-    :type: str, int, bool, list[Value], Record_Reference, \
-    Enumeration_Literal_Spec
+    :type: str, int, bool, fractions.Fraction, list[Value], \
+    Record_Reference, Enumeration_Literal_Spec
 
     :attribute typ: type of the value (or None for null values)
     :type: Type
@@ -66,6 +67,7 @@ class Value:
                                int,
                                bool,
                                list,
+                               Fraction,
                                Record_Reference,
                                Enumeration_Literal_Spec))
         assert typ is None or isinstance(typ, Type)
@@ -119,6 +121,7 @@ class Node:
             Symbol_Table
                Builtin_Boolean
                Builtin_Integer
+               Builtin_Decimal
                Builtin_String
                Package bar
                   Symbol_Table
@@ -251,6 +254,9 @@ class Unary_Operator(Enum):
     STRING_LENGTH  = auto()
     ARRAY_LENGTH   = auto()
 
+    CONVERSION_TO_INT     = auto()
+    CONVERSION_TO_DECIMAL = auto()
+
 
 class Binary_Operator(Enum):
     LOGICAL_AND     = auto()    # Short-circuit
@@ -320,12 +326,17 @@ class Expression(Node):
             self.__class__.__name__
 
     def ensure_type(self, mh, typ):
-        assert isinstance(typ, type)
-        if not isinstance(self.typ, typ):
+        assert isinstance(typ, (type, Type))
+        if isinstance(typ, type) and not isinstance(self.typ, typ):
             mh.error(self.location,
                      "expected expression of type %s, got %s instead" %
                      (typ.__name__,
                       self.typ.__class__.__name__))
+        elif isinstance(typ, Type) and self.typ != typ:
+            mh.error(self.location,
+                     "expected expression of type %s, got %s instead" %
+                     (typ.name,
+                      self.typ.name))
 
     def resolve_references(self, mh):
         assert isinstance(mh, Message_Handler)
@@ -449,6 +460,48 @@ class Integer_Literal(Literal):
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Integer Literal %u" % self.value)
+
+    def to_string(self):
+        return str(self.value)
+
+    def evaluate(self, mh, context):
+        assert isinstance(mh, Message_Handler)
+        assert context is None or isinstance(context, dict)
+        return Value(self.location, self.value, self.typ)
+
+    def to_python_object(self):
+        return self.value
+
+
+class Decimal_Literal(Literal):
+    """Decimal literals
+
+    Note that these are always positive. A negative decimal is
+    actually a unary negation expression, operating on a positive
+    decimal literal::
+
+      x == -5.0
+
+    This would create the following tree::
+
+       OP_EQUALITY
+          NAME_REFERENCE x
+          UNARY_EXPRESSION -
+             DECIMAL_LITERAL 5.0
+
+    :attribute value: the non-negative decimal value
+    :type: fractions.Fraction
+    """
+    def __init__(self, token, typ):
+        assert isinstance(token, Token)
+        assert token.kind == "DECIMAL"
+        assert isinstance(typ, Builtin_Decimal)
+        super().__init__(token.location, typ)
+
+        self.value = token.value
+
+    def dump(self, indent=0):  # pragma: no cover
+        self.write_indent(indent, "Decimal Literal %u" % self.value)
 
     def to_string(self):
         return str(self.value)
@@ -743,6 +796,8 @@ class Unary_Expression(Expression):
     * Unary_Operator.LOGICAL_NOT (e.g. ``not True``)
     * Unary_Operator.STRING_LENGTH (e.g. ``len("foobar")``)
     * Unary_Operator.ARRAY_LENGTH (e.g. ``len(component_name)``)
+    * Unary_Operator.CONVERSION_TO_INT (e.g. ``Integer(5.3)``)
+    * Unary_Operator.CONVERSION_TO_DECIMAL (e.g. ``Decimal(5)``)
 
     Note that several builtin functions are mapped to unary operators.
 
@@ -764,13 +819,17 @@ class Unary_Expression(Expression):
         if operator in (Unary_Operator.MINUS,
                         Unary_Operator.PLUS,
                         Unary_Operator.ABSOLUTE_VALUE):
-            self.n_operand.ensure_type(mh, Builtin_Integer)
+            self.n_operand.ensure_type(mh, Builtin_Numeric_Type)
         elif operator == Unary_Operator.LOGICAL_NOT:
             self.n_operand.ensure_type(mh, Builtin_Boolean)
         elif operator == Unary_Operator.STRING_LENGTH:
             self.n_operand.ensure_type(mh, Builtin_String)
         elif operator == Unary_Operator.ARRAY_LENGTH:
             self.n_operand.ensure_type(mh, Array_Type)
+        elif operator == Unary_Operator.CONVERSION_TO_INT:
+            self.n_operand.ensure_type(mh, Builtin_Numeric_Type)
+        elif operator == Unary_Operator.CONVERSION_TO_DECIMAL:
+            self.n_operand.ensure_type(mh, Builtin_Numeric_Type)
         else:
             mh.ice_loc(self.location,
                        "unexpected unary operation %s" % operator)
@@ -811,6 +870,20 @@ class Unary_Expression(Expression):
                                Unary_Operator.ARRAY_LENGTH):
             return Value(location = self.location,
                          value    = len(v_operand.value),
+                         typ      = self.typ)
+        elif self.operator == Unary_Operator.CONVERSION_TO_INT:
+            if isinstance(v_operand.value, Fraction):
+                return Value(
+                    location = self.location,
+                    value    = math.round_nearest_away(v_operand.value),
+                    typ      = self.typ)
+            else:
+                return Value(location = self.location,
+                             value    = v_operand.value,
+                             typ      = self.typ)
+        elif self.operator == Unary_Operator.CONVERSION_TO_DECIMAL:
+            return Value(location = self.location,
+                         value    = Fraction(v_operand.value),
                          typ      = self.typ)
         else:
             mh.ice_loc(self.location,
@@ -856,8 +929,8 @@ class Binary_Expression(Expression):
 
     Note that several builtin functions are mapped to unary operators.
 
-    Note also that the plus operation is supported for both integers
-    and strings.
+    Note also that the plus operation is supported for integers,
+    rationals and strings.
 
     :attribute operator: the operation
     :type: Binary_Operator
@@ -903,8 +976,8 @@ class Binary_Expression(Expression):
                           Binary_Operator.COMP_LEQ,
                           Binary_Operator.COMP_GT,
                           Binary_Operator.COMP_GEQ):
-            self.n_lhs.ensure_type(mh, Builtin_Integer)
-            self.n_rhs.ensure_type(mh, Builtin_Integer)
+            self.n_lhs.ensure_type(mh, Builtin_Numeric_Type)
+            self.n_rhs.ensure_type(mh, self.n_lhs.typ)
 
         elif operator in (Binary_Operator.STRING_CONTAINS,
                           Binary_Operator.STRING_STARTSWITH,
@@ -918,17 +991,23 @@ class Binary_Expression(Expression):
             self.n_lhs.ensure_type(mh, self.n_rhs.typ.element_type.__class__)
 
         elif operator == Binary_Operator.PLUS:
-            if isinstance(self.n_lhs.typ, Builtin_Integer):
-                self.n_rhs.ensure_type(mh, Builtin_Integer)
+            if isinstance(self.n_lhs.typ, Builtin_Numeric_Type):
+                self.n_rhs.ensure_type(mh, self.n_lhs.typ)
             else:
                 self.n_lhs.ensure_type(mh, Builtin_String)
                 self.n_rhs.ensure_type(mh, Builtin_String)
 
         elif operator in (Binary_Operator.MINUS,
                           Binary_Operator.TIMES,
-                          Binary_Operator.DIVIDE,
-                          Binary_Operator.REMAINDER,
-                          Binary_Operator.POWER):
+                          Binary_Operator.DIVIDE):
+            self.n_lhs.ensure_type(mh, Builtin_Numeric_Type)
+            self.n_rhs.ensure_type(mh, self.n_lhs.typ)
+
+        elif operator == Binary_Operator.POWER:
+            self.n_lhs.ensure_type(mh, Builtin_Numeric_Type)
+            self.n_rhs.ensure_type(mh, Builtin_Integer)
+
+        elif operator == Binary_Operator.REMAINDER:
             self.n_lhs.ensure_type(mh, Builtin_Integer)
             self.n_rhs.ensure_type(mh, Builtin_Integer)
 
@@ -1105,29 +1184,29 @@ class Binary_Expression(Expression):
                          typ      = self.typ)
 
         elif self.operator == Binary_Operator.PLUS:
-            assert isinstance(v_lhs.value, (int, str))
-            assert isinstance(v_rhs.value, (int, str))
+            assert isinstance(v_lhs.value, (int, str, Fraction))
+            assert isinstance(v_rhs.value, (int, str, Fraction))
             return Value(location = self.location,
                          value    = v_lhs.value + v_rhs.value,
                          typ      = self.typ)
 
         elif self.operator == Binary_Operator.MINUS:
-            assert isinstance(v_lhs.value, int)
-            assert isinstance(v_rhs.value, int)
+            assert isinstance(v_lhs.value, (int, Fraction))
+            assert isinstance(v_rhs.value, (int, Fraction))
             return Value(location = self.location,
                          value    = v_lhs.value - v_rhs.value,
                          typ      = self.typ)
 
         elif self.operator == Binary_Operator.TIMES:
-            assert isinstance(v_lhs.value, int)
-            assert isinstance(v_rhs.value, int)
+            assert isinstance(v_lhs.value, (int, Fraction))
+            assert isinstance(v_rhs.value, (int, Fraction))
             return Value(location = self.location,
                          value    = v_lhs.value * v_rhs.value,
                          typ      = self.typ)
 
         elif self.operator == Binary_Operator.DIVIDE:
-            assert isinstance(v_lhs.value, int)
-            assert isinstance(v_rhs.value, int)
+            assert isinstance(v_lhs.value, (int, Fraction))
+            assert isinstance(v_rhs.value, (int, Fraction))
 
             if v_rhs.value == 0:
                 mh.error(v_rhs.location,
@@ -1135,9 +1214,14 @@ class Binary_Expression(Expression):
                          (self.to_string(),
                           mh.cross_file_reference(self.location)))
 
-            return Value(location = self.location,
-                         value    = v_lhs.value // v_rhs.value,
-                         typ      = self.typ)
+            if isinstance(v_lhs.value, int):
+                return Value(location = self.location,
+                             value    = v_lhs.value // v_rhs.value,
+                             typ      = self.typ)
+            else:
+                return Value(location = self.location,
+                             value    = v_lhs.value / v_rhs.value,
+                             typ      = self.typ)
 
         elif self.operator == Binary_Operator.REMAINDER:
             assert isinstance(v_lhs.value, int)
@@ -1154,7 +1238,7 @@ class Binary_Expression(Expression):
                          typ      = self.typ)
 
         elif self.operator == Binary_Operator.POWER:
-            assert isinstance(v_lhs.value, int)
+            assert isinstance(v_lhs.value, (int, Fraction))
             assert isinstance(v_rhs.value, int)
             return Value(location = self.location,
                          value    = v_lhs.value ** v_rhs.value,
@@ -1222,9 +1306,9 @@ class Range_Test(Expression):
         self.n_lower = n_lower
         self.n_upper = n_upper
 
-        self.n_lhs.ensure_type(mh, Builtin_Integer)
-        self.n_lower.ensure_type(mh, Builtin_Integer)
-        self.n_upper.ensure_type(mh, Builtin_Integer)
+        self.n_lhs.ensure_type(mh, Builtin_Numeric_Type)
+        self.n_lower.ensure_type(mh, self.n_lhs.typ)
+        self.n_upper.ensure_type(mh, self.n_lhs.typ)
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Range Test")
@@ -1570,6 +1654,14 @@ class Builtin_Type(Type):
         self.write_indent(indent, self.__class__.__name__)
 
 
+class Builtin_Numeric_Type(Builtin_Type):
+    """Abstract base class for all builtin numeric types.
+
+    """
+    def dump(self, indent=0):  # pragma: no cover
+        self.write_indent(indent, self.__class__.__name__)
+
+
 class Builtin_Function(Entity):
     """Builtin functions.
 
@@ -1640,10 +1732,16 @@ class Array_Type(Type):
         self.element_type = element_type
 
 
-class Builtin_Integer(Builtin_Type):
+class Builtin_Integer(Builtin_Numeric_Type):
     """Builtin integer type."""
     def __init__(self):
         super().__init__("Integer")
+
+
+class Builtin_Decimal(Builtin_Numeric_Type):
+    """Builtin decimal type."""
+    def __init__(self):
+        super().__init__("Decimal")
 
 
 class Builtin_Boolean(Builtin_Type):
@@ -2231,6 +2329,7 @@ class Symbol_Table:
     def create_global_table(cls, mh):
         stab = Symbol_Table()
         stab.register(mh, Builtin_Integer())
+        stab.register(mh, Builtin_Decimal())
         stab.register(mh, Builtin_Boolean())
         stab.register(mh, Builtin_String())
         # The legacy versions

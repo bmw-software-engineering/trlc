@@ -19,6 +19,7 @@
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
 import sys
+from fractions import Fraction
 
 from trlc.errors import Location, Message_Handler
 
@@ -117,6 +118,7 @@ class Token:
                       "OPERATOR",
                       "ARROW",
                       "INTEGER",
+                      "DECIMAL",
                       "STRING"])
 
     def __init__(self, location, kind, value=None):
@@ -127,6 +129,8 @@ class Token:
             assert isinstance(value, str)
         elif kind == "INTEGER":
             assert isinstance(value, int)
+        elif kind == "DECIMAL":
+            assert isinstance(value, Fraction)
         else:
             assert value is None
 
@@ -205,12 +209,14 @@ class Python_Lexer(Lexer):
 
         self.file_length  = len(self.file_content)
 
-        self.lexpos = -2
+        self.lexpos = -3
         self.line_no = 0
         self.col_no  = 0
-        self.cc = None
-        self.nc = None
+        self.cc  = None
+        self.nc  = None
+        self.nnc = None
 
+        self.advance()
         self.advance()
 
     @staticmethod
@@ -239,9 +245,10 @@ class Python_Lexer(Lexer):
         if self.nc is not None:
             self.col_no += 1
         self.cc = self.nc
-        self.nc = (self.file_content[self.lexpos + 1]
-                   if self.lexpos + 1 < self.file_length
-                   else None)
+        self.nc = self.nnc
+        self.nnc = (self.file_content[self.lexpos + 2]
+                    if self.lexpos + 2 < self.file_length
+                    else None)
 
     def current_location(self):
         return Source_Reference(lexer      = self,
@@ -376,6 +383,20 @@ class Python_Lexer(Lexer):
             while self.nc and self.is_numeric(self.nc):
                 self.advance()
 
+            if self.nc == "." and self.nnc != ".":
+                kind = "DECIMAL"
+                self.advance()
+                if not self.nc or not self.is_numeric(self.nc):
+                    self.mh.lex_error(
+                        Source_Reference(lexer      = self,
+                                         start_line = start_line,
+                                         start_col  = start_col,
+                                         start_pos  = start_pos,
+                                         end_pos    = self.lexpos),
+                        "unfinished decimal number")
+                while self.nc and self.is_numeric(self.nc):
+                    self.advance()
+
         else:
             self.mh.lex_error(self.current_location(),
                               "unexpected character '%s'" % self.cc)
@@ -410,6 +431,9 @@ class Python_Lexer(Lexer):
 
         elif kind == "INTEGER":
             value = int(sref.text())
+
+        elif kind == "DECIMAL":
+            value = Fraction(sref.text())
 
         elif kind == "COMMENT":
             value = sref.text()

@@ -1,0 +1,2 @@
+  D ** 2.0 > 0.0, warning "potato", D
+       ^^^ foo.rsl:8: error: expected expression of type Builtin_Integer, got Builtin_Decimal instead

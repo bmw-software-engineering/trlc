@@ -22,6 +22,7 @@ import os
 import sys
 import json
 from argparse import ArgumentParser
+from fractions import Fraction
 
 from trlc import ast
 from trlc import lint
@@ -405,6 +406,10 @@ def main():
             tmp = {}
             for obj in sm.stab.iter_record_objects():
                 tmp[obj.name] = obj.to_python_dict()
+                for key in tmp[obj.name]:
+                    if isinstance(tmp[obj.name][key], Fraction):
+                        tmp[obj.name][key] = float(tmp[obj.name][key])
+
             print(json.dumps(tmp, indent=2, sort_keys=True))
 
     if sm.mh.errors:

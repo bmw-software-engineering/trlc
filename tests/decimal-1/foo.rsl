@@ -1,0 +1,11 @@
+package Foo
+
+type T {
+  D Decimal
+  I Integer
+}
+
+checks T {
+  D < Decimal(I), warning "D is not less that I", D
+  D > 0.0, warning "D is not positive", D
+}

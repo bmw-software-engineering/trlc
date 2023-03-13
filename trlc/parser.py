@@ -51,9 +51,10 @@ class Parser:
         self.nt = None
         self.advance()
 
-        self.builtin_bool = stab.table["Boolean"]
-        self.builtin_int  = stab.table["Integer"]
-        self.builtin_str  = stab.table["String"]
+        self.builtin_bool    = stab.table["Boolean"]
+        self.builtin_int     = stab.table["Integer"]
+        self.builtin_decimal = stab.table["Decimal"]
+        self.builtin_str     = stab.table["String"]
 
         self.section = []
         self.default_scope = ast.Scope()
@@ -486,7 +487,7 @@ class Parser:
             return ast.Unary_Expression(
                 mh        = self.mh,
                 location  = t_op.location,
-                typ       = self.builtin_int,
+                typ       = n_operand.typ,
                 operator  = ast.Unary_Operator.ABSOLUTE_VALUE,
                 n_operand = n_operand)
 
@@ -500,7 +501,7 @@ class Parser:
                 n_lhs = ast.Binary_Expression(
                     mh       = self.mh,
                     location = t_op.location,
-                    typ      = self.builtin_int,
+                    typ      = n_lhs.typ,
                     operator = ast.Binary_Operator.POWER,
                     n_lhs    = n_lhs,
                     n_rhs    = n_rhs)
@@ -512,6 +513,10 @@ class Parser:
         if self.peek("INTEGER"):
             self.match("INTEGER")
             return ast.Integer_Literal(self.ct, self.builtin_int)
+
+        elif self.peek("DECIMAL"):
+            self.match("DECIMAL")
+            return ast.Decimal_Literal(self.ct, self.builtin_decimal)
 
         elif self.peek("STRING"):
             self.match("STRING")
@@ -615,11 +620,13 @@ class Parser:
 
     def parse_builtin(self, scope, n_name, t_name):
         assert isinstance(scope, ast.Scope)
-        assert isinstance(n_name, ast.Builtin_Function)
+        assert isinstance(n_name, (ast.Builtin_Function,
+                                   ast.Builtin_Numeric_Type))
         assert isinstance(t_name, Token)
 
         # Lint: complain about old functions
-        if self.lint_mode and n_name.deprecated:
+        if isinstance(n_name, ast.Builtin_Function) and \
+           self.lint_mode and n_name.deprecated:
             self.mh.warning(
                 t_name.location,
                 "deprecated feature, please use function %s instead" %
@@ -637,9 +644,13 @@ class Parser:
         self.match("KET")
 
         # Enforce arity
-        if n_name.arity != len(parameters):
+        if isinstance(n_name, ast.Builtin_Function):
+            required_arity = n_name.arity
+        else:
+            required_arity = 1
+        if required_arity != len(parameters):
             self.mh.error(t_name.location,
-                          "function %requires %u parameters" %
+                          "function requires %u parameters" %
                           n_name.arity)
 
         # Enforce types
@@ -690,6 +701,26 @@ class Parser:
                 operator = ast.Binary_Operator.STRING_REGEX,
                 n_lhs    = parameters[0],
                 n_rhs    = parameters[1])
+
+        elif isinstance(n_name, ast.Builtin_Numeric_Type):
+            parameters[0].ensure_type(self.mh, ast.Builtin_Numeric_Type)
+            if isinstance(n_name, ast.Builtin_Integer):
+                return ast.Unary_Expression(
+                    mh        = self.mh,
+                    location  = t_name.location,
+                    typ       = self.builtin_int,
+                    operator  = ast.Unary_Operator.CONVERSION_TO_INT,
+                    n_operand = parameters[0])
+            elif isinstance(n_name, ast.Builtin_Decimal):
+                return ast.Unary_Expression(
+                    mh        = self.mh,
+                    location  = t_name.location,
+                    typ       = self.builtin_decimal,
+                    operator  = ast.Unary_Operator.CONVERSION_TO_DECIMAL,
+                    n_operand = parameters[0])
+            else:
+                self.mh.ice_loc(t_name.location,
+                                "unexpected type conversion")
 
         else:
             self.mh.ice_loc(t_name.location,
@@ -749,8 +780,14 @@ class Parser:
                 # have the same name.
                 n_name = self.stab.lookup(self.mh,
                                           self.ct,
-                                          ast.Builtin_Function)
-                return self.parse_builtin(scope, n_name, self.ct)
+                                          ast.Entity)
+                if isinstance(n_name, (ast.Builtin_Function,
+                                       ast.Builtin_Numeric_Type)):
+                    return self.parse_builtin(scope, n_name, self.ct)
+                else:
+                    self.mh.error(self.ct.location,
+                                  "expected builtin function, not %s" %
+                                  n_name.__class__.__name__)
 
             else:
                 # Must be a qualified name or enumeration
@@ -852,7 +889,7 @@ class Parser:
     def parse_value(self, typ):
         assert isinstance(typ, ast.Type)
 
-        if isinstance(typ, ast.Builtin_Integer):
+        if isinstance(typ, ast.Builtin_Numeric_Type):
             if self.peek("OPERATOR") and \
                self.nt.value in Parser.ADDING_OPERATOR:
                 self.match("OPERATOR")
@@ -862,14 +899,22 @@ class Parser:
                         else ast.Unary_Operator.MINUS)
             else:
                 t_op = None
-            self.match("INTEGER")
-            rv = ast.Integer_Literal(self.ct, self.builtin_int)
+
+            if self.peek("DECIMAL"):
+                self.match("DECIMAL")
+                rv = ast.Decimal_Literal(self.ct, self.builtin_decimal)
+
+            else:
+                self.match("INTEGER")
+                rv = ast.Integer_Literal(self.ct, self.builtin_int)
+
             if t_op:
                 rv = ast.Unary_Expression(mh        = self.mh,
                                           location  = t_op.location,
-                                          typ       = self.builtin_int,
+                                          typ       = rv.typ,
                                           operator  = e_op,
                                           n_operand = rv)
+
             return rv
 
         elif isinstance(typ, ast.Builtin_String):

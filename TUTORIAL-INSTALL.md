@@ -60,10 +60,11 @@ it is better than nothing.
   '("abs"
     "and"
     "checks"
-    "enum"
     "else"
     "elsif"
+    "enum"
     "error"
+    "exists"
     "extends"
     "false"
     "fatal"
@@ -87,6 +88,7 @@ it is better than nothing.
 (defvar trlc-types
   '("String"
     "Integer"
+    "Decimal"
     "Boolean"))
 
  (defvar trlc-font-lock-defaults

@@ -1,0 +1,10 @@
+package Foo
+
+type T {
+  D Decimal
+  I Integer
+}
+
+checks T {
+  D == I, warning "not equal", D
+}

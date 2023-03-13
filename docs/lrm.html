@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>TRLC Language Reference Manual, Version 2.4</title>
+<title>TRLC Language Reference Manual, Version 2.5</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -69,7 +69,7 @@ span.TRLC_STRING {
 </style>
 </head>
 <body>
-<h1>TRLC Language Reference Manual, Version 2.4</h1>
+<h1>TRLC Language Reference Manual, Version 2.5</h1>
 <div>
 Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.3 or any later version published by the Free SoftwareFoundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 A copy of the license is included in the section entitled "Appendix A: GNU Free Documentation License".
@@ -88,6 +88,8 @@ A copy of the license is included in the section entitled "Appendix A: GNU Free 
       <li><a href="#sec:aecefa911f304b068a66634b6c79442544731fcd">Punctuation</a>
       </li>
       <li><a href="#sec:707590991971c8cbba0fcbbab41d495f5267f09b">Integers</a>
+      </li>
+      <li><a href="#sec:6d1f18e149654f815a45d2f2e4a8c22b2fca2b30">Decimals</a>
       </li>
       <li><a href="#sec:a1e5f01b700e2c39a01c965ab74b3939b47b1a27">Strings</a>
       </li>
@@ -263,6 +265,20 @@ Examples:<ul>
   <li>007</li>
 </ul>
 </div>
+<h3 id="sec:6d1f18e149654f815a45d2f2e4a8c22b2fca2b30">Decimals</h3>
+<div>
+Decimals are base 10, and leading and trailing zeros are effectively ignored.
+</div>
+<div class='code'>
+<code id="bnf-DECIMAL">DECIMAL ::= [0-9]+\.[0-9]+</code>
+</div>
+<div>
+Examples:<ul>
+  <li>12.0</li>
+  <li>3.14</li>
+  <li>0.0800</li>
+</ul>
+</div>
 <h3 id="sec:a1e5f01b700e2c39a01c965ab74b3939b47b1a27">Strings</h3>
 <div>
 There are two versions of a string, double quoted and triple quoted:
@@ -350,6 +366,7 @@ An implementation shall support the following builtin types, that shall be made 
 <ul>
   <li>Boolean</li>
   <li>Integer</li>
+  <li>Decimal</li>
   <li>String</li>
 </ul>
 </div>
@@ -358,6 +375,9 @@ A <code>Boolean</code> has two values, <code>false</code> and <code>true</code>.
 </div>
 <div>
 An <code>Integer</code> is a signed integer, with an implementation defined range. This range shall be at least -1000 to 1000, and this can be infinite.
+</div>
+<div>
+A <code>Decimal</code> is a signed rational with a power-of-ten denominator, with an implementation defined range. This range for the numerator shall be at least -1000 to 1000, and denominator is always a natural number with a range of at least 1 to 1000. Any of these ranges can be infinite (but the denominator is always non-negative).
 </div>
 <div>
 A <code>String</code> is a sequence of implementation defined characters. <i>(The decision to support Unicode or not is left unspecified.)</i> The maximum length of a String, if any, is implementation defined, but shall be at least 1000.
@@ -369,6 +389,13 @@ A package also includes a number of builtin functions that are made available:
   <li>startswith</li>
   <li>endswith</li>
   <li>matches</li>
+</ul>
+</div>
+<div>
+A package also makes available a number of numeric type conversion functions:
+<ul>
+  <li>Integer</li>
+  <li>Decimal</li>
 </ul>
 </div>
 <h2 id="sec:43e328fe39e0b1e73d78dfa274ada761910daa8d">Described Names</h2>
@@ -510,7 +537,7 @@ It is recommended to emit a warning on array types with an upper bound of one.
 
   <span class="TRLC_IDENTIFIER">asil</span> <span class="TRLC_KEYWORD">optional</span> <span class="TRLC_IDENTIFIER">ASIL</span>
 
-  <span class="TRLC_IDENTIFIER">codebeamer_link</span> <span class="TRLC_IDENTIFIER">Integer</span> <span class="TRLC_S_BRA">[</span><span class="TRLC_INTEGER">1</span><span class="TRLC_RANGE">..</span><span class="TRLC_OPERATOR">*</span><span class="TRLC_S_KET">]</span>
+  <span class="TRLC_IDENTIFIER">codebeamer_link</span> <span class="TRLC_IDENTIFIER">Integer</span> <span class="TRLC_S_BRA">[</span><span class="TRLC_INTEGER">1</span> <span class="TRLC_RANGE">..</span> <span class="TRLC_OPERATOR">*</span><span class="TRLC_S_KET">]</span>
 <span class="TRLC_C_KET">}</span>
 
 <span class="TRLC_KEYWORD">type</span> <span class="TRLC_IDENTIFIER">Supplier_Requirement</span> <span class="TRLC_KEYWORD">extends</span> <span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_C_BRA">{</span>
@@ -622,6 +649,7 @@ It is an important design goal to keep the type system sane and following LSP. I
          | 'abs' <a href="#bnf-primary">primary</a>
 
 <span id="bnf-primary">primary</span> ::= <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span>
+          | <span class="tooltip"><a href="#bnf-DECIMAL">DECIMAL</a><span class="tooltiptext">[0-9]+\.[0-9]+</span></span>
           | <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span>
           | 'true'
           | 'false'
@@ -676,6 +704,9 @@ The builtin function <code>matches</code> is of arity 2. Its parameters must be 
 <div>
 In addition, the second parameter to the <code>matches</code> function must be a static compile-time constant, i.e. it must not depend on the value of a record field or the value of a quantified variable.
 </div>
+<div>
+The numeric type conversion functions are of arity 1 and polymorphic (they are defined for both integer and rationals). They return the type indicated by the function name. <i>(They are polymorphic in case we want to introduce a true rational type, or a floating point type.)</i>
+</div>
 <h3>Dynamic Semantics</h3>
 <div>
 The <code>len</code> function computes the length of the given string or array.
@@ -688,6 +719,12 @@ The <code>endswith</code> function returns true iff the first parameter fully co
 </div>
 <div>
 The <code>matches</code> function returns true iff the first parameter is matched by the regular expression given in the second parameter.
+</div>
+<div>
+The <code>Integer</code> type conversion rounds to the nearest integral, away from zero in the case of ties.
+</div>
+<div>
+The <code>Decimal</code> type conversion simply converts the given integer to the exact same rational.
 </div>
 <h3>Name resolution</h3>
 <div>
@@ -705,6 +742,9 @@ Name resolution is case sensitive.
 
   <span class="TRLC_IDENTIFIER">potato</span><span class="TRLC_S_BRA">[</span><span class="TRLC_INTEGER">3</span><span class="TRLC_S_KET">]</span> <span class="TRLC_OPERATOR">&lt;</span> <span class="TRLC_IDENTIFIER">potato</span><span class="TRLC_S_BRA">[</span><span class="TRLC_INTEGER">2</span><span class="TRLC_S_KET">]</span><span class="TRLC_COMMA">,</span> <span class="TRLC_STRING">&quot;foo&quot;</span>
   <span class="TRLC_COMMENT">// name that is an array index</span>
+
+  <span class="TRLC_IDENTIFIER">Decimal</span><span class="TRLC_BRA">(</span><span class="TRLC_IDENTIFIER">potato</span><span class="TRLC_S_BRA">[</span><span class="TRLC_INTEGER">0</span><span class="TRLC_S_KET">]</span><span class="TRLC_KET">)</span> <span class="TRLC_OPERATOR">&lt;</span> <span class="TRLC_IDENTIFIER">wibble</span><span class="TRLC_COMMA">,</span> <span class="TRLC_STRING">&quot;foo&quot;</span>
+  <span class="TRLC_COMMENT">// note that type conversion is necessary</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2 id="sec:26bd85a87e980cbb3cc597e9842ced0133d46633">Operators</h2>
@@ -751,13 +791,13 @@ Operators with standard semantics are <code>xor</code>, and <code>not</code>. Th
 <h3 id="sec:6853dd1f3f0e39c6d5d79baddfca46e8c9f0f9dc">Relational operators and membership tests</h3>
 <h4>Static Semantics</h4>
 <div>
-The equality operators <code>==</code> and <code>!=</code> are defined for all types, as long as the types are compatible, i.e. they are the same types or one type is a (transitive) extension of the other. The result is a Boolean.
+The equality operators <code>==</code> and <code>!=</code> are defined for all types, as long as the types are compatible, i.e. they are the same types or one type is a (transitive) record extension of the other. The result is a Boolean.
 </div>
 <div>
-The ordering relations <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, and <code>&gt;</code> are defined for integers only. The result is a Boolean.
+The ordering relations <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, and <code>&gt;</code> are defined for pairs of integers or pairs of rationals only. The result is a Boolean.
 </div>
 <div>
-Range membership tests <code>not in</code> and <code>in</code> are defined for Integers only. The result is a Boolean.
+Range membership tests <code>not in</code> and <code>in</code> are defined for integers and rationals only. All operands must have the same type, and the result is a Boolean.
 </div>
 <div>
 Substring tests <code>not in</code> and <code>in</code> are defined for Strings only. The result is a Boolean.
@@ -784,32 +824,35 @@ The array membership test <code>X in A</code> is equivalent to <code>(exists ite
 <h3 id="sec:4cfc517e70194486df511c43ed091f8aacc89d72">Adding operators</h3>
 <h4>Static Semantics</h4>
 <div>
-The binary adding operator <code>+</code> is defined for both Integers and Strings. The binary subtraction operator <code>-</code> is defined for only Integers.
+The binary adding operator <code>+</code> is defined for integers, rationals, and strings. The binary subtraction operator <code>-</code> is defined for only integers and rationals.
 </div>
 <div>
-The unary adding operator <code>+</code>, and the unary subtraction operator <code>-</code> is defined only for Integers.
+The unary adding operator <code>+</code>, and the unary subtraction operator <code>-</code> is defined only for integers and rationals.
 </div>
 <div>
-For binary adding operators the types of the operands have to match, and the result is the same type as the two operands. For unary adding operators the result is always Integer.
+For binary adding operators the types of the operands have to match, and the result is the same type as the two operands. For unary adding operators the result is always the same as the operand.
 </div>
 <h4>Dynamic Semantics</h4>
 <div>
-The definition of <code>+</code> and <code>-</code> for Integers is the usual one.
+The definition of <code>+</code> and <code>-</code> for integers and rationals is the usual one.
 </div>
 <div>
-The definition of <code>+</code> for Strings is String concatenation.
+The definition of <code>+</code> for strings is string concatenation.
 </div>
 <h3 id="sec:f5d45ad47a83ce6dd7573306a9ee187e6342f5bb">Multiplying operators</h3>
 <h4>Static Semantics</h4>
 <div>
-The multiplying operators <code>*</code>, <code>/</code>, and <code>%</code> are defined only for Integer types. The result is an Integer.
+The multiplying operators <code>*</code>, <code>/</code> are defined for integers and rational types. The remainder operator <code>%</code> is defined for integers only. For any of these the result is always the same type as the operands.
 </div>
 <h4>Dynamic Semantics</h4>
 <div>
 The definition of <code>*</code> is the usual one.
 </div>
 <div>
-The definition of <code>/</code> is floor division. <i>(For example <code>-5 / 2</code> is <code>2</code> and <code>-5 / 2</code> is <code>-3</code>.)</i>
+The definition of <code>/</code> for integers is floor division. <i>(For example <code>-5 / 2</code> is <code>2</code> and <code>-5 / 2</code> is <code>-3</code>.)</i>
+</div>
+<div>
+The definition of <code>/</code> for rationals is the usual one.
 </div>
 <div>
 The modulus division for <code>x % y</code> satisfies the relation <code>x = y*N + (x % y)</code>, for some (signed) value of <code>N</code>, with one of the following constraints met:
@@ -824,13 +867,13 @@ Division by zero or modulo division by 0 is an error.
 <h3 id="sec:775410b4cb9a8b0b8469f6d72d31fe25d0cbb54a">Highest precedence operators</h3>
 <h4>Static Semantics</h4>
 <div>
-The exponentiation operator <code>**</code> is defined for Integers only, and returns an Integer.
+The exponentiation operator <code>**</code> is defined for integers and rations bases, and returns the same type as its base. The exponent type is always an Integer.
 </div>
 <div>
 The right-hand side parameter of <code>**</code> must be a static compile-time constant, i.e. it must not depend on the value of a record field or the value of a quantified variable. It must not be negative.
 </div>
 <div>
-The absolute value prefix operator <code>abs</code> is defined for Integers only, and returns a (positive) Integer.
+The absolute value prefix operator <code>abs</code> is defined for integers and rationals, and returns a (positive) integer or rational respectively.
 </div>
 <div>
 The logical negation prefix operator <code>not</code> is defined for Booleans only, and returns a Boolean.
@@ -937,6 +980,7 @@ A section has no semantic impact, and no impact on name resolution. Section name
 <span id="bnf-component_association">component_association</span> ::= <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component_name</i> '=' <a href="#bnf-value">value</a>
 
 <span id="bnf-value">value</span> ::= [ <span class="tooltip"><a href="#bnf-adding_operator">adding_operator</a><span class="tooltiptext">+ | -</span></span> ] <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span>
+        | [ <span class="tooltip"><a href="#bnf-adding_operator">adding_operator</a><span class="tooltiptext">+ | -</span></span> ] <span class="tooltip"><a href="#bnf-DECIMAL">DECIMAL</a><span class="tooltiptext">[0-9]+\.[0-9]+</span></span>
         | <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span>
         | <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_RECORD_OBJECT</i>
         | <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_ENUM_TYPE</i> '.' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_enumeration_literal</i>

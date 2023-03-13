@@ -1,0 +1,9 @@
+package Foo
+
+type T {
+  D Decimal
+}
+
+checks T {
+  D in 0 .. 10, warning "potato", D
+}

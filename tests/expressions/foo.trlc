@@ -1,8 +1,10 @@
 package Foo
 
 T Test {
-   one = 1
-   two = 2
+   ione = 1
+   itwo = 2
+   done = 1.0
+   dtwo = 2.0
    yay = true
    nay = false
    foo = "foo"
