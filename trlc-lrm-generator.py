@@ -2,6 +2,7 @@
 #
 # TRLC - Treat Requirements Like Code
 # Copyright (C) 2022-2023 Florian Schanda
+# Copyright (C) 2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -28,7 +29,7 @@ import hashlib
 from collections import OrderedDict
 
 from trlc.errors import Message_Handler, TRLC_Error
-from trlc.lexer import Source_Reference, Lexer, Python_Lexer
+from trlc.lexer import Source_Reference, TRLC_Lexer
 from trlc.parser import Parser
 from trlc.trlc import Source_Manager
 from trlc import ast
@@ -874,7 +875,7 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
         fd.write("</div>\n")
 
 
-class Nested_Lexer(Python_Lexer):
+class Nested_Lexer(TRLC_Lexer):
     def __init__(self, string_literal):
         assert isinstance(string_literal, ast.String_Literal)
         mh = string_literal.location.lexer.mh
@@ -902,9 +903,9 @@ class Nested_Lexer(Python_Lexer):
         return tok
 
 
-class Token_Buffer(Lexer):
+class Token_Buffer(TRLC_Lexer):
     def __init__(self, lexer):
-        assert isinstance(lexer, Lexer)
+        assert isinstance(lexer, TRLC_Lexer)
         super().__init__(mh        = lexer.mh,
                          file_name = lexer.file_name)
         self.lexer  = lexer
@@ -942,7 +943,7 @@ class Token_Buffer(Lexer):
         return rv
 
 
-class Chained_Lexer(Lexer):
+class Chained_Lexer(TRLC_Lexer):
     def __init__(self, literals):
         assert isinstance(literals, list) and len(literals) >= 1
         for literal in literals:

@@ -1,0 +1,9 @@
+package Foo
+
+T Test_1 {
+  M = "[[Test_1]]"
+}
+
+T Test_2 {
+  M = "[[Test_3]]"
+}

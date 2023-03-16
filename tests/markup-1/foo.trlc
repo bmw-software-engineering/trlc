@@ -1,0 +1,17 @@
+package Foo
+
+Q kitten {}
+Q potato {}
+
+T test_1 {
+  S = "potato"
+  M = "pot\"ato [[kitten, Foo.potato]] is \"good"
+}
+
+T test_2 {
+  S = "potato"
+  M = '''
+    pot"ato [[Foo.kitten,
+    potato]] is "good
+  '''
+}

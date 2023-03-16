@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # TRLC - Treat Requirements Like Code
-# Copyright (C) 2022 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+# Copyright (C) 2022-2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -20,6 +20,7 @@
 
 import sys
 from fractions import Fraction
+from abc import ABCMeta, abstractmethod
 
 from trlc.errors import Location, Message_Handler
 
@@ -65,12 +66,12 @@ def triple_quoted_string_value(raw_value):
 
 class Source_Reference(Location):
     def __init__(self, lexer, start_line, start_col, start_pos, end_pos):
-        assert isinstance(lexer, Lexer)
+        assert isinstance(lexer, TRLC_Lexer)
         assert isinstance(start_line, int)
         assert isinstance(start_col, int)
         assert isinstance(start_pos, int)
         assert isinstance(end_pos, int)
-        assert 0 <= start_pos <= end_pos < lexer.file_length
+        assert 0 <= start_pos <= end_pos < lexer.length
         super().__init__(lexer.file_name,
                          start_line,
                          start_col)
@@ -79,22 +80,22 @@ class Source_Reference(Location):
         self.end_pos   = end_pos
 
     def text(self):
-        return self.lexer.file_content[self.start_pos:self.end_pos + 1]
+        return self.lexer.content[self.start_pos:self.end_pos + 1]
 
     def context_lines(self):
         line = ""
         n = self.start_pos
         while n >= 0:
-            if self.lexer.file_content[n] == "\n":
+            if self.lexer.content[n] == "\n":
                 break
-            line = self.lexer.file_content[n] + line
+            line = self.lexer.content[n] + line
             n -= 1
         offset = self.start_pos - n - 1
         n = self.start_pos + 1
-        while n < self.lexer.file_length:
-            if self.lexer.file_content[n] == "\n":
+        while n < self.lexer.length:
+            if self.lexer.content[n] == "\n":
                 break
-            line = line + self.lexer.file_content[n]
+            line = line + self.lexer.content[n]
             n += 1
         maxtrail = n - self.start_pos
         tlen = self.end_pos + 1 - self.start_pos
@@ -103,7 +104,16 @@ class Source_Reference(Location):
                 " " * offset + "^" * min(tlen, maxtrail)]
 
 
-class Token:
+class Token_Base:
+    def __init__(self, location, kind, value):
+        assert isinstance(location, Location)
+        assert isinstance(kind, str)
+        self.location = location
+        self.kind     = kind
+        self.value    = value
+
+
+class Token(Token_Base):
     KIND = frozenset(["COMMENT",
                       "IDENTIFIER",
                       "BUILTIN",
@@ -122,7 +132,6 @@ class Token:
                       "STRING"])
 
     def __init__(self, location, kind, value=None):
-        assert isinstance(location, Location)
         assert kind in Token.KIND
         if kind in ("COMMENT", "IDENTIFIER", "BUILTIN",
                     "KEYWORD", "OPERATOR", "STRING"):
@@ -133,10 +142,7 @@ class Token:
             assert isinstance(value, Fraction)
         else:
             assert value is None
-
-        self.location = location
-        self.kind     = kind
-        self.value    = value
+        super().__init__(location, kind, value)
 
     def __repr__(self):
         if self.value is None:
@@ -145,7 +151,70 @@ class Token:
             return "%s_Token(%s)" % (self.kind, self.value)
 
 
-class Lexer:
+class Lexer_Base(metaclass=ABCMeta):
+    def __init__(self, mh, content):
+        assert isinstance(mh, Message_Handler)
+        assert isinstance(content, str)
+        self.mh        = mh
+        self.content   = content
+        self.length    = len(self.content)
+
+        self.lexpos = -3
+        self.line_no = 0
+        self.col_no  = 0
+        self.cc  = None
+        self.nc  = None
+        self.nnc = None
+
+        self.advance()
+        self.advance()
+
+    @staticmethod
+    def is_alpha(char):
+        assert isinstance(char, str) and len(char) == 1
+        return ord('a') <= ord(char) <= ord('z') or \
+            ord('A') <= ord(char) <= ord('Z')
+
+    @staticmethod
+    def is_numeric(char):
+        assert isinstance(char, str) and len(char) == 1
+        return ord('0') <= ord(char) <= ord('9')
+
+    @staticmethod
+    def is_alnum(char):
+        assert isinstance(char, str) and len(char) == 1
+        return ord('a') <= ord(char) <= ord('z') or \
+            ord('A') <= ord(char) <= ord('Z') or \
+            ord('0') <= ord(char) <= ord('9')
+
+    @abstractmethod
+    def file_location(self):
+        pass
+
+    @abstractmethod
+    def token(self):
+        pass
+
+    def skip_whitespace(self):
+        while self.nc and self.nc.isspace():
+            self.advance()
+        self.advance()
+
+    def advance(self):
+        self.lexpos += 1
+        if self.cc == "\n" or self.lexpos == 0:
+            self.line_no += 1
+            self.col_no = 0
+        if self.nc is not None:
+            self.col_no += 1
+        self.cc = self.nc
+        self.nc = self.nnc
+        self.nnc = (self.content[self.lexpos + 2]
+                    if self.lexpos + 2 < self.length
+                    else None)
+
+
+class TRLC_Lexer(Lexer_Base):
     KEYWORDS = frozenset(["abs",
                           "and",
                           "checks",
@@ -188,67 +257,13 @@ class Lexer:
         "-" : "OPERATOR",
     }
 
-    def __init__(self, mh, file_name):
-        assert isinstance(mh, Message_Handler)
-        assert isinstance(file_name, str)
-        self.mh        = mh
-        self.file_name = file_name
-
-    def token(self):
-        assert False
-
-
-class Python_Lexer(Lexer):
     def __init__(self, mh, file_name, file_content=None):
-        super().__init__(mh, file_name)
         if file_content:
-            self.file_content = file_content
+            super().__init__(mh, file_content)
         else:
             with open(file_name, "r", encoding="UTF-8") as fd:
-                self.file_content = fd.read()
-
-        self.file_length  = len(self.file_content)
-
-        self.lexpos = -3
-        self.line_no = 0
-        self.col_no  = 0
-        self.cc  = None
-        self.nc  = None
-        self.nnc = None
-
-        self.advance()
-        self.advance()
-
-    @staticmethod
-    def is_alpha(char):
-        assert isinstance(char, str) and len(char) == 1
-        return ord('a') <= ord(char) <= ord('z') or \
-            ord('A') <= ord(char) <= ord('Z')
-
-    @staticmethod
-    def is_numeric(char):
-        assert isinstance(char, str) and len(char) == 1
-        return ord('0') <= ord(char) <= ord('9')
-
-    @staticmethod
-    def is_alnum(char):
-        assert isinstance(char, str) and len(char) == 1
-        return ord('a') <= ord(char) <= ord('z') or \
-            ord('A') <= ord(char) <= ord('Z') or \
-            ord('0') <= ord(char) <= ord('9')
-
-    def advance(self):
-        self.lexpos += 1
-        if self.cc == "\n" or self.lexpos == 0:
-            self.line_no += 1
-            self.col_no = 0
-        if self.nc is not None:
-            self.col_no += 1
-        self.cc = self.nc
-        self.nc = self.nnc
-        self.nnc = (self.file_content[self.lexpos + 2]
-                    if self.lexpos + 2 < self.file_length
-                    else None)
+                super().__init__(mh, fd.read())
+        self.file_name = file_name
 
     def current_location(self):
         return Source_Reference(lexer      = self,
@@ -257,13 +272,16 @@ class Python_Lexer(Lexer):
                                 start_pos  = self.lexpos,
                                 end_pos    = self.lexpos)
 
+    def file_location(self):
+        return Location(self.file_name, 1, 1)
+
     def token(self):
         # Skip whitespace and move to the next char
-        while self.nc and self.nc.isspace():
-            self.advance()
-        if self.nc is None:
+        self.skip_whitespace()
+
+        # Return if we're done
+        if self.cc is None:
             return None
-        self.advance()
 
         start_pos  = self.lexpos
         start_line = self.line_no
@@ -287,8 +305,8 @@ class Python_Lexer(Lexer):
                                self.nc == ":"):
                 self.advance()
 
-        elif self.cc in Lexer.PUNCTUATION:
-            kind = Lexer.PUNCTUATION[self.cc]
+        elif self.cc in TRLC_Lexer.PUNCTUATION:
+            kind = TRLC_Lexer.PUNCTUATION[self.cc]
 
         elif self.cc == "=":
             if self.nc == ">":
@@ -409,7 +427,7 @@ class Python_Lexer(Lexer):
 
         if kind == "IDENTIFIER":
             value = sref.text()
-            if value in Lexer.KEYWORDS:
+            if value in TRLC_Lexer.KEYWORDS:
                 kind = "KEYWORD"
             elif ":" in value:
                 kind = "BUILTIN"
@@ -451,16 +469,9 @@ class Python_Lexer(Lexer):
         return Token(sref, kind, value)
 
 
-def create_lexer(mh, file_name):
-    assert isinstance(mh, Message_Handler)
-    assert isinstance(file_name, str)
-
-    return Python_Lexer(mh, file_name)
-
-
 def sanity_test():
     mh    = Message_Handler()
-    lexer = create_lexer(mh, sys.argv[1])
+    lexer = TRLC_Lexer(mh, sys.argv[1])
 
     while True:
         token  = lexer.token()

@@ -45,7 +45,8 @@ Don't worry about the `package Exampele` yet, this is explained much
 later in the [Packages](TUTORIAL-PACKAGE.md) tutorial.
 
 Attributes have types, and the TRLC language provide a bunch of basic
-built-in types: `Boolean`, `Integer` and `String`; and a way to create
+built-in types: `Boolean`, `Integer`, `Decimal`, `String` and
+[`Markup_String`](TUTORIAL-ADVANCED.md); and a way to create
 user-defined enumeration types.
 
 We can then start to define requirements for our software project in a

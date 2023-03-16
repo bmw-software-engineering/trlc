@@ -308,7 +308,8 @@ section "Metamodel (RLS) files" {
       "Boolean",
       "Integer",
       "Decimal",
-      "String"
+      "String",
+      "Markup_String"
     ]
   }
 
@@ -343,6 +344,15 @@ section "Metamodel (RLS) files" {
               or not is left unspecified.)* The maximum
               length of a String, if any, is implementation
               defined, but shall be at least 1000.'''
+  }
+
+  Semantics Markup_String_Values {
+    kind = Kind.Static
+    text = '''A `Markup_String` is identical to a `String`, except for a
+              few additional constraints on the string
+              contents. Any value of type `Markup_String` is
+              a valid instance of `String`, but not the
+              other way around.'''
   }
 
   Semantics Builtin_Functions {
@@ -1166,6 +1176,16 @@ section "Operators" {
                 integers and rationals.'''
     }
 
+    Semantics String_Concatenation_Downgrade {
+      kind = Kind.Static
+      text = '''When `+` is used to concatenate strings, the result is
+                always a `String`, even if one or both
+                operands if of type `Markup_String`. *(This
+                means the only way you can create a markup
+                string is when you construct it at record
+                object declaration.)*'''
+    }
+
     Semantics Unary_Addition_Domain {
       kind = Kind.Static
       text = '''The unary adding operator `+`, and the unary subtraction
@@ -1569,6 +1589,93 @@ section "Record object declarations" {
                   the type information.''',
 	       '''Provide the type information through the type system of the
                   API language (e.g. the Python type system).''']
+  }
+
+}
+
+section "Markup Strings" {
+
+  Text Markup_String_Format {
+    text = '''A `Markup_String` allows you to inline references to TRLC
+              record in a string. The format is limited and
+              simple: any name or comma-separated list of
+              names enclosed in double square brackets
+              (i.e. `[[` and `]]`) is considered a
+              reference.'''
+  }
+
+  Text Markup_String_Errors {
+    text = '''Attempting to nest, or close a list that does not exist, or
+              not close an open list before the end of the
+              string is an error.'''
+  }
+
+  Semantics Markup_String_Types {
+    kind = Kind.Static
+    text = '''The fragment of BNF grammar applicable is
+              qualified_name. The type of each named object
+              must be a record type. *(This means you cannot
+              reference types or enumerations.)*'''
+  }
+
+  Semantics Markup_String_Late_Reference_Resolution {
+    kind = Kind.Dynamic
+    text = '''The references are resolved late, just like an ordinary
+              record reference. *(This means you can
+              forward-reference objects, or reference
+              yourself.)*'''
+  }
+
+  Name_Resolution Markup_String_Resolution {
+    text = '''The name resolution rules for the qualified_name are exactly
+              the same as they are for any other
+              qualified_name. *(This means you need to
+              import all packages from which you reference
+              objects.)*'''
+  }
+
+  Example Markup_String_Examples {
+    hidden_rsl = '''
+      package Foo
+      type Constant {
+         value Integer
+      }
+      type Requirement {
+         description Markup_String
+      }
+      enum License { GPL3 AGPL3 }
+      type Tool {
+         vendor String
+         url String
+         license License
+      }
+    '''
+    hidden_trlc = '''package Foo'''
+    trlc = '''
+      Requirement Bean_Vehicle {
+        description = "The car shall have [[WHEEL_COUNT]] wheels."
+      }
+
+      Requirement SW_Process {
+        description = "We shall use [[TRLC, LOBSTER]] for achieving software traceability."
+      }
+
+      Constant WHEEL_COUNT {
+        value = 3
+      }
+
+      Tool TRLC {
+        vendor  = "BMW AG"
+        url     = "https://github.com/bmw-software-engineering/trlc/"
+        license = License.GPL3
+      }
+
+      Tool LOBSTER {
+        vendor  = "BMW AG"
+        url     = "https://github.com/bmw-software-engineering/lobster/"
+        license = License.AGPL3
+      }
+    '''
   }
 
 }

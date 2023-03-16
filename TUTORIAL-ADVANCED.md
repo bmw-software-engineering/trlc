@@ -98,3 +98,39 @@ if it is not the case.
 Finally note that a reference is always a reference. You cannot
 specify an entirely new record "inline". We plan to support something
 like this in a future release, but it will be distinct from records.
+
+## In-line references
+
+It is also possible to refer to other TRLC records directly in
+text. For this you need to use the `Markup_String` type instead of
+`String`.
+
+```
+type Requirement {
+  description           Markup_String
+  derived_from optional Requirement
+}
+
+type Constant {
+  value Integer
+}
+```
+
+You can then name any other TRLC record inside a comma-separated list
+enclosed in `[[` and `]]`.
+
+```
+Requirement potato {
+   description  = '''
+      The car shall have [[wheel_count]] wheels. Related information
+	  can be found in [[Definition.Wheel, Definition.Car]].
+   '''
+}
+
+Constant wheel_count {
+   value = 3
+}
+```
+
+The advantage of using `Markup_String` is that such references are
+checked like any other.

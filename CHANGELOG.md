@@ -7,7 +7,9 @@ manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
 
-None.
+The new `Markup_String` type currently has limited language support,
+but we expect to add more features surrounding it later. (For example
+quantifying over all references.)
 
 ## Changelog
 
@@ -23,6 +25,12 @@ None.
   `Decimal` respectively. The language does not support implicit
   conversion, you will have to make sure all types are converted
   correctly yourself.
+
+* [TRLC, LRM] new type `Markup_String` which is a special kind of
+  `String` that behaves in exactly the same way. However you reference
+  other TRLC records directly: `for example see [[potato,
+  package.wibble]]`. These references are checked and validated by
+  TRLC.
 
 ### 1.0.11
 

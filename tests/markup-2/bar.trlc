@@ -1,0 +1,19 @@
+package Bar
+
+import Foo
+
+Foo.T foo {
+  M = "potato"
+}
+
+Foo.T test_1 {
+  M = "see [[foo]]"
+}
+
+Foo.T test_2 {
+  M = "see [[Foo.potato]]"
+}
+
+Foo.T test_3 {
+  M = "see [[Baz.foo]]"
+}

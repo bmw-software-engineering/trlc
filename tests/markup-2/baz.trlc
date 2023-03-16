@@ -1,0 +1,7 @@
+package Baz
+
+import Foo
+
+Foo.T foo {
+  M = "potato"
+}

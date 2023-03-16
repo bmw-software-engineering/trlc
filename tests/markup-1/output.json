@@ -1,0 +1,12 @@
+{
+  "kitten": {},
+  "potato": {},
+  "test_1": {
+    "M": "pot\"ato [[kitten, Foo.potato]] is \"good",
+    "S": "potato"
+  },
+  "test_2": {
+    "M": "pot\"ato [[Foo.kitten,\npotato]] is \"good",
+    "S": "potato"
+  }
+}

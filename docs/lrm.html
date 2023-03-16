@@ -143,6 +143,8 @@ A copy of the license is included in the section entitled "Appendix A: GNU Free 
   </li>
   <li><a href="#sec:874acaf9dea40145e68e30cd5668278b883fb037">Record object declarations</a>
   </li>
+  <li><a href="#sec:aca473accda10e90bfeb1af192c0d372dfaae446">Markup Strings</a>
+  </li>
   <li><a href="#sec:cfe9573cce03cb2912c44176c44378eb3eaec3c5">Null Values</a>
   </li>
 </ol>
@@ -368,6 +370,7 @@ An implementation shall support the following builtin types, that shall be made 
   <li>Integer</li>
   <li>Decimal</li>
   <li>String</li>
+  <li>Markup_String</li>
 </ul>
 </div>
 <div>
@@ -381,6 +384,9 @@ A <code>Decimal</code> is a signed rational with a power-of-ten denominator, wit
 </div>
 <div>
 A <code>String</code> is a sequence of implementation defined characters. <i>(The decision to support Unicode or not is left unspecified.)</i> The maximum length of a String, if any, is implementation defined, but shall be at least 1000.
+</div>
+<div>
+A <code>Markup_String</code> is identical to a <code>String</code>, except for a few additional constraints on the string contents. Any value of type <code>Markup_String</code> is a valid instance of <code>String</code>, but not the other way around.
 </div>
 <div>
 A package also includes a number of builtin functions that are made available:
@@ -827,6 +833,9 @@ The array membership test <code>X in A</code> is equivalent to <code>(exists ite
 The binary adding operator <code>+</code> is defined for integers, rationals, and strings. The binary subtraction operator <code>-</code> is defined for only integers and rationals.
 </div>
 <div>
+When <code>+</code> is used to concatenate strings, the result is always a <code>String</code>, even if one or both operands if of type <code>Markup_String</code>. <i>(This means the only way you can create a markup string is when you construct it at record object declaration.)</i>
+</div>
+<div>
 The unary adding operator <code>+</code>, and the unary subtraction operator <code>-</code> is defined only for integers and rationals.
 </div>
 <div>
@@ -1034,6 +1043,52 @@ When exposing record instances through the API, it is required to make the type 
   <li>Provide a function or attribute that, when called, provides the type information.</li>
   <li>Provide the type information through the type system of the API language (e.g. the Python type system).</li>
 </ul>
+</div>
+<h2 id="sec:aca473accda10e90bfeb1af192c0d372dfaae446">Markup Strings</h2>
+<div>
+A <code>Markup_String</code> allows you to inline references to TRLC record in a string. The format is limited and simple: any name or comma-separated list of names enclosed in double square brackets (i.e. <code>[[</code> and <code>]]</code>) is considered a reference.
+</div>
+<div>
+Attempting to nest, or close a list that does not exist, or not close an open list before the end of the string is an error.
+</div>
+<h3>Static Semantics</h3>
+<div>
+The fragment of BNF grammar applicable is qualified_name. The type of each named object must be a record type. <i>(This means you cannot reference types or enumerations.)</i>
+</div>
+<h3>Dynamic Semantics</h3>
+<div>
+The references are resolved late, just like an ordinary record reference. <i>(This means you can forward-reference objects, or reference yourself.)</i>
+</div>
+<h3>Name resolution</h3>
+<div>
+The name resolution rules for the qualified_name are exactly the same as they are for any other qualified_name. <i>(This means you need to import all packages from which you reference objects.)</i>
+</div>
+<h3>Example</h3>
+<div class='code'>
+<pre>
+<span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_IDENTIFIER">Bean_Vehicle</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">description</span> <span class="TRLC_ASSIGN">=</span> <span class="TRLC_STRING">&quot;The car shall have [[WHEEL_COUNT]] wheels.&quot;</span>
+<span class="TRLC_C_KET">}</span>
+
+<span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_IDENTIFIER">SW_Process</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">description</span> <span class="TRLC_ASSIGN">=</span> <span class="TRLC_STRING">&quot;We shall use [[TRLC, LOBSTER]] for achieving software traceability.&quot;</span>
+<span class="TRLC_C_KET">}</span>
+
+<span class="TRLC_IDENTIFIER">Constant</span> <span class="TRLC_IDENTIFIER">WHEEL_COUNT</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">value</span> <span class="TRLC_ASSIGN">=</span> <span class="TRLC_INTEGER">3</span>
+<span class="TRLC_C_KET">}</span>
+
+<span class="TRLC_IDENTIFIER">Tool</span> <span class="TRLC_IDENTIFIER">TRLC</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">vendor</span>  <span class="TRLC_ASSIGN">=</span> <span class="TRLC_STRING">&quot;BMW AG&quot;</span>
+  <span class="TRLC_IDENTIFIER">url</span>     <span class="TRLC_ASSIGN">=</span> <span class="TRLC_STRING">&quot;https://github.com/bmw-software-engineering/trlc/&quot;</span>
+  <span class="TRLC_IDENTIFIER">license</span> <span class="TRLC_ASSIGN">=</span> <span class="TRLC_IDENTIFIER">License</span><span class="TRLC_DOT">.</span><span class="TRLC_IDENTIFIER">GPL3</span>
+<span class="TRLC_C_KET">}</span>
+
+<span class="TRLC_IDENTIFIER">Tool</span> <span class="TRLC_IDENTIFIER">LOBSTER</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">vendor</span>  <span class="TRLC_ASSIGN">=</span> <span class="TRLC_STRING">&quot;BMW AG&quot;</span>
+  <span class="TRLC_IDENTIFIER">url</span>     <span class="TRLC_ASSIGN">=</span> <span class="TRLC_STRING">&quot;https://github.com/bmw-software-engineering/lobster/&quot;</span>
+  <span class="TRLC_IDENTIFIER">license</span> <span class="TRLC_ASSIGN">=</span> <span class="TRLC_IDENTIFIER">License</span><span class="TRLC_DOT">.</span><span class="TRLC_IDENTIFIER">AGPL3</span>
+<span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2 id="sec:cfe9573cce03cb2912c44176c44378eb3eaec3c5">Null Values</h2>
 <h3>Static Semantics</h3>

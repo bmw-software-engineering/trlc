@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # TRLC - Treat Requirements Like Code
-# Copyright (C) 2022 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+# Copyright (C) 2022-2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -123,6 +123,7 @@ class Node:
                Builtin_Integer
                Builtin_Decimal
                Builtin_String
+               Builtin_Markup_String
                Package bar
                   Symbol_Table
                      Record_Type MyType
@@ -528,6 +529,9 @@ class String_Literal(Literal):
     :attribute value: string content
     :type: str
 
+    :attribute references: resolved references of a markup string
+    :type: list[Record_Reference]
+
     """
     def __init__(self, token, typ):
         assert isinstance(token, Token)
@@ -535,10 +539,16 @@ class String_Literal(Literal):
         assert isinstance(typ, Builtin_String)
         super().__init__(token.location, typ)
 
-        self.value = token.value
+        self.value          = token.value
+        self.has_references = isinstance(typ, Builtin_Markup_String)
+        self.references     = []
 
     def dump(self, indent=0):  # pragma: no cover
-        self.write_indent(indent, "String Literal %s" % self.value)
+        self.write_indent(indent, "String Literal %s" % repr(self.value))
+        if self.has_references:
+            self.write_indent(indent + 1, "Markup References")
+            for ref in self.references:
+                ref.dump(indent + 2)
 
     def to_string(self):
         return self.value
@@ -550,6 +560,11 @@ class String_Literal(Literal):
 
     def to_python_object(self):
         return self.value
+
+    def resolve_references(self, mh):
+        assert isinstance(mh, Message_Handler)
+        for ref in self.references:
+            ref.resolve_references(mh)
 
 
 class Boolean_Literal(Literal):
@@ -706,20 +721,21 @@ class Record_Reference(Expression):
     :type: Package
 
     """
-    def __init__(self, referencing_token, typ, package):
-        assert isinstance(referencing_token, Token)
-        assert referencing_token.kind == "IDENTIFIER"
-        assert isinstance(typ, Record_Type)
+    def __init__(self, location, name, typ, package):
+        assert isinstance(location, Location)
+        assert isinstance(name, str)
+        assert isinstance(typ, Record_Type) or typ is None
         assert isinstance(package, Package)
-        super().__init__(referencing_token.location, typ)
+        super().__init__(location, typ)
 
-        self.name    = referencing_token.value
+        self.name    = name
         self.target  = None
         self.package = package
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Record Reference %s" % self.name)
-        self.write_indent(indent + 1, "Resolved: %s" % self.target is not None)
+        self.write_indent(indent + 1,
+                          "Resolved: %s" % (self.target is not None))
 
     def to_string(self):
         return self.name
@@ -737,6 +753,13 @@ class Record_Reference(Expression):
             name              = self.name,
             error_location    = self.location,
             required_subclass = Record_Object)
+        if self.typ is None:
+            self.typ = self.target.e_typ
+        elif not self.target.e_typ.is_subclass_of(self.typ):
+            mh.ice_loc(self.location,
+                       "on resolving references, types do not match; "
+                       "expected %s, got %s" % (self.typ.name,
+                                                self.target.e_typ.name))
 
     def to_python_object(self):
         return self.name
@@ -1707,13 +1730,15 @@ class Array_Type(Type):
 
     """
     def __init__(self, location, element_type, lower_bound, upper_bound):
-        assert isinstance(element_type, Type)
+        assert isinstance(element_type, Type) or element_type is None
         assert isinstance(lower_bound, int)
         assert lower_bound >= 0
         assert upper_bound is None or isinstance(upper_bound, int)
         assert upper_bound is None or upper_bound >= 0
 
-        if upper_bound is None:
+        if element_type is None:
+            name = "universal array"
+        elif upper_bound is None:
             if lower_bound == 0:
                 name = "array of %s" % element_type.name
             else:
@@ -1754,6 +1779,15 @@ class Builtin_String(Builtin_Type):
     """Builtin string type."""
     def __init__(self):
         super().__init__("String")
+
+
+class Builtin_Markup_String(Builtin_String):
+    """Builtin string type that allows checked references to TRLC
+       objects.
+    """
+    def __init__(self):
+        super().__init__()
+        self.name = "Markup_String"
 
 
 class Package(Entity):
@@ -2045,9 +2079,8 @@ class Record_Object(Entity):
         self.write_indent(indent, "Record_Object %s" % self.name)
         self.write_indent(indent + 1, "Type: %s" % self.e_typ.name)
         for key, value in self.field.items():
-            self.write_indent(indent + 1,
-                              "Field %s: %s" % (key,
-                                                repr(value.to_string())))
+            self.write_indent(indent + 1, "Field %s" % key)
+            value.dump(indent + 2)
         if self.section:
             self.section.dump(indent + 1)
 
@@ -2332,6 +2365,7 @@ class Symbol_Table:
         stab.register(mh, Builtin_Decimal())
         stab.register(mh, Builtin_Boolean())
         stab.register(mh, Builtin_String())
+        stab.register(mh, Builtin_Markup_String())
         # The legacy versions
         stab.register(mh,
                       Builtin_Function("trlc:len", 1))

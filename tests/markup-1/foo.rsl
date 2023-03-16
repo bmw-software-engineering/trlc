@@ -1,0 +1,13 @@
+package Foo
+
+type Q {}
+
+type T {
+  S String
+  M Markup_String
+}
+
+checks T {
+  len(M + S) > 10, warning "not long enough", M
+  S in M, warning "potato not in M", M
+}

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # TRLC - Treat Requirements Like Code
-# Copyright (C) 2022 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+# Copyright (C) 2022-2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -20,45 +20,119 @@
 
 import re
 
-from trlc.lexer import Token, Lexer, create_lexer
-from trlc.errors import Location, Message_Handler
+from trlc.nested import Nested_Lexer
+from trlc.lexer import Token_Base, Token, Lexer_Base, TRLC_Lexer
+from trlc.errors import Message_Handler
 from trlc import ast
 
 
-class Parser:
-    COMPARISON_OPERATOR = ("==", "!=", "<", "<=", ">", ">=")
-    ADDING_OPERATOR = ("+", "-")
-    MULTIPLYING_OPERATOR = ("*", "/", "%")
+class Markup_Token(Token_Base):
+    KIND = frozenset(["CHARACTER",
+                      "REFLIST_BEGIN",
+                      "REFLIST_END",
+                      "REFLIST_COMMA",
+                      "REFLIST_DOT",
+                      "REFLIST_IDENTIFIER"])
 
-    def __init__(self, mh, stab, file_name, lint_mode, lexer=None):
-        assert isinstance(mh, Message_Handler)
-        assert isinstance(stab, ast.Symbol_Table)
-        assert isinstance(file_name, str)
-        assert isinstance(lint_mode, bool)
-        self.mh        = mh
-        self.lint_mode = lint_mode
-        if lexer:
-            self.lexer = lexer
+    def __init__(self, location, kind, value):
+        super().__init__(location, kind, value)
+        assert isinstance(value, str)
+
+
+class Markup_Lexer(Nested_Lexer):
+    def __init__(self, mh, literal):
+        super().__init__(mh, literal)
+
+        self.in_reflist = False
+
+    def file_location(self):
+        return self.origin_location
+
+    def token(self):
+        if self.in_reflist:
+            self.skip_whitespace()
         else:
-            self.lexer = create_lexer(mh, file_name)
-        self.stab      = stab
-        self.pkg       = None
-        self.raw_deps  = []
-        self.deps      = []
-        self.imports   = set()
+            self.advance()
+        if self.cc is None:
+            return None
+
+        start_pos  = self.lexpos
+        start_line = self.line_no
+        start_col  = self.col_no
+
+        if self.cc == "[" and self.nc == "[":
+            kind = "REFLIST_BEGIN"
+            self.advance()
+            if self.in_reflist:
+                self.mh.lex_error(self.source_location(start_line,
+                                                       start_col,
+                                                       start_pos,
+                                                       start_pos + 1),
+                                  "cannot nest reference lists")
+            else:
+                self.in_reflist = True
+
+        elif self.cc == "]" and self.nc == "]":
+            kind = "REFLIST_END"
+            self.advance()
+            if self.in_reflist:
+                self.in_reflist = False
+            else:
+                self.mh.lex_error(self.source_location(start_line,
+                                                       start_col,
+                                                       start_pos,
+                                                       start_pos + 1),
+                                  "opening [[ for this ]] found")
+
+        elif not self.in_reflist:
+            kind = "CHARACTER"
+
+        elif self.cc == ",":
+            kind = "REFLIST_COMMA"
+
+        elif self.cc == ".":
+            kind = "REFLIST_DOT"
+
+        elif self.is_alpha(self.cc):
+            kind = "REFLIST_IDENTIFIER"
+            while self.nc and (self.is_alnum(self.nc) or
+                               self.nc == "_"):
+                self.advance()
+
+        else:
+            self.mh.lex_error(self.source_location(start_line,
+                                                   start_col,
+                                                   start_pos,
+                                                   start_pos),
+                              "unexpected character '%s'" % self.cc)
+
+        loc = self.source_location(start_line,
+                                   start_col,
+                                   start_pos,
+                                   self.lexpos)
+
+        return Markup_Token(loc,
+                            kind,
+                            self.content[start_pos:self.lexpos + 1])
+
+
+class Parser_Base:
+    def __init__(self, mh, lexer, eoc_name, token_kinds, keywords):
+        assert isinstance(mh, Message_Handler)
+        assert isinstance(lexer, Lexer_Base)
+        assert isinstance(eoc_name, str)
+        assert isinstance(token_kinds, frozenset)
+        assert isinstance(keywords, frozenset)
+        self.mh    = mh
+        self.lexer = lexer
+
+        self.eoc_name          = eoc_name
+        self.language_tokens   = token_kinds
+        self.language_keywords = keywords
 
         self.ct = None
         self.nt = None
         self.advance()
-
-        self.builtin_bool    = stab.table["Boolean"]
-        self.builtin_int     = stab.table["Integer"]
-        self.builtin_decimal = stab.table["Decimal"]
-        self.builtin_str     = stab.table["String"]
-
-        self.section = []
-        self.default_scope = ast.Scope()
-        self.default_scope.push(self.stab)
 
     def advance(self):
         self.ct = self.nt
@@ -68,25 +142,27 @@ class Parser:
                 break
 
     def peek(self, kind):
-        assert kind in Token.KIND
+        assert kind in self.language_tokens
         return self.nt is not None and self.nt.kind == kind
 
     def peek_eof(self):
         return self.nt is None
 
     def peek_kw(self, value):
-        assert value in Lexer.KEYWORDS
+        assert value in self.language_keywords
         return self.peek("KEYWORD") and self.nt.value == value
 
     def match(self, kind):
-        assert kind in Token.KIND
+        assert kind in self.language_tokens
         if self.nt is None:
-            # Note we do not need to handle the case where self.ct is
-            # None like we do in match_kw, since parsing always starts
-            # with a match_kw. At that point we will always have a ct.
-            self.mh.error(self.ct.location,
-                          "expected %s, encountered end-of-file instead" %
-                          kind)
+            if self.ct is None:
+                self.mh.error(self.lexer.file_location(),
+                              "expected %s, encountered %s instead" %
+                              (kind, self.eoc_name))
+            else:
+                self.mh.error(self.ct.location,
+                              "expected %s, encountered %s instead" %
+                              (kind, self.eoc_name))
         elif self.nt.kind != kind:
             self.mh.error(self.nt.location,
                           "expected %s, encountered %s instead" %
@@ -96,21 +172,20 @@ class Parser:
     def match_eof(self):
         if self.nt is not None:
             self.mh.error(self.nt.location,
-                          "expected end-of-file, encountered %s instead" %
-                          self.nt.kind)
+                          "expected %s, encountered %s instead" %
+                          (self.eoc_name, self.nt.kind))
 
     def match_kw(self, value):
-        assert value in Lexer.KEYWORDS
+        assert value in self.language_keywords
         if self.nt is None:
             if self.ct is None:
-                # Special case if we encounter an empty file.
-                self.mh.error(Location(self.lexer.file_name, 1, 1),
-                              "expected %s, encountered end-of-file instead" %
-                              value)
+                self.mh.error(self.lexer.file_location(),
+                              "expected %s, encountered %s instead" %
+                              (value, self.eoc_name))
             else:
                 self.mh.error(self.ct.location,
-                              "expected %s, encountered end-of-file instead" %
-                              value)
+                              "expected %s, encountered %s instead" %
+                              (value, self.eoc_name))
         elif self.nt.kind != "KEYWORD":
             self.mh.error(self.nt.location,
                           "expected %s, encountered %s instead" %
@@ -120,6 +195,96 @@ class Parser:
                           "expected %s, encountered %s instead" %
                           (value, self.nt.value))
         self.advance()
+
+
+class Markup_Parser(Parser_Base):
+    def __init__(self, parent, literal):
+        assert isinstance(parent, Parser)
+        super().__init__(parent.mh, Markup_Lexer(parent.mh, literal),
+                         eoc_name    = "end-of-string",
+                         token_kinds = Markup_Token.KIND,
+                         keywords    = frozenset())
+        self.parent     = parent
+        self.references = literal.references
+
+    def parse_all_references(self):
+        while self.nt:
+            if self.peek("CHARACTER"):
+                self.advance()
+            else:
+                self.parse_ref_list()
+        self.match_eof()
+        return self.references
+
+    def parse_ref_list(self):
+        self.match("REFLIST_BEGIN")
+        self.parse_qualified_name()
+        while self.peek("REFLIST_COMMA"):
+            self.match("REFLIST_COMMA")
+            self.parse_qualified_name()
+        self.match("REFLIST_END")
+
+    def parse_qualified_name(self):
+        self.match("REFLIST_IDENTIFIER")
+        if self.peek("REFLIST_DOT"):
+            package = self.parent.stab.lookup_direct(
+                mh                = self.mh,
+                name              = self.ct.value,
+                error_location    = self.ct.location,
+                required_subclass = ast.Package)
+            if package != self.parent.pkg and \
+               package.name not in self.parent.imports:
+                self.mh.error(self.ct.location,
+                              "package must be imported before use")
+
+            self.match("REFLIST_DOT")
+            self.match("REFLIST_IDENTIFIER")
+        else:
+            package = self.parent.pkg
+
+        ref = ast.Record_Reference(location = self.ct.location,
+                                   name     = self.ct.value,
+                                   typ      = None,
+                                   package  = package)
+        self.references.append(ref)
+
+
+class Parser(Parser_Base):
+    COMPARISON_OPERATOR = ("==", "!=", "<", "<=", ">", ">=")
+    ADDING_OPERATOR = ("+", "-")
+    MULTIPLYING_OPERATOR = ("*", "/", "%")
+
+    def __init__(self, mh, stab, file_name, lint_mode, lexer=None):
+        assert isinstance(mh, Message_Handler)
+        assert isinstance(stab, ast.Symbol_Table)
+        assert isinstance(file_name, str)
+        assert isinstance(lint_mode, bool)
+        if lexer:
+            super().__init__(mh, lexer,
+                             eoc_name    = "end-of-file",
+                             token_kinds = Token.KIND,
+                             keywords    = TRLC_Lexer.KEYWORDS)
+        else:
+            super().__init__(mh, TRLC_Lexer(mh, file_name),
+                             eoc_name    = "end-of-file",
+                             token_kinds = Token.KIND,
+                             keywords    = TRLC_Lexer.KEYWORDS)
+        self.lint_mode = lint_mode
+        self.stab      = stab
+        self.pkg       = None
+        self.raw_deps  = []
+        self.deps      = []
+        self.imports   = set()
+
+        self.builtin_bool    = stab.table["Boolean"]
+        self.builtin_int     = stab.table["Integer"]
+        self.builtin_decimal = stab.table["Decimal"]
+        self.builtin_str     = stab.table["String"]
+        self.builtin_mstr    = stab.table["Markup_String"]
+
+        self.section = []
+        self.default_scope = ast.Scope()
+        self.default_scope.push(self.stab)
 
     def parse_described_name(self):
         self.match("IDENTIFIER")
@@ -428,6 +593,11 @@ class Parser:
                 operator  = un_add_map[t_unary.value],
                 n_operand = n_lhs)
 
+        if isinstance(n_lhs.typ, ast.Builtin_String):
+            rtyp = self.builtin_str
+        else:
+            rtyp = n_lhs.typ
+
         while self.peek("OPERATOR") and \
               self.nt.value in Parser.ADDING_OPERATOR:
             self.match("OPERATOR")
@@ -436,7 +606,7 @@ class Parser:
             n_lhs = ast.Binary_Expression(
                 mh       = self.mh,
                 location = t_op.location,
-                typ      = n_lhs.typ,
+                typ      = rtyp,
                 operator = bin_add_map[t_op.value],
                 n_lhs    = n_lhs,
                 n_rhs    = n_rhs)
@@ -655,7 +825,7 @@ class Parser:
 
         # Enforce types
         if n_name.name in ("len", "trlc:len"):
-            if parameters[0].typ == self.builtin_str:
+            if isinstance(parameters[0].typ, ast.Builtin_String):
                 return ast.Unary_Expression(
                     mh        = self.mh,
                     location  = t_name.location,
@@ -917,6 +1087,9 @@ class Parser:
 
             return rv
 
+        elif isinstance(typ, ast.Builtin_Markup_String):
+            return self.parse_markup_string()
+
         elif isinstance(typ, ast.Builtin_String):
             self.match("STRING")
             return ast.String_Literal(self.ct, self.builtin_str)
@@ -979,7 +1152,10 @@ class Parser:
             else:
                 the_pkg = self.pkg
 
-            rv = ast.Record_Reference(t_name, typ, the_pkg)
+            rv = ast.Record_Reference(location = t_name.location,
+                                      name     = t_name.value,
+                                      typ      = typ,
+                                      package  = the_pkg)
             if the_pkg.symbols.contains(t_name.value):
                 rv.target = the_pkg.symbols.lookup(self.mh,
                                                    t_name,
@@ -997,6 +1173,13 @@ class Parser:
             self.mh.ice_loc(self.ct.location,
                             "logic error: unexpected type %s" %
                             typ.__class__.__name__)
+
+    def parse_markup_string(self):
+        self.match("STRING")
+        rv = ast.String_Literal(self.ct, self.builtin_mstr)
+        mpar = Markup_Parser(self, rv)
+        mpar.parse_all_references()
+        return rv
 
     def parse_record_object_declaration(self):
         r_typ = self.parse_qualified_name(self.default_scope,
