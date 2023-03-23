@@ -4,15 +4,13 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Error handling and reporting &#8212; TRLC 1.0.11 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Error handling and reporting &#8212; TRLC 1.0.12 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
     
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
     
@@ -33,7 +31,7 @@
         <li class="right" >
           <a href="infrastructure.html" title="Infrastructure"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.12 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Error handling and reporting</a></li> 
       </ul>
     </div>  
@@ -43,7 +41,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="error-handling-and-reporting">
+  <section id="error-handling-and-reporting">
 <h1>Error handling and reporting<a class="headerlink" href="#error-handling-and-reporting" title="Permalink to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="trlc.errors.Message_Handler">
@@ -58,22 +56,22 @@ statements.</p>
 <a class="reference internal" href="ast.html#trlc.ast.Node" title="trlc.ast.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a> then you also get context provided for
 free.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Attribute brief</dt>
+<dt class="field-odd">Attribute brief<span class="colon">:</span></dt>
 <dd class="field-odd"><p>When true displays as much context as possible</p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Boolean</p>
 </dd>
-<dt class="field-odd">Attribute warnings</dt>
+<dt class="field-odd">Attribute warnings<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Number of system or user warnings raised</p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>int</p>
 </dd>
-<dt class="field-odd">Attribute error</dt>
+<dt class="field-odd">Attribute error<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Number of system or user errors raised</p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>int</p>
 </dd>
 </dl>
@@ -91,7 +89,7 @@ free.</p>
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>location</strong> (<a class="reference internal" href="#trlc.errors.Location" title="trlc.errors.Location"><em>Location</em></a>) – where to attach the message</p></li>
 <li><p><strong>message</strong> (<em>str</em>) – the message to print</p></li>
@@ -99,7 +97,7 @@ free.</p>
 <li><p><strong>user</strong> (<em>bool</em>) – if set print “check error:” instead of “error:”</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#trlc.errors.TRLC_Error" title="trlc.errors.TRLC_Error"><strong>TRLC_Error</strong></a> – if fatal is true</p>
 </dd>
 </dl>
@@ -110,7 +108,7 @@ free.</p>
 <span class="sig-name descname"><span class="pre">warning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.errors.Message_Handler.warning" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a warning message</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>location</strong> (<a class="reference internal" href="#trlc.errors.Location" title="trlc.errors.Location"><em>Location</em></a>) – where to attach the message</p></li>
 <li><p><strong>message</strong> (<em>str</em>) – the message to print</p></li>
@@ -131,22 +129,22 @@ free.</p>
 attached to a given location. This location can be real
 (i.e. something in a file) or virtual (i.e. a builtin function).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Attribute file_name</dt>
+<dt class="field-odd">Attribute file_name<span class="colon">:</span></dt>
 <dd class="field-odd"><p>the name of the file or virtual location</p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>str</p>
 </dd>
-<dt class="field-odd">Attribute line_no</dt>
+<dt class="field-odd">Attribute line_no<span class="colon">:</span></dt>
 <dd class="field-odd"><p>an optional line number, starting at 1</p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>int</p>
 </dd>
-<dt class="field-odd">Attribute col_no</dt>
+<dt class="field-odd">Attribute col_no<span class="colon">:</span></dt>
 <dd class="field-odd"><p>an optional column number, starting at 1</p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>int:</p>
 </dd>
 </dl>
@@ -158,13 +156,13 @@ attached to a given location. This location can be real
 the filename is stripped of its path in order to make the
 final message smaller.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>include_column</strong> (<em>bool</em>) – If set, include the column location (if         there is one)</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a formatted location</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
@@ -178,28 +176,28 @@ final message smaller.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
 <p>The universal exception that TRLC raises if something goes wrong</p>
 <dl class="field-list simple">
-<dt class="field-odd">Attribute location</dt>
+<dt class="field-odd">Attribute location<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Where the issue originates from</p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#trlc.errors.Location" title="trlc.errors.Location">Location</a></p>
 </dd>
-<dt class="field-odd">Attribute kind</dt>
+<dt class="field-odd">Attribute kind<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The kind of problem (e.g. lex error, error, warning, etc.)</p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>str</p>
 </dd>
-<dt class="field-odd">Attribute message</dt>
+<dt class="field-odd">Attribute message<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Description of the problem</p>
 </dd>
-<dt class="field-even">Type</dt>
+<dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
             <div class="clearer"></div>
@@ -254,13 +252,13 @@ final message smaller.</p>
         <li class="right" >
           <a href="infrastructure.html" title="Infrastructure"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.11 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.12 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Error handling and reporting</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2022, Bayerische Motoren Werke Aktiengesellschaft (BMW AG).
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

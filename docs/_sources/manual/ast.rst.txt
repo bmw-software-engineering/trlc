@@ -35,9 +35,15 @@ Types
 
 .. autoclass:: trlc.ast.Type
 
+.. autoclass:: trlc.ast.Builtin_Type
+
 .. autoclass:: trlc.ast.Array_Type
 
+.. autoclass:: trlc.ast.Builtin_Numeric_Type
+
 .. autoclass:: trlc.ast.Builtin_Integer
+
+.. autoclass:: trlc.ast.Builtin_Decimal
 
 .. autoclass:: trlc.ast.Builtin_String
 
@@ -81,6 +87,8 @@ Literals
 .. autoclass:: trlc.ast.Null_Literal
 
 .. autoclass:: trlc.ast.Integer_Literal
+
+.. autoclass:: trlc.ast.Decimal_Literal
 
 .. autoclass:: trlc.ast.String_Literal
 
