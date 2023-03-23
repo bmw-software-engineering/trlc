@@ -14,7 +14,7 @@ quantifying over all references.)
 ## Changelog
 
 
-### 1.0.12-dev
+### 1.0.12
 
 * [TRLC, LRM] New type `Decimal` which allows you to specify values
   such as `0.1` with infinite precision. These are a subset of
