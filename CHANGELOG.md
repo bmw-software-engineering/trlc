@@ -20,6 +20,9 @@ quantifying over all references.)
   behaviour can be turned off by using the new option
   `--include-bazel-dirs`.
 
+* [TRLC] Add new option `--show-file-list` which dumps, on success,
+  all files processed by the tool.
+
 ### 1.0.12
 
 * [TRLC, LRM] New type `Decimal` which allows you to specify values

@@ -321,19 +321,6 @@ class Source_Manager:
             if not ok:
                 return None
             self.perform_sanity_checks()
-            summary = "Verified %u model(s) and check(s)" % \
-                (len(self.rsl_files) + len(self.check_files))
-            summary += " and found"
-            if self.mh.errors and self.mh.warnings:
-                summary += " %u warning(s)" % self.mh.warnings
-                summary += " and %u error(s)" % self.mh.errors
-            elif self.mh.warnings:
-                summary += " %u warning(s)" % self.mh.warnings
-            elif self.mh.errors:
-                summary += " %u error(s)" % self.mh.errors
-            else:
-                summary += " no issues"
-            print(summary)
             return None if self.mh.errors or self.mh.warnings else self.stab
 
         # Parse TRLC files. Almost all the semantic analysis and name
@@ -384,6 +371,10 @@ def main():
     ap.add_argument("--include-bazel-dirs",
                     action="store_true",
                     help="by default we do not enter bazel-* directories")
+    ap.add_argument("--show-file-list",
+                    action="store_true",
+                    help=("if there are no errors, produce a summary "
+                          "naming every file processed"))
     options = ap.parse_args()
 
     mh = Message_Handler(options.brief)
@@ -416,8 +407,9 @@ def main():
         return 1
 
     if sm.process() is None:
-        return 1
-    else:
+        ok = False
+
+    if ok:
         if options.debug_dump:
             sm.stab.dump()
         if options.debug_api_dump:
@@ -430,10 +422,51 @@ def main():
 
             print(json.dumps(tmp, indent=2, sort_keys=True))
 
-    if sm.mh.errors:
-        return 1
-    else:
+    if options.show_file_list or options.lint:
+        if options.lint:
+            summary = "Verified"
+        else:
+            summary = "Processed"
+
+        summary += " %u model(s)" % len(sm.rsl_files)
+        if options.lint:
+            summary += " and"
+        else:
+            summary += ", "
+        summary += " %u check(s)" % len(sm.check_files)
+        if not options.lint:
+            summary += " and %u requirement file(s)" % len(sm.trlc_files)
+
+        summary += " and found"
+
+        if mh.errors and mh.warnings:
+            summary += " %u warning(s)" % mh.warnings
+            summary += " and %u error(s)" % mh.errors
+        elif mh.warnings:
+            summary += " %u warning(s)" % mh.warnings
+        elif mh.errors:
+            summary += " %u error(s)" % mh.errors
+        else:
+            summary += " no issues"
+
+        print(summary)
+
+        if options.show_file_list and ok:
+            for filename in sorted(sm.rsl_files):
+                print("> Model %s (Package %s)" %
+                      (filename, sm.rsl_files[filename].pkg.name))
+            for filename in sorted(sm.check_files):
+                print("> Checks %s (Package %s)" %
+                      (filename, sm.check_files[filename].pkg.name))
+            if not options.lint:
+                for filename in sorted(sm.trlc_files):
+                    print("> Requirements %s (Package %s)" %
+                          (filename, sm.trlc_files[filename].pkg.name))
+
+    if ok:
         return 0
+    else:
+        return 1
 
 
 if __name__ == "__main__":
