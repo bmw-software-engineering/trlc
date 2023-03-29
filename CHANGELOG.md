@@ -16,7 +16,9 @@ quantifying over all references.)
 
 ### 1.0.13-dev
 
-
+* [TRLC] Do not enter (sub-)directories named `bazel-*`. This
+  behaviour can be turned off by using the new option
+  `--include-bazel-dirs`.
 
 ### 1.0.12
 

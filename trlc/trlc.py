@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
+import re
 import os
 import sys
 import json
@@ -58,6 +59,8 @@ class Source_Manager:
         self.trlc_files  = {}
         self.packages    = {}
         self.lint_mode   = lint_mode
+
+        self.exclude_patterns = []
 
         self.common_root    = None
 
@@ -152,7 +155,16 @@ class Source_Manager:
         assert os.path.isdir(dir_name)
 
         ok = True
-        for path, _, files in os.walk(dir_name):
+        for path, dirs, files in os.walk(dir_name):
+            for n, dirname in reversed(list(enumerate(dirs))):
+                keep = True
+                for exclude_pattern in self.exclude_patterns:
+                    if exclude_pattern.match(dirname):
+                        keep = False
+                        break
+                if not keep:
+                    del dirs[n]
+
             for file_name in sorted(files):
                 if os.path.splitext(file_name)[1] in (".rsl",
                                                       ".check",
@@ -369,10 +381,16 @@ def main():
     ap.add_argument("items",
                     nargs="*",
                     metavar="DIR|FILE")
+    ap.add_argument("--include-bazel-dirs",
+                    action="store_true",
+                    help="by default we do not enter bazel-* directories")
     options = ap.parse_args()
 
     mh = Message_Handler(options.brief)
     sm = Source_Manager(mh, options.lint)
+
+    if not options.include_bazel_dirs:
+        sm.exclude_patterns.append(re.compile("^bazel-.*$"))
 
     for path_name in options.items:
         if not (os.path.isdir(path_name) or
