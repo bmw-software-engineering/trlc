@@ -1,81 +1,81 @@
 T Test {
-  ^^^^ foo.trlc:3: check warning: 01: bad and
+  ^^^^ expressions/foo.trlc:3: check warning: 01: bad and
 T Test {
-  ^^^^ foo.trlc:3: check warning: 02: bad or
+  ^^^^ expressions/foo.trlc:3: check warning: 02: bad or
 T Test {
-  ^^^^ foo.trlc:3: check warning: 03: bad xor
+  ^^^^ expressions/foo.trlc:3: check warning: 03: bad xor
 T Test {
-  ^^^^ foo.trlc:3: check warning: 04: bad implies
+  ^^^^ expressions/foo.trlc:3: check warning: 04: bad implies
 T Test {
-  ^^^^ foo.trlc:3: check warning: 05: bad i<
+  ^^^^ expressions/foo.trlc:3: check warning: 05: bad i<
 T Test {
-  ^^^^ foo.trlc:3: check warning: 06: bad d<
+  ^^^^ expressions/foo.trlc:3: check warning: 06: bad d<
 T Test {
-  ^^^^ foo.trlc:3: check warning: 07: bad i<=
+  ^^^^ expressions/foo.trlc:3: check warning: 07: bad i<=
 T Test {
-  ^^^^ foo.trlc:3: check warning: 08: bad d<=
+  ^^^^ expressions/foo.trlc:3: check warning: 08: bad d<=
 T Test {
-  ^^^^ foo.trlc:3: check warning: 09: bad i>
+  ^^^^ expressions/foo.trlc:3: check warning: 09: bad i>
 T Test {
-  ^^^^ foo.trlc:3: check warning: 10: bad d>
+  ^^^^ expressions/foo.trlc:3: check warning: 10: bad d>
 T Test {
-  ^^^^ foo.trlc:3: check warning: 11: bad i>=
+  ^^^^ expressions/foo.trlc:3: check warning: 11: bad i>=
 T Test {
-  ^^^^ foo.trlc:3: check warning: 12: bad d>=
+  ^^^^ expressions/foo.trlc:3: check warning: 12: bad d>=
 T Test {
-  ^^^^ foo.trlc:3: check warning: 13: bad i==
+  ^^^^ expressions/foo.trlc:3: check warning: 13: bad i==
 T Test {
-  ^^^^ foo.trlc:3: check warning: 14: bad d==
+  ^^^^ expressions/foo.trlc:3: check warning: 14: bad d==
 T Test {
-  ^^^^ foo.trlc:3: check warning: 15: bad i!=
+  ^^^^ expressions/foo.trlc:3: check warning: 15: bad i!=
 T Test {
-  ^^^^ foo.trlc:3: check warning: 16: bad d!=
+  ^^^^ expressions/foo.trlc:3: check warning: 16: bad d!=
 T Test {
-  ^^^^ foo.trlc:3: check warning: 17: bad range iin
+  ^^^^ expressions/foo.trlc:3: check warning: 17: bad range iin
 T Test {
-  ^^^^ foo.trlc:3: check warning: 18: bad range din
+  ^^^^ expressions/foo.trlc:3: check warning: 18: bad range din
 T Test {
-  ^^^^ foo.trlc:3: check warning: 19: bad range not iin
+  ^^^^ expressions/foo.trlc:3: check warning: 19: bad range not iin
 T Test {
-  ^^^^ foo.trlc:3: check warning: 20: bad range not din
+  ^^^^ expressions/foo.trlc:3: check warning: 20: bad range not din
 T Test {
-  ^^^^ foo.trlc:3: check warning: 21: bad substring
+  ^^^^ expressions/foo.trlc:3: check warning: 21: bad substring
 T Test {
-  ^^^^ foo.trlc:3: check warning: 22: bad i adding (1/2)
+  ^^^^ expressions/foo.trlc:3: check warning: 22: bad i adding (1/2)
 T Test {
-  ^^^^ foo.trlc:3: check warning: 22: bad i adding (2/2)
+  ^^^^ expressions/foo.trlc:3: check warning: 22: bad i adding (2/2)
 T Test {
-  ^^^^ foo.trlc:3: check warning: 23: bad d adding (1/2)
+  ^^^^ expressions/foo.trlc:3: check warning: 23: bad d adding (1/2)
 T Test {
-  ^^^^ foo.trlc:3: check warning: 23: bad d adding (2/2)
+  ^^^^ expressions/foo.trlc:3: check warning: 23: bad d adding (2/2)
 T Test {
-  ^^^^ foo.trlc:3: check warning: 24: bad i*
+  ^^^^ expressions/foo.trlc:3: check warning: 24: bad i*
 T Test {
-  ^^^^ foo.trlc:3: check warning: 25: bad d*
+  ^^^^ expressions/foo.trlc:3: check warning: 25: bad d*
 T Test {
-  ^^^^ foo.trlc:3: check warning: 26: bad i/
+  ^^^^ expressions/foo.trlc:3: check warning: 26: bad i/
 T Test {
-  ^^^^ foo.trlc:3: check warning: 27: bad d/
+  ^^^^ expressions/foo.trlc:3: check warning: 27: bad d/
 T Test {
-  ^^^^ foo.trlc:3: check warning: 28: bad % (1/4)
+  ^^^^ expressions/foo.trlc:3: check warning: 28: bad % (1/4)
 T Test {
-  ^^^^ foo.trlc:3: check warning: 28: bad % (2/4)
+  ^^^^ expressions/foo.trlc:3: check warning: 28: bad % (2/4)
 T Test {
-  ^^^^ foo.trlc:3: check warning: 28: bad % (3/4)
+  ^^^^ expressions/foo.trlc:3: check warning: 28: bad % (3/4)
 T Test {
-  ^^^^ foo.trlc:3: check warning: 28: bad % (4/4)
+  ^^^^ expressions/foo.trlc:3: check warning: 28: bad % (4/4)
 T Test {
-  ^^^^ foo.trlc:3: check warning: 29: bad iexp
+  ^^^^ expressions/foo.trlc:3: check warning: 29: bad iexp
 T Test {
-  ^^^^ foo.trlc:3: check warning: 30: bad dexp
+  ^^^^ expressions/foo.trlc:3: check warning: 30: bad dexp
 T Test {
-  ^^^^ foo.trlc:3: check warning: 31: bad lnot
+  ^^^^ expressions/foo.trlc:3: check warning: 31: bad lnot
 T Test {
-  ^^^^ foo.trlc:3: check warning: 32: bad iabs
+  ^^^^ expressions/foo.trlc:3: check warning: 32: bad iabs
 T Test {
-  ^^^^ foo.trlc:3: check warning: 33: bad dabs
+  ^^^^ expressions/foo.trlc:3: check warning: 33: bad dabs
 T Test {
-  ^^^^ foo.trlc:3: check warning: 34: bad ifexpr
+  ^^^^ expressions/foo.trlc:3: check warning: 34: bad ifexpr
 {
   "Test": {
     "done": 1.0,

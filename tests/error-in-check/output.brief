@@ -1,1 +1,1 @@
-checks.check:4:7: trlc error: unknown symbol startsXwith, did you mean startswith?
+error-in-check/checks.check:4:7: trlc error: unknown symbol startsXwith, did you mean startswith?

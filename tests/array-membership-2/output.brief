@@ -1,1 +1,1 @@
-foo.rsl:9:3: trlc error: expected expression of type Builtin_String, got Builtin_Integer instead
+array-membership-2/foo.rsl:9:3: trlc error: expected expression of type Builtin_String, got Builtin_Integer instead

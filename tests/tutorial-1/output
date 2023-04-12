@@ -1,2 +1,2 @@
 Requirement fuel {
-            ^^^^ car.trlc:13: error: required component critical (see model.rsl:5) is not defined
+            ^^^^ tutorial-1/car.trlc:13: error: required component critical (see model.rsl:5) is not defined

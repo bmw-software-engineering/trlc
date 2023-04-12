@@ -1,2 +1,2 @@
         bar.BaseRequirement SomeThing {
-                            ^^^^^^^^^ instances.trlc:4: check error: Asil must be set
+                            ^^^^^^^^^ empty-attributes/instances.trlc:4: check error: Asil must be set

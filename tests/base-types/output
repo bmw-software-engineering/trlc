@@ -1,2 +1,2 @@
                 int_nok = 24
-                          ^^ instances.trlc:10: check error: int must be 42
+                          ^^ base-types/instances.trlc:10: check error: int must be 42

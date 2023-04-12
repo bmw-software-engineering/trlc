@@ -1,2 +1,2 @@
 tuple T {
-^^^^^ foo.rsl:3: error: expected end-of-file, encountered IDENTIFIER instead
+^^^^^ tuples-2/foo.rsl:3: error: expected end-of-file, encountered IDENTIFIER instead

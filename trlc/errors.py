@@ -65,7 +65,7 @@ class Location:
         :rtype: str
 
         """
-        rv = os.path.basename(self.file_name)
+        rv = os.path.relpath(self.file_name)
         if self.line_no:
             rv += ":%u" % self.line_no
             if self.col_no and include_column:

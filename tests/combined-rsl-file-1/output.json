@@ -1,2 +1,2 @@
 T foo {
-  ^^^ example.trlc:3: check error: potato
+  ^^^ combined-rsl-file-1/example.trlc:3: check error: potato

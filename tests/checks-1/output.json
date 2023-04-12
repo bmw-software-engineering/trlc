@@ -1,4 +1,4 @@
 T Test_1 {
-  ^^^^^^ foo.trlc:3: error: rhs of check a < b (foo.check:4) must not be null
+  ^^^^^^ checks-1/foo.trlc:3: error: rhs of check a < b (foo.check:4) must not be null
 T Test_2 {
-  ^^^^^^ foo.trlc:7: check error: a must be less than b
+  ^^^^^^ checks-1/foo.trlc:7: check error: a must be less than b

@@ -1,4 +1,4 @@
 T test_01 {
-  ^^^^^^^ foo.trlc:3: check error: potato
+  ^^^^^^^ if_expressions/foo.trlc:3: check error: potato
 T test_01 {
-  ^^^^^^^ foo.trlc:3: check error: kitten
+  ^^^^^^^ if_expressions/foo.trlc:3: check error: kitten

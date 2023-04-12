@@ -1,2 +1,2 @@
             bar.MyType SomeThing {
-                       ^^^^^^^^^ instances.trlc:4: error: required component other (see bar.rsl:5) is not defined
+                       ^^^^^^^^^ null-value/instances.trlc:4: error: required component other (see bar.rsl:5) is not defined

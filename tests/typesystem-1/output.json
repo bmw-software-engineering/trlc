@@ -1,2 +1,2 @@
                 name = 5
-                       ^ instances.trlc:5: error: expected STRING, encountered INTEGER instead
+                       ^ typesystem-1/instances.trlc:5: error: expected STRING, encountered INTEGER instead

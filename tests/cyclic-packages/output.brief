@@ -1,1 +1,1 @@
-bar.rsl: trlc error: circular inheritence between Bar | Baz | Bork
+cyclic-packages/bar.rsl: trlc error: circular inheritence between Bar | Baz | Bork

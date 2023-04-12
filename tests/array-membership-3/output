@@ -1,2 +1,2 @@
   kitten in arr, warning "does not reference kitten"
-  ^^^^^^ foo.rsl:10: error: unknown symbol kitten
+  ^^^^^^ array-membership-3/foo.rsl:10: error: unknown symbol kitten

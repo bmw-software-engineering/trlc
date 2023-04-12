@@ -23,6 +23,9 @@ quantifying over all references.)
 * [TRLC] Add new option `--show-file-list` which dumps, on success,
   all files processed by the tool.
 
+* [TRLC] Error messages now show all files relative to the current
+  working directory.
+
 ### 1.0.12
 
 * [TRLC, LRM] New type `Decimal` which allows you to specify values

@@ -1,1 +1,1 @@
-foo.rsl:8:8: trlc error: expected expression of type Builtin_Integer, got Builtin_Decimal instead
+decimal-7/foo.rsl:8:8: trlc error: expected expression of type Builtin_Integer, got Builtin_Decimal instead

@@ -1,2 +1,2 @@
-foo.trlc:3:3: trlc error: values in quantified expression (forall v in values => v != foo) (foo.check:4) must not be null
-foo.trlc:9:13: trlc check error: value cannot be same as value of foo
+checks-4/foo.trlc:3:3: trlc error: values in quantified expression (forall v in values => v != foo) (foo.check:4) must not be null
+checks-4/foo.trlc:9:13: trlc check error: value cannot be same as value of foo

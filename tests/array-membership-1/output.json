@@ -1,15 +1,15 @@
   arr    = [40, 41, 42, 43, 44, 45]
-           ^ foo.trlc:10: check warning: 42 is not in array
+           ^ array-membership-1/foo.trlc:10: check warning: 42 is not in array
   arr    = [40, 41, 42, 43, 44, 45]
-           ^ foo.trlc:10: check warning: 42 is in array
+           ^ array-membership-1/foo.trlc:10: check warning: 42 is in array
   arr    = [1, 2, 3]
-           ^ foo.trlc:22: check warning: 42 is not in array
+           ^ array-membership-1/foo.trlc:22: check warning: 42 is not in array
   arr    = [1, 2, 3]
-           ^ foo.trlc:22: check warning: 42 is in array
+           ^ array-membership-1/foo.trlc:22: check warning: 42 is in array
   arr    = []
-           ^ foo.trlc:34: check warning: 42 is not in array
+           ^ array-membership-1/foo.trlc:34: check warning: 42 is not in array
   arr    = []
-           ^ foo.trlc:34: check warning: 42 is in array
+           ^ array-membership-1/foo.trlc:34: check warning: 42 is in array
 {
   "invalid_1": {
     "arr": [

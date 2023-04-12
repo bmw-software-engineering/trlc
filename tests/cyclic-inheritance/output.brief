@@ -1,1 +1,1 @@
-bar.rsl:5:22: trlc error: unknown symbol MyType3
+cyclic-inheritance/bar.rsl:5:22: trlc error: unknown symbol MyType3

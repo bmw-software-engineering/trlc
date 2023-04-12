@@ -1,6 +1,6 @@
 Foo.T test1 {
-      ^^^^^ foo.trlc:4: check error: this is not a good name
+      ^^^^^ multiple-models/foo.trlc:4: check error: this is not a good name
 Bar.T test2 {
-      ^^^^^ foo.trlc:8: check error: this is not a good name
+      ^^^^^ multiple-models/foo.trlc:8: check error: this is not a good name
 Bar.T test2 {
-      ^^^^^ foo.trlc:8: check error: also not a good name
+      ^^^^^ multiple-models/foo.trlc:8: check error: also not a good name

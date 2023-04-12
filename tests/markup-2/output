@@ -1,2 +1,2 @@
   M = "see [[Baz.foo]]"
-             ^^^ bar.trlc:18: error: package must be imported before use
+             ^^^ markup-2/bar.trlc:18: error: package must be imported before use

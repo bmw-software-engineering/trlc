@@ -1,39 +1,39 @@
-foo.trlc:3:3: trlc check warning: 01: bad and
-foo.trlc:3:3: trlc check warning: 02: bad or
-foo.trlc:3:3: trlc check warning: 03: bad xor
-foo.trlc:3:3: trlc check warning: 04: bad implies
-foo.trlc:3:3: trlc check warning: 05: bad i<
-foo.trlc:3:3: trlc check warning: 06: bad d<
-foo.trlc:3:3: trlc check warning: 07: bad i<=
-foo.trlc:3:3: trlc check warning: 08: bad d<=
-foo.trlc:3:3: trlc check warning: 09: bad i>
-foo.trlc:3:3: trlc check warning: 10: bad d>
-foo.trlc:3:3: trlc check warning: 11: bad i>=
-foo.trlc:3:3: trlc check warning: 12: bad d>=
-foo.trlc:3:3: trlc check warning: 13: bad i==
-foo.trlc:3:3: trlc check warning: 14: bad d==
-foo.trlc:3:3: trlc check warning: 15: bad i!=
-foo.trlc:3:3: trlc check warning: 16: bad d!=
-foo.trlc:3:3: trlc check warning: 17: bad range iin
-foo.trlc:3:3: trlc check warning: 18: bad range din
-foo.trlc:3:3: trlc check warning: 19: bad range not iin
-foo.trlc:3:3: trlc check warning: 20: bad range not din
-foo.trlc:3:3: trlc check warning: 21: bad substring
-foo.trlc:3:3: trlc check warning: 22: bad i adding (1/2)
-foo.trlc:3:3: trlc check warning: 22: bad i adding (2/2)
-foo.trlc:3:3: trlc check warning: 23: bad d adding (1/2)
-foo.trlc:3:3: trlc check warning: 23: bad d adding (2/2)
-foo.trlc:3:3: trlc check warning: 24: bad i*
-foo.trlc:3:3: trlc check warning: 25: bad d*
-foo.trlc:3:3: trlc check warning: 26: bad i/
-foo.trlc:3:3: trlc check warning: 27: bad d/
-foo.trlc:3:3: trlc check warning: 28: bad % (1/4)
-foo.trlc:3:3: trlc check warning: 28: bad % (2/4)
-foo.trlc:3:3: trlc check warning: 28: bad % (3/4)
-foo.trlc:3:3: trlc check warning: 28: bad % (4/4)
-foo.trlc:3:3: trlc check warning: 29: bad iexp
-foo.trlc:3:3: trlc check warning: 30: bad dexp
-foo.trlc:3:3: trlc check warning: 31: bad lnot
-foo.trlc:3:3: trlc check warning: 32: bad iabs
-foo.trlc:3:3: trlc check warning: 33: bad dabs
-foo.trlc:3:3: trlc check warning: 34: bad ifexpr
+expressions/foo.trlc:3:3: trlc check warning: 01: bad and
+expressions/foo.trlc:3:3: trlc check warning: 02: bad or
+expressions/foo.trlc:3:3: trlc check warning: 03: bad xor
+expressions/foo.trlc:3:3: trlc check warning: 04: bad implies
+expressions/foo.trlc:3:3: trlc check warning: 05: bad i<
+expressions/foo.trlc:3:3: trlc check warning: 06: bad d<
+expressions/foo.trlc:3:3: trlc check warning: 07: bad i<=
+expressions/foo.trlc:3:3: trlc check warning: 08: bad d<=
+expressions/foo.trlc:3:3: trlc check warning: 09: bad i>
+expressions/foo.trlc:3:3: trlc check warning: 10: bad d>
+expressions/foo.trlc:3:3: trlc check warning: 11: bad i>=
+expressions/foo.trlc:3:3: trlc check warning: 12: bad d>=
+expressions/foo.trlc:3:3: trlc check warning: 13: bad i==
+expressions/foo.trlc:3:3: trlc check warning: 14: bad d==
+expressions/foo.trlc:3:3: trlc check warning: 15: bad i!=
+expressions/foo.trlc:3:3: trlc check warning: 16: bad d!=
+expressions/foo.trlc:3:3: trlc check warning: 17: bad range iin
+expressions/foo.trlc:3:3: trlc check warning: 18: bad range din
+expressions/foo.trlc:3:3: trlc check warning: 19: bad range not iin
+expressions/foo.trlc:3:3: trlc check warning: 20: bad range not din
+expressions/foo.trlc:3:3: trlc check warning: 21: bad substring
+expressions/foo.trlc:3:3: trlc check warning: 22: bad i adding (1/2)
+expressions/foo.trlc:3:3: trlc check warning: 22: bad i adding (2/2)
+expressions/foo.trlc:3:3: trlc check warning: 23: bad d adding (1/2)
+expressions/foo.trlc:3:3: trlc check warning: 23: bad d adding (2/2)
+expressions/foo.trlc:3:3: trlc check warning: 24: bad i*
+expressions/foo.trlc:3:3: trlc check warning: 25: bad d*
+expressions/foo.trlc:3:3: trlc check warning: 26: bad i/
+expressions/foo.trlc:3:3: trlc check warning: 27: bad d/
+expressions/foo.trlc:3:3: trlc check warning: 28: bad % (1/4)
+expressions/foo.trlc:3:3: trlc check warning: 28: bad % (2/4)
+expressions/foo.trlc:3:3: trlc check warning: 28: bad % (3/4)
+expressions/foo.trlc:3:3: trlc check warning: 28: bad % (4/4)
+expressions/foo.trlc:3:3: trlc check warning: 29: bad iexp
+expressions/foo.trlc:3:3: trlc check warning: 30: bad dexp
+expressions/foo.trlc:3:3: trlc check warning: 31: bad lnot
+expressions/foo.trlc:3:3: trlc check warning: 32: bad iabs
+expressions/foo.trlc:3:3: trlc check warning: 33: bad dabs
+expressions/foo.trlc:3:3: trlc check warning: 34: bad ifexpr

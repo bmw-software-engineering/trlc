@@ -1,1 +1,1 @@
-f2.trlc:3:5: trlc error: duplicate definition, previous definition at f1.trlc:4
+xref-uniqueness-across-files/f2.trlc:3:5: trlc error: duplicate definition, previous definition at f1.trlc:4

@@ -1,1 +1,1 @@
-foo.rsl:8:15: trlc error: expected expression of type Decimal, got Integer instead
+decimal-3/foo.rsl:8:15: trlc error: expected expression of type Decimal, got Integer instead

@@ -1,2 +1,2 @@
   D == I, warning "not equal", D
-    ^^ foo.rsl:9: error: type mismatch: Decimal and Integer do not match
+    ^^ decimal-8/foo.rsl:9: error: type mismatch: Decimal and Integer do not match
