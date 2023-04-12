@@ -19,7 +19,7 @@
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
 VERSION_TUPLE = (1, 0, 13)
-VERSION_SUFFIX = "dev"
+VERSION_SUFFIX = ""
 
 TRLC_VERSION = ("%u.%u.%u" % VERSION_TUPLE) + \
     ("-%s" % VERSION_SUFFIX if VERSION_SUFFIX else "")

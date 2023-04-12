@@ -14,7 +14,7 @@ quantifying over all references.)
 ## Changelog
 
 
-### 1.0.13-dev
+### 1.0.13
 
 * [TRLC] Do not enter (sub-)directories named `bazel-*`. This
   behaviour can be turned off by using the new option
