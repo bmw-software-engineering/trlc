@@ -479,7 +479,7 @@ class BNF_Parser:
     def parse(self, obj):
         assert self.current_lexer is None
         assert isinstance(obj, ast.Record_Object)
-        assert obj.e_typ.name == "Grammar"
+        assert obj.n_typ.name == "Grammar"
 
         # Get original text (without the ''' whitespace
         # simplifications)
@@ -766,7 +766,7 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
     data = obj.to_python_dict()
 
     # Close merged grammar section
-    if context["in_grammar"] and (obj.e_typ.name != "Grammar" or
+    if context["in_grammar"] and (obj.n_typ.name != "Grammar" or
                                   data["text"] or
                                   data["bullets"]):
         context["in_grammar"] = False
@@ -780,18 +780,18 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
     else:
         new_section = []
 
-    if obj.e_typ.name in ("Text", "Grammar",
+    if obj.n_typ.name in ("Text", "Grammar",
                           "Terminal",
                           "Keywords",
                           "Punctuation"):
         pass
-    elif obj.e_typ.name == "Semantics":
+    elif obj.n_typ.name == "Semantics":
         new_section.append(data["kind"] + " Semantics")
-    elif obj.e_typ.name == "Name_Resolution":
+    elif obj.n_typ.name == "Name_Resolution":
         new_section.append("Name resolution")
-    elif obj.e_typ.name == "Recommendation":
+    elif obj.n_typ.name == "Recommendation":
         new_section.append("Implementation Recommendation")
-    elif obj.e_typ.name == "Example":
+    elif obj.n_typ.name == "Example":
         new_section.append("Example")
     else:
         assert False
@@ -834,7 +834,7 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
             fd.write("</ul>\n")
         fd.write("</div>\n")
 
-    if obj.e_typ.name == "Grammar":
+    if obj.n_typ.name == "Grammar":
         if context["in_grammar"]:
             fd.write("\n")
         else:
@@ -843,7 +843,7 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
             fd.write("<pre>\n")
 
     # Emit additional data with semantics
-    if obj.e_typ.name == "Terminal":
+    if obj.n_typ.name == "Terminal":
         match = re.match("([A-Z_]+) *::= *(.*)", data["def"])
         fd.write("<div class='code'>\n")
         fd.write("<code id=\"bnf-%s\">%s</code>\n" %
@@ -858,7 +858,7 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
         fd.write("</ul>\n")
         fd.write("</div>\n")
 
-    elif obj.e_typ.name == "Grammar":
+    elif obj.n_typ.name == "Grammar":
         first = True
         for production in bnf_parser.bundles[obj.name]:
             if first:
@@ -867,7 +867,7 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
                 fd.write("\n")
             write_production(fd, production, bnf_parser)
 
-    elif obj.e_typ.name == "Example":
+    elif obj.n_typ.name == "Example":
         fd.write("<div class='code'>\n")
         fd.write("<pre>\n")
         write_example(fd, mh, obj)
@@ -969,9 +969,10 @@ class Chained_Lexer(TRLC_Lexer):
 
 def write_example(fd, mh, obj):
     assert isinstance(obj, ast.Record_Object)
-    assert obj.e_typ.name == "Example"
+    assert obj.n_typ.name == "Example"
 
     stab = ast.Symbol_Table.create_global_table(mh)
+    valid_example = True
 
     # Parse virtual RSL file
     rsl_sources = []
@@ -980,13 +981,16 @@ def write_example(fd, mh, obj):
     if isinstance(obj.field["rsl"], ast.String_Literal):
         rsl_sources.append(obj.field["rsl"])
     rsl_lexers = Chained_Lexer(rsl_sources)
-    rsl_parser = Parser(mh        = mh,
-                        stab      = stab,
-                        file_name = obj.location.file_name,
-                        lint_mode = False,
-                        lexer     = rsl_lexers)
-    rsl_parser.parse_rsl_header()
-    rsl_parser.parse_rsl_file()
+    try:
+        rsl_parser = Parser(mh        = mh,
+                            stab      = stab,
+                            file_name = obj.location.file_name,
+                            lint_mode = False,
+                            lexer     = rsl_lexers)
+        rsl_parser.parse_rsl_header()
+        rsl_parser.parse_rsl_file()
+    except TRLC_Error:
+        valid_example = False
 
     # Parse virtual TRLC file
     trlc_sources = []
@@ -994,22 +998,31 @@ def write_example(fd, mh, obj):
         trlc_sources.append(obj.field["hidden_trlc"])
     if isinstance(obj.field["trlc"], ast.String_Literal):
         trlc_sources.append(obj.field["trlc"])
-    if trlc_sources:
+    if trlc_sources and valid_example:
         trlc_lexers = Chained_Lexer(trlc_sources)
-        trlc_parser = Parser(mh        = mh,
-                             stab      = stab,
-                             file_name = obj.location.file_name,
-                             lint_mode = False,
-                             lexer     = trlc_lexers)
-        trlc_parser.parse_trlc_file()
+        try:
+            trlc_parser = Parser(mh        = mh,
+                                 stab      = stab,
+                                 file_name = obj.location.file_name,
+                                 lint_mode = False,
+                                 lexer     = trlc_lexers)
+            trlc_parser.parse_trlc_file()
+        except TRLC_Error:
+            valid_example = False
     else:
         trlc_parser = None
 
     data = obj.to_python_dict()
     if data["rsl"]:
-        fd.write(rsl_lexers.lexers[-1].as_html())
+        if valid_example:
+            fd.write(rsl_lexers.lexers[-1].as_html())
+        else:
+            fd.write(html.escape(data["rsl"]))
     else:
-        fd.write(trlc_lexers.lexers[-1].as_html())
+        if valid_example:
+            fd.write(trlc_lexers.lexers[-1].as_html())
+        else:
+            fd.write(html.escape(data["trlc"]))
 
 
 def write_production(fd, production, bnf_parser):
@@ -1190,24 +1203,24 @@ def main():
     # Process grammer
     parser = BNF_Parser(mh)
     for obj in pkg_lrm.symbols.iter_record_objects():
-        if obj.e_typ.is_subclass_of(typ_gram):
+        if obj.n_typ.is_subclass_of(typ_gram):
             try:
                 parser.parse(obj)
             except TRLC_Error:
                 return
-        elif obj.e_typ.is_subclass_of(typ_kword):
+        elif obj.n_typ.is_subclass_of(typ_kword):
             for kwobj in obj.field["bullets"].value:
                 try:
                     parser.register_terminal(kwobj)
                 except TRLC_Error:
                     return
-        elif obj.e_typ.is_subclass_of(typ_punct):
+        elif obj.n_typ.is_subclass_of(typ_punct):
             for kwobj in obj.field["bullets"].value:
                 try:
                     parser.register_backtick_terminals(kwobj)
                 except TRLC_Error:
                     return
-        elif obj.e_typ.is_subclass_of(typ_terminal):
+        elif obj.n_typ.is_subclass_of(typ_terminal):
             try:
                 parser.register_token(obj.field["def"], obj.field["examples"])
             except TRLC_Error:
@@ -1225,7 +1238,7 @@ def main():
         write_header(fd, obj_version, obj_license)
         write_toc(fd, pkg_lrm)
         for obj in pkg_lrm.symbols.iter_record_objects():
-            if obj.e_typ.is_subclass_of(typ_text):
+            if obj.n_typ.is_subclass_of(typ_text):
                 try:
                     write_text_object(fd, mh, obj, context, parser)
                 except TRLC_Error:

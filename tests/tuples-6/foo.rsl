@@ -1,0 +1,20 @@
+package Foo
+
+tuple Coordinate {
+  x Integer
+  y Integer
+}
+
+tuple Verified_Coordinate {
+  coord             Coordinate
+  separator verified
+  verified optional Boolean
+}
+
+checks Verified_Coordinate {
+  verified == true implies coord.x == coord.y, warning "potato", verified
+}
+
+type R {
+  c Verified_Coordinate [1 .. *]
+}

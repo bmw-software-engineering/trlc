@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>TRLC Language Reference Manual, Version 2.5</title>
+<title>TRLC Language Reference Manual, Version 2.6</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -69,7 +69,7 @@ span.TRLC_STRING {
 </style>
 </head>
 <body>
-<h1>TRLC Language Reference Manual, Version 2.5</h1>
+<h1>TRLC Language Reference Manual, Version 2.6</h1>
 <div>
 Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.3 or any later version published by the Free SoftwareFoundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 A copy of the license is included in the section entitled "Appendix A: GNU Free Documentation License".
@@ -103,11 +103,13 @@ A copy of the license is included in the section entitled "Appendix A: GNU Free 
   </li>
   <li><a href="#sec:43e328fe39e0b1e73d78dfa274ada761910daa8d">Described Names</a>
   </li>
+  <li><a href="#sec:590aeb2db73432d982c1e15e21c6b28a649cc293">Qualified names</a>
+  </li>
   <li><a href="#sec:2b0ce86a93da5b26c4b4929399d43cfb10393c60">Type declarations</a>
   </li>
   <li><a href="#sec:541918791ee5c9789a3fa79a547a313c021b753a">Enumerations</a>
   </li>
-  <li><a href="#sec:590aeb2db73432d982c1e15e21c6b28a649cc293">Qualified names</a>
+  <li><a href="#sec:f2cc0876001e1aef9cc0dc5a33f9da9e4037af3f">Tuples (algebraic data types)</a>
   </li>
   <li><a href="#sec:9aedc52d18c85a678921842cf6748e8e21be3b0b">Record declarations</a>
   </li>
@@ -225,8 +227,10 @@ A keyword is an identifier that is one of the following reserved words:
   <li>or</li>
   <li>package</li>
   <li>section</li>
+  <li>separator</li>
   <li>then</li>
   <li>true</li>
+  <li>tuple</li>
   <li>type</li>
   <li>warning</li>
   <li>xor</li>
@@ -240,6 +244,7 @@ Single character delimiters:
   <li>Punctuation: <code>,</code> <code>.</code> <code>=</code></li>
   <li>Operators: <code>*</code> <code>/</code> <code>%</code> <code>+</code> <code>-</code></li>
   <li>Boolean operators: <code>&lt;</code> <code>&gt;</code></li>
+  <li>Symbols: <code>@</code></li>
 </ul>
 </div>
 <div>
@@ -420,10 +425,24 @@ Two described names are considered equal if their names are equal.
 <div>
 The description has no bearing on equality. The string description should be exported to the API, so that downstream tools can make use of it. This way we don&#x27;t have to give some comments special meaning, and we don&#x27;t have to implement error-prone heuristics in downstream tools for discovering these descriptions.
 </div>
+<h2 id="sec:590aeb2db73432d982c1e15e21c6b28a649cc293">Qualified names</h2>
+<div class='code'>
+<pre>
+<span id="bnf-qualified_name">qualified_name</span> ::= [ <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_package_name</i> '.' ] <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i>
+</pre>
+</div>
+<h3>Static Semantics</h3>
+<div>
+The package name of a qualified name must be the current package or an imported package.
+</div>
+<div>
+The name must be a valid symbol in the current scope (if no package is provided) or a valid symbol of the indicated package.
+</div>
 <h2 id="sec:2b0ce86a93da5b26c4b4929399d43cfb10393c60">Type declarations</h2>
 <div class='code'>
 <pre>
 <span id="bnf-type_declaration">type_declaration</span> ::= 'enum' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> <span class="tooltip"><a href="#bnf-enumeration_declaration">enumeration_declaration</a><span class="tooltiptext">{ { enumeration_literal_specification } }</span></span>
+                   | 'tuple' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> <a href="#bnf-tuple_declaration">tuple_declaration</a>
                    | 'type' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> <a href="#bnf-record_declaration">record_declaration</a>
 </pre>
 </div>
@@ -463,18 +482,50 @@ It is not an error to have an enumeration literal with the same name as a record
   <span class="TRLC_IDENTIFIER">file_not_found</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2 id="sec:590aeb2db73432d982c1e15e21c6b28a649cc293">Qualified names</h2>
+<h2 id="sec:f2cc0876001e1aef9cc0dc5a33f9da9e4037af3f">Tuples (algebraic data types)</h2>
 <div class='code'>
 <pre>
-<span id="bnf-qualified_name">qualified_name</span> ::= [ <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_package_name</i> '.' ] <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i>
+<span id="bnf-tuple_declaration">tuple_declaration</span> ::= '{' <span class="tooltip"><a href="#bnf-field_declaration">field_declaration</a><span class="tooltiptext">described_name [ optional ] qualified_name</span></span>
+                      { [ <span class="tooltip"><a href="#bnf-separator_declaration">separator_declaration</a><span class="tooltiptext">separator separator_symbol</span></span> ] <span class="tooltip"><a href="#bnf-field_declaration">field_declaration</a><span class="tooltiptext">described_name [ optional ] qualified_name</span></span> }
+                      '}'
+
+<span id="bnf-field_declaration">field_declaration</span> ::= <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> [ 'optional' ] <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_FIELD_TYPE</i>
+
+<span id="bnf-separator_declaration">separator_declaration</span> ::= 'separator' <span class="tooltip"><a href="#bnf-separator_symbol">separator_symbol</a><span class="tooltiptext">IDENTIFIER | @</span></span>
+
+<span id="bnf-separator_symbol">separator_symbol</span> ::= <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span>
+                   | '@'
 </pre>
 </div>
 <h3>Static Semantics</h3>
 <div>
-The package name of a qualified name must be the current package or an imported package.
+A field type names any valid visible and complete type. <i>(Specifically you may not have a recursive tuple reference.)</i>
 </div>
 <div>
-The name must be a valid symbol in the current scope (if no package is provided) or a valid symbol of the indicated package.
+A tuple type shall declare separators between all fields, or none of them.
+</div>
+<div>
+Only tuples with separators may use optional fields. Tuples without separators cannot have optional fields.
+</div>
+<div>
+After an optional field has been declared, all fields following it must also be optional.
+</div>
+<div>
+It is an error to declare two fields with the same name in the same tuple. <i>(Note that it is possible, but a bad idea, to have a separator with the same identifier as a field.)</i>
+</div>
+<h3>Example</h3>
+<div class='code'>
+<pre>
+<span class="TRLC_KEYWORD">tuple</span> <span class="TRLC_IDENTIFIER">Coordinate</span> <span class="TRLC_C_BRA">{</span>
+   <span class="TRLC_IDENTIFIER">x</span> <span class="TRLC_IDENTIFIER">Decimal</span>
+   <span class="TRLC_IDENTIFIER">y</span> <span class="TRLC_IDENTIFIER">Decimal</span>
+<span class="TRLC_C_KET">}</span>
+
+<span class="TRLC_KEYWORD">tuple</span> <span class="TRLC_IDENTIFIER">Codebeamer_Item</span> <span class="TRLC_C_BRA">{</span>
+   <span class="TRLC_IDENTIFIER">item</span>             <span class="TRLC_IDENTIFIER">Integer</span>
+   <span class="TRLC_KEYWORD">separator</span> <span class="TRLC_AT">@</span>
+   <span class="TRLC_IDENTIFIER">version</span> <span class="TRLC_KEYWORD">optional</span> <span class="TRLC_IDENTIFIER">Integer</span>
+<span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2 id="sec:9aedc52d18c85a678921842cf6748e8e21be3b0b">Record declarations</h2>
 <div class='code'>
@@ -531,6 +582,9 @@ It is recommended to emit an error on array types with an upper bound of zero.
 <div>
 It is recommended to emit a warning on array types with an upper bound of one.
 </div>
+<div>
+It is recommended that an implementation checks if a record type contains a tuple with a identifier separator that is the same as one of its components. While this is not an error (parsing for values is greedy) it is still highly confusing.
+</div>
 <h3>Example</h3>
 <div class='code'>
 <pre>
@@ -567,7 +621,7 @@ It is an error to indicate a package that has not been declared in an <code>.rsl
 <h2 id="sec:e927d676860613a7cb2f750b822d434b0064ea5e">Checks</h2>
 <div class='code'>
 <pre>
-<span id="bnf-check_block">check_block</span> ::= 'checks' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_record_name</i>
+<span id="bnf-check_block">check_block</span> ::= 'checks' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_record_or_tuple_name</i>
                 '{' { <span class="tooltip"><a href="#bnf-check_declaration">check_declaration</a><span class="tooltiptext">expression , [ severity ] STRING [ , IDENTIFIER ]</span></span> } '}'
 
 <span id="bnf-check_declaration">check_declaration</span> ::= <a href="#bnf-expression">expression</a> ',' [ <span class="tooltip"><a href="#bnf-severity">severity</a><span class="tooltiptext">warning | error | fatal</span></span> ] <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span><i>_message</i>
@@ -580,10 +634,10 @@ It is an error to indicate a package that has not been declared in an <code>.rsl
 </div>
 <h3>Static Semantics</h3>
 <div>
-It is an error to refer to a type that does not exist in the current package, or is not a record type.
+It is an error to refer to a type that does not exist in the current package, or is not a record or tuple type.
 </div>
 <div>
-In a check declaration or expression, it is an error to refer to a component name that does not belong to the record indicated.
+In a check declaration or expression, it is an error to refer to a component name (or field name) that does not belong to the record (or tuple respectively) indicated.
 </div>
 <div>
 Note that it is never possible to add checks to a type from a foreign package. In check files this is more obvious as you cannot have an import clause, but this is also true for checks declared in <code>.rsl</code> files since it is not possible to specify a qalified name.
@@ -593,7 +647,7 @@ Note that it is never possible to add checks to a type from a foreign package. I
 Each check inside a check block evaluated in the specified order.
 </div>
 <div>
-If multiple check blocks are declared for the same record, then the order of evaluation of each check block is unspecified.
+If multiple check blocks are declared for the same type, then the order of evaluation of each check block is unspecified.
 </div>
 <div>
 For record extensions, all checks for the base record must be evaluated before any check of the record extension is evaluated.
@@ -606,14 +660,14 @@ The severity, if provided, controls how future errors are treated, and how the T
 <ul>
   <li>A warning has no effect other than emitting the message.</li>
   <li>An error (the default, in case severity is not specified) causes an implementation to eventually return a non-zero error code, but further checks will be evaluated (potentially creating more messages).</li>
-  <li>A fatal message is like an error, except that no further checks from this check block shall be evaluated for this record instance.</li>
+  <li>A fatal message is like an error, except that no further checks from this check block shall be evaluated for this type&#x27;s instance.</li>
 </ul>
 </div>
 <div>
-The component name (if specified) is a hint where the message should be anchored. It is implementation defined how or if this is taken into account. A suitable anchoring for a message without a component could be the record object declaration itself. If only a single component is used in the expression then the message could be anchored the same way as if the component was indicated explicitly in the check.
+The component name (if specified) is a hint where the message should be anchored. It is implementation defined how or if this is taken into account. A suitable anchoring for a message without a component or field could be the object declaration itself. If only a single component or field is used in the expression then the message could be anchored the same way as if the component was indicated explicitly in the check.
 </div>
 <div>
-It is an important design goal to keep the type system sane and following LSP. I.e. each subtype may only narrow the values permitted in a type. This means for a record R and its extension RE; any valid instance of RE is always a valid instance of R if a new binding of R is created considering only the fields that are in R. It will never be possible to delete, suppress, widen, or omit checks in record extensions.
+It is an important design goal to keep the type system sane and following LSP. I.e. each subtype may only narrow the values permitted in a type. This means for a record R and its extension RE; any valid instance of RE is always a valid instance of R if a new binding of R is created considering only the components that are in R. It will never be possible to delete, suppress, widen, or omit checks in record extensions.
 </div>
 <h3>Example</h3>
 <div class='code'>
@@ -629,6 +683,12 @@ It is an important design goal to keep the type system sane and following LSP. I
   <span class="TRLC_COMMENT">// overflow in the below expression</span>
 
   <span class="TRLC_IDENTIFIER">value</span> <span class="TRLC_OPERATOR">**</span> <span class="TRLC_INTEGER">2</span> <span class="TRLC_OPERATOR">==</span> <span class="TRLC_INTEGER">25</span><span class="TRLC_COMMA">,</span> <span class="TRLC_KEYWORD">warning</span> <span class="TRLC_STRING">&quot;Value is not 5 or -5&quot;</span>
+<span class="TRLC_C_KET">}</span>
+
+<span class="TRLC_KEYWORD">checks</span> <span class="TRLC_IDENTIFIER">Codebeamer_Item</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">item</span> <span class="TRLC_OPERATOR">&gt;=</span> <span class="TRLC_INTEGER">1</span><span class="TRLC_COMMA">,</span> <span class="TRLC_KEYWORD">error</span> <span class="TRLC_STRING">&quot;CB Item must be positive&quot;</span><span class="TRLC_COMMA">,</span> <span class="TRLC_IDENTIFIER">item</span>
+  <span class="TRLC_IDENTIFIER">version</span> <span class="TRLC_OPERATOR">!=</span> <span class="TRLC_KEYWORD">null</span> <span class="TRLC_KEYWORD">implies</span> <span class="TRLC_IDENTIFIER">version</span> <span class="TRLC_OPERATOR">&gt;=</span> <span class="TRLC_INTEGER">1</span><span class="TRLC_COMMA">,</span>
+    <span class="TRLC_KEYWORD">error</span> <span class="TRLC_STRING">&quot;CB Version must be positive&quot;</span><span class="TRLC_COMMA">,</span> <span class="TRLC_IDENTIFIER">version</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2 id="sec:fbcc36b7c40a2a111a9fac98725ee86aa48ae5a0">Expressions</h2>
@@ -686,18 +746,40 @@ The parsing of unary minus can be confusing: <code>-a % b</code> is actually <co
 <span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2 id="sec:e45bf89f4cee2eb28d331c49b46029d82b15382c">Names</h2>
+<div>
+A name can be one of 5 things:
+<ul>
+  <li>A qualified name referring to either some object, a component (in a record) or field (in a tuple), or an enumeration type.</li>
+  <li>(Deprecated) A builtin identifier for an old-style builtin function.</li>
+  <li>A tuple field or enumeration literal.</li>
+  <li>An index into an array.</li>
+  <li>A (builtin) function call.</li>
+</ul>
+</div>
 <div class='code'>
 <pre>
 <span id="bnf-name">name</span> ::= <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span>
-       | <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span> [ '.' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_literal</i> ]
+       | <span class="tooltip"><a href="#bnf-BUILTIN_IDENTIFIER">BUILTIN_IDENTIFIER</a><span class="tooltiptext">[a-z]+:[a-zA-Z][a-zA-Z0-9_]*</span></span>
+       | <a href="#bnf-name">name</a> '.' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span>
        | <a href="#bnf-name">name</a> '[' <a href="#bnf-expression">expression</a> ']'
-       | <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_builtin_function</i> '(' <span class="tooltip"><a href="#bnf-parameter_list">parameter_list</a><span class="tooltiptext">expression { , expression }</span></span> ')'
-       | <span class="tooltip"><a href="#bnf-BUILTIN_IDENTIFIER">BUILTIN_IDENTIFIER</a><span class="tooltiptext">[a-z]+:[a-zA-Z][a-zA-Z0-9_]*</span></span> '(' <span class="tooltip"><a href="#bnf-parameter_list">parameter_list</a><span class="tooltiptext">expression { , expression }</span></span> ')'
+       | <a href="#bnf-name">name</a> '(' <span class="tooltip"><a href="#bnf-parameter_list">parameter_list</a><span class="tooltiptext">expression { , expression }</span></span> ')'
 
 <span id="bnf-parameter_list">parameter_list</span> ::= <a href="#bnf-expression">expression</a> { ',' <a href="#bnf-expression">expression</a> }
 </pre>
 </div>
 <h3>Static Semantics</h3>
+<div>
+The <code>qualified_name</code> must resolve to record component or tuple field in scope, or a visible record object, or a visible enumeration type.
+</div>
+<div>
+If the prefix of a dot (<code>.</code>) access resolves to an enumeration type, then the identifier must be a valid literal of that type. If the prefix of a dot (<code>.</code>) access resolves to a tuple, then the identifier must be a valid field of the type of that tuple. Any other prefix is an error.
+</div>
+<div>
+The type of the <code>name</code> in an array indexing prefix (i.e. <code>[</code> .. <code>]</code>) must be an array type.
+</div>
+<div>
+The <code>name</code> in a function call must resolve to one of the builtin functions.
+</div>
 <div>
 The builtin function <code>len</code> is of arity 1. Its parameter must be of type <code>String</code> or an array type. Its return type is <code>Integer</code>.
 </div>
@@ -751,6 +833,9 @@ Name resolution is case sensitive.
 
   <span class="TRLC_IDENTIFIER">Decimal</span><span class="TRLC_BRA">(</span><span class="TRLC_IDENTIFIER">potato</span><span class="TRLC_S_BRA">[</span><span class="TRLC_INTEGER">0</span><span class="TRLC_S_KET">]</span><span class="TRLC_KET">)</span> <span class="TRLC_OPERATOR">&lt;</span> <span class="TRLC_IDENTIFIER">wibble</span><span class="TRLC_COMMA">,</span> <span class="TRLC_STRING">&quot;foo&quot;</span>
   <span class="TRLC_COMMENT">// note that type conversion is necessary</span>
+
+  <span class="TRLC_IDENTIFIER">cb_link</span><span class="TRLC_DOT">.</span><span class="TRLC_IDENTIFIER">item</span> <span class="TRLC_OPERATOR">&gt;=</span> <span class="TRLC_INTEGER">50000</span><span class="TRLC_COMMA">,</span> <span class="TRLC_KEYWORD">warning</span> <span class="TRLC_STRING">&quot;cb item value is oddly low&quot;</span>
+  <span class="TRLC_COMMENT">// you can obtain a tuple&#x27;s values</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2 id="sec:26bd85a87e980cbb3cc597e9842ced0133d46633">Operators</h2>
@@ -994,11 +1079,15 @@ A section has no semantic impact, and no impact on name resolution. Section name
         | <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_RECORD_OBJECT</i>
         | <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_ENUM_TYPE</i> '.' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_enumeration_literal</i>
         | '[' [ <a href="#bnf-value">value</a> { ',' <a href="#bnf-value">value</a> } ] ']'
+        | <a href="#bnf-tuple_aggregate">tuple_aggregate</a>
+
+<span id="bnf-tuple_aggregate">tuple_aggregate</span> ::= '(' <a href="#bnf-value">value</a> { ',' <a href="#bnf-value">value</a> } ')'
+                  | <a href="#bnf-value">value</a> { <span class="tooltip"><a href="#bnf-separator_symbol">separator_symbol</a><span class="tooltiptext">IDENTIFIER | @</span></span> <a href="#bnf-value">value</a> }
 </pre>
 </div>
 <h3>Static Semantics</h3>
 <div>
-The type of the declaration must be a valid record type. If no qualified name is given, the record type must be in the indicated package.
+The type of the declaration must be a valid record type. If no qualified name is given, the record type must be in the indicated package. <i>(Note that it is not legal to declare a tuple object.)</i>
 </div>
 <div>
 The name of the declaration must be a unique name and sufficiently distinct in the current package. <i>(See name resolution for a definition of sufficiently distinct.)</i> The name of the declaration must not shadow a type name or package.
@@ -1015,15 +1104,28 @@ The type of each value must match each component or array element type. Records 
 <div>
 It is an error to not provide a value for a non-optional component.
 </div>
+<div>
+The aggregate of a tuple must use the correct form. A tuple without separators uses the bracket syntax (e.g. <code>(1, 2, 3)</code>, and a tuple with separators must use the separator syntax (e.g. <code>12345@42</code>).
+</div>
+<div>
+A tuple value for a tuple without separators must contain one value, in order, for each of its fields.
+</div>
+<div>
+A tuple value for a tuple with separators must contain the separator symbols as indicated in the type, in order. Optional fields and their preceding separator may be omitted.
+</div>
 <h3>Dynamic Semantics</h3>
 <div>
-A record object declaration creates a new binding for a record. After references are resolved, all applicable checks are evaluated in the context of this binding.
+A record object declaration creates a new binding for a record. After references are resolved, all applicable checks on the object, including any checks for tuples, are evaluated in the context of this binding.
 </div>
 <div>
 It is an error to refer to a record by name that does not exist. It is legal to refer to an record that has not been encountered yet, as references are resolved after parsing.
 </div>
 <div>
 A record reference must match in type, i.e. be of the correct type or any record extension of that type. <i>(For example if RE extends R, then a list of R may contain references to instances of R and RE. A list of RE may not contain any references to R.)</i>
+</div>
+<h3>Static Semantics</h3>
+<div>
+The checks for a tuple aggregate are immediately evaluated after the last value is parsed.
 </div>
 <h3>Name resolution</h3>
 <div>
@@ -1043,6 +1145,18 @@ When exposing record instances through the API, it is required to make the type 
   <li>Provide a function or attribute that, when called, provides the type information.</li>
   <li>Provide the type information through the type system of the API language (e.g. the Python type system).</li>
 </ul>
+</div>
+<h3>Example</h3>
+<div class='code'>
+<pre>
+<span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_IDENTIFIER">Potato</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">description</span> <span class="TRLC_ASSIGN">=</span> <span class="TRLC_STRING">&quot;Hello World!&quot;</span>
+  <span class="TRLC_IDENTIFIER">coordinate</span> <span class="TRLC_ASSIGN">=</span> <span class="TRLC_BRA">(</span><span class="TRLC_DECIMAL">42.0</span><span class="TRLC_COMMA">,</span> <span class="TRLC_DECIMAL">666.0</span><span class="TRLC_KET">)</span>
+  <span class="TRLC_IDENTIFIER">derived_from_cb</span> <span class="TRLC_ASSIGN">=</span> <span class="TRLC_S_BRA">[</span>
+    <span class="TRLC_INTEGER">1234</span><span class="TRLC_COMMA">,</span>     <span class="TRLC_COMMENT">// references codebeamer item 1234 (at head revision)</span>
+    <span class="TRLC_INTEGER">1900</span><span class="TRLC_AT">@</span><span class="TRLC_INTEGER">42</span>   <span class="TRLC_COMMENT">// references codebeamer item 1900 at version 42</span>
+  <span class="TRLC_S_KET">]</span>
+<span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2 id="sec:aca473accda10e90bfeb1af192c0d372dfaae446">Markup Strings</h2>
 <div>
@@ -1100,7 +1214,7 @@ It is an error to form an expression if the type of all operands cannot be stati
 </div>
 <h3>Dynamic Semantics</h3>
 <div>
-The value of an optional field that is not specified is <code>null</code>.
+The value of an optional component or field that is not specified is <code>null</code>.
 </div>
 <div>
 For equality the null value is considered equal to itself, but not equal to any non-null value.

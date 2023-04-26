@@ -1,0 +1,13 @@
+package Foo
+
+R test1 {
+  c = [(1, 1) verified true,
+       (2, 2) verified false,
+       (3, 3)]
+}
+
+R test2 {
+  c = [(1, 0) verified true,
+       (2, 0) verified false,
+       (3, 0)]
+}

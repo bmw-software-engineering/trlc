@@ -32,7 +32,7 @@ author = 'Bayerische Motoren Werke Aktiengesellschaft (BMW AG)'
 version = trlc.version.TRLC_VERSION
 release = trlc.version.TRLC_VERSION
 
-language = None
+language = "en"
 
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 

@@ -1,0 +1,2 @@
+tuples-4/foo.trlc:6:7: trlc error: lhs of check f2 >= 0 (foo.rsl:12) must not be null
+tuples-4/foo.trlc:14:14: trlc check warning: potato2

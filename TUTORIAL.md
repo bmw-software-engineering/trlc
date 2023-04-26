@@ -8,6 +8,7 @@
   requirement
 * [Enumerations](TUTORIAL-ENUM.md): creating user-defined datatypes
 * [Arrays](TUTORIAL-ARRAYS.md): creating lists of attributes
+* [Tuples](TUTORIAL-TUPLES.md): creating complex datatypes
 * [References and Extensions](TUTORIAL-ADVANCED.md): linking
   requirements to other requirements
 * [User defined checks](TUTORIAL-CHECKS.md): enforcing process/policy

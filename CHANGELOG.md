@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 2.5 of [TRLC language reference
+Up to date with version 2.6 of [TRLC language reference
 manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
@@ -13,10 +13,51 @@ quantifying over all references.)
 
 ## Changelog
 
+### 1.1.1-dev
 
-### 1.0.14-dev
+* [LRM, TRLC] Support for `tuple` types: these are algebraic datatypes
+  that also support user-defined syntax. The main use case is
+  versioned identifiers, e.g. allowing you to write `12345@42` for
+  example to refer to a codebeamer item 12345 at version 42. Instead
+  of only allowing this use-case, tuples should be a widely applicable
+  generic datatype, for specifying e.g. coordinates, qualified
+  information, complex numbers, vectors, etc.
 
+  New keywords: `tuple` and `separator`
 
+  New punctuation: `@` (unused except for user-defined separator
+  syntax, like in the example above)
+
+  Have a look at the new [Tuples Tutorial](TUTORIAL-TUPLES.md) for
+  some examples.
+
+* [TRLC] Introducing the tuple type required significant
+  reorganisation of the AST, to mark this significant backwards
+  incompatible change we have increased the minor version instead of
+  just the patch version. The key incompatible changes are:
+
+  * New base-class for record types and tuple types, called
+    `Composite_Type`.
+
+  * Components and fields now share the same type
+    `Composite_Component`.
+
+  * New base-class `Typed_Entity` for entities with a type, in which
+    case the type is stored in the `n_typ` attribute. The entities
+    `Quantified_Variable`, `Composite_Component` (previously
+    `Record_Component`), `Enumeration_Literal_Spec`, and
+    `Record_Object` are now typed entities, and their inconsistent
+    attribute for their type is now `n_typ` consistently.
+
+  * Renamed `n_record` to `n_type` for `Composite_Component` (formally
+    `Record_Component`).
+
+* [TRLC] Fix unary operators in array aggregates; this used to crash
+  the tools and now works as expected.
+
+* [TRLC] Fix anchoring of some error messages which incorrectly linked
+  to the declaration of `x` instead of the part of the expression
+  where `x` was used.
 
 ### 1.0.13
 

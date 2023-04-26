@@ -19,6 +19,8 @@ docs:
 	rm -rf docs
 	sphinx-build -c sphinx -b html . docs
 	@python3 trlc-lrm-generator.py
+
+docs-and-commit: docs
 	git add docs
 	git commit -m "Re-generate documentation for release."
 
@@ -41,7 +43,7 @@ bump:
 
 full_release:
 	make remove_dev
-	make docs
+	make docs-and-commit
 	git push
 	make package
 	make upload_main

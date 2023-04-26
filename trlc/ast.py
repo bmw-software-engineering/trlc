@@ -66,7 +66,8 @@ class Value:
             isinstance(value, (str,
                                int,
                                bool,
-                               list,
+                               list,  # for arrays
+                               dict,  # for tuples
                                Fraction,
                                Record_Reference,
                                Enumeration_Literal_Spec))
@@ -78,7 +79,7 @@ class Value:
         self.typ      = typ
 
     def __eq__(self, other):
-        return self.value == other.value
+        return self.typ == other.typ and self.value == other.value
 
     def __repr__(self):  # pragma: no cover
         return "Value(%s)" % self.value
@@ -127,7 +128,7 @@ class Node:
                Package bar
                   Symbol_Table
                      Record_Type MyType
-                        Record_Component name
+                        Composite_Component name
                            Optional: False
                            Type: String
                         Checks
@@ -167,15 +168,15 @@ class Check(Node):
           a /= null implies a > 5, warning "potato", a
           ^^^^^^^^^^^^^^^^^^^^^^^1 ^2      ^3        ^4
 
-    :attribute n_record: The record type this check applies to
-    :type: Record_Type
+    :attribute n_type: The tuple/record type this check applies to
+    :type: Composite_Type
 
     :attribute n_expr: The boolean expression for the check (see 1)
     :type: Expression
 
     :attribute n_anchor: The (optional) record component where the message \
     should be issued (or None) (see 4)
-    :type: Record_Component
+    :type: Composite_Component
 
     :attribute severity: warning, error, or fatal (see 2; also if this is \
     not specified the default is 'error')
@@ -184,16 +185,16 @@ class Check(Node):
     :attribute message: the user-supplied message (see 3)
     :type: str
     """
-    def __init__(self, n_record, n_expr, n_anchor, severity, t_message):
-        assert isinstance(n_record, Record_Type)
+    def __init__(self, n_type, n_expr, n_anchor, severity, t_message):
+        assert isinstance(n_type, Composite_Type)
         assert isinstance(n_expr, Expression)
-        assert isinstance(n_anchor, Record_Component) or n_anchor is None
+        assert isinstance(n_anchor, Composite_Component) or n_anchor is None
         assert severity in ("warning", "error", "fatal")
         assert isinstance(t_message, Token)
         assert t_message.kind == "STRING"
         super().__init__(t_message.location)
 
-        self.n_record = n_record
+        self.n_type   = n_type
         self.n_expr   = n_expr
         self.n_anchor = n_anchor
         self.severity = severity
@@ -210,24 +211,32 @@ class Check(Node):
             self.write_indent(indent + 1, "Anchor: %s" % self.n_anchor.name)
         self.n_expr.dump(indent + 1)
 
-    def get_real_location(self, record_object):
-        assert isinstance(record_object, Record_Object)
-        if self.n_anchor is None:
-            return record_object.location
-        elif record_object.field[self.n_anchor.name] is not None:
-            return record_object.field[self.n_anchor.name].location
+    def get_real_location(self, composite_object):
+        assert isinstance(composite_object, (Record_Object,
+                                             Tuple_Aggregate))
+        if isinstance(composite_object, Record_Object):
+            fields = composite_object.field
         else:
-            return record_object.location
+            fields = composite_object.value
 
-    def perform(self, mh, record_object):
+        if self.n_anchor is None or fields[self.n_anchor.name] is None:
+            return composite_object.location
+        else:
+            return fields[self.n_anchor.name].location
+
+    def perform(self, mh, composite_object):
         assert isinstance(mh, Message_Handler)
-        assert isinstance(record_object, Record_Object)
+        assert isinstance(composite_object, (Record_Object,
+                                             Tuple_Aggregate))
 
-        result = self.n_expr.evaluate(mh, copy(record_object.field))
+        if isinstance(composite_object, Record_Object):
+            result = self.n_expr.evaluate(mh, copy(composite_object.field))
+        else:
+            result = self.n_expr.evaluate(mh, copy(composite_object.value))
         assert isinstance(result.value, bool)
 
         if not result.value:
-            loc = self.get_real_location(record_object)
+            loc = self.get_real_location(composite_object)
             if self.severity == "warning":
                 mh.warning(loc,
                            self.message,
@@ -312,7 +321,7 @@ class Expression(Node):
         :param mh: the message handler to use
         :type mh: Message_Handler
         :param context: name mapping or None (for a static context)
-        :type context: dict[str] Expression
+        :type context: dict[str, Expression]
         :raise TRLC_Error: if the expression cannot be evaluated
         :return: result of the evaluation
         :rtype: Value
@@ -346,8 +355,9 @@ class Expression(Node):
 class Implicit_Null(Expression):
     """Synthesised null values
 
-    When a record object is declared and an optional component is not
-    specified, we synthesise an implicit null expression for this.
+    When a record object or tuple aggregate is declared and an
+    optional component or field is not specified, we synthesise an
+    implicit null expression for this.
 
     For example given this TRLC type::
 
@@ -368,10 +378,11 @@ class Implicit_Null(Expression):
     that can appear in check expressions.
 
     """
-    def __init__(self, record_object, record_component):
-        assert isinstance(record_object, Record_Object)
-        assert isinstance(record_component, Record_Component)
-        super().__init__(record_object.location, None)
+    def __init__(self, composite_object, composite_component):
+        assert isinstance(composite_object, (Record_Object,
+                                             Tuple_Aggregate))
+        assert isinstance(composite_component, Composite_Component)
+        super().__init__(composite_object.location, None)
 
     def to_string(self):
         return "null"
@@ -383,6 +394,9 @@ class Implicit_Null(Expression):
 
     def to_python_object(self):
         return None
+
+    def dump(self, indent=0):  # pragma: no cover
+        self.write_indent(indent, "Implicit_Null")
 
 
 class Literal(Expression):
@@ -611,7 +625,7 @@ class Enumeration_Literal(Literal):
     (i.e. ``POTATO`` here) you can get the name of the literal spec
     itself: ``enum_lit.value.name``; and to get the name of the
     enumeration (i.e. ``my_enum`` here) you can use
-    ``enum_lit.value.enum.name``.
+    ``enum_lit.value.n_typ.name``.
 
     :attribute value: enumeration value
     :type: Enumeration_Literal_Spec
@@ -619,7 +633,7 @@ class Enumeration_Literal(Literal):
     """
     def __init__(self, location, literal):
         assert isinstance(literal, Enumeration_Literal_Spec)
-        super().__init__(location, literal.enum)
+        super().__init__(location, literal.n_typ)
 
         self.value = literal
 
@@ -665,7 +679,9 @@ class Array_Aggregate(Expression):
 
     def append(self, value):
         assert isinstance(value, (Literal,
+                                  Unary_Expression,
                                   Array_Aggregate,
+                                  Tuple_Aggregate,
                                   Record_Reference))
         self.value.append(value)
 
@@ -688,6 +704,91 @@ class Array_Aggregate(Expression):
 
     def to_python_object(self):
         return [x.to_python_object() for x in self.value]
+
+
+class Tuple_Aggregate(Expression):
+    """Instances of a tuple
+
+    This is created when assigning to a tuple components. There are
+    two forms, the ordinary form::
+
+       coordinate = (12.3, 40.0)
+                    ^^^^^^^^^^^^
+
+    And the separator form::
+
+       item = 12345@42
+              ^^^^^^^^
+
+    In terms of AST there is no difference, as the separator is only
+    syntactic sugar.
+
+    :attribute value: contents of the tuple
+    :type: dict[str, Expression]
+
+    """
+    def __init__(self, location, typ):
+        super().__init__(location, typ)
+        self.value = {n_field.name : Implicit_Null(self, n_field)
+                      for n_field in self.typ.components.values()}
+
+    def assign(self, field, value):
+        assert isinstance(field, str)
+        assert isinstance(value, (Literal,
+                                  Unary_Expression,
+                                  Tuple_Aggregate,
+                                  Record_Reference)), \
+                "value is %s" % value.__class__.__name__
+        assert field in self.typ.components
+
+        self.value[field] = value
+
+    def dump(self, indent=0):  # pragma: no cover
+        self.write_indent(indent, "Tuple_Aggregate")
+        self.write_indent(indent + 1, "Type: %s" % self.typ.name)
+        for n_item in self.typ.iter_sequence():
+            if isinstance(n_item, Composite_Component):
+                self.value[n_item.name].dump(indent + 1)
+
+    def to_string(self):
+        first = True
+        if self.typ.has_separators():
+            rv = ""
+        else:
+            rv = "("
+        for n_item in self.typ.iter_sequence():
+            if isinstance(n_item, Separator):
+                rv += " %s " % n_item.token.value
+            elif first:
+                first = False
+            else:
+                rv += ", "
+
+            if isinstance(n_item, Composite_Component):
+                rv += self.value[n_item.name].to_string()
+        if self.typ.has_separators():
+            rv = ""
+        else:
+            rv = ")"
+        return rv
+
+    def evaluate(self, mh, context):
+        assert isinstance(mh, Message_Handler)
+        assert context is None or isinstance(context, dict)
+        return Value(self.location,
+                     {name : element.evaluate(mh, context)
+                      for name, element in self.value.items()},
+                     self.typ)
+
+    def resolve_references(self, mh):
+        assert isinstance(mh, Message_Handler)
+
+        for val in self.value.values():
+            val.resolve_references(mh)
+
+    def to_python_object(self):
+        return {name: value.to_python_object()
+                for name, value in self.value.items()}
 
 
 class Record_Reference(Expression):
@@ -754,12 +855,12 @@ class Record_Reference(Expression):
             error_location    = self.location,
             required_subclass = Record_Object)
         if self.typ is None:
-            self.typ = self.target.e_typ
-        elif not self.target.e_typ.is_subclass_of(self.typ):
+            self.typ = self.target.n_typ
+        elif not self.target.n_typ.is_subclass_of(self.typ):
             mh.ice_loc(self.location,
                        "on resolving references, types do not match; "
                        "expected %s, got %s" % (self.typ.name,
-                                                self.target.e_typ.name))
+                                                self.target.n_typ.name))
 
     def to_python_object(self):
         return self.name
@@ -768,7 +869,7 @@ class Record_Reference(Expression):
 class Name_Reference(Expression):
     """Reference to a name
 
-    Name reference to either a :class:`Record_Component` or a
+    Name reference to either a :class:`Composite_Component` or a
     :class:`Quantified_Variable`. The actual value of course depends
     on the context. See :py:meth:`Expression.evaluate()`.
 
@@ -778,16 +879,16 @@ class Name_Reference(Expression):
                    ^1        ^2
 
     Both indicated parts are a :class:`Name_Reference`, the first one
-    refers to a :class:`Record_Component`, and the second refers to a
+    refers to a :class:`Composite_Component`, and the second refers to a
     :class:`Quantified_Variable`.
 
     :attribute entity: the entity named here
-    :type: Record_Component, Quantified_Variable
+    :type: Composite_Component, Quantified_Variable
     """
     def __init__(self, location, entity):
-        assert isinstance(entity, (Record_Component,
+        assert isinstance(entity, (Composite_Component,
                                    Quantified_Variable))
-        super().__init__(location, entity.typ)
+        super().__init__(location, entity.n_typ)
         self.entity = entity
 
     def dump(self, indent=0):  # pragma: no cover
@@ -1298,6 +1399,45 @@ class Binary_Expression(Expression):
                        "unexpected binary operator %s" % self.operator)
 
 
+class Field_Access_Expression(Expression):
+    """Tuple field access
+
+    For example in::
+
+      foo.bar
+      ^1  ^2
+
+    :attribute n_prefix: expression with tuple type (see 1)
+    :type: Expression
+
+    :attribute n_field: a tuple field to dereference (see 2)
+    :type: Composite_Component
+
+    """
+    def __init__(self, mh, location, n_prefix, n_field):
+        assert isinstance(mh, Message_Handler)
+        assert isinstance(n_prefix, Expression)
+        assert isinstance(n_field, Composite_Component)
+        super().__init__(location, n_field.n_typ)
+        self.n_prefix = n_prefix
+        self.n_field  = n_field
+
+        self.n_prefix.ensure_type(mh, self.n_field.member_of)
+
+    def dump(self, indent=0):  # pragma: no cover
+        self.write_indent(indent, "Field_Access (%s)" % self.n_field.name)
+        self.n_prefix.dump(indent + 1)
+
+    def to_string(self):
+        return self.n_prefix.to_string() + "." + self.n_field.name
+
+    def evaluate(self, mh, context):
+        assert isinstance(mh, Message_Handler)
+        assert context is None or isinstance(context, dict)
+
+        return self.n_prefix.evaluate(mh, context).value[self.n_field.name]
+
+
 class Range_Test(Expression):
     """Range membership test
 
@@ -1579,7 +1719,7 @@ class Quantified_Expression(Expression):
         # This is going to be a bit tricky. We essentially eliminate
         # the quantifier and substitute; for the sake of making better
         # error messages.
-        assert isinstance(self.n_source.entity, Record_Component)
+        assert isinstance(self.n_source.entity, Composite_Component)
         array_values = context[self.n_source.entity.name]
         if isinstance(array_values, Implicit_Null):
             mh.error(array_values.location,
@@ -1632,7 +1772,24 @@ class Entity(Node):
         self.name = name
 
 
-class Quantified_Variable(Entity):
+class Typed_Entity(Entity):
+    """Base class for entities with a type.
+
+    A typed entity is a concrete object (with a name and TRLC type)
+    for which we need to allocate memory. Examples of typed entities
+    are record objects and components.
+
+    :attribute n_typ: type of the entity
+    :type: Type
+
+    """
+    def __init__(self, name, location, n_typ):
+        super().__init__(name, location)
+        assert isinstance(n_typ, Type)
+        self.n_typ = n_typ
+
+
+class Quantified_Variable(Typed_Entity):
     """Variable used in quantified expression.
 
     A quantified expression declares and binds a variable, for which
@@ -1648,20 +1805,19 @@ class Quantified_Variable(Entity):
     :type: Type
 
     """
-    def __init__(self, name, location, typ):
-        super().__init__(name, location)
-        assert isinstance(typ, Type)
-        self.typ = typ
-
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Quantified Variable %s" % self.name)
-        self.typ.dump(indent + 1)
+        self.n_typ.dump(indent + 1)
 
 
 class Type(Entity):
     """Abstract base class for all types.
 
     """
+    def perform_type_checks(self, mh, value):
+        assert isinstance(mh, Message_Handler)
+        assert isinstance(value, Expression)
+        return True
 
 
 class Builtin_Type(Type):
@@ -1756,6 +1912,15 @@ class Array_Type(Type):
         self.upper_bound  = upper_bound
         self.element_type = element_type
 
+    def perform_type_checks(self, mh, value):
+        assert isinstance(mh, Message_Handler)
+        if isinstance(value, Array_Aggregate):
+            return all(self.element_type.perform_type_checks(mh, v)
+                       for v in value.value)
+        else:
+            assert isinstance(value, Implicit_Null)
+            return True
+
 
 class Builtin_Integer(Builtin_Numeric_Type):
     """Builtin integer type."""
@@ -1801,7 +1966,6 @@ class Package(Entity):
     :attribute symbols: symbol table of the package
     :type: Symbol_Table
 
-
     """
     def __init__(self, name, location, builtin_stab):
         super().__init__(name, location)
@@ -1815,39 +1979,111 @@ class Package(Entity):
         self.symbols.dump(indent + 1)
 
 
-class Record_Type(Type):
+class Composite_Type(Type):
+    """Abstract base for record and tuple types, as they share some
+       functionality.
+
+    :attribute components: type components (including inherited if applicable)
+    :type: Symbol_Table[Composite_Component]
+
+    :attribute description: user-supplied description of the type or None
+    :type: str
+
+    :attribute checks: used-defined checks for this type (excluding \
+      inherited checks)
+    :type: list[Check]
+
+    """
+    def __init__(self, name, description, location, inherited_symbols=None):
+        super().__init__(name, location)
+        assert isinstance(description, str) or description is None
+        assert isinstance(inherited_symbols, Symbol_Table) or \
+            inherited_symbols is None
+
+        self.components  = Symbol_Table(inherited_symbols)
+        self.description = description
+        self.checks      = []
+
+    def add_check(self, n_check):
+        assert isinstance(n_check, Check)
+        self.checks.append(n_check)
+
+    def iter_checks(self):
+        yield from self.checks
+
+
+class Composite_Component(Typed_Entity):
+    """Component in a record or tuple.
+
+    When declaring a composite type, for each component an entity is
+    declared::
+
+      type|tuple T {
+         foo "blah" optional Boolean
+         ^1  ^2     ^3       ^4
+
+    :attribute description: optional text (see 2) for this component, or None
+    :type: str
+
+    :attribute member_of: a link back to the containing record or tuple; \
+    for inherited fields this refers back to the original base record type
+    :type: Composite_Type
+
+    :attribute optional: indicates if the component can be null or not (see 3)
+    :type: bool
+
+    """
+
+    def __init__(self,
+                 name,
+                 description,
+                 location,
+                 member_of,
+                 n_typ,
+                 optional):
+        super().__init__(name, location, n_typ)
+        assert isinstance(description, str) or description is None
+        assert isinstance(member_of, Composite_Type)
+        assert isinstance(optional, bool)
+        self.description = description
+        self.member_of   = member_of
+        self.optional    = optional
+
+    def dump(self, indent=0):  # pragma: no cover
+        self.write_indent(indent, "Composite_Component %s" % self.name)
+        if self.description:
+            self.write_indent(indent + 1, "Description: %s" % self.description)
+        self.write_indent(indent + 1, "Optional: %s" % self.optional)
+        self.write_indent(indent + 1, "Type: %s" % self.n_typ.name)
+
+
+class Record_Type(Composite_Type):
     """A user-defined record type.
 
     In this example::
 
       type T  "optional description of T" extends Root_T {
-           ^1 ^2                         ^3
+           ^1 ^2                                  ^3
+
+    Note that (1) is part of the :class:`Entity` base, and (2) is part
+    of the :class:`Composite_Type` base.
 
     :attribute parent: root type or None, indicated by (3) above
     :type: Record_Type
 
-    :attribute components: record components (including inherited)
-    :type: Symbol_Table[Record_Component]
-
-    :attribute description: user-supplied description of the record or \
-    None, see (2)
-    :type: str
-
-    :attribute checks: used-defined checks for this record (excluding \
-    inherited checks)
-    :type: list[Check]
-
     """
     def __init__(self, name, description, location, parent=None):
-        super().__init__(name, location)
-        assert isinstance(description, str) or description is None
         assert isinstance(parent, Record_Type) or parent is None
-        self.parent      = parent
-        self.components  = Symbol_Table(self.parent.components
-                                        if self.parent
-                                        else None)
-        self.description = description
-        self.checks      = []
+        super().__init__(name,
+                         description,
+                         location,
+                         parent.components if parent else None)
+        self.parent = parent
+
+    def iter_checks(self):
+        if self.parent:
+            yield from self.parent.iter_checks()
+        yield from self.checks
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Record_Type %s" % self.name)
@@ -1866,22 +2102,13 @@ class Record_Type(Type):
     def all_components(self):
         """Convenience function to get a list of all components.
 
-        :rtype: list[Record_Component]
+        :rtype: list[Composite_Component]
         """
         if self.parent:
             return self.parent.all_components() + \
                 list(self.components.table.values())
         else:
             return list(self.components.table.values())
-
-    def add_check(self, n_check):
-        assert isinstance(n_check, Check)
-        self.checks.append(n_check)
-
-    def iter_checks(self):
-        if self.parent:
-            yield from self.parent.iter_checks()
-        yield from self.checks
 
     def is_subclass_of(self, record_type):
         """ Checks if this record type is or inherits from the given type
@@ -1904,49 +2131,99 @@ class Record_Type(Type):
         return False
 
 
-class Record_Component(Entity):
-    """Component in a record.
+class Tuple_Type(Composite_Type):
+    """A user-defined tuple type.
 
-    When declaring a record type, for each component an entity is
-    declared::
+    In this example::
 
-      type T {
-         foo "blah" optional Boolean
-         ^1  ^2     ^3       ^4
+      tuple T  "optional description of T" {
+            ^1 ^2
 
-    :attribute description: optional text (see 2) for this field, or None
-    :type: str
+    Note that (1) is part of the :class:`Entity` base, and (2) is part
+    of the :class:`Composite_Type` base.
 
-    :attribute record: a link back to the containing record; for inherited \
-    fields this refers back to the original base record type
-    :type: Record_Type
+    :attribute separators: list of syntactic separators.
+    :type: list[Separator]
 
-    :attribute typ: type of this component (see 4), but note it could also \
-    be an anonymous array type
-    :type: Type
-
-    :attribute optional: indicates if the component can be null or not (see 3)
-    :type: bool
+    Note the list of separators will either be empty, or there will be
+    precisely one less separator than components.
 
     """
+    def __init__(self, name, description, location):
+        super().__init__(name,
+                         description,
+                         location)
+        self.separators = []
 
-    def __init__(self, name, description, location, record, typ, optional):
-        super().__init__(name, location)
-        assert isinstance(description, str) or description is None
-        assert isinstance(record, Record_Type)
-        assert isinstance(typ, Type)
-        assert isinstance(optional, bool)
-        self.description = description
-        self.record      = record
-        self.typ         = typ
-        self.optional    = optional
+    def add_separator(self, n_separator):
+        assert isinstance(n_separator, Separator)
+        assert len(self.separators) + 1 == len(self.components.table)
+        self.separators.append(n_separator)
+
+    def iter_separators(self):
+        """Iterate over all separators"""
+        yield from self.separators
+
+    def iter_sequence(self):
+        """Iterate over all components and separators in syntactic order"""
+        if self.separators:
+            for i, n_component in enumerate(self.components.table.values()):
+                yield n_component
+                if i < len(self.separators):
+                    yield self.separators[i]
+        else:
+            yield from self.components.table.values()
+
+    def has_separators(self):
+        """Returns true if a tuple type requires separators"""
+        return bool(self.separators)
 
     def dump(self, indent=0):  # pragma: no cover
-        self.write_indent(indent, "Record_Component %s" % self.name)
+        self.write_indent(indent, "Tuple_Type %s" % self.name)
         if self.description:
             self.write_indent(indent + 1, "Description: %s" % self.description)
-        self.write_indent(indent + 1, "Optional: %s" % self.optional)
-        self.write_indent(indent + 1, "Type: %s" % self.typ.name)
+        self.write_indent(indent + 1, "Fields")
+        for n_item in self.iter_sequence():
+            n_item.dump(indent + 2)
+        if self.checks:
+            self.write_indent(indent + 1, "Checks")
+            for n_check in self.checks:
+                n_check.dump(indent + 2)
+        else:
+            self.write_indent(indent + 1, "Checks: None")
+
+    def perform_type_checks(self, mh, value):
+        assert isinstance(mh, Message_Handler)
+        if isinstance(value, Tuple_Aggregate):
+            ok = True
+            for check in self.iter_checks():
+                if not check.perform(mh, value):
+                    ok = False
+            return ok
+        else:
+            assert isinstance(value, Implicit_Null)
+            return True
+
+
+class Separator(Node):
+    """User-defined syntactic separator
+
+    For example::
+
+      separator x
+                ^1
+
+    :attribute token: token used to separate fields of the tuple
+    :type: Token
+    """
+    def __init__(self, token):
+        super().__init__(token.location)
+        assert isinstance(token, Token) and token.kind in ("IDENTIFIER",
+                                                           "AT")
+        self.token = token
+
+    def dump(self, indent=0):  # pragma: no cover
+        self.write_indent(indent, "Separator %s" % self.token.value)
 
 
 class Enumeration_Type(Type):
@@ -1977,7 +2254,7 @@ class Enumeration_Type(Type):
         self.literals.dump(indent + 1, omit_heading=True)
 
 
-class Enumeration_Literal_Spec(Entity):
+class Enumeration_Literal_Spec(Typed_Entity):
     """Declared literal in an enumeration declaration.
 
     Note that for literals mentioned later in record object
@@ -1991,16 +2268,12 @@ class Enumeration_Literal_Spec(Entity):
     :attribute description: the optional user-supplied description, or None
     :type: str
 
-    :attribute enum: a link back to the declaring enumeration
-    :type: Enumeration_Type
-
     """
     def __init__(self, name, description, location, enum):
-        super().__init__(name, location)
+        super().__init__(name, location, enum)
         assert isinstance(description, str) or description is None
         assert isinstance(enum, Enumeration_Type)
         self.description = description
-        self.enum        = enum
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Enumeration_Literal_Spec %s" % self.name)
@@ -2008,7 +2281,7 @@ class Enumeration_Literal_Spec(Entity):
             self.write_indent(indent + 1, "Description: %s" % self.description)
 
 
-class Record_Object(Entity):
+class Record_Object(Typed_Entity):
     """A declared instance of a record type.
 
     This is going to be the bulk of all entities created by TRLC::
@@ -2020,14 +2293,12 @@ class Record_Object(Entity):
              component1 = 42
              ^3           ^4
 
-    Note that the name of the object is provided by the name attribute
-    of the :class:`Entity` base class.
-
-    :attribute e_typ: the type of the object (see 1)
-    :type: Record_Type
+    Note that the name (see 2) and type (see 1) of the object is
+    provided by the name attribute of the :class:`Typed_Entity` base
+    class.
 
     :attribute field: the specific values for all components (see 3 and 4)
-    :type: dict[str] Expression
+    :type: dict[str, Expression]
 
     :attribute section: None or the section this record is contained in (see 5)
     :type: Section
@@ -2036,18 +2307,19 @@ class Record_Object(Entity):
     to:
 
     * :class:`Literal`
+    * :class:`Unary_Expression`
     * :class:`Array_Aggregate`
+    * :class:`Tuple_Aggregate`
     * :class:`Record_Reference`
     * :class:`Implicit_Null`
 
     """
-    def __init__(self, name, location, e_typ, section):
-        super().__init__(name, location)
-        assert isinstance(e_typ, Record_Type)
+    def __init__(self, name, location, n_typ, section):
+        assert isinstance(n_typ, Record_Type)
         assert isinstance(section, Section) or section is None
-        self.e_typ   = e_typ
+        super().__init__(name, location, n_typ)
         self.field   = {name: None
-                        for name in self.e_typ.components.all_names()}
+                        for name in self.n_typ.components.all_names()}
         self.section = section
 
     def to_python_dict(self):
@@ -2067,17 +2339,19 @@ class Record_Object(Entity):
                 for name, value in self.field.items()}
 
     def assign(self, component, value):
-        assert isinstance(component, Record_Component)
+        assert isinstance(component, Composite_Component)
         assert isinstance(value, (Literal,
                                   Array_Aggregate,
+                                  Tuple_Aggregate,
                                   Record_Reference,
                                   Implicit_Null,
-                                  Unary_Expression))
+                                  Unary_Expression)), \
+                "value is %s" % value.__class__.__name__
         self.field[component.name] = value
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Record_Object %s" % self.name)
-        self.write_indent(indent + 1, "Type: %s" % self.e_typ.name)
+        self.write_indent(indent + 1, "Type: %s" % self.n_typ.name)
         for key, value in self.field.items():
             self.write_indent(indent + 1, "Field %s" % key)
             value.dump(indent + 2)
@@ -2093,7 +2367,15 @@ class Record_Object(Entity):
         assert isinstance(mh, Message_Handler)
 
         ok = True
-        for check in self.e_typ.iter_checks():
+
+        # First evaluate all tuple checks
+        for n_comp in self.n_typ.all_components():
+            if not n_comp.n_typ.perform_type_checks(mh,
+                                                    self.field[n_comp.name]):
+                ok = False
+
+        # Then evaluate all record checks
+        for check in self.n_typ.iter_checks():
             # Prints messages, if applicable. Raises exception on
             # fatal checks, which causes this to abort.
             if not check.perform(mh, self):
@@ -2189,6 +2471,9 @@ class Symbol_Table:
 
         else:
             self.table[entity.name] = entity
+
+    def __contains__(self, name):
+        return self.contains(name)
 
     def contains(self, name):
         """ Tests if the given name is in the table
@@ -2340,7 +2625,7 @@ class Symbol_Table:
             error_location    = referencing_token.location,
             required_subclass = required_subclass)
 
-    def write_indent(self, indent, message):
+    def write_indent(self, indent, message):  # pragma: no cover
         assert isinstance(indent, int)
         assert indent >= 0
         assert isinstance(message, str)

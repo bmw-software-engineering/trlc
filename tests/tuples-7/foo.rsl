@@ -1,0 +1,7 @@
+package Foo
+
+tuple T {
+  x Integer
+  y Integer
+  z optional Integer
+}

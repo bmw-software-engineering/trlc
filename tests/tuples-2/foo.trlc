@@ -3,9 +3,9 @@ package Example
 R potato {}
 
 R test_1 {
-  foo = 1 potato 2 potato = potato
+  foo = 1 potato 2 potato = potato  // this is ok
 }
 
 R test_2 {
-  foo = 1 potato = potato
+  foo = 1 potato = potato  // this is NOT ok
 }

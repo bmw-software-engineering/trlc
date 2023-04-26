@@ -1,0 +1,17 @@
+package Foo
+
+type R1 {}
+
+tuple T1 {
+  x Integer
+  y String
+  z R1
+}
+
+type R2 {
+  t T1
+}
+
+type R3 {
+  t T1 [1 .. *]
+}

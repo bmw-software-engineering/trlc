@@ -1,1 +1,1 @@
-arrays-2/example.rsl:4:4: trlc error: is not of an array type
+arrays-2/example.rsl:8:4: trlc error: expression 'arr' has type Integer, which is not an array

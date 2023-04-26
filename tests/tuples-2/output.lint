@@ -1,3 +1,1 @@
-tuple T {
-^^^^^ tuples-2/foo.rsl:3: error: expected end-of-file, encountered IDENTIFIER instead
-Verified 1 model(s) and 0 check(s) and found 1 error(s)
+Verified 1 model(s) and 0 check(s) and found no issues

@@ -1,1 +1,1 @@
-tuples-2/foo.rsl:3:1: trlc error: expected end-of-file, encountered IDENTIFIER instead
+tuples-2/foo.trlc:10:18: trlc error: expected INTEGER, encountered ASSIGN instead

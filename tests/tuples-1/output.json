@@ -1,2 +1,26 @@
-tuple Dimension {
-^^^^^ tuples-1/foo.rsl:3: error: expected end-of-file, encountered IDENTIFIER instead
+  cb_link     = 12345      // Equivalent to 12345@null
+                ^^^^^ tuples-1/foo.trlc:12: check warning: Please link to a specific version
+{
+  "Bad_Potato": {
+    "cb_link": {
+      "item": 12345,
+      "version": null
+    },
+    "description": "This is a dodgy potato.",
+    "dim": {
+      "x": 42,
+      "y": 666
+    }
+  },
+  "Good_Potato": {
+    "cb_link": {
+      "item": 12345,
+      "version": 5
+    },
+    "description": "This is a nice potato.",
+    "dim": {
+      "x": 42,
+      "y": 666
+    }
+  }
+}

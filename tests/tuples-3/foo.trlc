@@ -1,0 +1,12 @@
+package Foo
+
+R1 potato {}
+
+R2 kitten {
+  t = (-1, "foo", potato)
+}
+
+R3 wibble {
+  t = [(-1, "foo", potato),
+       (+1, "bar", potato)]
+}

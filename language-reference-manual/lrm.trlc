@@ -2,7 +2,7 @@ package LRM
 
 Versioning Version {
   major = 2
-  minor = 5
+  minor = 6
 }
 
 GFDL_License License {
@@ -109,8 +109,10 @@ section "Lexing" {
         "or",
         "package",
         "section",
+        "separator"
         "then",
         "true",
+        "tuple",
         "type",
         "warning",
         "xor"
@@ -126,7 +128,8 @@ section "Lexing" {
         "Brackets: `(` `)` `[` `]` `{` `}`",
         "Punctuation: `,` `.` `=`",
         "Operators: `*` `/` `%` `+` `-`",
-        "Boolean operators: `<` `>`"
+        "Boolean operators: `<` `>`",
+        "Symbols: `@`",
       ]
     }
 
@@ -410,11 +413,35 @@ section "Described Names" {
 
 }
 
+section "Qualified names" {
+
+  Grammar Qualified_Name {
+    bnf = '''
+      qualified_name ::= [ IDENTIFIER_package_name '.' ] IDENTIFIER_name
+    '''
+  }
+
+  Semantics Valid_Qualifier {
+    kind = Kind.Static
+    text = '''The package name of a qualified name must be the current
+              package or an imported package.'''
+  }
+
+  Semantics Valid_Name {
+    kind = Kind.Static
+    text = '''The name must be a valid symbol in the current scope (if no
+              package is provided) or a valid symbol of the
+              indicated package.'''
+  }
+
+}
+
 section "Type declarations" {
 
   Grammar Type_Declarations {
     bnf = '''
       type_declaration ::= 'enum' described_name enumeration_declaration
+                         | 'tuple' described_name tuple_declaration
                          | 'type' described_name record_declaration
     '''
   }
@@ -477,25 +504,83 @@ section "Enumerations" {
 
 }
 
-section "Qualified names" {
+section "Tuples (algebraic data types)" {
 
-  Grammar Qualified_Name {
+  Grammar Tuple_Declaration {
     bnf = '''
-      qualified_name ::= [ IDENTIFIER_package_name '.' ] IDENTIFIER_name
+      tuple_declaration ::= '{' field_declaration
+                                { [ separator_declaration ]
+                                  field_declaration }
+                            '}'
+
+      field_declaration ::=
+        described_name [ 'optional' ] qualified_name_FIELD_TYPE
+
+      separator_declaration ::=
+        'separator' separator_symbol
+
+      separator_symbol ::= IDENTIFIER
+                         | '@'
     '''
   }
 
-  Semantics Valid_Qualifier {
+  Semantics Tuple_Field_Types {
     kind = Kind.Static
-    text = '''The package name of a qualified name must be the current
-              package or an imported package.'''
+    text = '''
+      A field type names any valid visible and complete
+      type. *(Specifically you may not have a recursive
+      tuple reference.)*
+    '''
   }
 
-  Semantics Valid_Name {
+  Semantics Tuple_Separators_All_Or_None {
     kind = Kind.Static
-    text = '''The name must be a valid symbol in the current scope (if no
-              package is provided) or a valid symbol of the
-              indicated package.'''
+    text = '''
+       A tuple type shall declare separators between all
+       fields, or none of them.
+    '''
+  }
+
+  Semantics Tuple_Optional_Requires_Separators {
+    kind = Kind.Static
+    text = '''
+       Only tuples with separators may use optional fields. Tuples
+       without separators cannot have optional fields.
+    '''
+  }
+
+  Semantics Tuple_Optional_Fields {
+    kind = Kind.Static
+    text = '''
+       After an optional field has been declared, all fields
+       following it must also be optional.
+    '''
+  }
+
+  Semantics Tuple_Unique_Field_Names {
+    kind = Kind.Static
+    text = '''
+      It is an error to declare two fields with the same
+      name in the same tuple. *(Note that it is possible,
+      but a bad idea, to have a separator with the same
+      identifier as a field.)*
+    '''
+  }
+
+  Example Tuple_Example {
+    hidden_rsl = '''package Example'''
+    rsl = '''
+      tuple Coordinate {
+         x Decimal
+         y Decimal
+      }
+
+      tuple Codebeamer_Item {
+         item             Integer
+         separator @
+         version optional Integer
+      }
+    '''
   }
 
 }
@@ -614,6 +699,16 @@ section "Record declarations" {
               upper bound of one.'''
   }
 
+  Recommendation Tuple_Separator_Clashes {
+    text = '''
+      It is recommended that an implementation checks if a
+      record type contains a tuple with a identifier
+      separator that is the same as one of its
+      components. While this is not an error (parsing for
+      values is greedy) it is still highly confusing.
+    '''
+  }
+
   Example Record_Examples {
     hidden_rsl = '''
       package Example
@@ -662,7 +757,7 @@ section "Checks" {
 
   Grammar Check_Block {
     bnf = '''
-      check_block ::= 'checks' IDENTIFIER_record_name
+      check_block ::= 'checks' IDENTIFIER_record_or_tuple_name
                       '{' { check_declaration } '}'
 
       check_declaration ::= expression ',' [ severity ] STRING_message
@@ -677,14 +772,16 @@ section "Checks" {
   Semantics Applicable_Types {
     kind = Kind.Static
     text = '''It is an error to refer to a type that does not exist in the
-              current package, or is not a record type.'''
+              current package, or is not a record or tuple type.'''
   }
 
   Semantics Applicable_Components {
     kind = Kind.Static
-    text = '''In a check declaration or expression, it is an error to
-              refer to a component name that does not belong
-              to the record indicated.'''
+    text = '''
+      In a check declaration or expression, it is an error to
+      refer to a component name (or field name) that does not belong
+      to the record (or tuple respectively) indicated.
+    '''
   }
 
   Text Only_Current_Package {
@@ -704,7 +801,7 @@ section "Checks" {
 
   Semantics Check_Evaluation_Order_Across_Blocks {
     kind = Kind.Dynamic
-    text = '''If multiple check blocks are declared for the same record,
+    text = '''If multiple check blocks are declared for the same type,
               then the order of evaluation of each check
               block is unspecified.'''
   }
@@ -736,7 +833,7 @@ section "Checks" {
                   creating more messages).''',
                '''A fatal message is like an error, except that no further
                   checks from this check block shall be
-                  evaluated for this record instance.''']
+                  evaluated for this type's instance.''']
   }
 
   Text Anchoring {
@@ -744,9 +841,9 @@ section "Checks" {
               message should be anchored. It is
               implementation defined how or if this is taken
               into account. A suitable anchoring for a
-              message without a component could be the
-              record object declaration itself. If only a
-              single component is used in the expression
+              message without a component or field could be the
+              object declaration itself. If only a
+              single component or field is used in the expression
               then the message could be anchored the same
               way as if the component was indicated
               explicitly in the check.'''
@@ -759,7 +856,7 @@ section "Checks" {
               means for a record R and its extension RE; any
               valid instance of RE is always a valid
               instance of R if a new binding of R is created
-              considering only the fields that are in R. It
+              considering only the components that are in R. It
               will never be possible to delete, suppress,
               widen, or omit checks in record extensions.'''
   }
@@ -772,6 +869,11 @@ section "Checks" {
       }
       type OverflowGuard {
         value Integer
+      }
+      tuple Codebeamer_Item {
+        item Integer
+        separator @
+        version optional Integer
       }
     '''
     rsl = '''
@@ -786,6 +888,12 @@ section "Checks" {
         // overflow in the below expression
 
         value ** 2 == 25, warning "Value is not 5 or -5"
+      }
+
+      checks Codebeamer_Item {
+        item >= 1, error "CB Item must be positive", item
+        version != null implies version >= 1,
+          error "CB Version must be positive", version
       }
     '''
   }
@@ -892,14 +1000,59 @@ section "Names" {
   Grammar Names {
     bnf = '''
       name ::= qualified_name
-             | qualified_name ['.' IDENTIFIER_literal]
+             | BUILTIN_IDENTIFIER
+             | name '.' IDENTIFIER
              | name '[' expression ']'
-             | IDENTIFIER_builtin_function '(' parameter_list ')'
-             | BUILTIN_IDENTIFIER '(' parameter_list ')'
+             | name '(' parameter_list ')'
 
       parameter_list ::= expression { ',' expression }
     '''
+    text = '''A name can be one of 5 things:'''
+    bullets = [
+      '''A qualified name referring to either some object, a component
+         (in a record) or field (in a tuple), or an enumeration type.''',
+      '''(Deprecated) A builtin identifier for an old-style
+         builtin function.''',
+      '''A tuple field or enumeration literal.''',
+      '''An index into an array.''',
+      '''A (builtin) function call.'''
+    ]
   }
+
+  Semantics Valid_Base_Names {
+    kind = Kind.Static
+    text = '''The `qualified_name` must resolve to record component or
+              tuple field in scope, or a visible record
+              object, or a visible enumeration type.
+           '''
+  }
+
+  Semantics Valid_Access_Prefixes {
+    kind = Kind.Static
+    text = '''If the prefix of a dot (`.`) access resolves to an
+              enumeration type, then the identifier must be
+              a valid literal of that type. If the prefix of
+              a dot (`.`) access resolves to a tuple, then
+              the identifier must be a valid field of the
+              type of that tuple. Any other prefix is an
+              error.
+           '''
+  }
+
+  Semantics Valid_Index_Prefixes {
+    kind = Kind.Static
+    text = '''The type of the `name` in an array indexing prefix (i.e. `[`
+              .. `]`) must be an array type.
+           '''
+  }
+
+  Semantics Valid_Function_Prefixes {
+    kind = Kind.Static
+    text = '''The `name` in a function call must resolve to one of the
+              builtin functions.
+           '''
+  }
+
 
   Semantics Signature_Len {
     kind = Kind.Static
@@ -993,6 +1146,11 @@ section "Names" {
     hidden_rsl = '''
       package Example
       enum ASIL { QM A B C D }
+      tuple Codebeamer_Item {
+        item Integer
+        separator @
+        version optional Integer
+      }
       type Name_Examples {
          foo Boolean
          bar Name_Examples
@@ -1000,6 +1158,7 @@ section "Names" {
          potato Integer [0 .. *]
          wibble Decimal
          field String
+         cb_link Codebeamer_Item
       }
     '''
     rsl = '''
@@ -1015,6 +1174,9 @@ section "Names" {
 
         Decimal(potato[0]) < wibble, "foo"
         // note that type conversion is necessary
+
+        cb_link.item >= 50000, warning "cb item value is oddly low"
+        // you can obtain a tuple's values
       }
     '''
   }
@@ -1251,7 +1413,7 @@ section "Operators" {
                 `N`, with one of the following constraints
                 met:'''
       bullets = ['''`x % y` is `0`''',
-		 '''`x % y` has the same sign as `y` and an absolute
+                 '''`x % y` has the same sign as `y` and an absolute
                     value less than `y`''']
     }
 
@@ -1381,7 +1543,7 @@ section "Quantification" {
               recommended (for sanity) to do the following:'''
     bullets = ['''For actual evaluation, use short-circuit semantics, as speed
                   is important.''',
-	       '''For static analysis or linting, use non-short-circuit
+               '''For static analysis or linting, use non-short-circuit
                   semantics, as using a quantifier as a
                   complex guard is not reasonable.''']
   }
@@ -1480,6 +1642,10 @@ section "Record object declarations" {
               | qualified_name_RECORD_OBJECT
               | qualified_name_ENUM_TYPE '.' IDENTIFIER_enumeration_literal
               | '[' [ value { ',' value } ] ']'
+              | tuple_aggregate
+
+      tuple_aggregate ::= '(' value { ',' value } ')'
+                        | value { separator_symbol value }
     '''
   }
 
@@ -1487,7 +1653,9 @@ section "Record object declarations" {
     kind = Kind.Static
     text = '''The type of the declaration must be a valid record type. If
               no qualified name is given, the record type
-              must be in the indicated package.'''
+              must be in the indicated package. *(Note that it is not
+              legal to declare a tuple object.)*
+           '''
   }
 
   Semantics Unique_Object_Names {
@@ -1528,11 +1696,34 @@ section "Record object declarations" {
               component.'''
   }
 
+  Semantics Tuple_Syntax_Correct_Form {
+    kind = Kind.Static
+    text = '''The aggregate of a tuple must use the correct form. A
+              tuple without separators uses the bracket syntax
+              (e.g. `(1, 2, 3)`, and a tuple with separators must
+              use the separator syntax (e.g. `12345@42`).'''
+  }
+
+  Semantics Tuple_Generic_Form {
+    kind = Kind.Static
+    text = '''A tuple value for a tuple without separators must
+              contain one value, in order, for each of its fields.'''
+  }
+
+  Semantics Tuple_Separator_Form {
+    kind = Kind.Static
+    text = '''A tuple value for a tuple with separators must
+              contain the separator symbols as indicated in the type,
+              in order. Optional fields and their preceding separator
+              may be omitted.'''
+  }
+
   Semantics Evaluation_Of_Checks {
     kind = Kind.Dynamic
     text = '''A record object declaration creates a new binding for a
               record. After references are resolved, all
-              applicable checks are evaluated in the context
+              applicable checks on the object, including any checks for
+              tuples, are evaluated in the context
               of this binding.'''
   }
 
@@ -1552,6 +1743,12 @@ section "Record object declarations" {
               list of R may contain references to instances
               of R and RE. A list of RE may not contain any
               references to R.)*'''
+  }
+
+  Semantics Tuple_Checks {
+    kind = Kind.Static
+    text = '''The checks for a tuple aggregate are immediately evaluated
+              after the last value is parsed.'''
   }
 
   Name_Resolution Sufficiently_Distinct {
@@ -1585,10 +1782,41 @@ section "Record object declarations" {
                   carries this information (it is safe to do
                   that, as it is impossible to specify a
                   record type with a field named `type`).''',
-	       '''Provide a function or attribute that, when called, provides
+               '''Provide a function or attribute that, when called, provides
                   the type information.''',
-	       '''Provide the type information through the type system of the
+               '''Provide the type information through the type system of the
                   API language (e.g. the Python type system).''']
+  }
+
+  Example Record_Object_Examples {
+    hidden_rsl = '''
+      package Example
+      tuple Codebeamer_Item {
+        item Integer
+        separator @
+        version optional Integer
+      }
+      tuple Coordinate {
+        x Decimal
+        y Decimal
+      }
+      type Requirement {
+        description String
+        coordinate Coordinate
+        derived_from_cb optional Codebeamer_Item [1 .. *]
+      }
+    '''
+    hidden_trlc = '''package Example'''
+    trlc = '''
+      Requirement Potato {
+        description = "Hello World!"
+        coordinate = (42.0, 666.0)
+        derived_from_cb = [
+          1234,     // references codebeamer item 1234 (at head revision)
+          1900@42   // references codebeamer item 1900 at version 42
+        ]
+      }
+    '''
   }
 
 }
@@ -1698,8 +1926,8 @@ section "Null Values" {
 
   Semantics Unspecified_Optional_Components {
     kind = Kind.Dynamic
-    text = '''The value of an optional field that is not specified is
-              `null`.'''
+    text = '''The value of an optional component or field that is
+              not specified is `null`.'''
   }
 
   Semantics Null_Equality {

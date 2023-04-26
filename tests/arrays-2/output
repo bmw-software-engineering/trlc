@@ -1,2 +1,2 @@
-   arr Integer
-   ^^^ arrays-2/example.rsl:4: error: is not of an array type
+   arr[0] == len(arr), "potato", arr
+   ^^^ arrays-2/example.rsl:8: error: expression 'arr' has type Integer, which is not an array

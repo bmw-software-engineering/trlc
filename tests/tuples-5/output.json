@@ -1,0 +1,23 @@
+  t = potato@-42
+             ^ tuples-5/foo.trlc:14: check warning: potato2
+{
+  "potato": {},
+  "test1": {
+    "t": {
+      "f1": "potato",
+      "f2": null
+    }
+  },
+  "test2": {
+    "t": {
+      "f1": "potato",
+      "f2": 42
+    }
+  },
+  "test3": {
+    "t": {
+      "f1": "potato",
+      "f2": -42
+    }
+  }
+}

@@ -301,7 +301,7 @@ class Parser(Parser_Base):
                              required_subclass=None,
                              match_ident=True):
         assert isinstance(scope, ast.Scope)
-        assert isinstance(required_subclass, type)
+        assert required_subclass is None or isinstance(required_subclass, type)
         assert isinstance(match_ident, bool)
 
         if match_ident:
@@ -321,6 +321,8 @@ class Parser(Parser_Base):
     def parse_type_declaration(self):
         if self.peek_kw("enum"):
             self.parse_enum_declaration()
+        elif self.peek_kw("tuple"):
+            self.parse_tuple_declaration()
         else:
             self.parse_record_declaration()
 
@@ -342,6 +344,87 @@ class Parser(Parser_Base):
                                                enum        = enum)
             enum.literals.register(self.mh, lit)
         self.match("C_KET")
+
+    def parse_tuple_field(self,
+                          n_tuple,
+                          optional_allowed,
+                          optional_reason,
+                          optional_required):
+        assert isinstance(n_tuple, ast.Tuple_Type)
+        assert isinstance(optional_allowed, bool)
+        assert isinstance(optional_reason, str)
+        assert isinstance(optional_required, bool)
+        assert optional_allowed or not optional_required
+
+        field_name, field_description = self.parse_described_name()
+
+        if optional_required or self.peek_kw("optional"):
+            self.match_kw("optional")
+            if optional_allowed:
+                field_is_optional = True
+            else:
+                self.mh.error(self.ct.location, optional_reason)
+        else:
+            field_is_optional = False
+
+        field_type = self.parse_qualified_name(self.default_scope,
+                                               ast.Type)
+
+        return ast.Composite_Component(
+            name        = field_name.value,
+            description = field_description,
+            location    = field_name.location,
+            member_of   = n_tuple,
+            n_typ       = field_type,
+            optional    = field_is_optional)
+
+    def parse_tuple_declaration(self):
+        self.match_kw("tuple")
+        name, description = self.parse_described_name()
+
+        n_tuple = ast.Tuple_Type(name        = name.value,
+                                 description = description,
+                                 location    = name.location)
+
+        self.match("C_BRA")
+
+        n_field = self.parse_tuple_field(
+            n_tuple,
+            optional_allowed  = False,
+            optional_reason   = "first field may not be optional",
+            optional_required = False)
+        n_tuple.components.register(self.mh, n_field)
+
+        has_separators    = False
+        optional_required = False
+        separator_allowed = True
+
+        while self.peek_kw("separator") or self.peek("IDENTIFIER"):
+            if has_separators or self.peek_kw("separator"):
+                has_separators = True
+                self.match_kw("separator")
+                if not separator_allowed:
+                    self.mh.error(self.ct.location,
+                                  "either all fields must be separated,"
+                                  " or none")
+                if self.peek("IDENTIFIER") or self.peek("AT"):
+                    self.advance()
+                    n_tuple.add_separator(ast.Separator(self.ct))
+            else:
+                separator_allowed = False
+            n_field = self.parse_tuple_field(
+                n_tuple,
+                optional_allowed  = has_separators,
+                optional_reason   = ("optional only permitted in tuples"
+                                     " with separators"),
+                optional_required = optional_required)
+            n_tuple.components.register(self.mh, n_field)
+            optional_required |= n_field.optional
+
+        self.match("C_KET")
+
+        # Late registration to avoid recursion in tuples
+        self.pkg.symbols.register(self.mh, n_tuple)
 
     def parse_record_declaration(self):
         self.match_kw("type")
@@ -409,12 +492,12 @@ class Parser(Parser_Base):
                                        lower_bound  = a_lo,
                                        upper_bound  = a_hi)
 
-            comp = ast.Record_Component(name        = c_name.value,
-                                        description = c_descr,
-                                        location    = c_name.location,
-                                        record      = record,
-                                        typ         = c_typ,
-                                        optional    = c_optional)
+            comp = ast.Composite_Component(name        = c_name.value,
+                                           description = c_descr,
+                                           location    = c_name.location,
+                                           member_of   = record,
+                                           n_typ       = c_typ,
+                                           optional    = c_optional)
             record.components.register(self.mh, comp)
 
         self.match("C_KET")
@@ -735,15 +818,15 @@ class Parser(Parser_Base):
                            self.mh.cross_file_reference(pdef.location)))
         self.match_kw("in")
         self.match("IDENTIFIER")
-        field = scope.lookup(self.mh, self.ct, ast.Record_Component)
+        field = scope.lookup(self.mh, self.ct, ast.Composite_Component)
         n_source = ast.Name_Reference(self.ct.location,
                                       field)
-        if not isinstance(field.typ, ast.Array_Type):
+        if not isinstance(field.n_typ, ast.Array_Type):
             self.mh.error(self.ct.location,
                           "you can only quantify over arrays")
         n_var = ast.Quantified_Variable(t_qv.value,
                                         t_qv.location,
-                                        field.typ.element_type)
+                                        field.n_typ.element_type)
         self.match("ARROW")
 
         new_table = ast.Symbol_Table()
@@ -902,97 +985,132 @@ class Parser(Parser_Base):
         # qualified_name ::= [ IDENTIFIER_package_name '.' ] IDENTIFIER_name
         #
         # name ::= qualified_name
-        #        | qualified_name ['.' IDENTIFIER_literal]
+        #        | BUILTIN_IDENTIFIER
+        #        | name '.' IDENTIFIER
         #        | name '[' expression ']'
-        #        | IDENTIFIER_builtin_function '(' parameter_list ')'
-        #        | BUILTIN '(' parameter_list ')'
+        #        | name '(' parameter_list ')'
         #
         # parameter_list ::= expression { ',' expression }
+
         assert isinstance(scope, ast.Scope)
+
+        # All names start with a (qualified) identifier. We parse that
+        # first. There is a special complication for functions, as
+        # builtin functions (e.g. len) can shadow record
+        # components. However as functions cannot be stored in
+        # components the true grammar for function calls is always
+        # IDENTIFIER '('; so we can slightly special case this.
 
         if self.peek("BUILTIN"):
             # Legacy builtin function call. The lookup in the root
             # scope is not an error.
             self.match("BUILTIN")
             n_name = self.stab.lookup(self.mh, self.ct, ast.Builtin_Function)
-            return self.parse_builtin(scope, n_name, self.ct)
 
         else:
             self.match("IDENTIFIER")
+            if self.peek("BRA"):
+                # There is one more way we can have a builtin
+                # function, if we follow our name with brackets
+                # immediately.
+                n_name = self.stab.lookup(self.mh,
+                                          self.ct)
+                if not isinstance(n_name, (ast.Builtin_Function,
+                                           ast.Builtin_Numeric_Type)):
+                    self.mh.error(self.ct.location,
+                                  "not a valid builtin function "
+                                  "or numeric type")
+            else:
+                n_name = self.parse_qualified_name(scope, match_ident=False)
 
-            if self.peek("S_BRA"):
-                # Must be an array index on a record field
-                #        | name '[' expression ']'
-                n_name = scope.lookup(self.mh, self.ct, ast.Entity)
+        # Enum literals are a bit different, so we deal with themq
+        # first.
+        if isinstance(n_name, ast.Enumeration_Type):
+            self.match("DOT")
+            self.match("IDENTIFIER")
+            lit = n_name.literals.lookup(self.mh,
+                                         self.ct,
+                                         ast.Enumeration_Literal_Spec)
+            return ast.Enumeration_Literal(location = self.ct.location,
+                                           literal  = lit)
+
+        # Anything that remains is either a function call or an actual
+        # name. Let's just enforce this for sanity.
+        if not isinstance(n_name, (ast.Builtin_Function,
+                                   ast.Builtin_Numeric_Type,
+                                   ast.Composite_Component,
+                                   ast.Quantified_Variable,
+                                   )):
+            self.mh.error(self.ct.location,
+                          "%s %s is not a valid name" %
+                          (n_name.__class__.__name__,
+                           n_name.name))
+
+        # Right now function calls and type conversions must be
+        # top-level, so let's get these out of the way as well.
+        if isinstance(n_name, (ast.Builtin_Function,
+                               ast.Builtin_Numeric_Type)):
+            return self.parse_builtin(scope, n_name, self.ct)
+
+        assert isinstance(n_name, (ast.Composite_Component,
+                                   ast.Quantified_Variable))
+
+        # We now process the potentially recursive part:
+        #        | name '.' IDENTIFIER
+        #        | name '[' expression ']'
+        n_name = ast.Name_Reference(location = self.ct.location,
+                                    entity   = n_name)
+
+        while self.peek("DOT") or self.peek("S_BRA"):
+            if self.peek("DOT"):
+                if not isinstance(n_name.typ, ast.Tuple_Type):
+                    self.mh.error(n_name.location,
+                                  "expression '%s' has type %s, "
+                                  "which is not a tuple" %
+                                  (n_name.to_string(),
+                                   n_name.typ.name))
+                self.match("DOT")
+                self.match("IDENTIFIER")
+                n_field = n_name.typ.components.lookup(self.mh,
+                                                       self.ct,
+                                                       ast.Composite_Component)
+                n_name = ast.Field_Access_Expression(
+                    mh       = self.mh,
+                    location = self.ct.location,
+                    n_prefix = n_name,
+                    n_field  = n_field)
+
+            elif self.peek("S_BRA"):
                 if not isinstance(n_name.typ, ast.Array_Type):
                     self.mh.error(n_name.location,
-                                  "is not of an array type")
-                n_lhs = ast.Name_Reference(location = self.ct.location,
-                                           entity   = n_name)
+                                  "expression '%s' has type %s, "
+                                  "which is not an array" %
+                                  (n_name.to_string(),
+                                   n_name.typ.name))
 
                 self.match("S_BRA")
                 t_bracket = self.ct
                 n_index = self.parse_expression(scope)
                 self.match("S_KET")
-                return ast.Binary_Expression(
+
+                n_name = ast.Binary_Expression(
                     mh       = self.mh,
                     location = t_bracket.location,
                     typ      = n_name.typ.element_type,
                     operator = ast.Binary_Operator.INDEX,
-                    n_lhs    = n_lhs,
+                    n_lhs    = n_name,
                     n_rhs    = n_index)
 
-            elif self.peek("BRA"):
-                # Must be a builtin call
-                #        | IDENTIFIER_builtin_function '(' parameter_list ')'
-                # The lookup in the root scope is not an error. We do
-                # this to avoid finding record fields that happen to
-                # have the same name.
-                n_name = self.stab.lookup(self.mh,
-                                          self.ct,
-                                          ast.Entity)
-                if isinstance(n_name, (ast.Builtin_Function,
-                                       ast.Builtin_Numeric_Type)):
-                    return self.parse_builtin(scope, n_name, self.ct)
-                else:
-                    self.mh.error(self.ct.location,
-                                  "expected builtin function, not %s" %
-                                  n_name.__class__.__name__)
-
-            else:
-                # Must be a qualified name or enumeration
-                # name ::= qualified_name
-                #        | qualified_name ['.' IDENTIFIER_literal]
-                n_name = self.parse_qualified_name(
-                    scope             = scope,
-                    required_subclass = ast.Entity,
-                    match_ident       = False)
-                t_name = self.ct
-
-                if isinstance(n_name, ast.Enumeration_Type):
-                    # If the (qualified) name refers to a enum, then
-                    # we have to narrow it down to a literal.
-                    self.match("DOT")
-                    self.match("IDENTIFIER")
-                    lit = n_name.literals.lookup(self.mh,
-                                                 self.ct,
-                                                 ast.Enumeration_Literal_Spec)
-                    return ast.Enumeration_Literal(location = self.ct.location,
-                                                   literal  = lit)
-
-                else:
-                    # Otherwise we're done
-                    return ast.Name_Reference(location = t_name.location,
-                                              entity   = n_name)
+        return n_name
 
     def parse_check_block(self):
         self.match_kw("checks")
         self.match("IDENTIFIER")
-        record = self.pkg.symbols.lookup(self.mh, self.ct, ast.Record_Type)
+        n_ctype = self.pkg.symbols.lookup(self.mh, self.ct, ast.Composite_Type)
         scope = ast.Scope()
         scope.push(self.stab)
         scope.push(self.pkg.symbols)
-        scope.push(record.components)
+        scope.push(n_ctype.components)
         self.match("C_BRA")
         while not self.peek("C_KET"):
             c_expr = self.parse_expression(scope)
@@ -1013,18 +1131,18 @@ class Parser(Parser_Base):
             if self.peek("COMMA"):
                 self.match("COMMA")
                 self.match("IDENTIFIER")
-                c_anchor = record.components.lookup(self.mh,
-                                                    self.ct,
-                                                    ast.Record_Component)
+                c_anchor = n_ctype.components.lookup(self.mh,
+                                                     self.ct,
+                                                     ast.Composite_Component)
             else:
                 c_anchor = None
 
-            n_check = ast.Check(n_record  = record,
+            n_check = ast.Check(n_type    = n_ctype,
                                 n_expr    = c_expr,
                                 n_anchor  = c_anchor,
                                 severity  = c_sev,
                                 t_message = t_msg)
-            record.add_check(n_check)
+            n_ctype.add_check(n_check)
 
             assert scope.size() == 3
 
@@ -1160,13 +1278,58 @@ class Parser(Parser_Base):
                 rv.target = the_pkg.symbols.lookup(self.mh,
                                                    t_name,
                                                    ast.Record_Object)
-                if not rv.target.e_typ.is_subclass_of(typ):
+                if not rv.target.n_typ.is_subclass_of(typ):
                     self.mh.error(t_name.location,
                                   "incorrect type, expected %s but %s is %s" %
                                   (typ.name,
                                    rv.name,
-                                   rv.target.e_typ.name))
+                                   rv.target.n_typ.name))
 
+            return rv
+
+        elif isinstance(typ, ast.Tuple_Type) and typ.has_separators():
+            rv = ast.Tuple_Aggregate(self.nt.location, typ)
+
+            next_is_optional = False
+            for n_item in typ.iter_sequence():
+                if isinstance(n_item, ast.Composite_Component):
+                    if next_is_optional and n_item.optional:
+                        break
+                    rv.assign(n_item.name,
+                              self.parse_value(n_item.n_typ))
+
+                elif n_item.token.kind == "AT":
+                    if self.peek("AT"):
+                        self.match("AT")
+                    else:
+                        next_is_optional = True
+
+                elif n_item.token.kind == "IDENTIFIER":
+                    if self.peek("IDENTIFIER") and \
+                       self.nt.value == n_item.token.value:
+                        self.match("IDENTIFIER")
+                    else:
+                        next_is_optional = True
+
+                else:
+                    assert False
+
+            return rv
+
+        elif isinstance(typ, ast.Tuple_Type) and not typ.has_separators():
+            self.match("BRA")
+            rv = ast.Tuple_Aggregate(self.ct.location, typ)
+
+            first = True
+            for n_field in typ.iter_sequence():
+                if first:
+                    first = False
+                else:
+                    self.match("COMMA")
+                rv.assign(n_field.name,
+                          self.parse_value(n_field.n_typ))
+
+            self.match("KET")
             return rv
 
         else:
@@ -1188,7 +1351,7 @@ class Parser(Parser_Base):
         obj = ast.Record_Object(
             name     = self.ct.value,
             location = self.ct.location,
-            e_typ    = r_typ,
+            n_typ    = r_typ,
             section  = self.section[-1] if self.section else None)
         self.pkg.symbols.register(self.mh, obj)
         self.match("C_BRA")
@@ -1196,9 +1359,9 @@ class Parser(Parser_Base):
             self.match("IDENTIFIER")
             comp = r_typ.components.lookup(self.mh,
                                            self.ct,
-                                           ast.Record_Component)
+                                           ast.Composite_Component)
             self.match("ASSIGN")
-            value = self.parse_value(comp.typ)
+            value = self.parse_value(comp.n_typ)
             obj.assign(comp, value)
 
         # Check that each non-optional component has been specified
@@ -1240,13 +1403,11 @@ class Parser(Parser_Base):
     def parse_rsl_file(self):
         assert self.pkg is not None
 
-        while self.peek_kw("enum") or \
-              self.peek_kw("type") or \
-              self.peek_kw("checks"):
-            if self.peek_kw("enum") or self.peek_kw("type"):
-                self.parse_type_declaration()
-            else:
+        while not self.peek_eof():
+            if self.peek_kw("checks"):
                 self.parse_check_block()
+            else:
+                self.parse_type_declaration()
 
         self.match_eof()
 

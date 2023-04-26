@@ -1,0 +1,17 @@
+package Foo
+
+type R1 {}
+
+tuple T {
+  f1 R1
+  separator @
+  f2 optional Integer
+}
+
+checks T {
+  f2 >= 0, warning "potato2", f2
+}
+
+type R2 {
+  t T
+}

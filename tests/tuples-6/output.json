@@ -1,0 +1,54 @@
+  c = [(1, 0) verified true,
+                       ^^^^ tuples-6/foo.trlc:10: check warning: potato
+{
+  "test1": {
+    "c": [
+      {
+        "coord": {
+          "x": 1,
+          "y": 1
+        },
+        "verified": true
+      },
+      {
+        "coord": {
+          "x": 2,
+          "y": 2
+        },
+        "verified": false
+      },
+      {
+        "coord": {
+          "x": 3,
+          "y": 3
+        },
+        "verified": null
+      }
+    ]
+  },
+  "test2": {
+    "c": [
+      {
+        "coord": {
+          "x": 1,
+          "y": 0
+        },
+        "verified": true
+      },
+      {
+        "coord": {
+          "x": 2,
+          "y": 0
+        },
+        "verified": false
+      },
+      {
+        "coord": {
+          "x": 3,
+          "y": 0
+        },
+        "verified": null
+      }
+    ]
+  }
+}

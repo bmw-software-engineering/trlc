@@ -1,0 +1,15 @@
+package Foo
+
+R1 potato {}
+
+R2 test1 {
+  t = potato
+}
+
+R2 test2 {
+  t = potato@42
+}
+
+R2 test3 {
+  t = potato@-42
+}
