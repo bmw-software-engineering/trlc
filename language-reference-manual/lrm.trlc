@@ -94,11 +94,11 @@ section "Lexing" {
         "elsif",
         "enum",
         "error",
+        "exists",
         "extends",
         "false",
         "fatal",
         "forall",
-	"exists",
         "if",
         "implies",
         "import",
@@ -790,7 +790,7 @@ section "Checks" {
               obvious as you cannot have an import clause,
               but this is also true for checks declared in
               `.rsl` files since it is not possible to
-              specify a qalified name.'''
+              specify a qualified name.'''
   }
 
   Semantics Check_Evaluation_Order {

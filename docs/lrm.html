@@ -212,11 +212,11 @@ A keyword is an identifier that is one of the following reserved words:
   <li>elsif</li>
   <li>enum</li>
   <li>error</li>
+  <li>exists</li>
   <li>extends</li>
   <li>false</li>
   <li>fatal</li>
   <li>forall</li>
-  <li>exists</li>
   <li>if</li>
   <li>implies</li>
   <li>import</li>
@@ -640,7 +640,7 @@ It is an error to refer to a type that does not exist in the current package, or
 In a check declaration or expression, it is an error to refer to a component name (or field name) that does not belong to the record (or tuple respectively) indicated.
 </div>
 <div>
-Note that it is never possible to add checks to a type from a foreign package. In check files this is more obvious as you cannot have an import clause, but this is also true for checks declared in <code>.rsl</code> files since it is not possible to specify a qalified name.
+Note that it is never possible to add checks to a type from a foreign package. In check files this is more obvious as you cannot have an import clause, but this is also true for checks declared in <code>.rsl</code> files since it is not possible to specify a qualified name.
 </div>
 <h3>Dynamic Semantics</h3>
 <div>
