@@ -1,0 +1,2 @@
+T Foo {}
+  ^^^ name-shadowing-1/foo.trlc:3: error: duplicate definition, previous definition at foo.rsl:1
