@@ -1,2 +1,2 @@
-    bar.MyType SomeThing {
-               ^^^^^^^^^ enum-null/instances.trlc:4: check error: Status must be not null
+bar.MyType SomeThing {
+           ^^^^^^^^^ enum-null/instances.trlc:4: check error: Status must be not null

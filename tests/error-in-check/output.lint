@@ -1,3 +1,3 @@
-      startsXwith(name, "Q"), error "name must start with Q", name
-      ^^^^^^^^^^^ error-in-check/checks.check:4: error: unknown symbol startsXwith, did you mean startswith?
+startsXwith(name, "Q"), error "name must start with Q", name
+^^^^^^^^^^^ error-in-check/checks.check:4: error: unknown symbol startsXwith, did you mean startswith?
 Verified 1 model(s) and 1 check(s) and found 1 error(s)

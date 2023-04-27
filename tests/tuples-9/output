@@ -1,2 +1,2 @@
-  cdr optional List
-               ^^^^ tuples-9/foo.rsl:6: error: unknown symbol List
+cdr optional List
+             ^^^^ tuples-9/foo.rsl:6: error: unknown symbol List

@@ -1,24 +1,24 @@
-                name = "Qbert" // does start with Q
-                       ^^^^^^^ simple-info-warn-error/instances.trlc:5: check error: name must start with D
-                name = "Qbert" // does start with Q
-                       ^^^^^^^ simple-info-warn-error/instances.trlc:5: check error: name must start with E
-                name = "Qbert" // does start with Q
-                       ^^^^^^^ simple-info-warn-error/instances.trlc:5: check warning: name must start with W
-                name = "Qbert" // does start with Q
-                       ^^^^^^^ simple-info-warn-error/instances.trlc:5: check warning: name must start with I
-                name = "Abert"
-                       ^^^^^^^ simple-info-warn-error/instances.trlc:9: check error: name must start with D
-                name = "Abert"
-                       ^^^^^^^ simple-info-warn-error/instances.trlc:9: check error: name must start with E
-                name = "Abert"
-                       ^^^^^^^ simple-info-warn-error/instances.trlc:9: check warning: name must start with W
-                name = "Abert"
-                       ^^^^^^^ simple-info-warn-error/instances.trlc:9: check warning: name must start with I
-                name = "BBert"
-                       ^^^^^^^ simple-info-warn-error/instances.trlc:13: check error: name must start with D
-                name = "BBert"
-                       ^^^^^^^ simple-info-warn-error/instances.trlc:13: check error: name must start with E
-                name = "BBert"
-                       ^^^^^^^ simple-info-warn-error/instances.trlc:13: check warning: name must start with W
-                name = "BBert"
-                       ^^^^^^^ simple-info-warn-error/instances.trlc:13: check warning: name must start with I
+name = "Qbert" // does start with Q
+       ^^^^^^^ simple-info-warn-error/instances.trlc:5: check error: name must start with D
+name = "Qbert" // does start with Q
+       ^^^^^^^ simple-info-warn-error/instances.trlc:5: check error: name must start with E
+name = "Qbert" // does start with Q
+       ^^^^^^^ simple-info-warn-error/instances.trlc:5: check warning: name must start with W
+name = "Qbert" // does start with Q
+       ^^^^^^^ simple-info-warn-error/instances.trlc:5: check warning: name must start with I
+name = "Abert"
+       ^^^^^^^ simple-info-warn-error/instances.trlc:9: check error: name must start with D
+name = "Abert"
+       ^^^^^^^ simple-info-warn-error/instances.trlc:9: check error: name must start with E
+name = "Abert"
+       ^^^^^^^ simple-info-warn-error/instances.trlc:9: check warning: name must start with W
+name = "Abert"
+       ^^^^^^^ simple-info-warn-error/instances.trlc:9: check warning: name must start with I
+name = "BBert"
+       ^^^^^^^ simple-info-warn-error/instances.trlc:13: check error: name must start with D
+name = "BBert"
+       ^^^^^^^ simple-info-warn-error/instances.trlc:13: check error: name must start with E
+name = "BBert"
+       ^^^^^^^ simple-info-warn-error/instances.trlc:13: check warning: name must start with W
+name = "BBert"
+       ^^^^^^^ simple-info-warn-error/instances.trlc:13: check warning: name must start with I

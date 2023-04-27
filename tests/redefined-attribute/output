@@ -1,2 +1,2 @@
-        name = "Xbert" // does start with Q
-               ^^^^^^^ redefined-attribute/instances.trlc:5: check error: name must start with Q
+name = "Xbert" // does start with Q
+       ^^^^^^^ redefined-attribute/instances.trlc:5: check error: name must start with Q

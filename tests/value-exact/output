@@ -1,2 +1,2 @@
-                name = "xbert" // does start with Q
-                       ^^^^^^^ value-exact/instances.trlc:5: check error: name must be 'Qbert'
+name = "xbert" // does start with Q
+       ^^^^^^^ value-exact/instances.trlc:5: check error: name must be 'Qbert'

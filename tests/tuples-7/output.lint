@@ -1,3 +1,3 @@
-  z optional Integer
-    ^^^^^^^^ tuples-7/foo.rsl:6: error: optional only permitted in tuples with separators
+z optional Integer
+  ^^^^^^^^ tuples-7/foo.rsl:6: error: optional only permitted in tuples with separators
 Verified 1 model(s) and 0 check(s) and found 1 error(s)

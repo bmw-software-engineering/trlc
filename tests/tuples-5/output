@@ -1,2 +1,2 @@
-  t = potato@-42
-             ^ tuples-5/foo.trlc:14: check warning: potato2
+t = potato@-42
+           ^ tuples-5/foo.trlc:14: check warning: potato2

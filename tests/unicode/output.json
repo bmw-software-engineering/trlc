@@ -1,2 +1,2 @@
-    bar.MyType Übergrößenträger {
-               ^ unicode/instances.trlc:4: lex error: unexpected character 'Ü'
+bar.MyType Übergrößenträger {
+           ^ unicode/instances.trlc:4: lex error: unexpected character 'Ü'

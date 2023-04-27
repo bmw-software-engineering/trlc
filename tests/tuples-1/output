@@ -1,2 +1,2 @@
-  cb_link     = 12345      // Equivalent to 12345@null
-                ^^^^^ tuples-1/foo.trlc:12: check warning: Please link to a specific version
+cb_link     = 12345      // Equivalent to 12345@null
+              ^^^^^ tuples-1/foo.trlc:12: check warning: Please link to a specific version

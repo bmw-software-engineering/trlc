@@ -1,2 +1,2 @@
-  z optional Integer
-    ^^^^^^^^ tuples-7/foo.rsl:6: error: optional only permitted in tuples with separators
+z optional Integer
+  ^^^^^^^^ tuples-7/foo.rsl:6: error: optional only permitted in tuples with separators

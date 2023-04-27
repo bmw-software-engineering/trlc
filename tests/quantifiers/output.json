@@ -1,23 +1,23 @@
-  arr = []
-        ^ quantifiers/foo.trlc:10: check warning: not everything is 42
-  arr = []
-        ^ quantifiers/foo.trlc:10: check warning: nothing is 42
-  arr = [40, 41, 42, 43, 44]
-        ^ quantifiers/foo.trlc:22: check warning: not everything is 42
-  arr = [40, 41, 42, 43, 44]
-        ^ quantifiers/foo.trlc:22: check warning: nothing is 42
-  arr = [1, 2, 3]
-        ^ quantifiers/foo.trlc:34: check warning: not everything is 42
-  arr = [1, 2, 3]
-        ^ quantifiers/foo.trlc:34: check warning: nothing is 42
-  arr = [42, 0, 42]
-        ^ quantifiers/foo.trlc:46: check warning: not everything is 42
-  arr = [42, 0, 42]
-        ^ quantifiers/foo.trlc:46: check warning: nothing is 42
-  arr = [42, 42]
-        ^ quantifiers/foo.trlc:58: check warning: not everything is 42
-  arr = [42, 42]
-        ^ quantifiers/foo.trlc:58: check warning: nothing is 42
+arr = []
+      ^ quantifiers/foo.trlc:10: check warning: not everything is 42
+arr = []
+      ^ quantifiers/foo.trlc:10: check warning: nothing is 42
+arr = [40, 41, 42, 43, 44]
+      ^ quantifiers/foo.trlc:22: check warning: not everything is 42
+arr = [40, 41, 42, 43, 44]
+      ^ quantifiers/foo.trlc:22: check warning: nothing is 42
+arr = [1, 2, 3]
+      ^ quantifiers/foo.trlc:34: check warning: not everything is 42
+arr = [1, 2, 3]
+      ^ quantifiers/foo.trlc:34: check warning: nothing is 42
+arr = [42, 0, 42]
+      ^ quantifiers/foo.trlc:46: check warning: not everything is 42
+arr = [42, 0, 42]
+      ^ quantifiers/foo.trlc:46: check warning: nothing is 42
+arr = [42, 42]
+      ^ quantifiers/foo.trlc:58: check warning: not everything is 42
+arr = [42, 42]
+      ^ quantifiers/foo.trlc:58: check warning: nothing is 42
 {
   "invalid_1": {
     "a": false,

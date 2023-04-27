@@ -1,2 +1,2 @@
-      startsXwith(name, "Q"), error "name must start with Q", name
-      ^^^^^^^^^^^ error-in-check/checks.check:4: error: unknown symbol startsXwith, did you mean startswith?
+startsXwith(name, "Q"), error "name must start with Q", name
+^^^^^^^^^^^ error-in-check/checks.check:4: error: unknown symbol startsXwith, did you mean startswith?

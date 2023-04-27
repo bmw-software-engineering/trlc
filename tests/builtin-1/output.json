@@ -1,5 +1,5 @@
-   len = 2
-         ^ builtin-1/example.trlc:10: check warning: potato
+len = 2
+      ^ builtin-1/example.trlc:10: check warning: potato
 {
   "Test_1": {
     "len": 3,

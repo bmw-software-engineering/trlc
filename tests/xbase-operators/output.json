@@ -1,2 +1,2 @@
-                name = "Qbert" // does start with Q
-                       ^^^^^^^ xbase-operators/instances.trlc:5: check error: Must fail
+name = "Qbert" // does start with Q
+       ^^^^^^^ xbase-operators/instances.trlc:5: check error: Must fail

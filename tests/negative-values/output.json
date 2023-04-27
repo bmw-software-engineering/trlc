@@ -1,9 +1,9 @@
-  val = -5
-        ^ negative-values/foo.trlc:4: check warning: potato
-  val = 5
-        ^ negative-values/foo.trlc:10: check warning: potato
-  val = +5
-        ^ negative-values/foo.trlc:13: check warning: potato
+val = -5
+      ^ negative-values/foo.trlc:4: check warning: potato
+val = 5
+      ^ negative-values/foo.trlc:10: check warning: potato
+val = +5
+      ^ negative-values/foo.trlc:13: check warning: potato
 {
   "Test_1": {
     "val": -5

@@ -59,6 +59,9 @@ quantifying over all references.)
   to the declaration of `x` instead of the part of the expression
   where `x` was used.
 
+* [TRLC] Warning and error messages that show source context now strip
+  leading spaces to preserve space.
+
 ### 1.0.13
 
 * [TRLC] Do not enter (sub-)directories named `bazel-*`. This

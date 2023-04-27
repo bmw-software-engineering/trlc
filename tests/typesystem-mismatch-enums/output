@@ -1,2 +1,2 @@
-        asil = bar.Status.DEPRECATED
-                   ^^^^^^ typesystem-mismatch-enums/instances.trlc:6: error: expected ASIL
+asil = bar.Status.DEPRECATED
+           ^^^^^^ typesystem-mismatch-enums/instances.trlc:6: error: expected ASIL

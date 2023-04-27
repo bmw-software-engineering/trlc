@@ -1,2 +1,2 @@
-  description = "potato"
-                ^^^^^^^^ tutorial-2/example.trlc:4: check warning: this is not very descriptive
+description = "potato"
+              ^^^^^^^^ tutorial-2/example.trlc:4: check warning: this is not very descriptive

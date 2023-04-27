@@ -1,4 +1,4 @@
-                name = "Abert"
-                       ^^^^^^^ simple-more-than-one/instances.trlc:9: check error: name must start with Q
-                name = "BBert"
-                       ^^^^^^^ simple-more-than-one/instances.trlc:13: check error: name must start with Q
+name = "Abert"
+       ^^^^^^^ simple-more-than-one/instances.trlc:9: check error: name must start with Q
+name = "BBert"
+       ^^^^^^^ simple-more-than-one/instances.trlc:13: check error: name must start with Q

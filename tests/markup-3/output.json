@@ -1,2 +1,2 @@
-  M = "[[Test_3]]"
-         ^^^^^^ markup-3/foo.trlc:8: error: unknown symbol Test_3, did you mean Test_2?
+M = "[[Test_3]]"
+       ^^^^^^ markup-3/foo.trlc:8: error: unknown symbol Test_3, did you mean Test_2?

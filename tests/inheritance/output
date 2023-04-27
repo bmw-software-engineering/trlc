@@ -1,2 +1,2 @@
-                name  = "Qbert" 
-                        ^^^^^^^ inheritance/instances.trlc:4: check error: name must have specific length
+name  = "Qbert" 
+        ^^^^^^^ inheritance/instances.trlc:4: check error: name must have specific length

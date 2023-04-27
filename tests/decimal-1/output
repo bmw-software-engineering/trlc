@@ -1,6 +1,6 @@
-  D = 5.0
-      ^^^ decimal-1/foo.trlc:9: check warning: D is not less that I
-  D = -5.0
-      ^ decimal-1/foo.trlc:14: check warning: D is not less that I
-  D = -5.0
-      ^ decimal-1/foo.trlc:14: check warning: D is not positive
+D = 5.0
+    ^^^ decimal-1/foo.trlc:9: check warning: D is not less that I
+D = -5.0
+    ^ decimal-1/foo.trlc:14: check warning: D is not less that I
+D = -5.0
+    ^ decimal-1/foo.trlc:14: check warning: D is not positive

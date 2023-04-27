@@ -100,8 +100,11 @@ class Source_Reference(Location):
         maxtrail = n - self.start_pos
         tlen = self.end_pos + 1 - self.start_pos
 
-        return [line,
-                " " * offset + "^" * min(tlen, maxtrail)]
+        stripped_line = line.lstrip()
+        stripped_offset = offset - (len(line) - len(stripped_line))
+
+        return [stripped_line,
+                " " * stripped_offset + "^" * min(tlen, maxtrail)]
 
 
 class Token_Base:

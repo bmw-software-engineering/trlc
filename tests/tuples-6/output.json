@@ -1,5 +1,5 @@
-  c = [(1, 0) verified true,
-                       ^^^^ tuples-6/foo.trlc:10: check warning: potato
+c = [(1, 0) verified true,
+                     ^^^^ tuples-6/foo.trlc:10: check warning: potato
 {
   "test1": {
     "c": [

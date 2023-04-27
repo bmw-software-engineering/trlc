@@ -1,2 +1,2 @@
-   a = 5
-       ^ checks-3/foo.trlc:8: check error: a must be less than b
+a = 5
+    ^ checks-3/foo.trlc:8: check error: a must be less than b
