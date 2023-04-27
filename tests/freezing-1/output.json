@@ -1,0 +1,13 @@
+freeze n = -2
+           ^ freezing-1/foo.rsl:16: check warning: n should be positive
+{
+  "t1": {
+    "n": null
+  },
+  "t2": {
+    "n": 2
+  },
+  "t3": {
+    "n": -2
+  }
+}

@@ -15,6 +15,9 @@ quantifying over all references.)
 
 ### 1.1.1-dev
 
+* [LRM] New keywords: `tuple`, `separator`, and `freeze`. New
+  punctuation: `@`.
+
 * [LRM, TRLC] Support for `tuple` types: these are algebraic datatypes
   that also support user-defined syntax. The main use case is
   versioned identifiers, e.g. allowing you to write `12345@42` for
@@ -23,13 +26,17 @@ quantifying over all references.)
   generic datatype, for specifying e.g. coordinates, qualified
   information, complex numbers, vectors, etc.
 
-  New keywords: `tuple` and `separator`
-
-  New punctuation: `@` (unused except for user-defined separator
-  syntax, like in the example above)
-
   Have a look at the new [Tuples Tutorial](TUTORIAL-TUPLES.md) for
   some examples.
+
+* [LRM, TRLC] Support for freezing record components: you can now
+  declare that a particular component is always a certain value for
+  all instances of that record type. This is not the same as a
+  "default" value, instead that value can never be changed,
+  overwritten, or unfrozen again.
+
+  Have a look at the updated [Catch-all base types
+  tutorial](TUTORIAL-OPTIONAL-BASE.md) for an example.
 
 * [TRLC] Introducing the tuple type required significant
   reorganisation of the AST, to mark this significant backwards

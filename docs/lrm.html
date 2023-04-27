@@ -217,6 +217,7 @@ A keyword is an identifier that is one of the following reserved words:
   <li>false</li>
   <li>fatal</li>
   <li>forall</li>
+  <li>freeze</li>
   <li>if</li>
   <li>implies</li>
   <li>import</li>
@@ -531,13 +532,16 @@ It is an error to declare two fields with the same name in the same tuple. <i>(N
 <div class='code'>
 <pre>
 <span id="bnf-record_declaration">record_declaration</span> ::= [ 'extends' <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_ROOT_TYPE</i> ]
-                       '{' { <a href="#bnf-component_declaration">component_declaration</a> } '}'
+                       '{' { <a href="#bnf-component_declaration">component_declaration</a> | <span class="tooltip"><a href="#bnf-component_freezing">component_freezing</a><span class="tooltiptext">freeze IDENTIFIER = value</span></span> }
+                       '}'
 
 <span id="bnf-component_declaration">component_declaration</span> ::= <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> [ 'optional' ]
                           <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_COMPONENT_TYPE</i> [ <span class="tooltip"><a href="#bnf-array_declaration">array_declaration</a><span class="tooltiptext">[ INTEGER .. * ] | [ INTEGER .. INTEGER ]</span></span> ]
 
 <span id="bnf-array_declaration">array_declaration</span> ::= '[' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span><i>_lower</i> '..' '*' ']'
                     | '[' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span><i>_lower</i> '..' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span><i>_upper</i> ']'
+
+<span id="bnf-component_freezing">component_freezing</span> ::= 'freeze' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component</i> '=' <a href="#bnf-value">value</a>
 </pre>
 </div>
 <h3>Static Semantics</h3>
@@ -556,6 +560,9 @@ A component with an array declaration introduces an anonymous array type. This m
 <div>
 It is an error to specify an upper bound that is less than the lower bound. <i>(Note that it is permitted for them to be equal.)</i>
 </div>
+<div>
+Any valid previously declared record component may be frozen, providing a value of the correct type for the given field in all instances of the record type. It is an error to freeze a component that is already frozen.
+</div>
 <h3>Dynamic Semantics</h3>
 <div>
 Arrays are indexed by natural numbers and the first index is 0.
@@ -570,7 +577,7 @@ An array type has no upper bound if <code>*</code> is specified. An array instan
 An implementation may impose an arbitrary limit to the actual upper bound of an array <i>(that is treat the <code>*</code> as if it was that limit)</i>. This limit, if it exists, shall be greater than or equal to 1000.
 </div>
 <div>
-A record type that extends another inherits all components and user defined checks specified for its root type.
+A record type that extends another inherits all components, user defined checks, and component freezes specified for its root type.
 </div>
 <div>
 Instances of an extension may be provided as a reference where a root type is required; but not the other way around. <i>(This provide a limited form of polymorphism, but with the Liskov substitution principle guaranteed.)</i>
@@ -581,6 +588,9 @@ It is recommended to emit a warning on array types with an upper bound of zero.
 </div>
 <div>
 It is recommended to emit a warning on array types with an upper bound of one.
+</div>
+<div>
+It is recommended to emit a warning on freezing a component declared in the same record.
 </div>
 <div>
 It is recommended that an implementation checks if a record type contains a tuple with a identifier separator that is the same as one of its components. While this is not an error (parsing for values is greedy) it is still highly confusing.
@@ -597,11 +607,16 @@ It is recommended that an implementation checks if a record type contains a tupl
 
   <span class="TRLC_IDENTIFIER">asil</span> <span class="TRLC_KEYWORD">optional</span> <span class="TRLC_IDENTIFIER">ASIL</span>
 
-  <span class="TRLC_IDENTIFIER">codebeamer_link</span> <span class="TRLC_IDENTIFIER">Integer</span> <span class="TRLC_S_BRA">[</span><span class="TRLC_INTEGER">1</span> <span class="TRLC_RANGE">..</span> <span class="TRLC_OPERATOR">*</span><span class="TRLC_S_KET">]</span>
+  <span class="TRLC_IDENTIFIER">derived_from</span> <span class="TRLC_KEYWORD">optional</span> <span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_S_BRA">[</span><span class="TRLC_INTEGER">1</span> <span class="TRLC_RANGE">..</span> <span class="TRLC_OPERATOR">*</span><span class="TRLC_S_KET">]</span>
 <span class="TRLC_C_KET">}</span>
 
 <span class="TRLC_KEYWORD">type</span> <span class="TRLC_IDENTIFIER">Supplier_Requirement</span> <span class="TRLC_KEYWORD">extends</span> <span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_C_BRA">{</span>
   <span class="TRLC_IDENTIFIER">supplier_id</span> <span class="TRLC_IDENTIFIER">Integer</span>
+<span class="TRLC_C_KET">}</span>
+
+<span class="TRLC_KEYWORD">type</span> <span class="TRLC_IDENTIFIER">ACME_Requirement</span> <span class="TRLC_KEYWORD">extends</span> <span class="TRLC_IDENTIFIER">Supplier_Requirement</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_KEYWORD">freeze</span> <span class="TRLC_IDENTIFIER">supplier_id</span> <span class="TRLC_ASSIGN">=</span> <span class="TRLC_INTEGER">666</span>
+  <span class="TRLC_KEYWORD">freeze</span> <span class="TRLC_IDENTIFIER">asil</span>        <span class="TRLC_ASSIGN">=</span> <span class="TRLC_IDENTIFIER">ASIL</span><span class="TRLC_DOT">.</span><span class="TRLC_IDENTIFIER">QM</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2 id="sec:5103569cc5a86b8e2f77bec0c907d17d4a4567da">Check Files</h2>
@@ -1093,7 +1108,7 @@ The type of the declaration must be a valid record type. If no qualified name is
 The name of the declaration must be a unique name and sufficiently distinct in the current package. <i>(See name resolution for a definition of sufficiently distinct.)</i> The name of the declaration must not shadow a type name or package.
 </div>
 <div>
-Each component name must be a valid component of the record type.
+Each component name must be a valid, non-frozen component of the record type. It is an error to attempt to assign to a frozen component <i>(even if the value assigned would be the same value as it&#x27;s frozen value)</i>.
 </div>
 <div>
 Each enumeration must be a valid enumeration type in the indicated (or qualified) package. Each enumeration literal must be a valid literal of the indicated enumeration in the prefix.
@@ -1115,7 +1130,7 @@ A tuple value for a tuple with separators must contain the separator symbols as 
 </div>
 <h3>Dynamic Semantics</h3>
 <div>
-A record object declaration creates a new binding for a record. After references are resolved, all applicable checks on the object, including any checks for tuples, are evaluated in the context of this binding.
+A record object declaration creates a new binding for a record. The value of any frozen components is the value provided in the freezing declaration. After references are resolved, all applicable checks on the object, including any checks for tuples, are evaluated in the context of this binding.
 </div>
 <div>
 It is an error to refer to a record by name that does not exist. It is legal to refer to an record that has not been encountered yet, as references are resolved after parsing.

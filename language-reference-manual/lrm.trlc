@@ -99,6 +99,7 @@ section "Lexing" {
         "false",
         "fatal",
         "forall",
+        "freeze",
         "if",
         "implies",
         "import",
@@ -590,7 +591,8 @@ section "Record declarations" {
   Grammar Record_Declaration {
     bnf = '''
       record_declaration ::= [ 'extends' qualified_name_ROOT_TYPE ]
-                             '{' { component_declaration } '}'
+                             '{' { component_declaration |
+                                   component_freezing } '}'
 
       component_declaration ::=
         described_name [ 'optional' ]
@@ -598,6 +600,8 @@ section "Record declarations" {
 
       array_declaration ::= '[' INTEGER_lower '..' '*' ']'
                           | '[' INTEGER_lower '..' INTEGER_upper ']'
+
+      component_freezing ::= 'freeze' IDENTIFIER_component '=' value
     '''
   }
 
@@ -643,6 +647,15 @@ section "Record declarations" {
               for them to be equal.)*'''
   }
 
+  Semantics Freezing_Components {
+    kind = Kind.Static
+    text = '''Any valid previously declared record component may be
+              frozen, providing a value of the correct type
+              for the given field in all instances of the
+              record type. It is an error to freeze a
+              component that is already frozen.'''
+  }
+
   Semantics Array_Indexing {
     kind = Kind.Dynamic
     text = '''Arrays are indexed by natural numbers and the first index is
@@ -674,9 +687,9 @@ section "Record declarations" {
 
   Semantics Type_Extensions_Inherit_Everything {
     kind = Kind.Dynamic
-    text = '''A record type that extends another inherits all components
-              and user defined checks specified for its root
-              type.'''
+    text = '''A record type that extends another inherits all components,
+              user defined checks, and component freezes
+              specified for its root type.'''
   }
 
   Semantics Type_Extensions_Polymorphism {
@@ -697,6 +710,11 @@ section "Record declarations" {
   Recommendation Arrays_Sized_One {
     text = '''It is recommended to emit a warning on array types with an
               upper bound of one.'''
+  }
+
+  Recommendation Freezing_In_Same_Record {
+    text = '''It is recommended to emit a warning on freezing a component
+              declared in the same record.'''
   }
 
   Recommendation Tuple_Separator_Clashes {
@@ -724,11 +742,16 @@ section "Record declarations" {
 
         asil optional ASIL
 
-        codebeamer_link Integer [1 .. *]
+        derived_from optional Requirement [1 .. *]
       }
 
       type Supplier_Requirement extends Requirement {
         supplier_id Integer
+      }
+
+      type ACME_Requirement extends Supplier_Requirement {
+        freeze supplier_id = 666
+        freeze asil        = ASIL.QM
       }
     '''
   }
@@ -1670,8 +1693,10 @@ section "Record object declarations" {
 
   Semantics Valid_Components {
     kind = Kind.Static
-    text = '''Each component name must be a valid component of the record
-              type.'''
+    text = '''Each component name must be a valid, non-frozen component
+              of the record type. It is an error to attempt to assign to
+              a frozen component *(even if the value assigned would be the
+              same value as it's frozen value)*.'''
   }
 
   Semantics Valid_Enumeration_Literals {
@@ -1721,9 +1746,10 @@ section "Record object declarations" {
   Semantics Evaluation_Of_Checks {
     kind = Kind.Dynamic
     text = '''A record object declaration creates a new binding for a
-              record. After references are resolved, all
-              applicable checks on the object, including any checks for
-              tuples, are evaluated in the context
+              record. The value of any frozen components is the value
+              provided in the freezing declaration. After references
+              are resolved, all applicable checks on the object, including
+              any checks for tuples, are evaluated in the context
               of this binding.'''
   }
 

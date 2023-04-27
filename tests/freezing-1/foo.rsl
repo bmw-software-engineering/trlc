@@ -1,0 +1,17 @@
+package Foo
+
+type R1 {
+  n optional Integer
+}
+
+checks R1 {
+  n != null implies n >= 0, warning "n should be positive", n
+}
+
+type R2 extends R1 {
+  freeze n = +2
+}
+
+type R3 extends R1 {
+  freeze n = -2
+}

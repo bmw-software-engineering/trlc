@@ -231,6 +231,7 @@ class TRLC_Lexer(Lexer_Base):
                           "false",
                           "fatal",
                           "forall",
+                          "freeze",
                           "if",
                           "implies",
                           "import",

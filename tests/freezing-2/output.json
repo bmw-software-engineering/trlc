@@ -1,0 +1,2 @@
+freeze a = 3
+       ^ freezing-2/foo.rsl:6: error: duplicate freezing of a, previously frozen at foo.rsl:5

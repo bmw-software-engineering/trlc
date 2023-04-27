@@ -1,0 +1,2 @@
+n = 42
+^ freezing-3/foo.trlc:4: error: cannot overwrite frozen component n

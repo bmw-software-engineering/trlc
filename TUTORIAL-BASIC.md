@@ -134,7 +134,7 @@ type Requirement {
 }
 ```
 
-## No defaults
+## No defaults, only freezing
 
 It is tempting at this point to want a way to specify the "default"
 for attributes, but this is not supported by design. There are two
@@ -145,3 +145,16 @@ reasons for this:
 * In a safety-critical context, if the default ever changes it would
   create a very tricky situation when it comes to software
   traceability.
+
+However, there is a way to permanently nail down a value using
+`freeze`:
+
+```
+type Critical_Requirement extends Requirement {
+  freeze critical = true
+}
+```
+
+Note that this is _not_ a default: it is permenently set in stone. If
+you ever attempt to set `critical` in a `Critical_Requirement` then
+you will get an error.

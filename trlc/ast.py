@@ -2071,6 +2071,9 @@ class Record_Type(Composite_Type):
     :attribute parent: root type or None, indicated by (3) above
     :type: Record_Type
 
+    :attribute frozen: mapping of frozen components
+    :type: dict[str, Expression]
+
     """
     def __init__(self, name, description, location, parent=None):
         assert isinstance(parent, Record_Type) or parent is None
@@ -2079,6 +2082,7 @@ class Record_Type(Composite_Type):
                          location,
                          parent.components if parent else None)
         self.parent = parent
+        self.frozen = {}
 
     def iter_checks(self):
         if self.parent:
@@ -2118,7 +2122,6 @@ class Record_Type(Composite_Type):
 
         :returns: true if we are or extend the given type
         :rtype: Boolean
-
         """
         assert isinstance(record_type, Record_Type)
 
@@ -2129,6 +2132,44 @@ class Record_Type(Composite_Type):
             else:
                 ptr = ptr.parent
         return False
+
+    def is_frozen(self, n_component):
+        """Test if the given component is frozen.
+
+        :param n_component: a composite component of this record type \
+          (or any of its parents)
+        :type n_component: Composite_Component
+
+        :rtype: bool
+        """
+        assert isinstance(n_component, Composite_Component)
+        if n_component.name in self.frozen:
+            return True
+        elif self.parent:
+            return self.parent.is_frozen(n_component)
+        else:
+            return False
+
+    def get_freezing_expression(self, n_component):
+        """Retrieve the frozen value for a frozen component
+
+        It is an internal compiler error to call this method with a
+        component that his not frozen.
+
+        :param n_component: a frozen component of this record type \
+          (or any of its parents)
+        :type n_component: Composite_Component
+
+        :rtype: Expression
+
+        """
+        assert isinstance(n_component, Composite_Component)
+        if n_component.name in self.frozen:
+            return self.frozen[n_component.name]
+        elif self.parent:
+            return self.parent.get_freezing_expression(n_component)
+        else:
+            assert False
 
 
 class Tuple_Type(Composite_Type):

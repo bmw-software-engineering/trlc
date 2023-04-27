@@ -59,30 +59,31 @@ This is not only error prone (although the [lint
 feature](TUTORIAL-CI.md) of TRLC plans to address this), but it is
 also quite hard to understand.
 
-## Solution 1: refactor types
+## Solution 1: refactor types and freeze components
 
 One way to fix this problem is to have fewer attributes and fewer
-optional attributes in your types. You could, for example, rework the
-above example like so:
+optional attributes in your types, and freeze components that never
+change. You could, for example, rework the above example like so:
 
 ```
 type Requirement {
   description optional String
+  asil                 ASIL
+}
+
+type Component_Requirement extends Requirement {
+  component COMPONENT
 }
 
 type Engine_Requirement extends Requirement {
-  component COMPONENT
-  asil      ASIL
+  freeze component = COMPONENT.Engine
 }
 
 checks Engine_Requirement {
-  component == COMPONENT.Engine,
-    "Engine req should have Engine component
+  asil == ASIL.C or asil == ASIL.D,
+    "Engine req should be ASIL C or D"
 
-  asil == ASIL.D
-    "Engine req should be ASIL D"
-
-  description != null and len(description) > 0
+  description != null and len(description) > 0,
     "Must have a description"
 }
 ```
@@ -91,7 +92,7 @@ This is great _if you can do it_, but if you have other requirements
 with e.g. an ASIL level then you don't want to introduce the same
 component in more than one subtype.
 
-## Solution 2: empty extensions
+## Solution 2: empty and frozen extensions
 
 Another way to deal with this problem is to create empty extensions
 with additional fatal checks. This allows you to keep the very generic
@@ -107,23 +108,19 @@ type Requirement {
   cb_link     optional Integer
 }
 
-type Engine_Requirement extends Requirement {}
+type Engine_Requirement extends Requirement {
+  freeze component = COMPONENT.Engine
+  freeze asil      = ASIL.D
+}
 
 checks Engine_Requirement {
-  component   /= null, fatal "component must be set"
-  asil        /= null, fatal "asil must be set"
   description /= null, fatal "description must be set"
-
-  component == COMPONENT.Engine,
-    "engine req must have engine component"
-
-  asil == ASIL.D, "engine req must be ASIL D"
 
   len(description) > 0, "empty description not allowed"
 }
 ```
 
-The first three checks must be `fatal` in order to prevent the other
+The first check must be `fatal` in order to prevent the other
 check being evaluated with potential `null` values.
 
 This is way more readable than the original convoluted expression, and

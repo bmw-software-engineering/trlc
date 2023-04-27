@@ -426,6 +426,63 @@ class Parser(Parser_Base):
         # Late registration to avoid recursion in tuples
         self.pkg.symbols.register(self.mh, n_tuple)
 
+    def parse_record_component(self, n_record):
+        assert isinstance(n_record, ast.Record_Type)
+
+        c_name, c_descr = self.parse_described_name()
+        if self.peek_kw("optional"):
+            self.match_kw("optional")
+            c_optional = True
+        else:
+            c_optional = False
+        c_typ = self.parse_qualified_name(self.default_scope,
+                                          ast.Type)
+
+        if self.peek("S_BRA"):
+            self.match("S_BRA")
+            self.match("INTEGER")
+            a_lo = self.ct.value
+            self.match("RANGE")
+            a_loc = self.ct.location
+            if self.peek("INTEGER"):
+                self.match("INTEGER")
+                a_hi = self.ct.value
+                if a_lo > a_hi:
+                    self.mh.error(self.ct.location,
+                                  "upper bound must be at least %u" % a_lo,
+                                  fatal = False)
+                elif a_hi == 0:
+                    self.mh.error(self.ct.location,
+                                  "this array makes no sense",
+                                  fatal = False)
+                elif a_hi == 1 and a_lo == 1:
+                    self.mh.warning(a_loc,
+                                    "array of fixed size 1 "
+                                    "should not be an array")
+                elif a_hi == 1 and a_lo == 0:
+                    self.mh.warning(a_loc,
+                                    "consider making this array an"
+                                    " optional %s" % c_typ.name)
+
+            elif self.peek("OPERATOR") and self.nt.value == "*":
+                self.match("OPERATOR")
+                a_hi = None
+            else:
+                self.mh.error(self.nt.location,
+                              "expected INTEGER or * for upper bound")
+            self.match("S_KET")
+            c_typ = ast.Array_Type(location     = a_loc,
+                                   element_type = c_typ,
+                                   lower_bound  = a_lo,
+                                   upper_bound  = a_hi)
+
+        return ast.Composite_Component(name        = c_name.value,
+                                       description = c_descr,
+                                       location    = c_name.location,
+                                       member_of   = n_record,
+                                       n_typ       = c_typ,
+                                       optional    = c_optional)
+
     def parse_record_declaration(self):
         self.match_kw("type")
         name, description = self.parse_described_name()
@@ -445,60 +502,27 @@ class Parser(Parser_Base):
 
         self.match("C_BRA")
         while not self.peek("C_KET"):
-            c_name, c_descr = self.parse_described_name()
-            if self.peek_kw("optional"):
-                self.match_kw("optional")
-                c_optional = True
+            if self.peek_kw("freeze"):
+                self.match_kw("freeze")
+                self.match("IDENTIFIER")
+                n_comp = record.components.lookup(self.mh,
+                                                  self.ct,
+                                                  ast.Composite_Component)
+                if record.is_frozen(n_comp):
+                    n_value = record.get_freezing_expression(n_comp)
+                    self.mh.error(
+                        self.ct.location,
+                        "duplicate freezing of %s, previously frozen at %s" %
+                        (n_comp.name,
+                         self.mh.cross_file_reference(n_value.location)))
+                self.match("ASSIGN")
+                n_value = self.parse_value(n_comp.n_typ)
+
+                record.frozen[n_comp.name] = n_value
+
             else:
-                c_optional = False
-            c_typ = self.parse_qualified_name(self.default_scope,
-                                              ast.Type)
-
-            if self.peek("S_BRA"):
-                self.match("S_BRA")
-                self.match("INTEGER")
-                a_lo = self.ct.value
-                self.match("RANGE")
-                a_loc = self.ct.location
-                if self.peek("INTEGER"):
-                    self.match("INTEGER")
-                    a_hi = self.ct.value
-                    if a_lo > a_hi:
-                        self.mh.error(self.ct.location,
-                                      "upper bound must be at least %u" % a_lo,
-                                      fatal = False)
-                    elif a_hi == 0:
-                        self.mh.error(self.ct.location,
-                                      "this array makes no sense",
-                                      fatal = False)
-                    elif a_hi == 1 and a_lo == 1:
-                        self.mh.warning(a_loc,
-                                        "array of fixed size 1 "
-                                        "should not be an array")
-                    elif a_hi == 1 and a_lo == 0:
-                        self.mh.warning(a_loc,
-                                        "consider making this array an"
-                                        " optional %s" % c_typ.name)
-
-                elif self.peek("OPERATOR") and self.nt.value == "*":
-                    self.match("OPERATOR")
-                    a_hi = None
-                else:
-                    self.mh.error(self.nt.location,
-                                  "expected INTEGER or * for upper bound")
-                self.match("S_KET")
-                c_typ = ast.Array_Type(location     = a_loc,
-                                       element_type = c_typ,
-                                       lower_bound  = a_lo,
-                                       upper_bound  = a_hi)
-
-            comp = ast.Composite_Component(name        = c_name.value,
-                                           description = c_descr,
-                                           location    = c_name.location,
-                                           member_of   = record,
-                                           n_typ       = c_typ,
-                                           optional    = c_optional)
-            record.components.register(self.mh, comp)
+                n_comp = self.parse_record_component(record)
+                record.components.register(self.mh, n_comp)
 
         self.match("C_KET")
 
@@ -1360,6 +1384,10 @@ class Parser(Parser_Base):
             comp = r_typ.components.lookup(self.mh,
                                            self.ct,
                                            ast.Composite_Component)
+            if r_typ.is_frozen(comp):
+                self.mh.error(self.ct.location,
+                              "cannot overwrite frozen component %s" %
+                              comp.name)
             self.match("ASSIGN")
             value = self.parse_value(comp.n_typ)
             obj.assign(comp, value)
@@ -1367,7 +1395,9 @@ class Parser(Parser_Base):
         # Check that each non-optional component has been specified
         for comp in r_typ.all_components():
             if obj.field[comp.name] is None:
-                if not comp.optional:
+                if r_typ.is_frozen(comp):
+                    obj.assign(comp, r_typ.get_freezing_expression(comp))
+                elif not comp.optional:
                     self.mh.error(
                         obj.location,
                         "required component %s (see %s) is not defined" %

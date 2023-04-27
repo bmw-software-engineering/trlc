@@ -1,0 +1,2 @@
+freeze n = -2
+           ^ freezing-1/foo.rsl:16: check warning: n should be positive
