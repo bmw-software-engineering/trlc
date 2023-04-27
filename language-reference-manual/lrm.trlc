@@ -690,7 +690,7 @@ section "Record declarations" {
   }
 
   Recommendation Zero_Upper_Bound {
-    text = '''It is recommended to emit an error on array types with an
+    text = '''It is recommended to emit a warning on array types with an
               upper bound of zero.'''
   }
 
