@@ -43,6 +43,8 @@ Types
 
 .. autoclass:: trlc.ast.Type
 
+.. autoclass:: trlc.ast.Concrete_Type
+
 .. autoclass:: trlc.ast.Builtin_Type
 
 .. autoclass:: trlc.ast.Array_Type

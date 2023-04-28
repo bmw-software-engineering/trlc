@@ -88,6 +88,7 @@ section "Lexing" {
                 reserved words:'''
       bullets = [
         "abs",
+        "abstract",
         "and",
         "checks",
         "else",
@@ -98,6 +99,7 @@ section "Lexing" {
         "extends",
         "false",
         "fatal",
+        "final"
         "forall",
         "freeze",
         "if",
@@ -590,10 +592,12 @@ section "Type declarations" {
 
     Grammar Record_Declaration {
       bnf = '''
-      record_declaration ::= 'type' described_name
+      record_declaration ::= [ inheritance_qualifier ] 'type' described_name
                              [ 'extends' qualified_name_ROOT_TYPE ]
                              '{' { component_declaration |
                                    component_freezing } '}'
+
+      inheritance_qualifier ::= 'abstract' | 'final'
 
       component_declaration ::=
         described_name [ 'optional' ]
@@ -609,6 +613,26 @@ section "Type declarations" {
     Semantics Valid_Root_Type {
       kind = Kind.Static
       text = "The root type for a record extension must be a valid record type."
+    }
+
+    Semantics Abstract_Types {
+      kind = Kind.Static
+      text = '''
+        A record may be marked `abstract`, in which case no objects of this
+        type may be declared. It must be extended *(even if that extension is
+        empty)* before instances of that type can be declared.
+        *(Note that it is possible to have components of an abstract type.)*
+      '''
+    }
+
+    Semantics Final_Types {
+      kind = Kind.Static
+      text = '''
+        A record may be marked `final`, and the extension of a `final` type
+        is also considered to be final *(even if it is not explicitly marked
+        as such)*. An extension of a final type may not contain any
+        component declarations.
+      '''
     }
 
     Semantics Unique_Record_Components {
@@ -734,19 +758,20 @@ section "Type declarations" {
       enum ASIL { QM A B C D }
       '''
       rsl = '''
-      type Requirement {
+      abstract type Base_Requirement {
         summary "A short summary of the requirement."
           String
 
         description "The actual requirement text."
           String
+      }
 
-        asil optional ASIL
-
+      type Requirement extends Base_Requirement {
+        asil         optional ASIL
         derived_from optional Requirement [1 .. *]
       }
 
-      type Supplier_Requirement extends Requirement {
+      final type Supplier_Requirement extends Requirement {
         supplier_id Integer
       }
 
@@ -1657,7 +1682,7 @@ section "Record object declarations" {
   Grammar Record_Object_Declaration {
     bnf = '''
       record_object_declaration ::=
-        qualified_name IDENTIFIER_name
+        qualified_name_RECORD_TYPE IDENTIFIER_object_name
         '{' { component_association } '}'
 
       component_association ::= IDENTIFIER_component_name '=' value
@@ -1677,8 +1702,8 @@ section "Record object declarations" {
 
   Semantics Valid_Record_Types {
     kind = Kind.Static
-    text = '''The type of the declaration must be a valid record type. If
-              no qualified name is given, the record type
+    text = '''The type of the declaration must be a valid, non-abstract
+              record type. If no qualified name is given, the record type
               must be in the indicated package. *(Note that it is not
               legal to declare a tuple object.)*
            '''

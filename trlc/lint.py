@@ -19,9 +19,47 @@
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
 from trlc import ast
-from trlc.errors import Message_Handler
+from trlc.errors import Message_Handler, TRLC_Error
 
 
-def verify_record(mh, record):
-    assert isinstance(mh, Message_Handler)
-    assert isinstance(record, ast.Record_Type)
+class Linter:
+    def __init__(self, mh, stab):
+        assert isinstance(mh, Message_Handler)
+        assert isinstance(stab, ast.Symbol_Table)
+
+        self.mh   = mh
+        self.stab = stab
+
+        self.abstract_extensions = {}
+
+    def verify(self):
+        ok = True
+        for package in self.stab.values(ast.Package):
+            for n_typ in package.symbols.values(ast.Record_Type):
+                try:
+                    self.verify_record(n_typ)
+                except TRLC_Error:
+                    ok = False
+
+        # Complain about abstract types without extensions
+        for package in self.stab.values(ast.Package):
+            for n_typ in package.symbols.values(ast.Record_Type):
+                if n_typ.is_abstract and not self.abstract_extensions[n_typ]:
+                    self.mh.warning(
+                        n_typ.location,
+                        "abstract type %s does not have any extensions" %
+                        n_typ.name)
+
+        return ok
+
+    def verify_record(self, n_record_type):
+        assert isinstance(n_record_type, ast.Record_Type)
+
+        # Mark abstract extensions
+        if n_record_type.is_abstract:
+            if n_record_type not in self.abstract_extensions:
+                self.abstract_extensions[n_record_type] = set()
+        elif n_record_type.parent and n_record_type.parent.is_abstract:
+            if n_record_type.parent not in self.abstract_extensions:
+                self.abstract_extensions[n_record_type.parent] = set()
+            self.abstract_extensions[n_record_type.parent].add(n_record_type)

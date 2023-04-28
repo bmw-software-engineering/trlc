@@ -1,0 +1,17 @@
+package Foo
+
+T2 test_1 {
+  x = 0
+  y = 0
+}
+
+T3 test_2 {
+  x = 0
+  y = 0
+  z = 0
+}
+
+T4 test_3 {
+  y = 0
+  z = 0
+}

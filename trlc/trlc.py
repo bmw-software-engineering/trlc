@@ -287,14 +287,8 @@ class Source_Manager:
         return ok
 
     def perform_sanity_checks(self):
-        ok = True
-        for package in self.stab.values(ast.Package):
-            for obj in package.symbols.values(ast.Record_Type):
-                try:
-                    lint.verify_record(self.mh, obj)
-                except TRLC_Error:
-                    ok = False
-        return ok
+        linter = lint.Linter(self.mh, self.stab)
+        return linter.verify()
 
     def process(self):
         """Parse all registered files.

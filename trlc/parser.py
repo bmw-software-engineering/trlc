@@ -332,7 +332,8 @@ class Parser(Parser_Base):
 
         enum = ast.Enumeration_Type(name        = name.value,
                                     description = description,
-                                    location    = name.location)
+                                    location    = name.location,
+                                    package     = self.pkg)
         self.pkg.symbols.register(self.mh, enum)
 
         self.match("C_BRA")
@@ -384,7 +385,8 @@ class Parser(Parser_Base):
 
         n_tuple = ast.Tuple_Type(name        = name.value,
                                  description = description,
-                                 location    = name.location)
+                                 location    = name.location,
+                                 package     = self.pkg)
 
         self.match("C_BRA")
 
@@ -484,6 +486,18 @@ class Parser(Parser_Base):
                                        optional    = c_optional)
 
     def parse_record_declaration(self):
+        if self.peek_kw("abstract"):
+            self.match_kw("abstract")
+            is_abstract = True
+            is_final    = False
+        elif self.peek_kw("final"):
+            self.match_kw("final")
+            is_abstract = False
+            is_final    = True
+        else:
+            is_abstract = False
+            is_final    = False
+
         self.match_kw("type")
         name, description = self.parse_described_name()
 
@@ -494,10 +508,18 @@ class Parser(Parser_Base):
         else:
             root_record = None
 
+        if self.lint_mode and \
+           root_record and root_record.is_final and \
+           not is_final:
+            self.mh.warning(name.location,
+                            "consider clarifying that this record is final")
+
         record = ast.Record_Type(name        = name.value,
                                  description = description,
                                  location    = name.location,
-                                 parent      = root_record)
+                                 package     = self.pkg,
+                                 n_parent    = root_record,
+                                 is_abstract = is_abstract)
         self.pkg.symbols.register(self.mh, record)
 
         self.match("C_BRA")
@@ -522,9 +544,18 @@ class Parser(Parser_Base):
 
             else:
                 n_comp = self.parse_record_component(record)
-                record.components.register(self.mh, n_comp)
+                if record.is_final:
+                    self.mh.error(n_comp.location,
+                                  "cannot declare new components in"
+                                  " final record type")
+                else:
+                    record.components.register(self.mh, n_comp)
 
         self.match("C_KET")
+
+        # Finally mark record final if applicable
+        if is_final:
+            record.is_final = True
 
     def parse_expression(self, scope):
         assert isinstance(scope, ast.Scope)
@@ -1371,6 +1402,11 @@ class Parser(Parser_Base):
     def parse_record_object_declaration(self):
         r_typ = self.parse_qualified_name(self.default_scope,
                                           ast.Record_Type)
+        if r_typ.is_abstract:
+            self.mh.error(self.ct.location,
+                          "cannot declare object of abstract record type %s" %
+                          r_typ.name)
+
         self.match("IDENTIFIER")
         obj = ast.Record_Object(
             name     = self.ct.value,

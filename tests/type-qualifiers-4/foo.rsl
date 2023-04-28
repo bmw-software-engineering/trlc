@@ -1,0 +1,5 @@
+package Foo
+
+abstract type T1 {}
+
+abstract type T2 {}

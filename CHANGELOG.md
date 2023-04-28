@@ -15,10 +15,11 @@ quantifying over all references.)
 
 ### 1.1.1-dev
 
-* [LRM] New keywords: `tuple`, `separator`, and `freeze`. New
-  punctuation: `@`.
+* [LRM, TRLC] New (backwards-incompatible) keywords: `tuple`,
+  `separator`, `freeze`, `abstract`, and `final`. New punctuation:
+  `@`.
 
-* [LRM, TRLC] Support for `tuple` types: these are algebraic datatypes
+* [LRM, TRLC] Support for tuple types: these are algebraic datatypes
   that also support user-defined syntax. The main use case is
   versioned identifiers, e.g. allowing you to write `12345@42` for
   example to refer to a codebeamer item 12345 at version 42. Instead
@@ -37,6 +38,13 @@ quantifying over all references.)
 
   Have a look at the updated [Catch-all base types
   tutorial](TUTORIAL-OPTIONAL-BASE.md) for an example.
+
+* [LRM, TRLC] Support for abstract and final types: abstract must be
+  extended before they can be used, and final types cannot gain new
+  components.
+
+  Have a look at the new [Advaned tips &
+  tricks](TUTORIAL-ADVANCED-TYPES.md) tutorial for examples.
 
 * [TRLC] Introducing the tuple type required significant
   reorganisation of the AST, to mark this significant backwards
@@ -68,6 +76,12 @@ quantifying over all references.)
 
 * [TRLC] Warning and error messages that show source context now strip
   leading spaces to preserve space.
+
+* [TRLC] User defined types (records, enumerations, and tuples) now
+  all subclass from `Concrete_Type` in the API which provides a useful
+  new function: `fully_qualified_name()` which returns something like
+  `package.typename`. These types are now also python hashable, so you
+  can create dictionaries and sets with them without issues.
 
 ### 1.0.13
 

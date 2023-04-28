@@ -20,5 +20,7 @@
   organisations and big projects
 * [Catch-all base types](TUTORIAL-OPTIONAL-BASE.md): dealing with
   large types with lots of optional fields
+* [Advaned tips & tricks](TUTORIAL-ADVANCED-TYPES.md): some more
+  advanced tips and tricks for large organisations
 * [Python API](TUTORIAL-API.md): writing a custom check with the API
 * [CI Integration](TUTORIAL-CI.md): tips on how to integrate in your CI

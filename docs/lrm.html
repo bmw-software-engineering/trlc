@@ -208,6 +208,7 @@ Examples:<ul>
 A keyword is an identifier that is one of the following reserved words:
 <ul>
   <li>abs</li>
+  <li>abstract</li>
   <li>and</li>
   <li>checks</li>
   <li>else</li>
@@ -218,6 +219,7 @@ A keyword is an identifier that is one of the following reserved words:
   <li>extends</li>
   <li>false</li>
   <li>fatal</li>
+  <li>final</li>
   <li>forall</li>
   <li>freeze</li>
   <li>if</li>
@@ -535,10 +537,13 @@ It is an error to declare two fields with the same name in the same tuple. <i>(N
 <h3 id="sec:fff14f02c0a590def7283b89960c98af94922c47">Record declarations</h3>
 <div class='code'>
 <pre>
-<span id="bnf-record_declaration">record_declaration</span> ::= 'type' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span>
+<span id="bnf-record_declaration">record_declaration</span> ::= [ <span class="tooltip"><a href="#bnf-inheritance_qualifier">inheritance_qualifier</a><span class="tooltiptext">abstract | final</span></span> ] 'type' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span>
                        [ 'extends' <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_ROOT_TYPE</i> ]
                        '{' { <a href="#bnf-component_declaration">component_declaration</a> | <span class="tooltip"><a href="#bnf-component_freezing">component_freezing</a><span class="tooltiptext">freeze IDENTIFIER = value</span></span> }
                        '}'
+
+<span id="bnf-inheritance_qualifier">inheritance_qualifier</span> ::= 'abstract'
+                        | 'final'
 
 <span id="bnf-component_declaration">component_declaration</span> ::= <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> [ 'optional' ]
                           <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_COMPONENT_TYPE</i> [ <span class="tooltip"><a href="#bnf-array_declaration">array_declaration</a><span class="tooltiptext">[ INTEGER .. * ] | [ INTEGER .. INTEGER ]</span></span> ]
@@ -552,6 +557,12 @@ It is an error to declare two fields with the same name in the same tuple. <i>(N
 <h4>Static Semantics</h4>
 <div>
 The root type for a record extension must be a valid record type.
+</div>
+<div>
+A record may be marked <code>abstract</code>, in which case no objects of this type may be declared. It must be extended <i>(even if that extension is empty)</i> before instances of that type can be declared. <i>(Note that it is possible to have components of an abstract type.)</i>
+</div>
+<div>
+A record may be marked <code>final</code>, and the extension of a <code>final</code> type is also considered to be final <i>(even if it is not explicitly marked as such)</i>. An extension of a final type may not contain any component declarations.
 </div>
 <div>
 Each component declaration shall have a unique name in that record declaration, or any of its root types. <i>(Two separate record extensions may defined the same component, and they may even have different types. But you cannot re-define a component from a parent type.)</i>
@@ -603,19 +614,20 @@ It is recommended that an implementation checks if a record type contains a tupl
 <h4>Example</h4>
 <div class='code'>
 <pre>
-<span class="TRLC_KEYWORD">type</span> <span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_C_BRA">{</span>
+<span class="TRLC_KEYWORD">abstract</span> <span class="TRLC_KEYWORD">type</span> <span class="TRLC_IDENTIFIER">Base_Requirement</span> <span class="TRLC_C_BRA">{</span>
   <span class="TRLC_IDENTIFIER">summary</span> <span class="TRLC_STRING">&quot;A short summary of the requirement.&quot;</span>
     <span class="TRLC_IDENTIFIER">String</span>
 
   <span class="TRLC_IDENTIFIER">description</span> <span class="TRLC_STRING">&quot;The actual requirement text.&quot;</span>
     <span class="TRLC_IDENTIFIER">String</span>
+<span class="TRLC_C_KET">}</span>
 
-  <span class="TRLC_IDENTIFIER">asil</span> <span class="TRLC_KEYWORD">optional</span> <span class="TRLC_IDENTIFIER">ASIL</span>
-
+<span class="TRLC_KEYWORD">type</span> <span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_KEYWORD">extends</span> <span class="TRLC_IDENTIFIER">Base_Requirement</span> <span class="TRLC_C_BRA">{</span>
+  <span class="TRLC_IDENTIFIER">asil</span>         <span class="TRLC_KEYWORD">optional</span> <span class="TRLC_IDENTIFIER">ASIL</span>
   <span class="TRLC_IDENTIFIER">derived_from</span> <span class="TRLC_KEYWORD">optional</span> <span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_S_BRA">[</span><span class="TRLC_INTEGER">1</span> <span class="TRLC_RANGE">..</span> <span class="TRLC_OPERATOR">*</span><span class="TRLC_S_KET">]</span>
 <span class="TRLC_C_KET">}</span>
 
-<span class="TRLC_KEYWORD">type</span> <span class="TRLC_IDENTIFIER">Supplier_Requirement</span> <span class="TRLC_KEYWORD">extends</span> <span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_C_BRA">{</span>
+<span class="TRLC_KEYWORD">final</span> <span class="TRLC_KEYWORD">type</span> <span class="TRLC_IDENTIFIER">Supplier_Requirement</span> <span class="TRLC_KEYWORD">extends</span> <span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_C_BRA">{</span>
   <span class="TRLC_IDENTIFIER">supplier_id</span> <span class="TRLC_IDENTIFIER">Integer</span>
 <span class="TRLC_C_KET">}</span>
 
@@ -1088,7 +1100,7 @@ A section has no semantic impact, and no impact on name resolution. Section name
 <h2 id="sec:874acaf9dea40145e68e30cd5668278b883fb037">Record object declarations</h2>
 <div class='code'>
 <pre>
-<span id="bnf-record_object_declaration">record_object_declaration</span> ::= <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span> <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i>
+<span id="bnf-record_object_declaration">record_object_declaration</span> ::= <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_RECORD_TYPE</i> <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_object_name</i>
                               '{' { <span class="tooltip"><a href="#bnf-component_association">component_association</a><span class="tooltiptext">IDENTIFIER = value</span></span> } '}'
 
 <span id="bnf-component_association">component_association</span> ::= <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component_name</i> '=' <a href="#bnf-value">value</a>
@@ -1107,7 +1119,7 @@ A section has no semantic impact, and no impact on name resolution. Section name
 </div>
 <h3>Static Semantics</h3>
 <div>
-The type of the declaration must be a valid record type. If no qualified name is given, the record type must be in the indicated package. <i>(Note that it is not legal to declare a tuple object.)</i>
+The type of the declaration must be a valid, non-abstract record type. If no qualified name is given, the record type must be in the indicated package. <i>(Note that it is not legal to declare a tuple object.)</i>
 </div>
 <div>
 The name of the declaration must be a unique name and sufficiently distinct in the current package. <i>(See name resolution for a definition of sufficiently distinct.)</i> The name of the declaration must not shadow a type name or package.

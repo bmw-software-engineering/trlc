@@ -1,0 +1,2 @@
+T1 test_1 {
+^^ type-qualifiers-2/foo.trlc:3: error: cannot declare object of abstract record type T1

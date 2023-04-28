@@ -1,0 +1,2 @@
+w Integer
+^ type-qualifiers-3/foo.rsl:20: error: cannot declare new components in final record type

@@ -1,0 +1,21 @@
+package Foo
+
+abstract type T1 {
+  x Integer
+}
+
+type T2 extends T1 {
+  y Integer
+}
+
+final type T3 extends T2 {
+  z Integer
+}
+
+type T4 extends T3 {
+  freeze x = 0
+}
+
+type T5 extends T4 {
+  w Integer
+}

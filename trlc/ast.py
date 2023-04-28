@@ -1820,6 +1820,33 @@ class Type(Entity):
         return True
 
 
+class Concrete_Type(Type):
+    """Abstract base class for all non-anonymous types.
+
+    :attribute n_package: package where this type was declared
+    :type: Package
+    """
+    def __init__(self, name, location, n_package):
+        super().__init__(name, location)
+        assert isinstance(n_package, Package)
+        self.n_package = n_package
+
+    def fully_qualified_name(self):
+        """Return the FQN for this type (i.e. PACKAGE.NAME)
+
+        :returns: the type's full name
+        :rtype: str
+        """
+        return self.n_package.name + "." + self.name
+
+    def __hash__(self):
+        return hash((self.n_package.name, self.name))
+
+    def __repr__(self):
+        return "%s<%s>" % (self.__class__.__name__,
+                           self.fully_qualified_name())
+
+
 class Builtin_Type(Type):
     """Abstract base class for all builtin types.
 
@@ -1979,7 +2006,7 @@ class Package(Entity):
         self.symbols.dump(indent + 1)
 
 
-class Composite_Type(Type):
+class Composite_Type(Concrete_Type):
     """Abstract base for record and tuple types, as they share some
        functionality.
 
@@ -1994,8 +2021,13 @@ class Composite_Type(Type):
     :type: list[Check]
 
     """
-    def __init__(self, name, description, location, inherited_symbols=None):
-        super().__init__(name, location)
+    def __init__(self,
+                 name,
+                 description,
+                 location,
+                 package,
+                 inherited_symbols=None):
+        super().__init__(name, location, package)
         assert isinstance(description, str) or description is None
         assert isinstance(inherited_symbols, Symbol_Table) or \
             inherited_symbols is None
@@ -2074,15 +2106,31 @@ class Record_Type(Composite_Type):
     :attribute frozen: mapping of frozen components
     :type: dict[str, Expression]
 
+    :attribute is_final: type is final (i.e. no new components may be declared)
+    :type: bool
+
+    :attribute is_abstract: type is abstract
+    :type: bool
+
     """
-    def __init__(self, name, description, location, parent=None):
-        assert isinstance(parent, Record_Type) or parent is None
+    def __init__(self,
+                 name,
+                 description,
+                 location,
+                 package,
+                 n_parent,
+                 is_abstract):
+        assert isinstance(n_parent, Record_Type) or n_parent is None
+        assert isinstance(is_abstract, bool)
         super().__init__(name,
                          description,
                          location,
-                         parent.components if parent else None)
-        self.parent = parent
-        self.frozen = {}
+                         package,
+                         n_parent.components if n_parent else None)
+        self.parent      = n_parent
+        self.frozen      = {}
+        self.is_final    = (n_parent.is_final if n_parent else False)
+        self.is_abstract = is_abstract
 
     def iter_checks(self):
         if self.parent:
@@ -2190,10 +2238,11 @@ class Tuple_Type(Composite_Type):
     precisely one less separator than components.
 
     """
-    def __init__(self, name, description, location):
+    def __init__(self, name, description, location, package):
         super().__init__(name,
                          description,
-                         location)
+                         location,
+                         package)
         self.separators = []
 
     def add_separator(self, n_separator):
@@ -2267,7 +2316,7 @@ class Separator(Node):
         self.write_indent(indent, "Separator %s" % self.token.value)
 
 
-class Enumeration_Type(Type):
+class Enumeration_Type(Concrete_Type):
     """User-defined enumeration types.
 
     For example::
@@ -2282,8 +2331,8 @@ class Enumeration_Type(Type):
     :type: Symbol_Table[Enumeration_Literal_Spec]
 
     """
-    def __init__(self, name, description, location):
-        super().__init__(name, location)
+    def __init__(self, name, description, location, package):
+        super().__init__(name, location, package)
         assert isinstance(description, str) or description is None
         self.literals    = Symbol_Table()
         self.description = description
