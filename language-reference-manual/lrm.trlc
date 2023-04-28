@@ -441,55 +441,54 @@ section "Type declarations" {
 
   Grammar Type_Declarations {
     bnf = '''
-      type_declaration ::= 'enum' described_name enumeration_declaration
-                         | 'tuple' described_name tuple_declaration
-                         | 'type' described_name record_declaration
+      type_declaration ::= enumeration_declaration
+                         | tuple_declaration
+                         | record_declaration
     '''
   }
 
   Semantics Duplicate_Types {
     kind = Kind.Static
-    text = '''It is an error to create a type with a name that already
-              exists in the current package. (Note: this
-              especially includes shadowing one of the
-              builtin types.)'''
+    text = '''It is an error to create a type with a name that is
+              potentially visible. (Note: this especially
+              includes shadowing one of the builtin types,
+              but also means you cannot shadow packages.)'''
   }
 
-}
+  section "Enumerations" {
 
-section "Enumerations" {
-
-  Grammar Enumeration_Declaration {
-    bnf = '''
-      enumeration_declaration ::= '{' { enumeration_literal_specification } '}'
+    Grammar Enumeration_Declaration {
+      bnf = '''
+      enumeration_declaration ::= 'enum' described_name
+                                  '{' { enumeration_literal_specification } '}'
 
       enumeration_literal_specification ::= described_name
     '''
-  }
+    }
 
-  Semantics Unique_Enumeration_Literals {
-    kind = Kind.Static
-    text = '''Each described name declares an enumeration literal
+    Semantics Unique_Enumeration_Literals {
+      kind = Kind.Static
+      text = '''Each described name declares an enumeration literal
               specification, which shall have a unique name
               in that enumeration.'''
-  }
+    }
 
-  Text Shared_Literals {
-    text = '''It is not an error to have the same literal specification
+    Text Shared_Literals {
+      text = '''It is not an error to have the same literal specification
               for different enumerations.'''
-  }
+    }
 
-  Text Literals_Shadowing_Permitted {
-    text = '''It is not an error to have an enumeration literal with the
+    Text Literals_Shadowing_Permitted {
+      text = '''It is not an error to have an enumeration literal with the
               same name as a record or enumeration - as
               there is no ambiguity - but it is recommended
               that an implementation emits a warning in this
               case.'''
-  }
+    }
 
-  Example Enumeration_Example {
-    hidden_rsl = '''package Example'''
-    rsl = '''
+    Example Enumeration_Example {
+      hidden_rsl = '''package Example'''
+      rsl = '''
       enum ASIL {
         QM "Not safety relevant"
         A B C D
@@ -500,16 +499,17 @@ section "Enumerations" {
         no
         file_not_found
       }
-    '''
+      '''
+    }
+
   }
 
-}
+  section "Tuples (algebraic data types)" {
 
-section "Tuples (algebraic data types)" {
-
-  Grammar Tuple_Declaration {
-    bnf = '''
-      tuple_declaration ::= '{' field_declaration
+    Grammar Tuple_Declaration {
+      bnf = '''
+      tuple_declaration ::= 'tuple' described_name
+                            '{' field_declaration
                                 { [ separator_declaration ]
                                   field_declaration }
                             '}'
@@ -523,54 +523,54 @@ section "Tuples (algebraic data types)" {
       separator_symbol ::= IDENTIFIER
                          | '@'
     '''
-  }
+    }
 
-  Semantics Tuple_Field_Types {
-    kind = Kind.Static
-    text = '''
+    Semantics Tuple_Field_Types {
+      kind = Kind.Static
+      text = '''
       A field type names any valid visible and complete
       type. *(Specifically you may not have a recursive
       tuple reference.)*
-    '''
-  }
+      '''
+    }
 
-  Semantics Tuple_Separators_All_Or_None {
-    kind = Kind.Static
-    text = '''
+    Semantics Tuple_Separators_All_Or_None {
+      kind = Kind.Static
+      text = '''
        A tuple type shall declare separators between all
        fields, or none of them.
-    '''
-  }
+       '''
+    }
 
-  Semantics Tuple_Optional_Requires_Separators {
-    kind = Kind.Static
-    text = '''
+    Semantics Tuple_Optional_Requires_Separators {
+      kind = Kind.Static
+      text = '''
        Only tuples with separators may use optional fields. Tuples
        without separators cannot have optional fields.
-    '''
-  }
+       '''
+    }
 
-  Semantics Tuple_Optional_Fields {
-    kind = Kind.Static
-    text = '''
+    Semantics Tuple_Optional_Fields {
+      kind = Kind.Static
+      text = '''
        After an optional field has been declared, all fields
        following it must also be optional.
-    '''
-  }
+       '''
+    }
 
-  Semantics Tuple_Unique_Field_Names {
-    kind = Kind.Static
-    text = '''
+    Semantics Tuple_Unique_Field_Names {
+      kind = Kind.Static
+      text = '''
       It is an error to declare two fields with the same
       name in the same tuple. *(Note that it is possible,
       but a bad idea, to have a separator with the same
       identifier as a field.)*
-    '''
-  }
+      '''
+    }
 
-  Example Tuple_Example {
-    hidden_rsl = '''package Example'''
-    rsl = '''
+    Example Tuple_Example {
+      hidden_rsl = '''package Example'''
+      rsl = '''
       tuple Coordinate {
          x Decimal
          y Decimal
@@ -581,16 +581,17 @@ section "Tuples (algebraic data types)" {
          separator @
          version optional Integer
       }
-    '''
+      '''
+    }
+
   }
 
-}
+  section "Record declarations" {
 
-section "Record declarations" {
-
-  Grammar Record_Declaration {
-    bnf = '''
-      record_declaration ::= [ 'extends' qualified_name_ROOT_TYPE ]
+    Grammar Record_Declaration {
+      bnf = '''
+      record_declaration ::= 'type' described_name
+                             [ 'extends' qualified_name_ROOT_TYPE ]
                              '{' { component_declaration |
                                    component_freezing } '}'
 
@@ -602,137 +603,137 @@ section "Record declarations" {
                           | '[' INTEGER_lower '..' INTEGER_upper ']'
 
       component_freezing ::= 'freeze' IDENTIFIER_component '=' value
-    '''
-  }
+      '''
+    }
 
-  Semantics Valid_Root_Type {
-    kind = Kind.Static
-    text = "The root type for a record extension must be a valid record type."
-  }
+    Semantics Valid_Root_Type {
+      kind = Kind.Static
+      text = "The root type for a record extension must be a valid record type."
+    }
 
-  Semantics Unique_Record_Components {
-    kind = Kind.Static
-    text = '''Each component declaration shall have a unique name in that
+    Semantics Unique_Record_Components {
+      kind = Kind.Static
+      text = '''Each component declaration shall have a unique name in that
               record declaration, or any of its root
               types. *(Two separate record extensions may
               defined the same component, and they may even
               have different types. But you cannot re-define
               a component from a parent type.)*'''
-  }
+    }
 
-  Semantics Valid_Component_Type {
-    kind = Kind.Static
-    text = '''Each component type shall refer to a valid type, or to the
+    Semantics Valid_Component_Type {
+      kind = Kind.Static
+      text = '''Each component type shall refer to a valid type, or to the
               name of the record type itself. It is an error
               to refer to a type that has not been declared
               yet. *(As there are no forward declarations in
               the language, this forces the user type
               hierarchy to be a DAG, but permitting
               self-references.)*'''
-  }
+    }
 
-  Semantics Anonymous_Arrays {
-    kind = Kind.Static
-    text = '''A component with an array declaration introduces an
+    Semantics Anonymous_Arrays {
+      kind = Kind.Static
+      text = '''A component with an array declaration introduces an
               anonymous array type. This means the type of
               the record component is not the type as
               specified, but rather an array where the
               element type is that type.'''
-  }
+    }
 
-  Semantics Upper_Bound_Greater_Than_Lower_Bound {
-    kind = Kind.Static
-    text = '''It is an error to specify an upper bound that is less than
+    Semantics Upper_Bound_Greater_Than_Lower_Bound {
+      kind = Kind.Static
+      text = '''It is an error to specify an upper bound that is less than
               the lower bound. *(Note that it is permitted
               for them to be equal.)*'''
-  }
+    }
 
-  Semantics Freezing_Components {
-    kind = Kind.Static
-    text = '''Any valid previously declared record component may be
+    Semantics Freezing_Components {
+      kind = Kind.Static
+      text = '''Any valid previously declared record component may be
               frozen, providing a value of the correct type
               for the given field in all instances of the
               record type. It is an error to freeze a
               component that is already frozen.'''
-  }
+    }
 
-  Semantics Array_Indexing {
-    kind = Kind.Dynamic
-    text = '''Arrays are indexed by natural numbers and the first index is
+    Semantics Array_Indexing {
+      kind = Kind.Dynamic
+      text = '''Arrays are indexed by natural numbers and the first index is
               0.'''
-  }
+    }
 
-  Semantics Array_Lower_Bound {
-    kind = Kind.Dynamic
-    text = '''An instance of an array shall not have fewer elements than
+    Semantics Array_Lower_Bound {
+      kind = Kind.Dynamic
+      text = '''An instance of an array shall not have fewer elements than
               its lower bound.'''
-  }
+    }
 
-  Semantics Array_Upper_Bound {
-    kind = Kind.Dynamic
-    text = '''An array type has no upper bound if `*` is specified. An
+    Semantics Array_Upper_Bound {
+      kind = Kind.Dynamic
+      text = '''An array type has no upper bound if `*` is specified. An
               array instance for an array type with an upper
               bound shall not have more elements than its
               upper bound.'''
-  }
+    }
 
-  Semantics Array_Implementation_Upper_Bound {
-    kind = Kind.Dynamic
-    text = '''An implementation may impose an arbitrary limit to the
+    Semantics Array_Implementation_Upper_Bound {
+      kind = Kind.Dynamic
+      text = '''An implementation may impose an arbitrary limit to the
               actual upper bound of an array *(that is treat
               the `*` as if it was that limit)*. This limit,
               if it exists, shall be greater than or equal
               to 1000.'''
-  }
+    }
 
-  Semantics Type_Extensions_Inherit_Everything {
-    kind = Kind.Dynamic
-    text = '''A record type that extends another inherits all components,
+    Semantics Type_Extensions_Inherit_Everything {
+      kind = Kind.Dynamic
+      text = '''A record type that extends another inherits all components,
               user defined checks, and component freezes
               specified for its root type.'''
-  }
+    }
 
-  Semantics Type_Extensions_Polymorphism {
-    kind = Kind.Dynamic
-    text = '''Instances of an extension may be
+    Semantics Type_Extensions_Polymorphism {
+      kind = Kind.Dynamic
+      text = '''Instances of an extension may be
               provided as a reference where a root type is
               required; but not the other way around. *(This
               provide a limited form of polymorphism, but
               with the Liskov substitution principle
               guaranteed.)*'''
-  }
+    }
 
-  Recommendation Zero_Upper_Bound {
-    text = '''It is recommended to emit a warning on array types with an
+    Recommendation Zero_Upper_Bound {
+      text = '''It is recommended to emit a warning on array types with an
               upper bound of zero.'''
-  }
+    }
 
-  Recommendation Arrays_Sized_One {
-    text = '''It is recommended to emit a warning on array types with an
+    Recommendation Arrays_Sized_One {
+      text = '''It is recommended to emit a warning on array types with an
               upper bound of one.'''
-  }
+    }
 
-  Recommendation Freezing_In_Same_Record {
-    text = '''It is recommended to emit a warning on freezing a component
+    Recommendation Freezing_In_Same_Record {
+      text = '''It is recommended to emit a warning on freezing a component
               declared in the same record.'''
-  }
+    }
 
-  Recommendation Tuple_Separator_Clashes {
-    text = '''
+    Recommendation Tuple_Separator_Clashes {
+      text = '''
       It is recommended that an implementation checks if a
       record type contains a tuple with a identifier
       separator that is the same as one of its
       components. While this is not an error (parsing for
       values is greedy) it is still highly confusing.
-    '''
-  }
+      '''
+    }
 
-  Example Record_Examples {
-    hidden_rsl = '''
+    Example Record_Examples {
+      hidden_rsl = '''
       package Example
       enum ASIL { QM A B C D }
-    '''
-    rsl = '''
+      '''
+      rsl = '''
       type Requirement {
         summary "A short summary of the requirement."
           String
@@ -753,7 +754,9 @@ section "Record declarations" {
         freeze supplier_id = 666
         freeze asil        = ASIL.QM
       }
-    '''
+      '''
+    }
+
   }
 
 }
@@ -765,7 +768,7 @@ section "Check Files" {
     bnf = '''
       check_file ::= package_indication
                      { check_block }
-    '''
+      '''
   }
 
   Semantics Cannot_Declare_In_Check_File {
@@ -789,7 +792,7 @@ section "Checks" {
       severity ::= 'warning'
                  | 'error'
                  | 'fatal'
-    '''
+      '''
   }
 
   Semantics Applicable_Types {
@@ -804,7 +807,7 @@ section "Checks" {
       In a check declaration or expression, it is an error to
       refer to a component name (or field name) that does not belong
       to the record (or tuple respectively) indicated.
-    '''
+      '''
   }
 
   Text Only_Current_Package {
@@ -856,7 +859,7 @@ section "Checks" {
                   creating more messages).''',
                '''A fatal message is like an error, except that no further
                   checks from this check block shall be
-                  evaluated for this type's instance.''']
+                  evaluated for this object.''']
   }
 
   Text Anchoring {
@@ -898,7 +901,7 @@ section "Checks" {
         separator @
         version optional Integer
       }
-    '''
+      '''
     rsl = '''
       checks Requirement {
         summary != null, warning "You should specify a summary", summary
@@ -918,7 +921,7 @@ section "Checks" {
         version != null implies version >= 1,
           error "CB Version must be positive", version
       }
-    '''
+      '''
   }
 
 }

@@ -106,12 +106,14 @@ A copy of the license is included in the section entitled "Appendix A: GNU Free 
   <li><a href="#sec:590aeb2db73432d982c1e15e21c6b28a649cc293">Qualified names</a>
   </li>
   <li><a href="#sec:2b0ce86a93da5b26c4b4929399d43cfb10393c60">Type declarations</a>
-  </li>
-  <li><a href="#sec:541918791ee5c9789a3fa79a547a313c021b753a">Enumerations</a>
-  </li>
-  <li><a href="#sec:f2cc0876001e1aef9cc0dc5a33f9da9e4037af3f">Tuples (algebraic data types)</a>
-  </li>
-  <li><a href="#sec:9aedc52d18c85a678921842cf6748e8e21be3b0b">Record declarations</a>
+    <ol>
+      <li><a href="#sec:e1f8bb3ddd6a0895152a453fa14399b694157f38">Enumerations</a>
+      </li>
+      <li><a href="#sec:9c935af337f85e7a0b4f793f9f5404aa3567db0b">Tuples (algebraic data types)</a>
+      </li>
+      <li><a href="#sec:fff14f02c0a590def7283b89960c98af94922c47">Record declarations</a>
+      </li>
+    </ol>
   </li>
   <li><a href="#sec:5103569cc5a86b8e2f77bec0c907d17d4a4567da">Check Files</a>
   </li>
@@ -442,24 +444,25 @@ The name must be a valid symbol in the current scope (if no package is provided)
 <h2 id="sec:2b0ce86a93da5b26c4b4929399d43cfb10393c60">Type declarations</h2>
 <div class='code'>
 <pre>
-<span id="bnf-type_declaration">type_declaration</span> ::= 'enum' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> <span class="tooltip"><a href="#bnf-enumeration_declaration">enumeration_declaration</a><span class="tooltiptext">{ { enumeration_literal_specification } }</span></span>
-                   | 'tuple' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> <a href="#bnf-tuple_declaration">tuple_declaration</a>
-                   | 'type' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> <a href="#bnf-record_declaration">record_declaration</a>
+<span id="bnf-type_declaration">type_declaration</span> ::= <a href="#bnf-enumeration_declaration">enumeration_declaration</a>
+                   | <a href="#bnf-tuple_declaration">tuple_declaration</a>
+                   | <a href="#bnf-record_declaration">record_declaration</a>
 </pre>
 </div>
 <h3>Static Semantics</h3>
 <div>
-It is an error to create a type with a name that already exists in the current package. (Note: this especially includes shadowing one of the builtin types.)
+It is an error to create a type with a name that is potentially visible. (Note: this especially includes shadowing one of the builtin types, but also means you cannot shadow packages.)
 </div>
-<h2 id="sec:541918791ee5c9789a3fa79a547a313c021b753a">Enumerations</h2>
+<h3 id="sec:e1f8bb3ddd6a0895152a453fa14399b694157f38">Enumerations</h3>
 <div class='code'>
 <pre>
-<span id="bnf-enumeration_declaration">enumeration_declaration</span> ::= '{' { <span class="tooltip"><a href="#bnf-enumeration_literal_specification">enumeration_literal_specification</a><span class="tooltiptext">described_name</span></span> } '}'
+<span id="bnf-enumeration_declaration">enumeration_declaration</span> ::= 'enum' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span>
+                            '{' { <span class="tooltip"><a href="#bnf-enumeration_literal_specification">enumeration_literal_specification</a><span class="tooltiptext">described_name</span></span> } '}'
 
 <span id="bnf-enumeration_literal_specification">enumeration_literal_specification</span> ::= <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span>
 </pre>
 </div>
-<h3>Static Semantics</h3>
+<h4>Static Semantics</h4>
 <div>
 Each described name declares an enumeration literal specification, which shall have a unique name in that enumeration.
 </div>
@@ -469,7 +472,7 @@ It is not an error to have the same literal specification for different enumerat
 <div>
 It is not an error to have an enumeration literal with the same name as a record or enumeration - as there is no ambiguity - but it is recommended that an implementation emits a warning in this case.
 </div>
-<h3>Example</h3>
+<h4>Example</h4>
 <div class='code'>
 <pre>
 <span class="TRLC_KEYWORD">enum</span> <span class="TRLC_IDENTIFIER">ASIL</span> <span class="TRLC_C_BRA">{</span>
@@ -483,10 +486,11 @@ It is not an error to have an enumeration literal with the same name as a record
   <span class="TRLC_IDENTIFIER">file_not_found</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2 id="sec:f2cc0876001e1aef9cc0dc5a33f9da9e4037af3f">Tuples (algebraic data types)</h2>
+<h3 id="sec:9c935af337f85e7a0b4f793f9f5404aa3567db0b">Tuples (algebraic data types)</h3>
 <div class='code'>
 <pre>
-<span id="bnf-tuple_declaration">tuple_declaration</span> ::= '{' <span class="tooltip"><a href="#bnf-field_declaration">field_declaration</a><span class="tooltiptext">described_name [ optional ] qualified_name</span></span>
+<span id="bnf-tuple_declaration">tuple_declaration</span> ::= 'tuple' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span>
+                      '{' <span class="tooltip"><a href="#bnf-field_declaration">field_declaration</a><span class="tooltiptext">described_name [ optional ] qualified_name</span></span>
                       { [ <span class="tooltip"><a href="#bnf-separator_declaration">separator_declaration</a><span class="tooltiptext">separator separator_symbol</span></span> ] <span class="tooltip"><a href="#bnf-field_declaration">field_declaration</a><span class="tooltiptext">described_name [ optional ] qualified_name</span></span> }
                       '}'
 
@@ -498,7 +502,7 @@ It is not an error to have an enumeration literal with the same name as a record
                    | '@'
 </pre>
 </div>
-<h3>Static Semantics</h3>
+<h4>Static Semantics</h4>
 <div>
 A field type names any valid visible and complete type. <i>(Specifically you may not have a recursive tuple reference.)</i>
 </div>
@@ -514,7 +518,7 @@ After an optional field has been declared, all fields following it must also be 
 <div>
 It is an error to declare two fields with the same name in the same tuple. <i>(Note that it is possible, but a bad idea, to have a separator with the same identifier as a field.)</i>
 </div>
-<h3>Example</h3>
+<h4>Example</h4>
 <div class='code'>
 <pre>
 <span class="TRLC_KEYWORD">tuple</span> <span class="TRLC_IDENTIFIER">Coordinate</span> <span class="TRLC_C_BRA">{</span>
@@ -528,10 +532,11 @@ It is an error to declare two fields with the same name in the same tuple. <i>(N
    <span class="TRLC_IDENTIFIER">version</span> <span class="TRLC_KEYWORD">optional</span> <span class="TRLC_IDENTIFIER">Integer</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2 id="sec:9aedc52d18c85a678921842cf6748e8e21be3b0b">Record declarations</h2>
+<h3 id="sec:fff14f02c0a590def7283b89960c98af94922c47">Record declarations</h3>
 <div class='code'>
 <pre>
-<span id="bnf-record_declaration">record_declaration</span> ::= [ 'extends' <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_ROOT_TYPE</i> ]
+<span id="bnf-record_declaration">record_declaration</span> ::= 'type' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span>
+                       [ 'extends' <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_ROOT_TYPE</i> ]
                        '{' { <a href="#bnf-component_declaration">component_declaration</a> | <span class="tooltip"><a href="#bnf-component_freezing">component_freezing</a><span class="tooltiptext">freeze IDENTIFIER = value</span></span> }
                        '}'
 
@@ -544,7 +549,7 @@ It is an error to declare two fields with the same name in the same tuple. <i>(N
 <span id="bnf-component_freezing">component_freezing</span> ::= 'freeze' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component</i> '=' <a href="#bnf-value">value</a>
 </pre>
 </div>
-<h3>Static Semantics</h3>
+<h4>Static Semantics</h4>
 <div>
 The root type for a record extension must be a valid record type.
 </div>
@@ -563,7 +568,7 @@ It is an error to specify an upper bound that is less than the lower bound. <i>(
 <div>
 Any valid previously declared record component may be frozen, providing a value of the correct type for the given field in all instances of the record type. It is an error to freeze a component that is already frozen.
 </div>
-<h3>Dynamic Semantics</h3>
+<h4>Dynamic Semantics</h4>
 <div>
 Arrays are indexed by natural numbers and the first index is 0.
 </div>
@@ -582,7 +587,7 @@ A record type that extends another inherits all components, user defined checks,
 <div>
 Instances of an extension may be provided as a reference where a root type is required; but not the other way around. <i>(This provide a limited form of polymorphism, but with the Liskov substitution principle guaranteed.)</i>
 </div>
-<h3>Implementation Recommendation</h3>
+<h4>Implementation Recommendation</h4>
 <div>
 It is recommended to emit a warning on array types with an upper bound of zero.
 </div>
@@ -595,7 +600,7 @@ It is recommended to emit a warning on freezing a component declared in the same
 <div>
 It is recommended that an implementation checks if a record type contains a tuple with a identifier separator that is the same as one of its components. While this is not an error (parsing for values is greedy) it is still highly confusing.
 </div>
-<h3>Example</h3>
+<h4>Example</h4>
 <div class='code'>
 <pre>
 <span class="TRLC_KEYWORD">type</span> <span class="TRLC_IDENTIFIER">Requirement</span> <span class="TRLC_C_BRA">{</span>
@@ -675,7 +680,7 @@ The severity, if provided, controls how future errors are treated, and how the T
 <ul>
   <li>A warning has no effect other than emitting the message.</li>
   <li>An error (the default, in case severity is not specified) causes an implementation to eventually return a non-zero error code, but further checks will be evaluated (potentially creating more messages).</li>
-  <li>A fatal message is like an error, except that no further checks from this check block shall be evaluated for this type&#x27;s instance.</li>
+  <li>A fatal message is like an error, except that no further checks from this check block shall be evaluated for this object.</li>
 </ul>
 </div>
 <div>
