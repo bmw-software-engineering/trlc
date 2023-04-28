@@ -14,26 +14,36 @@ Entities
 
 .. autoclass:: trlc.ast.Entity
 
-.. autoclass:: trlc.ast.Quantified_Variable
-
 .. autoclass:: trlc.ast.Builtin_Function
 
 .. autoclass:: trlc.ast.Package
 
-.. autoclass:: trlc.ast.Check
+.. autoclass:: trlc.ast.Section
 
-.. autoclass:: trlc.ast.Record_Component
+.. autoclass:: trlc.ast.Typed_Entity
+
+.. autoclass:: trlc.ast.Quantified_Variable
+
+.. autoclass:: trlc.ast.Composite_Component
 
 .. autoclass:: trlc.ast.Enumeration_Literal_Spec
 
 .. autoclass:: trlc.ast.Record_Object
 
-.. autoclass:: trlc.ast.Section
+
+Miscellaneous
+-------------
+
+.. autoclass:: trlc.ast.Check
+
+.. autoclass:: trlc.ast.Separator
 
 Types
 -----
 
 .. autoclass:: trlc.ast.Type
+
+.. autoclass:: trlc.ast.Concrete_Type
 
 .. autoclass:: trlc.ast.Builtin_Type
 
@@ -49,7 +59,11 @@ Types
 
 .. autoclass:: trlc.ast.Builtin_Boolean
 
+.. autoclass:: trlc.ast.Composite_Type
+
 .. autoclass:: trlc.ast.Record_Type
+
+.. autoclass:: trlc.ast.Tuple_Type
 
 .. autoclass:: trlc.ast.Enumeration_Type
 
@@ -63,6 +77,8 @@ Expressions
 
 .. autoclass:: trlc.ast.Array_Aggregate
 
+.. autoclass:: trlc.ast.Tuple_Aggregate
+
 .. autoclass:: trlc.ast.Record_Reference
 
 .. autoclass:: trlc.ast.Name_Reference
@@ -70,6 +86,8 @@ Expressions
 .. autoclass:: trlc.ast.Unary_Expression
 
 .. autoclass:: trlc.ast.Binary_Expression
+
+.. autoclass:: trlc.ast.Field_Access_Expression
 
 .. autoclass:: trlc.ast.Range_Test
 

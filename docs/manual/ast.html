@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>AST &#8212; TRLC 1.0.13 documentation</title>
+    <title>AST &#8212; TRLC 1.1.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
     
@@ -27,7 +27,7 @@
         <li class="right" >
           <a href="errors.html" title="Error handling and reporting"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.13 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.1.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">AST</a></li> 
       </ul>
     </div>  
@@ -71,7 +71,7 @@ output like this:</p>
    <span class="n">Package</span> <span class="n">bar</span>
       <span class="n">Symbol_Table</span>
          <span class="n">Record_Type</span> <span class="n">MyType</span>
-            <span class="n">Record_Component</span> <span class="n">name</span>
+            <span class="n">Composite_Component</span> <span class="n">name</span>
                <span class="n">Optional</span><span class="p">:</span> <span class="kc">False</span>
                <span class="n">Type</span><span class="p">:</span> <span class="n">String</span>
             <span class="n">Checks</span>
@@ -124,29 +124,6 @@ objects.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="trlc.ast.Quantified_Variable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Quantified_Variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Quantified_Variable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Entity" title="trlc.ast.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Entity</span></code></a></p>
-<p>Variable used in quantified expression.</p>
-<p>A quantified expression declares and binds a variable, for which
-we need a named entity. For example in:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">forall</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">array</span> <span class="o">=&gt;</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="o">^</span>
-</pre></div>
-</div>
-<p>We represent this first x as a <a class="reference internal" href="#trlc.ast.Quantified_Variable" title="trlc.ast.Quantified_Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantified_Variable</span></code></a>, the
-second x will be an ordinary <a class="reference internal" href="#trlc.ast.Name_Reference" title="trlc.ast.Name_Reference"><code class="xref py py-class docutils literal notranslate"><span class="pre">Name_Reference</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Attribute typ<span class="colon">:</span></dt>
-<dd class="field-odd"><p>type of the variable (i.e. element type of the array)</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Type" title="trlc.ast.Type">Type</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="trlc.ast.Builtin_Function">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Builtin_Function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Builtin_Function" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trlc.ast.Entity" title="trlc.ast.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Entity</span></code></a></p>
@@ -188,180 +165,6 @@ just a single file, it can be spread over multiple files.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="trlc.ast.Check">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_anchor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">severity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Check" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Node" title="trlc.ast.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a></p>
-<p>User defined check</p>
-<p>This represent a single user-defined check inside a check block:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">checks</span> <span class="n">T</span> <span class="p">{</span>
-    <span class="n">a</span> <span class="o">/=</span> <span class="n">null</span> <span class="n">implies</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">,</span> <span class="n">warning</span> <span class="s2">&quot;potato&quot;</span><span class="p">,</span> <span class="n">a</span>
-    <span class="o">^^^^^^^^^^^^^^^^^^^^^^^</span><span class="mi">1</span> <span class="o">^</span><span class="mi">2</span>      <span class="o">^</span><span class="mi">3</span>        <span class="o">^</span><span class="mi">4</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Attribute n_record<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The record type this check applies to</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Record_Type" title="trlc.ast.Record_Type">Record_Type</a></p>
-</dd>
-<dt class="field-odd">Attribute n_expr<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The boolean expression for the check (see 1)</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a></p>
-</dd>
-<dt class="field-odd">Attribute n_anchor<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The (optional) record component where the message     should be issued (or None) (see 4)</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Record_Component" title="trlc.ast.Record_Component">Record_Component</a></p>
-</dd>
-<dt class="field-odd">Attribute severity<span class="colon">:</span></dt>
-<dd class="field-odd"><p>warning, error, or fatal (see 2; also if this is     not specified the default is ‘error’)</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">Attribute message<span class="colon">:</span></dt>
-<dd class="field-odd"><p>the user-supplied message (see 3)</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trlc.ast.Record_Component">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Record_Component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Record_Component" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Entity" title="trlc.ast.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Entity</span></code></a></p>
-<p>Component in a record.</p>
-<p>When declaring a record type, for each component an entity is
-declared:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span> <span class="n">T</span> <span class="p">{</span>
-   <span class="n">foo</span> <span class="s2">&quot;blah&quot;</span> <span class="n">optional</span> <span class="n">Boolean</span>
-   <span class="o">^</span><span class="mi">1</span>  <span class="o">^</span><span class="mi">2</span>     <span class="o">^</span><span class="mi">3</span>       <span class="o">^</span><span class="mi">4</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Attribute description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>optional text (see 2) for this field, or None</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">Attribute record<span class="colon">:</span></dt>
-<dd class="field-odd"><p>a link back to the containing record; for inherited     fields this refers back to the original base record type</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Record_Type" title="trlc.ast.Record_Type">Record_Type</a></p>
-</dd>
-<dt class="field-odd">Attribute typ<span class="colon">:</span></dt>
-<dd class="field-odd"><p>type of this component (see 4), but note it could also     be an anonymous array type</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Type" title="trlc.ast.Type">Type</a></p>
-</dd>
-<dt class="field-odd">Attribute optional<span class="colon">:</span></dt>
-<dd class="field-odd"><p>indicates if the component can be null or not (see 3)</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>bool</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trlc.ast.Enumeration_Literal_Spec">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Enumeration_Literal_Spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enum</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Enumeration_Literal_Spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Entity" title="trlc.ast.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Entity</span></code></a></p>
-<p>Declared literal in an enumeration declaration.</p>
-<p>Note that for literals mentioned later in record object
-declarations, we use <a class="reference internal" href="#trlc.ast.Enumeration_Literal" title="trlc.ast.Enumeration_Literal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enumeration_Literal</span></code></a>. Literal specs
-are used here:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">enum</span> <span class="n">ASIL</span> <span class="p">{</span>
-   <span class="n">QM</span> <span class="s2">&quot;not safety related&quot;</span>
-   <span class="o">^</span><span class="mi">1</span> <span class="o">^</span><span class="mi">2</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Attribute description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>the optional user-supplied description, or None</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">Attribute enum<span class="colon">:</span></dt>
-<dd class="field-odd"><p>a link back to the declaring enumeration</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Enumeration_Type" title="trlc.ast.Enumeration_Type">Enumeration_Type</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="trlc.ast.Record_Object">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Record_Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_typ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Record_Object" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Entity" title="trlc.ast.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Entity</span></code></a></p>
-<p>A declared instance of a record type.</p>
-<p>This is going to be the bulk of all entities created by TRLC:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">section</span> <span class="s2">&quot;Potato&quot;</span> <span class="p">{</span>
-        <span class="o">^</span><span class="mi">5</span>
-  <span class="n">Requirement</span> <span class="n">PotatoReq</span> <span class="p">{</span>
-  <span class="o">^</span><span class="mi">1</span>          <span class="o">^</span><span class="mi">2</span>
-      <span class="n">component1</span> <span class="o">=</span> <span class="mi">42</span>
-      <span class="o">^</span><span class="mi">3</span>           <span class="o">^</span><span class="mi">4</span>
-</pre></div>
-</div>
-<p>Note that the name of the object is provided by the name attribute
-of the <a class="reference internal" href="#trlc.ast.Entity" title="trlc.ast.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Entity</span></code></a> base class.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Attribute e_typ<span class="colon">:</span></dt>
-<dd class="field-odd"><p>the type of the object (see 1)</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Record_Type" title="trlc.ast.Record_Type">Record_Type</a></p>
-</dd>
-<dt class="field-odd">Attribute field<span class="colon">:</span></dt>
-<dd class="field-odd"><p>the specific values for all components (see 3 and 4)</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>dict[str] <a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a></p>
-</dd>
-<dt class="field-odd">Attribute section<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None or the section this record is contained in (see 5)</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Section" title="trlc.ast.Section">Section</a></p>
-</dd>
-</dl>
-<p>The actual type of expressions in the field attribute are limited
-to:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#trlc.ast.Literal" title="trlc.ast.Literal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Literal</span></code></a></p></li>
-<li><p><a class="reference internal" href="#trlc.ast.Array_Aggregate" title="trlc.ast.Array_Aggregate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Array_Aggregate</span></code></a></p></li>
-<li><p><a class="reference internal" href="#trlc.ast.Record_Reference" title="trlc.ast.Record_Reference"><code class="xref py py-class docutils literal notranslate"><span class="pre">Record_Reference</span></code></a></p></li>
-<li><p><a class="reference internal" href="#trlc.ast.Implicit_Null" title="trlc.ast.Implicit_Null"><code class="xref py py-class docutils literal notranslate"><span class="pre">Implicit_Null</span></code></a></p></li>
-</ul>
-<dl class="py method">
-<dt class="sig sig-object py" id="trlc.ast.Record_Object.to_python_dict">
-<span class="sig-name descname"><span class="pre">to_python_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Record_Object.to_python_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return an evaluated and simplified object for Python.</p>
-<p>For example it might provide:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;foo&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
- <span class="s2">&quot;bar&quot;</span> <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
- <span class="s2">&quot;baz&quot;</span> <span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">}</span>
-</pre></div>
-</div>
-<p>This is a function especially designed for the Python API. The
-name of the object itself is not in this returned dictionary.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="trlc.ast.Section">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Section" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trlc.ast.Entity" title="trlc.ast.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Entity</span></code></a></p>
@@ -384,6 +187,229 @@ objects together:</p>
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Typed_Entity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Typed_Entity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_typ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Typed_Entity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Entity" title="trlc.ast.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Entity</span></code></a></p>
+<p>Base class for entities with a type.</p>
+<p>A typed entity is a concrete object (with a name and TRLC type)
+for which we need to allocate memory. Examples of typed entities
+are record objects and components.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute n_typ<span class="colon">:</span></dt>
+<dd class="field-odd"><p>type of the entity</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Type" title="trlc.ast.Type">Type</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Quantified_Variable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Quantified_Variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_typ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Quantified_Variable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Typed_Entity" title="trlc.ast.Typed_Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Typed_Entity</span></code></a></p>
+<p>Variable used in quantified expression.</p>
+<p>A quantified expression declares and binds a variable, for which
+we need a named entity. For example in:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">forall</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">array</span> <span class="o">=&gt;</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="o">^</span>
+</pre></div>
+</div>
+<p>We represent this first x as a <a class="reference internal" href="#trlc.ast.Quantified_Variable" title="trlc.ast.Quantified_Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantified_Variable</span></code></a>, the
+second x will be an ordinary <a class="reference internal" href="#trlc.ast.Name_Reference" title="trlc.ast.Name_Reference"><code class="xref py py-class docutils literal notranslate"><span class="pre">Name_Reference</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute typ<span class="colon">:</span></dt>
+<dd class="field-odd"><p>type of the variable (i.e. element type of the array)</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Type" title="trlc.ast.Type">Type</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Composite_Component">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Composite_Component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">member_of</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_typ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Composite_Component" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Typed_Entity" title="trlc.ast.Typed_Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Typed_Entity</span></code></a></p>
+<p>Component in a record or tuple.</p>
+<p>When declaring a composite type, for each component an entity is
+declared:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span><span class="o">|</span><span class="nb">tuple</span> <span class="n">T</span> <span class="p">{</span>
+   <span class="n">foo</span> <span class="s2">&quot;blah&quot;</span> <span class="n">optional</span> <span class="n">Boolean</span>
+   <span class="o">^</span><span class="mi">1</span>  <span class="o">^</span><span class="mi">2</span>     <span class="o">^</span><span class="mi">3</span>       <span class="o">^</span><span class="mi">4</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute description<span class="colon">:</span></dt>
+<dd class="field-odd"><p>optional text (see 2) for this component, or None</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Attribute member_of<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a link back to the containing record or tuple;     for inherited fields this refers back to the original base record type</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Composite_Type" title="trlc.ast.Composite_Type">Composite_Type</a></p>
+</dd>
+<dt class="field-odd">Attribute optional<span class="colon">:</span></dt>
+<dd class="field-odd"><p>indicates if the component can be null or not (see 3)</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Enumeration_Literal_Spec">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Enumeration_Literal_Spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enum</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Enumeration_Literal_Spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Typed_Entity" title="trlc.ast.Typed_Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Typed_Entity</span></code></a></p>
+<p>Declared literal in an enumeration declaration.</p>
+<p>Note that for literals mentioned later in record object
+declarations, we use <a class="reference internal" href="#trlc.ast.Enumeration_Literal" title="trlc.ast.Enumeration_Literal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enumeration_Literal</span></code></a>. Literal specs
+are used here:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">enum</span> <span class="n">ASIL</span> <span class="p">{</span>
+   <span class="n">QM</span> <span class="s2">&quot;not safety related&quot;</span>
+   <span class="o">^</span><span class="mi">1</span> <span class="o">^</span><span class="mi">2</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute description<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the optional user-supplied description, or None</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Record_Object">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Record_Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_typ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Record_Object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Typed_Entity" title="trlc.ast.Typed_Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Typed_Entity</span></code></a></p>
+<p>A declared instance of a record type.</p>
+<p>This is going to be the bulk of all entities created by TRLC:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">section</span> <span class="s2">&quot;Potato&quot;</span> <span class="p">{</span>
+        <span class="o">^</span><span class="mi">5</span>
+  <span class="n">Requirement</span> <span class="n">PotatoReq</span> <span class="p">{</span>
+  <span class="o">^</span><span class="mi">1</span>          <span class="o">^</span><span class="mi">2</span>
+      <span class="n">component1</span> <span class="o">=</span> <span class="mi">42</span>
+      <span class="o">^</span><span class="mi">3</span>           <span class="o">^</span><span class="mi">4</span>
+</pre></div>
+</div>
+<p>Note that the name (see 2) and type (see 1) of the object is
+provided by the name attribute of the <a class="reference internal" href="#trlc.ast.Typed_Entity" title="trlc.ast.Typed_Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Typed_Entity</span></code></a> base
+class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute field<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the specific values for all components (see 3 and 4)</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, <a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a>]</p>
+</dd>
+<dt class="field-odd">Attribute section<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None or the section this record is contained in (see 5)</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Section" title="trlc.ast.Section">Section</a></p>
+</dd>
+</dl>
+<p>The actual type of expressions in the field attribute are limited
+to:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#trlc.ast.Literal" title="trlc.ast.Literal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Literal</span></code></a></p></li>
+<li><p><a class="reference internal" href="#trlc.ast.Unary_Expression" title="trlc.ast.Unary_Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">Unary_Expression</span></code></a></p></li>
+<li><p><a class="reference internal" href="#trlc.ast.Array_Aggregate" title="trlc.ast.Array_Aggregate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Array_Aggregate</span></code></a></p></li>
+<li><p><a class="reference internal" href="#trlc.ast.Tuple_Aggregate" title="trlc.ast.Tuple_Aggregate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple_Aggregate</span></code></a></p></li>
+<li><p><a class="reference internal" href="#trlc.ast.Record_Reference" title="trlc.ast.Record_Reference"><code class="xref py py-class docutils literal notranslate"><span class="pre">Record_Reference</span></code></a></p></li>
+<li><p><a class="reference internal" href="#trlc.ast.Implicit_Null" title="trlc.ast.Implicit_Null"><code class="xref py py-class docutils literal notranslate"><span class="pre">Implicit_Null</span></code></a></p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Record_Object.to_python_dict">
+<span class="sig-name descname"><span class="pre">to_python_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Record_Object.to_python_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an evaluated and simplified object for Python.</p>
+<p>For example it might provide:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;foo&quot;</span> <span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+ <span class="s2">&quot;bar&quot;</span> <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+ <span class="s2">&quot;baz&quot;</span> <span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>This is a function especially designed for the Python API. The
+name of the object itself is not in this returned dictionary.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="miscellaneous">
+<h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Check">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_anchor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">severity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Node" title="trlc.ast.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a></p>
+<p>User defined check</p>
+<p>This represent a single user-defined check inside a check block:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">checks</span> <span class="n">T</span> <span class="p">{</span>
+    <span class="n">a</span> <span class="o">/=</span> <span class="n">null</span> <span class="n">implies</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">,</span> <span class="n">warning</span> <span class="s2">&quot;potato&quot;</span><span class="p">,</span> <span class="n">a</span>
+    <span class="o">^^^^^^^^^^^^^^^^^^^^^^^</span><span class="mi">1</span> <span class="o">^</span><span class="mi">2</span>      <span class="o">^</span><span class="mi">3</span>        <span class="o">^</span><span class="mi">4</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute n_type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The tuple/record type this check applies to</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Composite_Type" title="trlc.ast.Composite_Type">Composite_Type</a></p>
+</dd>
+<dt class="field-odd">Attribute n_expr<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The boolean expression for the check (see 1)</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a></p>
+</dd>
+<dt class="field-odd">Attribute n_anchor<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The (optional) record component where the message     should be issued (or None) (see 4)</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Composite_Component" title="trlc.ast.Composite_Component">Composite_Component</a></p>
+</dd>
+<dt class="field-odd">Attribute severity<span class="colon">:</span></dt>
+<dd class="field-odd"><p>warning, error, or fatal (see 2; also if this is     not specified the default is ‘error’)</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Attribute message<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the user-supplied message (see 3)</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Separator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Separator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Separator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Node" title="trlc.ast.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a></p>
+<p>User-defined syntactic separator</p>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">separator</span> <span class="n">x</span>
+          <span class="o">^</span><span class="mi">1</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute token<span class="colon">:</span></dt>
+<dd class="field-odd"><p>token used to separate fields of the tuple</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Token</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="types">
 <h2>Types<a class="headerlink" href="#types" title="Permalink to this heading">¶</a></h2>
@@ -392,6 +418,35 @@ objects together:</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trlc.ast.Entity" title="trlc.ast.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Entity</span></code></a></p>
 <p>Abstract base class for all types.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Concrete_Type">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Concrete_Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Concrete_Type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Type" title="trlc.ast.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a></p>
+<p>Abstract base class for all non-anonymous types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute n_package<span class="colon">:</span></dt>
+<dd class="field-odd"><p>package where this type was declared</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Package" title="trlc.ast.Package">Package</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Concrete_Type.fully_qualified_name">
+<span class="sig-name descname"><span class="pre">fully_qualified_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Concrete_Type.fully_qualified_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the FQN for this type (i.e. PACKAGE.NAME)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the type’s full name</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -470,15 +525,47 @@ an array specifier:</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Composite_Type">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Composite_Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inherited_symbols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Composite_Type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Concrete_Type" title="trlc.ast.Concrete_Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Concrete_Type</span></code></a></p>
+<dl class="simple">
+<dt>Abstract base for record and tuple types, as they share some</dt><dd><p>functionality.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute components<span class="colon">:</span></dt>
+<dd class="field-odd"><p>type components (including inherited if applicable)</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Symbol_Table" title="trlc.ast.Symbol_Table">Symbol_Table</a>[<a class="reference internal" href="#trlc.ast.Composite_Component" title="trlc.ast.Composite_Component">Composite_Component</a>]</p>
+</dd>
+<dt class="field-odd">Attribute description<span class="colon">:</span></dt>
+<dd class="field-odd"><p>user-supplied description of the type or None</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+<dt class="field-odd">Attribute checks<span class="colon">:</span></dt>
+<dd class="field-odd"><p>used-defined checks for this type (excluding       inherited checks)</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<a class="reference internal" href="#trlc.ast.Check" title="trlc.ast.Check">Check</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="trlc.ast.Record_Type">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Record_Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Record_Type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Type" title="trlc.ast.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Record_Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_abstract</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Record_Type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Composite_Type" title="trlc.ast.Composite_Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Composite_Type</span></code></a></p>
 <p>A user-defined record type.</p>
 <p>In this example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span> <span class="n">T</span>  <span class="s2">&quot;optional description of T&quot;</span> <span class="n">extends</span> <span class="n">Root_T</span> <span class="p">{</span>
-     <span class="o">^</span><span class="mi">1</span> <span class="o">^</span><span class="mi">2</span>                         <span class="o">^</span><span class="mi">3</span>
+     <span class="o">^</span><span class="mi">1</span> <span class="o">^</span><span class="mi">2</span>                                  <span class="o">^</span><span class="mi">3</span>
 </pre></div>
 </div>
+<p>Note that (1) is part of the <a class="reference internal" href="#trlc.ast.Entity" title="trlc.ast.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Entity</span></code></a> base, and (2) is part
+of the <a class="reference internal" href="#trlc.ast.Composite_Type" title="trlc.ast.Composite_Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Composite_Type</span></code></a> base.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attribute parent<span class="colon">:</span></dt>
 <dd class="field-odd"><p>root type or None, indicated by (3) above</p>
@@ -486,23 +573,23 @@ an array specifier:</p>
 <dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Record_Type" title="trlc.ast.Record_Type">Record_Type</a></p>
 </dd>
-<dt class="field-odd">Attribute components<span class="colon">:</span></dt>
-<dd class="field-odd"><p>record components (including inherited)</p>
+<dt class="field-odd">Attribute frozen<span class="colon">:</span></dt>
+<dd class="field-odd"><p>mapping of frozen components</p>
 </dd>
 <dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Symbol_Table" title="trlc.ast.Symbol_Table">Symbol_Table</a>[<a class="reference internal" href="#trlc.ast.Record_Component" title="trlc.ast.Record_Component">Record_Component</a>]</p>
+<dd class="field-even"><p>dict[str, <a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a>]</p>
 </dd>
-<dt class="field-odd">Attribute description<span class="colon">:</span></dt>
-<dd class="field-odd"><p>user-supplied description of the record or     None, see (2)</p>
-</dd>
-<dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">Attribute checks<span class="colon">:</span></dt>
-<dd class="field-odd"><p>used-defined checks for this record (excluding     inherited checks)</p>
+<dt class="field-odd">Attribute is_final<span class="colon">:</span></dt>
+<dd class="field-odd"><p>type is final (i.e. no new components may be declared)</p>
 </dd>
 <dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p>list[<a class="reference internal" href="#trlc.ast.Check" title="trlc.ast.Check">Check</a>]</p>
+<dd class="field-even"><p>bool</p>
+</dd>
+<dt class="field-odd">Attribute is_abstract<span class="colon">:</span></dt>
+<dd class="field-odd"><p>type is abstract</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -511,7 +598,37 @@ an array specifier:</p>
 <dd><p>Convenience function to get a list of all components.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[<a class="reference internal" href="#trlc.ast.Record_Component" title="trlc.ast.Record_Component">Record_Component</a>]</p>
+<dd class="field-odd"><p>list[<a class="reference internal" href="#trlc.ast.Composite_Component" title="trlc.ast.Composite_Component">Composite_Component</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Record_Type.get_freezing_expression">
+<span class="sig-name descname"><span class="pre">get_freezing_expression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Record_Type.get_freezing_expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the frozen value for a frozen component</p>
+<p>It is an internal compiler error to call this method with a
+component that his not frozen.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n_component</strong> (<a class="reference internal" href="#trlc.ast.Composite_Component" title="trlc.ast.Composite_Component"><em>Composite_Component</em></a>) – a frozen component of this record type           (or any of its parents)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Record_Type.is_frozen">
+<span class="sig-name descname"><span class="pre">is_frozen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Record_Type.is_frozen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the given component is frozen.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n_component</strong> (<a class="reference internal" href="#trlc.ast.Composite_Component" title="trlc.ast.Composite_Component"><em>Composite_Component</em></a>) – a composite component of this record type           (or any of its parents)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>
@@ -536,9 +653,51 @@ an array specifier:</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Tuple_Type">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Tuple_Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Tuple_Type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Composite_Type" title="trlc.ast.Composite_Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Composite_Type</span></code></a></p>
+<p>A user-defined tuple type.</p>
+<p>In this example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">tuple</span> <span class="n">T</span>  <span class="s2">&quot;optional description of T&quot;</span> <span class="p">{</span>
+      <span class="o">^</span><span class="mi">1</span> <span class="o">^</span><span class="mi">2</span>
+</pre></div>
+</div>
+<p>Note that (1) is part of the <a class="reference internal" href="#trlc.ast.Entity" title="trlc.ast.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Entity</span></code></a> base, and (2) is part
+of the <a class="reference internal" href="#trlc.ast.Composite_Type" title="trlc.ast.Composite_Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Composite_Type</span></code></a> base.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute separators<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of syntactic separators.</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<a class="reference internal" href="#trlc.ast.Separator" title="trlc.ast.Separator">Separator</a>]</p>
+</dd>
+</dl>
+<p>Note the list of separators will either be empty, or there will be
+precisely one less separator than components.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Tuple_Type.has_separators">
+<span class="sig-name descname"><span class="pre">has_separators</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Tuple_Type.has_separators" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if a tuple type requires separators</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Tuple_Type.iter_separators">
+<span class="sig-name descname"><span class="pre">iter_separators</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Tuple_Type.iter_separators" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over all separators</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Tuple_Type.iter_sequence">
+<span class="sig-name descname"><span class="pre">iter_sequence</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Tuple_Type.iter_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over all components and separators in syntactic order</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="trlc.ast.Enumeration_Type">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Enumeration_Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Enumeration_Type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Type" title="trlc.ast.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Enumeration_Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Enumeration_Type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Concrete_Type" title="trlc.ast.Concrete_Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Concrete_Type</span></code></a></p>
 <p>User-defined enumeration types.</p>
 <p>For example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">enum</span> <span class="n">T</span>  <span class="s2">&quot;potato&quot;</span> <span class="p">{</span>
@@ -589,7 +748,7 @@ quantified variables) to expressions.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mh</strong> (<a class="reference internal" href="errors.html#trlc.errors.Message_Handler" title="trlc.errors.Message_Handler"><em>Message_Handler</em></a>) – the message handler to use</p></li>
-<li><p><strong>context</strong> (<em>dict</em><em>[</em><em>str</em><em>] </em><a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression"><em>Expression</em></a>) – name mapping or None (for a static context)</p></li>
+<li><p><strong>context</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression"><em>Expression</em></a><em>]</em>) – name mapping or None (for a static context)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -608,11 +767,12 @@ quantified variables) to expressions.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trlc.ast.Implicit_Null">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Implicit_Null</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record_component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Implicit_Null" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Implicit_Null</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">composite_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">composite_component</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Implicit_Null" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">Expression</span></code></a></p>
 <p>Synthesised null values</p>
-<p>When a record object is declared and an optional component is not
-specified, we synthesise an implicit null expression for this.</p>
+<p>When a record object or tuple aggregate is declared and an
+optional component or field is not specified, we synthesise an
+implicit null expression for this.</p>
 <p>For example given this TRLC type:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">type</span> <span class="n">T</span> <span class="p">{</span>
    <span class="n">x</span> <span class="n">optional</span> <span class="n">Integer</span>
@@ -655,6 +815,34 @@ limited:</p>
 </dd>
 <dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>list[<a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Tuple_Aggregate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Tuple_Aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Tuple_Aggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">Expression</span></code></a></p>
+<p>Instances of a tuple</p>
+<p>This is created when assigning to a tuple components. There are
+two forms, the ordinary form:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">coordinate</span> <span class="o">=</span> <span class="p">(</span><span class="mf">12.3</span><span class="p">,</span> <span class="mf">40.0</span><span class="p">)</span>
+             <span class="o">^^^^^^^^^^^^</span>
+</pre></div>
+</div>
+<p>And the separator form:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">item</span> <span class="o">=</span> <span class="mi">12345</span><span class="o">@</span><span class="mi">42</span>
+       <span class="o">^^^^^^^^</span>
+</pre></div>
+</div>
+<p>In terms of AST there is no difference, as the separator is only
+syntactic sugar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute value<span class="colon">:</span></dt>
+<dd class="field-odd"><p>contents of the tuple</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict[str, <a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -706,7 +894,7 @@ in this AST node.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Name_Reference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Name_Reference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">Expression</span></code></a></p>
 <p>Reference to a name</p>
-<p>Name reference to either a <a class="reference internal" href="#trlc.ast.Record_Component" title="trlc.ast.Record_Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Record_Component</span></code></a> or a
+<p>Name reference to either a <a class="reference internal" href="#trlc.ast.Composite_Component" title="trlc.ast.Composite_Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Composite_Component</span></code></a> or a
 <a class="reference internal" href="#trlc.ast.Quantified_Variable" title="trlc.ast.Quantified_Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantified_Variable</span></code></a>. The actual value of course depends
 on the context. See <a class="reference internal" href="#trlc.ast.Expression.evaluate" title="trlc.ast.Expression.evaluate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Expression.evaluate()</span></code></a>.</p>
 <p>For example:</p>
@@ -715,14 +903,14 @@ on the context. See <a class="reference internal" href="#trlc.ast.Expression.eva
 </pre></div>
 </div>
 <p>Both indicated parts are a <a class="reference internal" href="#trlc.ast.Name_Reference" title="trlc.ast.Name_Reference"><code class="xref py py-class docutils literal notranslate"><span class="pre">Name_Reference</span></code></a>, the first one
-refers to a <a class="reference internal" href="#trlc.ast.Record_Component" title="trlc.ast.Record_Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Record_Component</span></code></a>, and the second refers to a
+refers to a <a class="reference internal" href="#trlc.ast.Composite_Component" title="trlc.ast.Composite_Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Composite_Component</span></code></a>, and the second refers to a
 <a class="reference internal" href="#trlc.ast.Quantified_Variable" title="trlc.ast.Quantified_Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantified_Variable</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attribute entity<span class="colon">:</span></dt>
 <dd class="field-odd"><p>the entity named here</p>
 </dd>
 <dt class="field-even">Type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Record_Component" title="trlc.ast.Record_Component">Record_Component</a>, <a class="reference internal" href="#trlc.ast.Quantified_Variable" title="trlc.ast.Quantified_Variable">Quantified_Variable</a></p>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Composite_Component" title="trlc.ast.Composite_Component">Composite_Component</a>, <a class="reference internal" href="#trlc.ast.Quantified_Variable" title="trlc.ast.Quantified_Variable">Quantified_Variable</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -811,6 +999,32 @@ rationals and strings.</p>
 </dd>
 <dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Field_Access_Expression">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Field_Access_Expression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_field</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Field_Access_Expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">Expression</span></code></a></p>
+<p>Tuple field access</p>
+<p>For example in:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">foo</span><span class="o">.</span><span class="n">bar</span>
+<span class="o">^</span><span class="mi">1</span>  <span class="o">^</span><span class="mi">2</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute n_prefix<span class="colon">:</span></dt>
+<dd class="field-odd"><p>expression with tuple type (see 1)</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a></p>
+</dd>
+<dt class="field-odd">Attribute n_field<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a tuple field to dereference (see 2)</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Composite_Component" title="trlc.ast.Composite_Component">Composite_Component</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1104,7 +1318,7 @@ specific mention of an enumeration member in an expression:</p>
 (i.e. <code class="docutils literal notranslate"><span class="pre">POTATO</span></code> here) you can get the name of the literal spec
 itself: <code class="docutils literal notranslate"><span class="pre">enum_lit.value.name</span></code>; and to get the name of the
 enumeration (i.e. <code class="docutils literal notranslate"><span class="pre">my_enum</span></code> here) you can use
-<code class="docutils literal notranslate"><span class="pre">enum_lit.value.enum.name</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">enum_lit.value.n_typ.name</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attribute value<span class="colon">:</span></dt>
 <dd class="field-odd"><p>enumeration value</p>
@@ -1291,18 +1505,24 @@ Package, then the following error is issued:</p>
 </li>
 <li><a class="reference internal" href="#entities">Entities</a><ul>
 <li><a class="reference internal" href="#trlc.ast.Entity"><code class="docutils literal notranslate"><span class="pre">Entity</span></code></a></li>
-<li><a class="reference internal" href="#trlc.ast.Quantified_Variable"><code class="docutils literal notranslate"><span class="pre">Quantified_Variable</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Builtin_Function"><code class="docutils literal notranslate"><span class="pre">Builtin_Function</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Package"><code class="docutils literal notranslate"><span class="pre">Package</span></code></a></li>
-<li><a class="reference internal" href="#trlc.ast.Check"><code class="docutils literal notranslate"><span class="pre">Check</span></code></a></li>
-<li><a class="reference internal" href="#trlc.ast.Record_Component"><code class="docutils literal notranslate"><span class="pre">Record_Component</span></code></a></li>
+<li><a class="reference internal" href="#trlc.ast.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a></li>
+<li><a class="reference internal" href="#trlc.ast.Typed_Entity"><code class="docutils literal notranslate"><span class="pre">Typed_Entity</span></code></a></li>
+<li><a class="reference internal" href="#trlc.ast.Quantified_Variable"><code class="docutils literal notranslate"><span class="pre">Quantified_Variable</span></code></a></li>
+<li><a class="reference internal" href="#trlc.ast.Composite_Component"><code class="docutils literal notranslate"><span class="pre">Composite_Component</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Enumeration_Literal_Spec"><code class="docutils literal notranslate"><span class="pre">Enumeration_Literal_Spec</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Record_Object"><code class="docutils literal notranslate"><span class="pre">Record_Object</span></code></a></li>
-<li><a class="reference internal" href="#trlc.ast.Section"><code class="docutils literal notranslate"><span class="pre">Section</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#miscellaneous">Miscellaneous</a><ul>
+<li><a class="reference internal" href="#trlc.ast.Check"><code class="docutils literal notranslate"><span class="pre">Check</span></code></a></li>
+<li><a class="reference internal" href="#trlc.ast.Separator"><code class="docutils literal notranslate"><span class="pre">Separator</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#types">Types</a><ul>
 <li><a class="reference internal" href="#trlc.ast.Type"><code class="docutils literal notranslate"><span class="pre">Type</span></code></a></li>
+<li><a class="reference internal" href="#trlc.ast.Concrete_Type"><code class="docutils literal notranslate"><span class="pre">Concrete_Type</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Builtin_Type"><code class="docutils literal notranslate"><span class="pre">Builtin_Type</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Array_Type"><code class="docutils literal notranslate"><span class="pre">Array_Type</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Builtin_Numeric_Type"><code class="docutils literal notranslate"><span class="pre">Builtin_Numeric_Type</span></code></a></li>
@@ -1310,7 +1530,9 @@ Package, then the following error is issued:</p>
 <li><a class="reference internal" href="#trlc.ast.Builtin_Decimal"><code class="docutils literal notranslate"><span class="pre">Builtin_Decimal</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Builtin_String"><code class="docutils literal notranslate"><span class="pre">Builtin_String</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Builtin_Boolean"><code class="docutils literal notranslate"><span class="pre">Builtin_Boolean</span></code></a></li>
+<li><a class="reference internal" href="#trlc.ast.Composite_Type"><code class="docutils literal notranslate"><span class="pre">Composite_Type</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Record_Type"><code class="docutils literal notranslate"><span class="pre">Record_Type</span></code></a></li>
+<li><a class="reference internal" href="#trlc.ast.Tuple_Type"><code class="docutils literal notranslate"><span class="pre">Tuple_Type</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Enumeration_Type"><code class="docutils literal notranslate"><span class="pre">Enumeration_Type</span></code></a></li>
 </ul>
 </li>
@@ -1318,10 +1540,12 @@ Package, then the following error is issued:</p>
 <li><a class="reference internal" href="#trlc.ast.Expression"><code class="docutils literal notranslate"><span class="pre">Expression</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Implicit_Null"><code class="docutils literal notranslate"><span class="pre">Implicit_Null</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Array_Aggregate"><code class="docutils literal notranslate"><span class="pre">Array_Aggregate</span></code></a></li>
+<li><a class="reference internal" href="#trlc.ast.Tuple_Aggregate"><code class="docutils literal notranslate"><span class="pre">Tuple_Aggregate</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Record_Reference"><code class="docutils literal notranslate"><span class="pre">Record_Reference</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Name_Reference"><code class="docutils literal notranslate"><span class="pre">Name_Reference</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Unary_Expression"><code class="docutils literal notranslate"><span class="pre">Unary_Expression</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Binary_Expression"><code class="docutils literal notranslate"><span class="pre">Binary_Expression</span></code></a></li>
+<li><a class="reference internal" href="#trlc.ast.Field_Access_Expression"><code class="docutils literal notranslate"><span class="pre">Field_Access_Expression</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Range_Test"><code class="docutils literal notranslate"><span class="pre">Range_Test</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Action"><code class="docutils literal notranslate"><span class="pre">Action</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Conditional_Expression"><code class="docutils literal notranslate"><span class="pre">Conditional_Expression</span></code></a></li>
@@ -1374,7 +1598,7 @@ Package, then the following error is issued:</p>
         <li class="right" >
           <a href="errors.html" title="Error handling and reporting"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.0.13 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.1.1 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">AST</a></li> 
       </ul>
     </div>
