@@ -384,7 +384,7 @@ section "Metamodel (RLS) files" {
   }
 }
 
-section "Described Names" {
+section "Described names" {
 
   Grammar Described_Names {
     bnf = '''
@@ -1875,7 +1875,7 @@ section "Record object declarations" {
 
 }
 
-section "Markup Strings" {
+section "Markup strings" {
 
   Text Markup_String_Format {
     text = '''A `Markup_String` allows you to inline references to TRLC
