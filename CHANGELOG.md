@@ -13,7 +13,7 @@ quantifying over all references.)
 
 ## Changelog
 
-### 1.1.1-dev
+### 1.1.1
 
 * [LRM, TRLC] New (backwards-incompatible) keywords: `tuple`,
   `separator`, `freeze`, `abstract`, and `final`. New punctuation:
