@@ -14,7 +14,7 @@ quantifying over all references.)
 ## Changelog
 
 
-### 1.1.2-dev
+### 1.1.2
 
 * [LRM, TRLC] Also allow `:` and `;` as a tuple field separators.
 
