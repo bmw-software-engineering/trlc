@@ -527,7 +527,7 @@ class Decimal_Literal(Literal):
         return Value(self.location, self.value, self.typ)
 
     def to_python_object(self):
-        return self.value
+        return float(self.value)
 
 
 class String_Literal(Literal):
@@ -2309,7 +2309,9 @@ class Separator(Node):
     def __init__(self, token):
         super().__init__(token.location)
         assert isinstance(token, Token) and token.kind in ("IDENTIFIER",
-                                                           "AT")
+                                                           "AT",
+                                                           "COLON",
+                                                           "SEMICOLON")
         self.token = token
 
     def dump(self, indent=0):  # pragma: no cover

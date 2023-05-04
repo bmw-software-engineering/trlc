@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>TRLC Language Reference Manual, Version 2.6</title>
+<title>TRLC Language Reference Manual, Version 2.7</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -69,7 +69,7 @@ span.TRLC_STRING {
 </style>
 </head>
 <body>
-<h1>TRLC Language Reference Manual, Version 2.6</h1>
+<h1>TRLC Language Reference Manual, Version 2.7</h1>
 <div>
 Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.3 or any later version published by the Free SoftwareFoundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 A copy of the license is included in the section entitled "Appendix A: GNU Free Documentation License".
@@ -249,7 +249,7 @@ Single character delimiters:
   <li>Punctuation: <code>,</code> <code>.</code> <code>=</code></li>
   <li>Operators: <code>*</code> <code>/</code> <code>%</code> <code>+</code> <code>-</code></li>
   <li>Boolean operators: <code>&lt;</code> <code>&gt;</code></li>
-  <li>Symbols: <code>@</code></li>
+  <li>Symbols: <code>@</code> <code>:</code> <code>;</code></li>
 </ul>
 </div>
 <div>
@@ -498,10 +498,12 @@ It is not an error to have an enumeration literal with the same name as a record
 
 <span id="bnf-field_declaration">field_declaration</span> ::= <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> [ 'optional' ] <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_FIELD_TYPE</i>
 
-<span id="bnf-separator_declaration">separator_declaration</span> ::= 'separator' <span class="tooltip"><a href="#bnf-separator_symbol">separator_symbol</a><span class="tooltiptext">IDENTIFIER | @</span></span>
+<span id="bnf-separator_declaration">separator_declaration</span> ::= 'separator' <span class="tooltip"><a href="#bnf-separator_symbol">separator_symbol</a><span class="tooltiptext">IDENTIFIER | @ | : | ;</span></span>
 
 <span id="bnf-separator_symbol">separator_symbol</span> ::= <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span>
                    | '@'
+                   | ':'
+                   | ';'
 </pre>
 </div>
 <h4>Static Semantics</h4>
@@ -532,7 +534,17 @@ It is an error to declare two fields with the same name in the same tuple. <i>(N
    <span class="TRLC_IDENTIFIER">item</span>             <span class="TRLC_IDENTIFIER">Integer</span>
    <span class="TRLC_KEYWORD">separator</span> <span class="TRLC_AT">@</span>
    <span class="TRLC_IDENTIFIER">version</span> <span class="TRLC_KEYWORD">optional</span> <span class="TRLC_IDENTIFIER">Integer</span>
-<span class="TRLC_C_KET">}</span></pre>
+<span class="TRLC_C_KET">}</span>
+<span class="TRLC_COMMENT">// allows you to write 12345@42</span>
+
+<span class="TRLC_KEYWORD">tuple</span> <span class="TRLC_IDENTIFIER">Doors_Item</span> <span class="TRLC_C_BRA">{</span>
+   <span class="TRLC_IDENTIFIER">module_id</span> <span class="TRLC_IDENTIFIER">Integer</span>
+   <span class="TRLC_KEYWORD">separator</span> <span class="TRLC_COLON">:</span>
+   <span class="TRLC_IDENTIFIER">item_id</span>   <span class="TRLC_IDENTIFIER">Integer</span>
+   <span class="TRLC_KEYWORD">separator</span> <span class="TRLC_AT">@</span>
+   <span class="TRLC_IDENTIFIER">baseline</span> <span class="TRLC_KEYWORD">optional</span> <span class="TRLC_IDENTIFIER">Decimal</span>
+<span class="TRLC_C_KET">}</span>
+<span class="TRLC_COMMENT">// allows you to write 42:666@1.0</span></pre>
 </div>
 <h3 id="sec:fff14f02c0a590def7283b89960c98af94922c47">Record declarations</h3>
 <div class='code'>
@@ -1114,7 +1126,7 @@ A section has no semantic impact, and no impact on name resolution. Section name
         | <a href="#bnf-tuple_aggregate">tuple_aggregate</a>
 
 <span id="bnf-tuple_aggregate">tuple_aggregate</span> ::= '(' <a href="#bnf-value">value</a> { ',' <a href="#bnf-value">value</a> } ')'
-                  | <a href="#bnf-value">value</a> { <span class="tooltip"><a href="#bnf-separator_symbol">separator_symbol</a><span class="tooltiptext">IDENTIFIER | @</span></span> <a href="#bnf-value">value</a> }
+                  | <a href="#bnf-value">value</a> { <span class="tooltip"><a href="#bnf-separator_symbol">separator_symbol</a><span class="tooltiptext">IDENTIFIER | @ | : | ;</span></span> <a href="#bnf-value">value</a> }
 </pre>
 </div>
 <h3>Static Semantics</h3>

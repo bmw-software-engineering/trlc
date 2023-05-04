@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 2.6 of [TRLC language reference
+Up to date with version 2.7 of [TRLC language reference
 manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
@@ -16,6 +16,7 @@ quantifying over all references.)
 
 ### 1.1.2-dev
 
+* [LRM, TRLC] Also allow `:` and `;` as a tuple field separators.
 
 ### 1.1.1
 

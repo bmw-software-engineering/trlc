@@ -409,7 +409,10 @@ class Parser(Parser_Base):
                     self.mh.error(self.ct.location,
                                   "either all fields must be separated,"
                                   " or none")
-                if self.peek("IDENTIFIER") or self.peek("AT"):
+                if self.peek("IDENTIFIER") or \
+                   self.peek("AT") or \
+                   self.peek("COLON") or \
+                   self.peek("SEMICOLON"):
                     self.advance()
                     n_tuple.add_separator(ast.Separator(self.ct))
             else:
@@ -1353,9 +1356,9 @@ class Parser(Parser_Base):
                     rv.assign(n_item.name,
                               self.parse_value(n_item.n_typ))
 
-                elif n_item.token.kind == "AT":
-                    if self.peek("AT"):
-                        self.match("AT")
+                elif n_item.token.kind in ("AT", "COLON", "SEMICOLON"):
+                    if self.peek(n_item.token.kind):
+                        self.match(n_item.token.kind)
                     else:
                         next_is_optional = True
 

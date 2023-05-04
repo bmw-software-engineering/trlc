@@ -2,7 +2,7 @@ package LRM
 
 Versioning Version {
   major = 2
-  minor = 6
+  minor = 7
 }
 
 GFDL_License License {
@@ -132,7 +132,7 @@ section "Lexing" {
         "Punctuation: `,` `.` `=`",
         "Operators: `*` `/` `%` `+` `-`",
         "Boolean operators: `<` `>`",
-        "Symbols: `@`",
+        "Symbols: `@` `:` `;`",
       ]
     }
 
@@ -524,6 +524,8 @@ section "Type declarations" {
 
       separator_symbol ::= IDENTIFIER
                          | '@'
+                         | ':'
+                         | ';'
     '''
     }
 
@@ -583,6 +585,16 @@ section "Type declarations" {
          separator @
          version optional Integer
       }
+      // allows you to write 12345@42
+
+      tuple Doors_Item {
+         module_id Integer
+         separator :
+         item_id   Integer
+         separator @
+         baseline optional Decimal
+      }
+      // allows you to write 42:666@1.0
       '''
     }
 

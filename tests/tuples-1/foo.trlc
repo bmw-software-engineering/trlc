@@ -11,3 +11,21 @@ Requirement Bad_Potato {
   dim         = (42, 666)
   cb_link     = 12345      // Equivalent to 12345@null
 }
+
+Migrated_Requirement Good_Kitten {
+  description = "This is a nice potato."
+  dim         = (42, 666)
+  cb_link     = 12345@42
+  doors_id    = 500: 12345@6.1
+}
+
+Potato_Requirement Wibble {
+  description = "This is a nice potato."
+  dim         = (42, 666)
+  cb_link     = 12345@42
+  relations   = [
+    Good_Potato,
+    Bad_Potato; "this is dodgy"
+    Good_Kitten; "this is fine"
+  ]
+}

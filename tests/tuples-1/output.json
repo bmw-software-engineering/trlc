@@ -12,6 +12,22 @@ cb_link     = 12345      // Equivalent to 12345@null
       "y": 666
     }
   },
+  "Good_Kitten": {
+    "cb_link": {
+      "item": 12345,
+      "version": 42
+    },
+    "description": "This is a nice potato.",
+    "dim": {
+      "x": 42,
+      "y": 666
+    },
+    "doors_id": {
+      "baseline": 6.1,
+      "item_id": 12345,
+      "module_id": 500
+    }
+  },
   "Good_Potato": {
     "cb_link": {
       "item": 12345,
@@ -22,5 +38,30 @@ cb_link     = 12345      // Equivalent to 12345@null
       "x": 42,
       "y": 666
     }
+  },
+  "Wibble": {
+    "cb_link": {
+      "item": 12345,
+      "version": 42
+    },
+    "description": "This is a nice potato.",
+    "dim": {
+      "x": 42,
+      "y": 666
+    },
+    "relations": [
+      {
+        "requirement": "Good_Potato",
+        "tag": null
+      },
+      {
+        "requirement": "Bad_Potato",
+        "tag": "this is dodgy"
+      },
+      {
+        "requirement": "Good_Kitten",
+        "tag": "this is fine"
+      }
+    ]
   }
 }

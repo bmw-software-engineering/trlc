@@ -31,3 +31,31 @@ checks Requirement {
   cb_link.item >= 10000, warning "CB Item is suspiciously low", cb_link
   cb_link.version != null, warning "Please link to a specific version", cb_link
 }
+
+tuple Doors_Item {
+  module_id Integer
+  separator :
+  item_id   Integer
+  separator @
+  baseline  optional Decimal
+}
+
+checks Doors_Item {
+  module_id >= 1, error "Doors module must be positive", module_id
+  item_id   >= 1, error "Doors item must be positive", item_id
+  baseline  >= 1.0, error "Baseline must be at least 1.0", baseline
+}
+
+type Migrated_Requirement extends Requirement {
+  doors_id Doors_Item
+}
+
+tuple Tagged_Requirement {
+  requirement Requirement
+  separator ;
+  tag         optional String
+}
+
+type Potato_Requirement extends Requirement {
+  relations optional Tagged_Requirement [1 .. *]
+}
