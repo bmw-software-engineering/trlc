@@ -14,7 +14,7 @@ quantifying over all references.)
 ## Changelog
 
 
-### 1.1.3-dev
+### 1.1.3
 
 * [TRLC] New API function `fully_qualified_name` for `Record_Object`
   which can be used to get the `package.name` name for any record.
