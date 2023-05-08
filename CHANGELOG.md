@@ -16,7 +16,11 @@ quantifying over all references.)
 
 ### 1.1.3-dev
 
+* [TRLC] New API function `fully_qualified_name` for `Record_Object`
+  which can be used to get the `package.name` name for any record.
 
+* [TRLC] The API function `to_python_object` now emits fully qualified
+  names for record references.
 
 ### 1.1.2
 

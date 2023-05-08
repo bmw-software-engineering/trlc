@@ -863,7 +863,7 @@ class Record_Reference(Expression):
                                                 self.target.n_typ.name))
 
     def to_python_object(self):
-        return self.name
+        return self.target.fully_qualified_name()
 
 
 class Name_Reference(Expression):
@@ -2395,6 +2395,9 @@ class Record_Object(Typed_Entity):
     :attribute section: None or the section this record is contained in (see 5)
     :type: Section
 
+    :attribute n_package: The package in which this record is declared in
+    :type: Section
+
     The actual type of expressions in the field attribute are limited
     to:
 
@@ -2406,13 +2409,23 @@ class Record_Object(Typed_Entity):
     * :class:`Implicit_Null`
 
     """
-    def __init__(self, name, location, n_typ, section):
+    def __init__(self, name, location, n_typ, section, n_package):
         assert isinstance(n_typ, Record_Type)
         assert isinstance(section, Section) or section is None
+        assert isinstance(n_package, Package)
         super().__init__(name, location, n_typ)
-        self.field   = {name: None
-                        for name in self.n_typ.components.all_names()}
-        self.section = section
+        self.field     = {name: None
+                          for name in self.n_typ.components.all_names()}
+        self.section   = section
+        self.n_package = n_package
+
+    def fully_qualified_name(self):
+        """Return the FQN for this type (i.e. PACKAGE.NAME)
+
+        :returns: the object's full name
+        :rtype: str
+        """
+        return self.n_package.name + "." + self.name
 
     def to_python_dict(self):
         """Return an evaluated and simplified object for Python.

@@ -51,15 +51,15 @@ cb_link     = 12345      // Equivalent to 12345@null
     },
     "relations": [
       {
-        "requirement": "Good_Potato",
+        "requirement": "Example.Good_Potato",
         "tag": null
       },
       {
-        "requirement": "Bad_Potato",
+        "requirement": "Example.Bad_Potato",
         "tag": "this is dodgy"
       },
       {
-        "requirement": "Good_Kitten",
+        "requirement": "Example.Good_Kitten",
         "tag": "this is fine"
       }
     ]

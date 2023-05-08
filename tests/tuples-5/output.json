@@ -4,19 +4,19 @@ t = potato@-42
   "potato": {},
   "test1": {
     "t": {
-      "f1": "potato",
+      "f1": "Foo.potato",
       "f2": null
     }
   },
   "test2": {
     "t": {
-      "f1": "potato",
+      "f1": "Foo.potato",
       "f2": 42
     }
   },
   "test3": {
     "t": {
-      "f1": "potato",
+      "f1": "Foo.potato",
       "f2": -42
     }
   }

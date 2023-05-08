@@ -1412,11 +1412,13 @@ class Parser(Parser_Base):
 
         self.match("IDENTIFIER")
         obj = ast.Record_Object(
-            name     = self.ct.value,
-            location = self.ct.location,
-            n_typ    = r_typ,
-            section  = self.section[-1] if self.section else None)
+            name      = self.ct.value,
+            location  = self.ct.location,
+            n_typ     = r_typ,
+            section   = self.section[-1] if self.section else None,
+            n_package = self.pkg)
         self.pkg.symbols.register(self.mh, obj)
+
         self.match("C_BRA")
         while not self.peek("C_KET"):
             self.match("IDENTIFIER")
