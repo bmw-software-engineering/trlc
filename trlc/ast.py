@@ -2003,7 +2003,7 @@ class Package(Entity):
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Package %s" % self.name)
-        self.symbols.dump(indent + 1)
+        self.symbols.dump(indent + 1, omit_heading=True)
 
 
 class Composite_Type(Concrete_Type):
