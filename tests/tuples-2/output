@@ -1,2 +1,2 @@
 foo = 1 potato = potato  // this is NOT ok
-               ^ tuples-2/foo.trlc:10: error: expected INTEGER, encountered ASSIGN instead
+               ^ tuples-2/foo.trlc:10: error: expected integer literal, encountered = instead

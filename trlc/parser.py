@@ -27,12 +27,14 @@ from trlc import ast
 
 
 class Markup_Token(Token_Base):
-    KIND = frozenset(["CHARACTER",
-                      "REFLIST_BEGIN",
-                      "REFLIST_END",
-                      "REFLIST_COMMA",
-                      "REFLIST_DOT",
-                      "REFLIST_IDENTIFIER"])
+    KIND = {
+        "CHARACTER"          : "character",
+        "REFLIST_BEGIN"      : "[[",
+        "REFLIST_END"        : "]]",
+        "REFLIST_COMMA"      : ",",
+        "REFLIST_DOT"        : ".",
+        "REFLIST_IDENTIFIER" : "identifier",
+    }
 
     def __init__(self, location, kind, value):
         super().__init__(location, kind, value)
@@ -117,17 +119,17 @@ class Markup_Lexer(Nested_Lexer):
 
 
 class Parser_Base:
-    def __init__(self, mh, lexer, eoc_name, token_kinds, keywords):
+    def __init__(self, mh, lexer, eoc_name, token_map, keywords):
         assert isinstance(mh, Message_Handler)
         assert isinstance(lexer, Lexer_Base)
         assert isinstance(eoc_name, str)
-        assert isinstance(token_kinds, frozenset)
+        assert isinstance(token_map, dict)
         assert isinstance(keywords, frozenset)
         self.mh    = mh
         self.lexer = lexer
 
         self.eoc_name          = eoc_name
-        self.language_tokens   = token_kinds
+        self.language_tokens   = token_map
         self.language_keywords = keywords
 
         self.ct = None
@@ -142,57 +144,65 @@ class Parser_Base:
                 break
 
     def peek(self, kind):
-        assert kind in self.language_tokens
+        assert kind in self.language_tokens, \
+            "%s is not a valid token" % kind
         return self.nt is not None and self.nt.kind == kind
 
     def peek_eof(self):
         return self.nt is None
 
     def peek_kw(self, value):
-        assert value in self.language_keywords
+        assert value in self.language_keywords, \
+            "%s is not a valid keyword" % value
         return self.peek("KEYWORD") and self.nt.value == value
 
     def match(self, kind):
-        assert kind in self.language_tokens
+        assert kind in self.language_tokens, \
+            "%s is not a valid token" % kind
         if self.nt is None:
             if self.ct is None:
                 self.mh.error(self.lexer.file_location(),
                               "expected %s, encountered %s instead" %
-                              (kind, self.eoc_name))
+                              (self.language_tokens[kind], self.eoc_name))
             else:
                 self.mh.error(self.ct.location,
                               "expected %s, encountered %s instead" %
-                              (kind, self.eoc_name))
+                              (self.language_tokens[kind], self.eoc_name))
         elif self.nt.kind != kind:
             self.mh.error(self.nt.location,
                           "expected %s, encountered %s instead" %
-                          (kind, self.nt.kind))
+                          (self.language_tokens[kind],
+                           self.language_tokens[self.nt.kind]))
         self.advance()
 
     def match_eof(self):
         if self.nt is not None:
             self.mh.error(self.nt.location,
                           "expected %s, encountered %s instead" %
-                          (self.eoc_name, self.nt.kind))
+                          (self.eoc_name,
+                           self.language_tokens[self.nt.kind]))
 
     def match_kw(self, value):
-        assert value in self.language_keywords
+        assert value in self.language_keywords, \
+            "%s is not a valid keyword" % value
         if self.nt is None:
             if self.ct is None:
                 self.mh.error(self.lexer.file_location(),
-                              "expected %s, encountered %s instead" %
+                              "expected keyword %s, encountered %s instead" %
                               (value, self.eoc_name))
             else:
                 self.mh.error(self.ct.location,
-                              "expected %s, encountered %s instead" %
+                              "expected keyword %s, encountered %s instead" %
                               (value, self.eoc_name))
         elif self.nt.kind != "KEYWORD":
             self.mh.error(self.nt.location,
-                          "expected %s, encountered %s instead" %
-                          (value, self.nt.kind))
+                          "expected keyword %s, encountered %s instead" %
+                          (value,
+                           self.language_tokens[self.nt.kind]))
         elif self.nt.value != value:
             self.mh.error(self.nt.location,
-                          "expected %s, encountered %s instead" %
+                          "expected keyword %s,"
+                          " encountered keyword %s instead" %
                           (value, self.nt.value))
         self.advance()
 
@@ -201,9 +211,9 @@ class Markup_Parser(Parser_Base):
     def __init__(self, parent, literal):
         assert isinstance(parent, Parser)
         super().__init__(parent.mh, Markup_Lexer(parent.mh, literal),
-                         eoc_name    = "end-of-string",
-                         token_kinds = Markup_Token.KIND,
-                         keywords    = frozenset())
+                         eoc_name  = "end-of-string",
+                         token_map = Markup_Token.KIND,
+                         keywords  = frozenset())
         self.parent     = parent
         self.references = literal.references
 
@@ -261,14 +271,14 @@ class Parser(Parser_Base):
         assert isinstance(lint_mode, bool)
         if lexer:
             super().__init__(mh, lexer,
-                             eoc_name    = "end-of-file",
-                             token_kinds = Token.KIND,
-                             keywords    = TRLC_Lexer.KEYWORDS)
+                             eoc_name  = "end-of-file",
+                             token_map = Token.KIND,
+                             keywords  = TRLC_Lexer.KEYWORDS)
         else:
             super().__init__(mh, TRLC_Lexer(mh, file_name),
-                             eoc_name    = "end-of-file",
-                             token_kinds = Token.KIND,
-                             keywords    = TRLC_Lexer.KEYWORDS)
+                             eoc_name  = "end-of-file",
+                             token_map = Token.KIND,
+                             keywords  = TRLC_Lexer.KEYWORDS)
         self.lint_mode = lint_mode
         self.stab      = stab
         self.pkg       = None

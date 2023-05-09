@@ -16,7 +16,9 @@ quantifying over all references.)
 
 ### 1.1.4-dev
 
-
+* [TRLC] Improve error messages by using a more human readable form of
+  expected tokens, so now you see "opening brace '{'" instead of
+  "C_BRA".
 
 ### 1.1.3
 

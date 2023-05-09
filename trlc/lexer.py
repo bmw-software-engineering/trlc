@@ -117,25 +117,30 @@ class Token_Base:
 
 
 class Token(Token_Base):
-    KIND = frozenset(["COMMENT",
-                      "IDENTIFIER",
-                      "BUILTIN",
-                      "KEYWORD",
-                      "BRA", "KET",
-                      "S_BRA", "S_KET",
-                      "C_BRA", "C_KET",
-                      "AT",
-                      "COMMA",
-                      "SEMICOLON",
-                      "COLON",
-                      "DOT",
-                      "RANGE",
-                      "ASSIGN",
-                      "OPERATOR",
-                      "ARROW",
-                      "INTEGER",
-                      "DECIMAL",
-                      "STRING"])
+    KIND = {
+        "COMMENT"    : "comment",
+        "IDENTIFIER" : "identifier",
+        "BUILTIN"    : "bultin identifier",
+        "KEYWORD"    : "keyword",
+        "BRA"        : "opening parenthesis '('",
+        "KET"        : "closing parenthesis ')'",
+        "S_BRA"      : "opening bracket '['",
+        "S_KET"      : "closing bracket ']'",
+        "C_BRA"      : "opening brace '{'",
+        "C_KET"      : "closing brace '}'",
+        "COMMA"      : "comma ','",
+        "AT"         : "separtor '@'",
+        "SEMICOLON"  : "separator ';'",
+        "COLON"      : "separator ':'",
+        "DOT"        : ".",
+        "RANGE"      : "..",
+        "ASSIGN"     : "=",
+        "OPERATOR"   : "operator",
+        "ARROW"      : "->",
+        "INTEGER"    : "integer literal",
+        "DECIMAL"    : "decimal literal",
+        "STRING"     : "string literal",
+    }
 
     def __init__(self, location, kind, value=None):
         assert kind in Token.KIND
