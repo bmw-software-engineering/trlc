@@ -1905,19 +1905,33 @@ class Array_Type(Type):
     :attribute lower_bound: minimum number of elements
     :type: int
 
+    :attribute loc_lower: text location of the lower bound indicator
+    :type: Location
+
     :attribute upper_bound: maximum number of elements (or None)
     :type: int
+
+    :attribute loc_upper: text location of the upper bound indicator
+    :type: Location
 
     :attribute element_type: type of the array elements
     :type: Type
 
     """
-    def __init__(self, location, element_type, lower_bound, upper_bound):
+    def __init__(self,
+                 location,
+                 element_type,
+                 loc_lower,
+                 lower_bound,
+                 loc_upper,
+                 upper_bound):
         assert isinstance(element_type, Type) or element_type is None
         assert isinstance(lower_bound, int)
         assert lower_bound >= 0
         assert upper_bound is None or isinstance(upper_bound, int)
         assert upper_bound is None or upper_bound >= 0
+        assert isinstance(loc_lower, Location)
+        assert isinstance(loc_upper, Location)
 
         if element_type is None:
             name = "universal array"
@@ -1936,7 +1950,9 @@ class Array_Type(Type):
                                              element_type.name)
         super().__init__(name, location)
         self.lower_bound  = lower_bound
+        self.loc_lower    = loc_lower
         self.upper_bound  = upper_bound
+        self.loc_upper    = loc_upper
         self.element_type = element_type
 
     def perform_type_checks(self, mh, value):

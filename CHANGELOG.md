@@ -16,7 +16,12 @@ quantifying over all references.)
 
 ### 1.1.5-dev
 
+* [TRLC] Improve --lint output by appending a rule name in the output
+  (in a style similar to clang-tidy). In the future it will be
+  possible to turn rules off you don't like.
 
+* [TRLC] Relax errors surrounding array sizes, they are now lint
+  messages like the language manual suggests.
 
 ### 1.1.4
 

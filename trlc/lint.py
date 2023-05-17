@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # TRLC - Treat Requirements Like Code
-# Copyright (C) 2022 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+# Copyright (C) 2022-2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -31,13 +31,14 @@ class Linter:
         self.stab = stab
 
         self.abstract_extensions = {}
+        self.checked_types = set()
 
     def verify(self):
         ok = True
         for package in self.stab.values(ast.Package):
-            for n_typ in package.symbols.values(ast.Record_Type):
+            for n_typ in package.symbols.values(ast.Type):
                 try:
-                    self.verify_record(n_typ)
+                    self.verify_type(n_typ)
                 except TRLC_Error:
                     ok = False
 
@@ -45,14 +46,29 @@ class Linter:
         for package in self.stab.values(ast.Package):
             for n_typ in package.symbols.values(ast.Record_Type):
                 if n_typ.is_abstract and not self.abstract_extensions[n_typ]:
-                    self.mh.warning(
+                    self.mh.check(
                         n_typ.location,
                         "abstract type %s does not have any extensions" %
-                        n_typ.name)
+                        n_typ.name,
+                        "abstract_leaf_types")
 
         return ok
 
-    def verify_record(self, n_record_type):
+    def verify_type(self, n_typ):
+        assert isinstance(n_typ, ast.Type)
+
+        if n_typ in self.checked_types:
+            return
+        else:
+            self.checked_types.add(n_typ)
+
+        if isinstance(n_typ, ast.Record_Type):
+            self.verify_record_type(n_typ)
+
+        elif isinstance(n_typ, ast.Array_Type):
+            self.verify_array_type(n_typ)
+
+    def verify_record_type(self, n_record_type):
         assert isinstance(n_record_type, ast.Record_Type)
 
         # Mark abstract extensions
@@ -63,3 +79,31 @@ class Linter:
             if n_record_type.parent not in self.abstract_extensions:
                 self.abstract_extensions[n_record_type.parent] = set()
             self.abstract_extensions[n_record_type.parent].add(n_record_type)
+
+        # Walk over components
+        for n_component in n_record_type.components.values():
+            self.verify_type(n_component.n_typ)
+
+    def verify_array_type(self, n_typ):
+        assert isinstance(n_typ, ast.Array_Type)
+
+        if n_typ.upper_bound is None:
+            pass
+        elif n_typ.lower_bound > n_typ.upper_bound:
+            self.mh.check(n_typ.loc_upper,
+                          "upper bound must be at least %u" % n_typ.lower_bound,
+                          "impossible_array_types")
+        elif n_typ.upper_bound == 0:
+            self.mh.check(n_typ.loc_upper,
+                          "this array makes no sense",
+                          "impossible_array_types")
+        elif n_typ.upper_bound == 1 and n_typ.lower_bound == 1:
+            self.mh.check(n_typ.loc_upper,
+                          "array of fixed size 1 "
+                          "should not be an array",
+                          "weird_array_types")
+        elif n_typ.upper_bound == 1 and n_typ.lower_bound == 0:
+            self.mh.check(n_typ.loc_upper,
+                          "consider making this array an"
+                          " optional %s" % c_typ.name,
+                          "weird_array_types")

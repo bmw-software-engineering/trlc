@@ -1,5 +1,3 @@
-mult/bar.rsl:17:20: trlc error: this array makes no sense
-mult/bar.rsl:23:21: trlc error: upper bound must be at least 5
 mult/instances.trlc:6:22: trlc error: this array requires at least 5 elements (only 2 provided)
 mult/instances.trlc:16:22: trlc error: this array requires at least 5 elements (only 2 provided)
 mult/instances.trlc:21:22: trlc error: this array requires at least 3 elements (only 2 provided)

@@ -457,39 +457,26 @@ class Parser(Parser_Base):
             self.match("S_BRA")
             self.match("INTEGER")
             a_lo = self.ct.value
+            loc_lo = self.ct.location
             self.match("RANGE")
             a_loc = self.ct.location
             if self.peek("INTEGER"):
                 self.match("INTEGER")
                 a_hi = self.ct.value
-                if a_lo > a_hi:
-                    self.mh.error(self.ct.location,
-                                  "upper bound must be at least %u" % a_lo,
-                                  fatal = False)
-                elif a_hi == 0:
-                    self.mh.error(self.ct.location,
-                                  "this array makes no sense",
-                                  fatal = False)
-                elif a_hi == 1 and a_lo == 1:
-                    self.mh.warning(a_loc,
-                                    "array of fixed size 1 "
-                                    "should not be an array")
-                elif a_hi == 1 and a_lo == 0:
-                    self.mh.warning(a_loc,
-                                    "consider making this array an"
-                                    " optional %s" % c_typ.name)
-
             elif self.peek("OPERATOR") and self.nt.value == "*":
                 self.match("OPERATOR")
                 a_hi = None
             else:
                 self.mh.error(self.nt.location,
                               "expected INTEGER or * for upper bound")
+            loc_hi = self.ct.location
             self.match("S_KET")
             c_typ = ast.Array_Type(location     = a_loc,
                                    element_type = c_typ,
                                    lower_bound  = a_lo,
-                                   upper_bound  = a_hi)
+                                   upper_bound  = a_hi,
+                                   loc_lower    = loc_lo,
+                                   loc_upper    = loc_hi)
 
         return ast.Composite_Component(name        = c_name.value,
                                        description = c_descr,
@@ -524,8 +511,9 @@ class Parser(Parser_Base):
         if self.lint_mode and \
            root_record and root_record.is_final and \
            not is_final:
-            self.mh.warning(name.location,
-                            "consider clarifying that this record is final")
+            self.mh.check(name.location,
+                          "consider clarifying that this record is final",
+                          "clarify_final")
 
         record = ast.Record_Type(name        = name.value,
                                  description = description,
@@ -733,10 +721,11 @@ class Parser(Parser_Base):
             if self.lint_mode and \
                isinstance(n_lhs, ast.Binary_Expression) and \
                not has_explicit_brackets:
-                self.mh.warning(t_unary.location,
-                                "expression means -(%s), place explicit "
-                                "brackets to clarify intent" %
-                                n_lhs.to_string())
+                self.mh.check(t_unary.location,
+                              "expression means -(%s), place explicit "
+                              "brackets to clarify intent" %
+                              n_lhs.to_string(),
+                              "unary_minus_precedence")
             n_lhs = ast.Unary_Expression(
                 mh        = self.mh,
                 location  = t_unary.location,
@@ -948,10 +937,11 @@ class Parser(Parser_Base):
         # Lint: complain about old functions
         if isinstance(n_name, ast.Builtin_Function) and \
            self.lint_mode and n_name.deprecated:
-            self.mh.warning(
+            self.mh.check(
                 t_name.location,
-                "deprecated feature, please use function %s instead" %
-                n_name.name.replace("trlc:", ""))
+                "please use function %s instead" %
+                n_name.name.replace("trlc:", ""),
+                "deprecated_feature")
 
         # Parse the arguments.
         parameters = []

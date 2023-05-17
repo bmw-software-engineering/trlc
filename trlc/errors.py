@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # TRLC - Treat Requirements Like Code
-# Copyright (C) 2022 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+# Copyright (C) 2022-2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -230,6 +230,17 @@ class Message_Handler:
 
         self.warnings += 1
         self.emit(location, kind, message, fatal=False)
+
+    def check(self, location, message, check):
+        assert isinstance(location, Location)
+        assert isinstance(message, str)
+        assert isinstance(check, str)
+
+        self.warnings += 1
+        self.emit(location,
+                  "warning",
+                  "%s [%s]" % (message, check),
+                  fatal=False)
 
     def ice_loc(self, location, message):  # pragma: no cover
         assert isinstance(location, Location)
