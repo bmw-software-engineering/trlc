@@ -637,6 +637,8 @@ def write_header(fd, obj_version, obj_license):
     fd.write("@media screen and (min-width: 55rem) {\n")
     fd.write("  html {\n")
     fd.write("    width: 55rem;\n")
+    fd.write("    margin-left: auto;\n")
+    fd.write("    margin-right: auto;\n")
     fd.write("  }\n")
     fd.write("}\n")
     fd.write("div.code {\n")
