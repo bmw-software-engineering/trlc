@@ -45,8 +45,16 @@ enum Kind {
   Dynamic
 }
 
-type Semantics extends Text {
+abstract type Semantics extends Text {
   kind Kind
+}
+
+type Static_Semantics extends Semantics {
+  freeze kind = Kind.Static
+}
+
+type Dynamic_Semantics extends Semantics {
+  freeze kind = Kind.Dynamic
 }
 
 type Name_Resolution extends Text {}

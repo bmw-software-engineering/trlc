@@ -785,7 +785,7 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
                           "Keywords",
                           "Punctuation"):
         pass
-    elif obj.n_typ.name == "Semantics":
+    elif obj.n_typ.name in ("Static_Semantics", "Dynamic_Semantics"):
         new_section.append(data["kind"] + " Semantics")
     elif obj.n_typ.name == "Name_Resolution":
         new_section.append("Name resolution")
