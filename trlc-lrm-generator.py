@@ -40,6 +40,8 @@ BMW_RED    = "#E22718"
 BMW_GREY   = "#6f6f6f"
 BMW_SILVER = "#d6d6d6"
 
+CODE_BG    = "#f6f8fa"
+
 EMACS_STRING = "#8d2153"
 
 
@@ -617,18 +619,31 @@ def write_header(fd, obj_version, obj_license):
     fd.write("  color: %s;\n" % BMW_BLUE_2)
     fd.write("}\n")
     fd.write("h1, h2, h3, h4, h5, h6, h7 {\n")
-    fd.write("  color: %s\n" % BMW_BLUE_2)
+    fd.write("  color: %s;\n" % BMW_BLUE_2)
+    fd.write("}\n")
+    fd.write("h1 {\n")
+    fd.write("  counter-reset: section\n")
+    fd.write("}\n")
+    fd.write("h2:before {\n")
+    fd.write("  counter-increment: section;\n")
+    fd.write("  content: counter(section) \". \";\n")
+    fd.write("}\n")
+    fd.write("h2 {\n")
+    fd.write("  border-bottom: 0.1em solid %s;\n" % BMW_BLUE_2)
     fd.write("}\n")
     fd.write("div {\n")
-    fd.write("  margin-top: 0.2em;\n")
+    fd.write("  margin-top: 0.4em;\n")
+    fd.write("}\n")
+    fd.write("@media screen and (min-width: 55rem) {\n")
+    fd.write("  html {\n")
+    fd.write("    width: 55rem;\n")
+    fd.write("  }\n")
     fd.write("}\n")
     fd.write("div.code {\n")
     fd.write("  margin-top: 1.5em;\n")
     fd.write("  margin-bottom: 1.5em;\n")
-    fd.write("  border-radius: 1em;\n")
+    fd.write("  background-color: %s;\n" % CODE_BG)
     fd.write("  padding: 1em;\n")
-    fd.write("  border-left: 0.2em solid %s;\n" % BMW_SILVER)
-    fd.write("  border-bottom: 0.2em solid %s;\n" % BMW_SILVER)
     fd.write("}\n")
     fd.write("a {\n")
     fd.write("  color: %s;\n" % BMW_BLUE_1)
