@@ -1,0 +1,2 @@
+package a
+        ^ late-packages-1/b.trlc:1: error: duplicate definition, previous definition at a.trlc:1

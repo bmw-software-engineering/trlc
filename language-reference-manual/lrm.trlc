@@ -1662,13 +1662,19 @@ section "TRLC Files" {
     '''
   }
 
-  Text Package_Declarations_In_TRLC {
-    text = '''*(Note that it is possible to indicate a package that has
+  Semantics Late_Package_Declarations {
+    kind = Kind.Static
+    text = '''Note that it is permitted to indicate a package that has
               not been declared in an `.rsl` file, in which
               case it is declared by the
-              package_indication. Note that such a package
-              cannot be imported in by other `.trlc`
-              files.)*'''
+              package_indication in the `.trlc` file. Such a package is
+              declared late.'''
+  }
+
+  Text Late_Package_Declarations_Implications {
+    text = '''*(Note that such a late declared package is properly declared,
+              i.e. if you attempt to have multiple late declared packages with
+              the same name you will get an error.)*'''
   }
 
 }

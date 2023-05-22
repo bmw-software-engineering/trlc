@@ -23,6 +23,14 @@ quantifying over all references.)
 * [TRLC] Relax errors surrounding array sizes, they are now lint
   messages like the language manual suggests.
 
+* [LRM] Clarify how late packages are supposed to work in the
+  LRM. This is not really a change, so no version increase.
+
+* [TRLC] Fix bug relating to late packages where multiple late
+  packages with the same name were not detected correctly. This is now
+  working as expected, and the case where we attempt to import a late
+  package has had it's error message improved as a side-effect.
+
 ### 1.1.4
 
 * [TRLC] Improve error messages by using a more human readable form of

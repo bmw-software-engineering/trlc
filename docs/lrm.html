@@ -1096,8 +1096,12 @@ A <code>.trlc</code> file is simply a set of record object declarations.
              | <a href="#bnf-record_object_declaration">record_object_declaration</a>
 </pre>
 </div>
+<h3>Static Semantics</h3>
 <div>
-<i>(Note that it is possible to indicate a package that has not been declared in an <code>.rsl</code> file, in which case it is declared by the package_indication. Note that such a package cannot be imported in by other <code>.trlc</code> files.)</i>
+Note that it is permitted to indicate a package that has not been declared in an <code>.rsl</code> file, in which case it is declared by the package_indication in the <code>.trlc</code> file. Such a package is declared late.
+</div>
+<div>
+<i>(Note that such a late declared package is properly declared, i.e. if you attempt to have multiple late declared packages with the same name you will get an error.)</i>
 </div>
 <h2 id="sec:6c2981b99c4b49558783bd900a1dc95a00a454f0">Sections</h2>
 <div>

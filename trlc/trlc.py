@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # TRLC - Treat Requirements Like Code
-# Copyright (C) 2022 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+# Copyright (C) 2022-2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -179,7 +179,7 @@ class Source_Manager:
         self.update_common_root(file_name)
 
         self.rsl_files[file_name] = self.create_parser(file_name)
-        self.rsl_files[file_name].parse_rsl_header()
+        self.rsl_files[file_name].parse_rsl_preamble()
 
         self.register_package(
             package_name = self.rsl_files[file_name].pkg.name,
@@ -256,11 +256,24 @@ class Source_Manager:
 
     def parse_trlc_files(self):
         ok = True
+
+        # First, pre-parse all files to discover all late packages and
+        # identify any conflicts
+        for name in sorted(self.trlc_files):
+            try:
+                self.trlc_files[name].parse_trlc_preamble()
+            except TRLC_Error:
+                ok = False
+        if not ok:
+            return False
+
+        # Then actually parse
         for name in sorted(self.trlc_files):
             try:
                 self.trlc_files[name].parse_trlc_file()
             except TRLC_Error:
                 ok = False
+
         return ok
 
     def resolve_record_references(self):

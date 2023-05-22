@@ -1455,7 +1455,7 @@ class Parser(Parser_Base):
         else:
             self.parse_record_object_declaration()
 
-    def parse_rsl_header(self):
+    def parse_rsl_preamble(self):
         self.match_kw("package")
         self.match("IDENTIFIER")
 
@@ -1470,6 +1470,29 @@ class Parser(Parser_Base):
             self.match("IDENTIFIER")
             self.raw_deps.append(self.ct)
             self.imports.add(self.ct.value)
+
+    def parse_trlc_preamble(self):
+        self.match_kw("package")
+        self.match("IDENTIFIER")
+
+        if self.stab.contains(self.ct.value):
+            self.pkg = self.stab.lookup(self.mh, self.ct, ast.Package)
+            if self.pkg.declared_late:
+                # If this package is already declared late, then the
+                # correct semantics is to attempt to declare it late
+                # again and get an error.
+                self.pkg = ast.Package(self.ct.value,
+                                       self.ct.location,
+                                       self.stab)
+                self.pkg.declared_late = True
+                self.stab.register(self.mh, self.pkg)
+        else:
+            self.pkg = ast.Package(self.ct.value,
+                                   self.ct.location,
+                                   self.stab)
+            self.pkg.declared_late = True
+            self.stab.register(self.mh, self.pkg)
+        self.default_scope.push(self.pkg.symbols)
 
     def parse_rsl_file(self):
         assert self.pkg is not None
@@ -1495,19 +1518,6 @@ class Parser(Parser_Base):
         self.match_eof()
 
     def parse_trlc_file(self):
-        self.match_kw("package")
-        self.match("IDENTIFIER")
-
-        if self.stab.contains(self.ct.value):
-            self.pkg = self.stab.lookup(self.mh, self.ct, ast.Package)
-        else:
-            self.pkg = ast.Package(self.ct.value,
-                                   self.ct.location,
-                                   self.stab)
-            self.pkg.declared_late = True
-            self.stab.register(self.mh, self.pkg)
-        self.default_scope.push(self.pkg.symbols)
-
         while self.peek_kw("import"):
             self.match_kw("import")
             self.match("IDENTIFIER")
