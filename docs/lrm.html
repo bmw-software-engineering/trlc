@@ -18,7 +18,7 @@ h1, h2, h3, h4, h5, h6, h7 {
 h1 {
   counter-reset: section
 }
-h2:before {
+h2.autosection:before {
   counter-increment: section;
   content: counter(section) ". ";
 }
@@ -167,7 +167,7 @@ A copy of the license is included in the section entitled "Appendix A: GNU Free 
   <li><a href="#sec:cfe9573cce03cb2912c44176c44378eb3eaec3c5">Null Values</a>
   </li>
 </ol>
-<h2 id="sec:1babfba499a35bc8dd53df02b58c26f65fe9b497">Design Goals</h2>
+<h2 class="autosection" id="sec:1babfba499a35bc8dd53df02b58c26f65fe9b497">Design Goals</h2>
 <div>
 It is important to have design goals for a language. The design goals of TRLC are:
 <ul>
@@ -178,8 +178,8 @@ It is important to have design goals for a language. The design goals of TRLC ar
   <li>No business logic should be encoded in the language design.</li>
 </ul>
 </div>
-<h2 id="sec:a7d832e9bb00d9ab844f20e6fbf5d1d776afbacf">Lexing</h2>
-<h3 id="sec:6fae88d0d44b306c96b9a5cadd3577b36e2cec22">Encoding</h3>
+<h2 class="autosection" id="sec:a7d832e9bb00d9ab844f20e6fbf5d1d776afbacf">Lexing</h2>
+<h3 class="autosection" id="sec:6fae88d0d44b306c96b9a5cadd3577b36e2cec22">Encoding</h3>
 <div>
 All input files are encoded in UTF-8. Passing a file with a different encoding to TRLC results in undefined behaviour.
 </div>
@@ -187,14 +187,14 @@ All input files are encoded in UTF-8. Passing a file with a different encoding t
 <div>
 It is recommended to try to detect this in an implementation and raise a fatal error; but in the interest of compatibility and sanity an implementation shall not provide a way to switch the encoding (at the command-line or otherwise).
 </div>
-<h3 id="sec:2fffbe8811832e6bc87d8e87f5fe868af27c5884">Whitespace and comments</h3>
+<h3 class="autosection" id="sec:2fffbe8811832e6bc87d8e87f5fe868af27c5884">Whitespace and comments</h3>
 <div>
 Whitespace is ignored.
 </div>
 <div>
 Comments are C-Style <code>/* .. */</code> and C++ style <code>//</code>, and are ignored. The matching for C-style comments is non-greedy.
 </div>
-<h3 id="sec:e8ffb2f75005b380605ac7cd84bd1e8135d8d484">Identifiers and keywords</h3>
+<h3 class="autosection" id="sec:e8ffb2f75005b380605ac7cd84bd1e8135d8d484">Identifiers and keywords</h3>
 <div>
 Identifiers start with a letter and are followed by letters, numbers, or underscores.
 </div>
@@ -256,7 +256,7 @@ A keyword is an identifier that is one of the following reserved words:
   <li>xor</li>
 </ul>
 </div>
-<h3 id="sec:aecefa911f304b068a66634b6c79442544731fcd">Punctuation</h3>
+<h3 class="autosection" id="sec:aecefa911f304b068a66634b6c79442544731fcd">Punctuation</h3>
 <div>
 Single character delimiters:
 <ul>
@@ -278,7 +278,7 @@ Double character delimiters:
 <div>
 Preference is (obviously) given to longer delimiters if there is ambiguity; i.e. <code>==</code> takes precedence over two <code>=</code> tokens.
 </div>
-<h3 id="sec:707590991971c8cbba0fcbbab41d495f5267f09b">Integers</h3>
+<h3 class="autosection" id="sec:707590991971c8cbba0fcbbab41d495f5267f09b">Integers</h3>
 <div>
 Integers are base 10, and leading zeros are effectively ignored.
 </div>
@@ -292,7 +292,7 @@ Examples:<ul>
   <li>007</li>
 </ul>
 </div>
-<h3 id="sec:6d1f18e149654f815a45d2f2e4a8c22b2fca2b30">Decimals</h3>
+<h3 class="autosection" id="sec:6d1f18e149654f815a45d2f2e4a8c22b2fca2b30">Decimals</h3>
 <div>
 Decimals are base 10, and leading and trailing zeros are effectively ignored.
 </div>
@@ -306,7 +306,7 @@ Examples:<ul>
   <li>0.0800</li>
 </ul>
 </div>
-<h3 id="sec:a1e5f01b700e2c39a01c965ab74b3939b47b1a27">Strings</h3>
+<h3 class="autosection" id="sec:a1e5f01b700e2c39a01c965ab74b3939b47b1a27">Strings</h3>
 <div>
 There are two versions of a string, double quoted and triple quoted:
 </div>
@@ -327,7 +327,7 @@ The value of a double quoted string is precisely the characters between the two 
 <div>
 The value of a triple quoted string is the whitespace trimmed string of characters between the triple quotes (including the line breaks), The common whitespace at the beginning of each line (ignoring blank lines) starting at the second is removed. The trailing whitespace on every line is removed. There is no escaping in a triple quoted string.
 </div>
-<h2 id="sec:405023229ad0daa7843f23de4264ea6671dbd124">Layout and file structure</h2>
+<h2 class="autosection" id="sec:405023229ad0daa7843f23de4264ea6671dbd124">Layout and file structure</h2>
 <div>
 There are three types of files:
 <ul>
@@ -347,7 +347,7 @@ After all files are parsed, references are resolved and user-defined checks are 
 <div>
 It is unspecified how an implementation treats errors in <code>.trlc</code> files, but it is recommended to not stop processing after the first error.
 </div>
-<h2 id="sec:1b5022091302172b7af39971681b5b026fc2fa64">Preamble</h2>
+<h2 class="autosection" id="sec:1b5022091302172b7af39971681b5b026fc2fa64">Preamble</h2>
 <div>
 All TRLC files start with a package indication.
 </div>
@@ -371,7 +371,7 @@ A package declared in an RSL file may be imported, in which case its name may be
 <div>
 A package may not import itself.
 </div>
-<h2 id="sec:347156ba7288ce580b92312542aba49980af6614">Metamodel (RLS) files</h2>
+<h2 class="autosection" id="sec:347156ba7288ce580b92312542aba49980af6614">Metamodel (RLS) files</h2>
 <div>
 A <code>.rls</code> file starts with a package declaration and is followed by type declarations.
 </div>
@@ -429,7 +429,7 @@ A package also makes available a number of numeric type conversion functions:
   <li>Decimal</li>
 </ul>
 </div>
-<h2 id="sec:0034d3d04e5c64801a54b17b470e6a49a500b621">Described names</h2>
+<h2 class="autosection" id="sec:0034d3d04e5c64801a54b17b470e6a49a500b621">Described names</h2>
 <div class='code'>
 <pre>
 <span id="bnf-described_name">described_name</span> ::= <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i> [ <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span><i>_description</i> ]
@@ -445,7 +445,7 @@ Two described names are considered equal if their names are equal.
 <div>
 The description has no bearing on equality. The string description should be exported to the API, so that downstream tools can make use of it. This way we don&#x27;t have to give some comments special meaning, and we don&#x27;t have to implement error-prone heuristics in downstream tools for discovering these descriptions.
 </div>
-<h2 id="sec:590aeb2db73432d982c1e15e21c6b28a649cc293">Qualified names</h2>
+<h2 class="autosection" id="sec:590aeb2db73432d982c1e15e21c6b28a649cc293">Qualified names</h2>
 <div class='code'>
 <pre>
 <span id="bnf-qualified_name">qualified_name</span> ::= [ <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_package_name</i> '.' ] <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i>
@@ -458,7 +458,7 @@ The package name of a qualified name must be the current package or an imported 
 <div>
 The name must be a valid symbol in the current scope (if no package is provided) or a valid symbol of the indicated package.
 </div>
-<h2 id="sec:2b0ce86a93da5b26c4b4929399d43cfb10393c60">Type declarations</h2>
+<h2 class="autosection" id="sec:2b0ce86a93da5b26c4b4929399d43cfb10393c60">Type declarations</h2>
 <div class='code'>
 <pre>
 <span id="bnf-type_declaration">type_declaration</span> ::= <a href="#bnf-enumeration_declaration">enumeration_declaration</a>
@@ -470,7 +470,7 @@ The name must be a valid symbol in the current scope (if no package is provided)
 <div>
 It is an error to create a type with a name that is potentially visible. (Note: this especially includes shadowing one of the builtin types, but also means you cannot shadow packages.)
 </div>
-<h3 id="sec:e1f8bb3ddd6a0895152a453fa14399b694157f38">Enumerations</h3>
+<h3 class="autosection" id="sec:e1f8bb3ddd6a0895152a453fa14399b694157f38">Enumerations</h3>
 <div class='code'>
 <pre>
 <span id="bnf-enumeration_declaration">enumeration_declaration</span> ::= 'enum' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span>
@@ -503,7 +503,7 @@ It is not an error to have an enumeration literal with the same name as a record
   <span class="TRLC_IDENTIFIER">file_not_found</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h3 id="sec:9c935af337f85e7a0b4f793f9f5404aa3567db0b">Tuples (algebraic data types)</h3>
+<h3 class="autosection" id="sec:9c935af337f85e7a0b4f793f9f5404aa3567db0b">Tuples (algebraic data types)</h3>
 <div class='code'>
 <pre>
 <span id="bnf-tuple_declaration">tuple_declaration</span> ::= 'tuple' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span>
@@ -561,7 +561,7 @@ It is an error to declare two fields with the same name in the same tuple. <i>(N
 <span class="TRLC_C_KET">}</span>
 <span class="TRLC_COMMENT">// allows you to write 42:666@1.0</span></pre>
 </div>
-<h3 id="sec:fff14f02c0a590def7283b89960c98af94922c47">Record declarations</h3>
+<h3 class="autosection" id="sec:fff14f02c0a590def7283b89960c98af94922c47">Record declarations</h3>
 <div class='code'>
 <pre>
 <span id="bnf-record_declaration">record_declaration</span> ::= [ <span class="tooltip"><a href="#bnf-inheritance_qualifier">inheritance_qualifier</a><span class="tooltiptext">abstract | final</span></span> ] 'type' <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span>
@@ -663,7 +663,7 @@ It is recommended that an implementation checks if a record type contains a tupl
   <span class="TRLC_KEYWORD">freeze</span> <span class="TRLC_IDENTIFIER">asil</span>        <span class="TRLC_ASSIGN">=</span> <span class="TRLC_IDENTIFIER">ASIL</span><span class="TRLC_DOT">.</span><span class="TRLC_IDENTIFIER">QM</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2 id="sec:5103569cc5a86b8e2f77bec0c907d17d4a4567da">Check Files</h2>
+<h2 class="autosection" id="sec:5103569cc5a86b8e2f77bec0c907d17d4a4567da">Check Files</h2>
 <div>
 A <code>.check</code> file is simply a set of check blocks.
 </div>
@@ -677,7 +677,7 @@ A <code>.check</code> file is simply a set of check blocks.
 <div>
 It is an error to indicate a package that has not been declared in an <code>.rsl</code> file.
 </div>
-<h2 id="sec:e927d676860613a7cb2f750b822d434b0064ea5e">Checks</h2>
+<h2 class="autosection" id="sec:e927d676860613a7cb2f750b822d434b0064ea5e">Checks</h2>
 <div class='code'>
 <pre>
 <span id="bnf-check_block">check_block</span> ::= 'checks' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_record_or_tuple_name</i>
@@ -750,7 +750,7 @@ It is an important design goal to keep the type system sane and following LSP. I
     <span class="TRLC_KEYWORD">error</span> <span class="TRLC_STRING">&quot;CB Version must be positive&quot;</span><span class="TRLC_COMMA">,</span> <span class="TRLC_IDENTIFIER">version</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2 id="sec:fbcc36b7c40a2a111a9fac98725ee86aa48ae5a0">Expressions</h2>
+<h2 class="autosection" id="sec:fbcc36b7c40a2a111a9fac98725ee86aa48ae5a0">Expressions</h2>
 <div class='code'>
 <pre>
 <span id="bnf-expression">expression</span> ::= <a href="#bnf-relation">relation</a> { 'and' <a href="#bnf-relation">relation</a> }
@@ -804,7 +804,7 @@ The parsing of unary minus can be confusing: <code>-a % b</code> is actually <co
     <span class="TRLC_KEYWORD">warning</span> <span class="TRLC_STRING">&quot;cb link is suspiciously small&quot;</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2 id="sec:e45bf89f4cee2eb28d331c49b46029d82b15382c">Names</h2>
+<h2 class="autosection" id="sec:e45bf89f4cee2eb28d331c49b46029d82b15382c">Names</h2>
 <div>
 A name can be one of 5 things:
 <ul>
@@ -897,7 +897,7 @@ Name resolution is case sensitive.
   <span class="TRLC_COMMENT">// you can obtain a tuple&#x27;s values</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2 id="sec:26bd85a87e980cbb3cc597e9842ced0133d46633">Operators</h2>
+<h2 class="autosection" id="sec:26bd85a87e980cbb3cc597e9842ced0133d46633">Operators</h2>
 <div class='code'>
 <pre>
 <span id="bnf-comparison_operator">comparison_operator</span> ::= '=='
@@ -926,7 +926,7 @@ It is implementation defined if type checks (range or length) are performed for 
 <div>
 <i>(This means you either type check all the time, or you guarantee that any intermediate will not create an error in the implementation, as long as the final value fits in the relevant type. For example if A and B are maximum length Strings, then <code>&quot;potato&quot; in A + B</code> may either create an error when attempting to concatenate the strings, OR it must work correctly. What you cannot do is cause undefined behaviour in the evaluation.)</i>
 </div>
-<h3 id="sec:1b7d2da842f3f6074070526b5a4a3c424dcc604a">Logical operators</h3>
+<h3 class="autosection" id="sec:1b7d2da842f3f6074070526b5a4a3c424dcc604a">Logical operators</h3>
 <h4>Static Semantics</h4>
 <div>
 There are five Boolean operators defined (not, and, or, xor, implies) for expressions of Boolean type. The type of the result is Boolean.
@@ -938,7 +938,7 @@ Operators with short-cut semantics are <code>and</code>, <code>or</code>, and <c
 <div>
 Operators with standard semantics are <code>xor</code>, and <code>not</code>. They do the usual thing.
 </div>
-<h3 id="sec:6853dd1f3f0e39c6d5d79baddfca46e8c9f0f9dc">Relational operators and membership tests</h3>
+<h3 class="autosection" id="sec:6853dd1f3f0e39c6d5d79baddfca46e8c9f0f9dc">Relational operators and membership tests</h3>
 <h4>Static Semantics</h4>
 <div>
 The equality operators <code>==</code> and <code>!=</code> are defined for all types, as long as the types are compatible, i.e. they are the same types or one type is a (transitive) record extension of the other. The result is a Boolean.
@@ -971,7 +971,7 @@ The meaning of the substring test is the usual. <i>(Note that the substring test
 <div>
 The array membership test <code>X in A</code> is equivalent to <code>(exists item in A =&gt; item == X)</code>. The array non-membership test <code>X not in A</code> is equivalent to <code>(forall item in A =&gt; item != X)</code>.
 </div>
-<h3 id="sec:4cfc517e70194486df511c43ed091f8aacc89d72">Adding operators</h3>
+<h3 class="autosection" id="sec:4cfc517e70194486df511c43ed091f8aacc89d72">Adding operators</h3>
 <h4>Static Semantics</h4>
 <div>
 The binary adding operator <code>+</code> is defined for integers, rationals, and strings. The binary subtraction operator <code>-</code> is defined for only integers and rationals.
@@ -992,7 +992,7 @@ The definition of <code>+</code> and <code>-</code> for integers and rationals i
 <div>
 The definition of <code>+</code> for strings is string concatenation.
 </div>
-<h3 id="sec:f5d45ad47a83ce6dd7573306a9ee187e6342f5bb">Multiplying operators</h3>
+<h3 class="autosection" id="sec:f5d45ad47a83ce6dd7573306a9ee187e6342f5bb">Multiplying operators</h3>
 <h4>Static Semantics</h4>
 <div>
 The multiplying operators <code>*</code>, <code>/</code> are defined for integers and rational types. The remainder operator <code>%</code> is defined for integers only. For any of these the result is always the same type as the operands.
@@ -1017,7 +1017,7 @@ The modulus division for <code>x % y</code> satisfies the relation <code>x = y*N
 <div>
 Division by zero or modulo division by 0 is an error.
 </div>
-<h3 id="sec:775410b4cb9a8b0b8469f6d72d31fe25d0cbb54a">Highest precedence operators</h3>
+<h3 class="autosection" id="sec:775410b4cb9a8b0b8469f6d72d31fe25d0cbb54a">Highest precedence operators</h3>
 <h4>Static Semantics</h4>
 <div>
 The exponentiation operator <code>**</code> is defined for integers and rations bases, and returns the same type as its base. The exponent type is always an Integer.
@@ -1040,7 +1040,7 @@ The definition of absolute value <code>abs</code> is the usual one.
 <div>
 The definition of logical negation <code>not</code> is the usual one.
 </div>
-<h2 id="sec:bcc19cc6284b0508f332d585fa6ddb294172206c">Quantification</h2>
+<h2 class="autosection" id="sec:bcc19cc6284b0508f332d585fa6ddb294172206c">Quantification</h2>
 <div class='code'>
 <pre>
 <span id="bnf-quantified_expression">quantified_expression</span> ::= <span class="tooltip"><a href="#bnf-quantifier">quantifier</a><span class="tooltiptext">forall | exists</span></span> <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_name</i> 'in' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component_name</i> '=&gt;'
@@ -1079,7 +1079,7 @@ In general Quantification is equivalent to a chain of <code>and</code> or <code>
   <li>For static analysis or linting, use non-short-circuit semantics, as using a quantifier as a complex guard is not reasonable.</li>
 </ul>
 </div>
-<h2 id="sec:c3ae93a78e6ebf08327c53ca69b9e5d308148660">Conditional expressions</h2>
+<h2 class="autosection" id="sec:c3ae93a78e6ebf08327c53ca69b9e5d308148660">Conditional expressions</h2>
 <div class='code'>
 <pre>
 <span id="bnf-conditional_expression">conditional_expression</span> ::= 'if' <a href="#bnf-expression">expression</a><i>_CONDITION</i> 'then' <a href="#bnf-expression">expression</a><i>_DEPENDENT</i>
@@ -1098,7 +1098,7 @@ Each condition is evaluated in sequence. Evaluation stops on the first condition
 <div>
 If all condition are evaluated to false, then the else dependent expression is evaluated and returned.
 </div>
-<h2 id="sec:0a6f86b9bdb92972913eb249076315dce5a0d5db">TRLC Files</h2>
+<h2 class="autosection" id="sec:0a6f86b9bdb92972913eb249076315dce5a0d5db">TRLC Files</h2>
 <div>
 A <code>.trlc</code> file is simply a set of record object declarations.
 </div>
@@ -1118,7 +1118,7 @@ Note that it is permitted to indicate a package that has not been declared in an
 <div>
 <i>(Note that such a late declared package is properly declared, i.e. if you attempt to have multiple late declared packages with the same name you will get an error.)</i>
 </div>
-<h2 id="sec:6c2981b99c4b49558783bd900a1dc95a00a454f0">Sections</h2>
+<h2 class="autosection" id="sec:6c2981b99c4b49558783bd900a1dc95a00a454f0">Sections</h2>
 <div>
 A section has no semantic impact, and no impact on name resolution. Section names do not have to be unique. It may be exposed in an API, for example to section a HTML view of requirements.
 </div>
@@ -1128,7 +1128,7 @@ A section has no semantic impact, and no impact on name resolution. Section name
                         '{' { <span class="tooltip"><a href="#bnf-trlc_entry">trlc_entry</a><span class="tooltiptext">section_declaration | record_object_declaration</span></span> } '}'
 </pre>
 </div>
-<h2 id="sec:874acaf9dea40145e68e30cd5668278b883fb037">Record object declarations</h2>
+<h2 class="autosection" id="sec:874acaf9dea40145e68e30cd5668278b883fb037">Record object declarations</h2>
 <div class='code'>
 <pre>
 <span id="bnf-record_object_declaration">record_object_declaration</span> ::= <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_RECORD_TYPE</i> <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_object_name</i>
@@ -1221,7 +1221,7 @@ When exposing record instances through the API, it is required to make the type 
   <span class="TRLC_S_KET">]</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2 id="sec:d301b6573b8a1818f692aaddcb76e7edb29f3606">Markup strings</h2>
+<h2 class="autosection" id="sec:d301b6573b8a1818f692aaddcb76e7edb29f3606">Markup strings</h2>
 <div>
 A <code>Markup_String</code> allows you to inline references to TRLC record in a string. The format is limited and simple: any name or comma-separated list of names enclosed in double square brackets (i.e. <code>[[</code> and <code>]]</code>) is considered a reference.
 </div>
@@ -1267,7 +1267,7 @@ The name resolution rules for the qualified_name are exactly the same as they ar
   <span class="TRLC_IDENTIFIER">license</span> <span class="TRLC_ASSIGN">=</span> <span class="TRLC_IDENTIFIER">License</span><span class="TRLC_DOT">.</span><span class="TRLC_IDENTIFIER">AGPL3</span>
 <span class="TRLC_C_KET">}</span></pre>
 </div>
-<h2 id="sec:cfe9573cce03cb2912c44176c44378eb3eaec3c5">Null Values</h2>
+<h2 class="autosection" id="sec:cfe9573cce03cb2912c44176c44378eb3eaec3c5">Null Values</h2>
 <h3>Static Semantics</h3>
 <div>
 The null value has a polymorphic type that matches the required type given by context.

@@ -591,7 +591,7 @@ class BNF_Parser:
 
 def write_heading(fd, name, depth, anchor=None):
     if anchor:
-        fd.write("<h%u id=\"%s\">" % (depth, anchor))
+        fd.write("<h%u class=\"autosection\" id=\"%s\">" % (depth, anchor))
     else:
         fd.write("<h%u>" % depth)
     fd.write(html.escape(name))
@@ -624,7 +624,7 @@ def write_header(fd, obj_version, obj_license):
     fd.write("h1 {\n")
     fd.write("  counter-reset: section\n")
     fd.write("}\n")
-    fd.write("h2:before {\n")
+    fd.write("h2.autosection:before {\n")
     fd.write("  counter-increment: section;\n")
     fd.write("  content: counter(section) \". \";\n")
     fd.write("}\n")
