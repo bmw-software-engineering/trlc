@@ -179,14 +179,14 @@ class Source_Manager:
         self.update_common_root(file_name)
 
         self.rsl_files[file_name] = self.create_parser(file_name)
-        self.rsl_files[file_name].parse_rsl_preamble()
+        self.rsl_files[file_name].parse_preamble("rsl")
 
         self.register_package(
-            package_name = self.rsl_files[file_name].pkg.name,
+            package_name = self.rsl_files[file_name].cu.package.name,
             file_name    = file_name)
-        for import_name in self.rsl_files[file_name].raw_deps:
+        for import_name in self.rsl_files[file_name].cu.raw_imports:
             self.register_dependency(
-                package_name = self.rsl_files[file_name].pkg.name,
+                package_name = self.rsl_files[file_name].cu.package.name,
                 import_name  = import_name.value)
 
     def register_check_file(self, file_name):
@@ -206,10 +206,7 @@ class Source_Manager:
     def parse_rsl_files(self):
         # First, check that each package import is known
         for parser in self.rsl_files.values():
-            for t_import in parser.raw_deps:
-                parser.deps.append(parser.stab.lookup(self.mh,
-                                                      t_import,
-                                                      ast.Package))
+            parser.cu.resolve_imports(self.mh, self.stab)
 
         # Second, parse packages that have no unparsed
         # dependencies. Keep doing it until we parse everything or
@@ -257,11 +254,11 @@ class Source_Manager:
     def parse_trlc_files(self):
         ok = True
 
-        # First, pre-parse all files to discover all late packages and
-        # identify any conflicts
+        # First, pre-parse the file_preamble of all files to discover
+        # all late packages
         for name in sorted(self.trlc_files):
             try:
-                self.trlc_files[name].parse_trlc_preamble()
+                self.trlc_files[name].parse_preamble("trlc")
             except TRLC_Error:
                 ok = False
         if not ok:
@@ -461,14 +458,14 @@ def main():
         if options.show_file_list and ok:
             for filename in sorted(sm.rsl_files):
                 print("> Model %s (Package %s)" %
-                      (filename, sm.rsl_files[filename].pkg.name))
+                      (filename, sm.rsl_files[filename].cu.package.name))
             for filename in sorted(sm.check_files):
                 print("> Checks %s (Package %s)" %
-                      (filename, sm.check_files[filename].pkg.name))
+                      (filename, sm.check_files[filename].cu.package.name))
             if not options.lint:
                 for filename in sorted(sm.trlc_files):
                     print("> Requirements %s (Package %s)" %
-                          (filename, sm.trlc_files[filename].pkg.name))
+                          (filename, sm.trlc_files[filename].cu.package.name))
 
     if ok:
         return 0

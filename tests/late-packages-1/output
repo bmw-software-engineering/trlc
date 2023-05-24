@@ -1,2 +1,2 @@
 package a
-        ^ late-packages-1/b.trlc:1: error: duplicate definition, previous definition at a.trlc:1
+        ^ late-packages-1/b.trlc:1: warning: duplicate late declaration of package a, previous declaration in a.trlc:1; consider adding an rsl file declaring the package

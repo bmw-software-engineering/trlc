@@ -1,0 +1,2 @@
+package Foo
+        ^^^ duplicate-late-packages/foo.trlc:1: warning: duplicate late declaration of package Foo, previous declaration in bar.trlc:1; consider adding an rsl file declaring the package

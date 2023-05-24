@@ -242,15 +242,14 @@ class Markup_Parser(Parser_Base):
                 name              = self.ct.value,
                 error_location    = self.ct.location,
                 required_subclass = ast.Package)
-            if package != self.parent.pkg and \
-               package.name not in self.parent.imports:
+            if not self.parent.cu.is_visible(package):
                 self.mh.error(self.ct.location,
                               "package must be imported before use")
 
             self.match("REFLIST_DOT")
             self.match("REFLIST_IDENTIFIER")
         else:
-            package = self.parent.pkg
+            package = self.parent.cu.package
 
         ref = ast.Record_Reference(location = self.ct.location,
                                    name     = self.ct.value,
@@ -281,10 +280,7 @@ class Parser(Parser_Base):
                              keywords  = TRLC_Lexer.KEYWORDS)
         self.lint_mode = lint_mode
         self.stab      = stab
-        self.pkg       = None
-        self.raw_deps  = []
-        self.deps      = []
-        self.imports   = set()
+        self.cu        = ast.Compilation_Unit(file_name)
 
         self.builtin_bool    = stab.table["Boolean"]
         self.builtin_int     = stab.table["Integer"]
@@ -319,22 +315,25 @@ class Parser(Parser_Base):
         sym = scope.lookup(self.mh, self.ct)
 
         if isinstance(sym, ast.Package):
-            if sym != self.pkg and sym.name not in self.imports:
+            if not self.cu.is_visible(sym):
                 self.mh.error(self.ct.location,
                               "package must be imported before use")
             self.match("DOT")
             self.match("IDENTIFIER")
             return sym.symbols.lookup(self.mh, self.ct, required_subclass)
         else:
+            # Easiest way to generate the correct error message
             return scope.lookup(self.mh, self.ct, required_subclass)
 
     def parse_type_declaration(self):
         if self.peek_kw("enum"):
-            self.parse_enum_declaration()
+            n_item = self.parse_enum_declaration()
         elif self.peek_kw("tuple"):
-            self.parse_tuple_declaration()
+            n_item = self.parse_tuple_declaration()
         else:
-            self.parse_record_declaration()
+            n_item = self.parse_record_declaration()
+        assert isinstance(n_item, ast.Concrete_Type)
+        return n_item
 
     def parse_enum_declaration(self):
         self.match_kw("enum")
@@ -343,8 +342,8 @@ class Parser(Parser_Base):
         enum = ast.Enumeration_Type(name        = name.value,
                                     description = description,
                                     location    = name.location,
-                                    package     = self.pkg)
-        self.pkg.symbols.register(self.mh, enum)
+                                    package     = self.cu.package)
+        self.cu.package.symbols.register(self.mh, enum)
 
         self.match("C_BRA")
         while not self.peek("C_KET"):
@@ -355,6 +354,8 @@ class Parser(Parser_Base):
                                                enum        = enum)
             enum.literals.register(self.mh, lit)
         self.match("C_KET")
+
+        return enum
 
     def parse_tuple_field(self,
                           n_tuple,
@@ -396,7 +397,7 @@ class Parser(Parser_Base):
         n_tuple = ast.Tuple_Type(name        = name.value,
                                  description = description,
                                  location    = name.location,
-                                 package     = self.pkg)
+                                 package     = self.cu.package)
 
         self.match("C_BRA")
 
@@ -439,7 +440,9 @@ class Parser(Parser_Base):
         self.match("C_KET")
 
         # Late registration to avoid recursion in tuples
-        self.pkg.symbols.register(self.mh, n_tuple)
+        self.cu.package.symbols.register(self.mh, n_tuple)
+
+        return n_tuple
 
     def parse_record_component(self, n_record):
         assert isinstance(n_record, ast.Record_Type)
@@ -518,10 +521,10 @@ class Parser(Parser_Base):
         record = ast.Record_Type(name        = name.value,
                                  description = description,
                                  location    = name.location,
-                                 package     = self.pkg,
+                                 package     = self.cu.package,
                                  n_parent    = root_record,
                                  is_abstract = is_abstract)
-        self.pkg.symbols.register(self.mh, record)
+        self.cu.package.symbols.register(self.mh, record)
 
         self.match("C_BRA")
         while not self.peek("C_KET"):
@@ -557,6 +560,8 @@ class Parser(Parser_Base):
         # Finally mark record final if applicable
         if is_final:
             record.is_final = True
+
+        return record
 
     def parse_expression(self, scope):
         assert isinstance(scope, ast.Scope)
@@ -1164,10 +1169,14 @@ class Parser(Parser_Base):
     def parse_check_block(self):
         self.match_kw("checks")
         self.match("IDENTIFIER")
-        n_ctype = self.pkg.symbols.lookup(self.mh, self.ct, ast.Composite_Type)
+        n_ctype = self.cu.package.symbols.lookup(self.mh,
+                                                 self.ct,
+                                                 ast.Composite_Type)
+        n_check_block = ast.Check_Block(location = self.ct.location,
+                                        n_typ    = n_ctype)
         scope = ast.Scope()
         scope.push(self.stab)
-        scope.push(self.pkg.symbols)
+        scope.push(self.cu.package.symbols)
         scope.push(n_ctype.components)
         self.match("C_BRA")
         while not self.peek("C_KET"):
@@ -1201,10 +1210,13 @@ class Parser(Parser_Base):
                                 severity  = c_sev,
                                 t_message = t_msg)
             n_ctype.add_check(n_check)
+            n_check_block.add_check(n_check)
 
             assert scope.size() == 3
 
         self.match("C_KET")
+
+        return n_check_block
 
     def parse_section_declaration(self):
         self.match_kw("section")
@@ -1321,27 +1333,21 @@ class Parser(Parser_Base):
                 self.match("DOT")
                 self.match("IDENTIFIER")
                 the_pkg = self.stab.lookup(self.mh, t_name, ast.Package)
-                if the_pkg != self.pkg and the_pkg.name not in self.imports:
+                if not self.cu.is_visible(the_pkg):
                     self.mh.error(self.ct.location,
                                   "package must be imported before use")
                 t_name = self.ct
             else:
-                the_pkg = self.pkg
+                the_pkg = self.cu.package
 
             rv = ast.Record_Reference(location = t_name.location,
                                       name     = t_name.value,
                                       typ      = typ,
                                       package  = the_pkg)
+
+            # We can do an early lookup if the target is known
             if the_pkg.symbols.contains(t_name.value):
-                rv.target = the_pkg.symbols.lookup(self.mh,
-                                                   t_name,
-                                                   ast.Record_Object)
-                if not rv.target.n_typ.is_subclass_of(typ):
-                    self.mh.error(t_name.location,
-                                  "incorrect type, expected %s but %s is %s" %
-                                  (typ.name,
-                                   rv.name,
-                                   rv.target.n_typ.name))
+                rv.resolve_references(self.mh)
 
             return rv
 
@@ -1416,8 +1422,8 @@ class Parser(Parser_Base):
             location  = self.ct.location,
             n_typ     = r_typ,
             section   = self.section[-1] if self.section else None,
-            n_package = self.pkg)
-        self.pkg.symbols.register(self.mh, obj)
+            n_package = self.cu.package)
+        self.cu.package.symbols.register(self.mh, obj)
 
         self.match("C_BRA")
         while not self.peek("C_KET"):
@@ -1449,84 +1455,80 @@ class Parser(Parser_Base):
 
         self.match("C_KET")
 
+        return obj
+
     def parse_trlc_entry(self):
         if self.peek_kw("section"):
             self.parse_section_declaration()
         else:
-            self.parse_record_object_declaration()
+            self.cu.add_item(self.parse_record_object_declaration())
 
-    def parse_rsl_preamble(self):
+    def parse_preamble(self, kind):
+        assert kind in ("rsl", "check", "trlc")
+
+        # First, parse package indication, declaring the package if
+        # needed
         self.match_kw("package")
         self.match("IDENTIFIER")
 
-        self.pkg = ast.Package(self.ct.value,
-                               self.ct.location,
-                               self.stab)
-        self.stab.register(self.mh, self.pkg)
-        self.default_scope.push(self.pkg.symbols)
-
-        while self.peek_kw("import"):
-            self.match_kw("import")
-            self.match("IDENTIFIER")
-            self.raw_deps.append(self.ct)
-            self.imports.add(self.ct.value)
-
-    def parse_trlc_preamble(self):
-        self.match_kw("package")
-        self.match("IDENTIFIER")
-
-        if self.stab.contains(self.ct.value):
-            self.pkg = self.stab.lookup(self.mh, self.ct, ast.Package)
-            if self.pkg.declared_late:
-                # If this package is already declared late, then the
-                # correct semantics is to attempt to declare it late
-                # again and get an error.
-                self.pkg = ast.Package(self.ct.value,
-                                       self.ct.location,
-                                       self.stab)
-                self.pkg.declared_late = True
-                self.stab.register(self.mh, self.pkg)
+        if kind == "rsl":
+            declare_package = True
+        elif kind == "check":
+            declare_package = False
         else:
-            self.pkg = ast.Package(self.ct.value,
-                                   self.ct.location,
-                                   self.stab)
-            self.pkg.declared_late = True
-            self.stab.register(self.mh, self.pkg)
-        self.default_scope.push(self.pkg.symbols)
+            declare_package = not self.stab.contains(self.ct.value)
+
+        if declare_package:
+            pkg = ast.Package(name          = self.ct.value,
+                              location      = self.ct.location,
+                              builtin_stab  = self.stab,
+                              declared_late = kind == "trlc")
+            self.stab.register(self.mh, pkg)
+        else:
+            pkg = self.stab.lookup(self.mh, self.ct, ast.Package)
+            if pkg.declared_late and kind == "trlc":
+                self.mh.warning(
+                    self.ct.location,
+                    "duplicate late declaration of package %s,"
+                    " previous declaration in %s;"
+                    " consider adding an rsl file declaring the"
+                    " package" %
+                    (pkg.name,
+                     self.mh.cross_file_reference(pkg.location)))
+
+        self.cu.set_package(pkg)
+        self.default_scope.push(self.cu.package.symbols)
+
+        # Second, parse import list (but don't resolve names yet)
+        if kind != "check":
+            while self.peek_kw("import"):
+                self.match_kw("import")
+                self.match("IDENTIFIER")
+                self.cu.add_import(self.mh, self.ct)
 
     def parse_rsl_file(self):
-        assert self.pkg is not None
+        assert self.cu.package is not None
 
         while not self.peek_eof():
             if self.peek_kw("checks"):
-                self.parse_check_block()
+                self.cu.add_item(self.parse_check_block())
             else:
-                self.parse_type_declaration()
+                self.cu.add_item(self.parse_type_declaration())
 
         self.match_eof()
 
     def parse_check_file(self):
-        self.match_kw("package")
-        self.match("IDENTIFIER")
-
-        self.pkg = self.stab.lookup(self.mh, self.ct, ast.Package)
-        self.default_scope.push(self.pkg.symbols)
+        self.parse_preamble("check")
+        self.cu.resolve_imports(self.mh, self.stab)
 
         while not self.peek_eof():
-            self.parse_check_block()
+            self.cu.add_item(self.parse_check_block())
 
         self.match_eof()
 
     def parse_trlc_file(self):
-        while self.peek_kw("import"):
-            self.match_kw("import")
-            self.match("IDENTIFIER")
-            pkg = self.stab.lookup(self.mh, self.ct, ast.Package)
-            if pkg.declared_late:
-                self.mh.error(self.ct.location,
-                              "package must be declared in rsl file to be"
-                              " importable")
-            self.imports.add(pkg.name)
+        assert self.cu.package is not None
+        self.cu.resolve_imports(self.mh, self.stab)
 
         while self.peek_kw("section") or self.peek("IDENTIFIER"):
             self.parse_trlc_entry()

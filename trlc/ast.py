@@ -159,6 +159,92 @@ class Node:
         assert False, "dump not implemented for %s" % self.__class__.__name__
 
 
+class Check_Block(Node):
+    """Node representing check blocks
+
+    Semantically this has no meaning, but it's nice to have some kind
+    of similar representation to how it's in the file.
+
+    :attribute n_typ: composite type for which the checks apply
+    :type: Composite_Type
+
+    :attribute checks: list of checks
+    :type: list[Check]
+
+    """
+    def __init__(self, location, n_typ):
+        super().__init__(location)
+        assert isinstance(n_typ, Composite_Type)
+        self.n_typ  = n_typ
+        self.checks = []
+
+    def add_check(self, n_check):
+        assert isinstance(n_check, Check)
+        self.checks.append(n_check)
+
+
+class Compilation_Unit(Node):
+    """Special node to represent the concrete file structure
+
+    :attribute package: the main package this file declares or contributes to
+    :type: Package
+
+    :attribute imports: package imported by this file
+    :type: list[Package]
+
+    :attribute items: list of
+    :type: list[Node]
+
+    """
+    def __init__(self, file_name):
+        super().__init__(Location(file_name))
+        self.package       = None
+        self.imports       = None
+        self.raw_imports   = []
+        self.items         = []
+
+    def set_package(self, pkg):
+        assert isinstance(pkg, Package)
+        self.package = pkg
+
+    def add_import(self, mh, t_import):
+        assert isinstance(mh, Message_Handler)
+        assert isinstance(t_import, Token)
+        assert t_import.kind == "IDENTIFIER"
+
+        if t_import.value == self.package.name:
+            mh.error(t_import.location,
+                     "package %s cannot import itself" % self.package.name)
+
+        # Skip duplicates
+        for t_previous in self.raw_imports:
+            if t_previous.value == t_import.value:
+                mh.warning(t_import.location,
+                           "duplicate import of package %s" % t_import.value)
+                return
+
+        self.raw_imports.append(t_import)
+
+    def resolve_imports(self, mh, stab):
+        assert isinstance(mh, Message_Handler)
+        assert isinstance(stab, Symbol_Table)
+        self.imports = set()
+        for t_import in self.raw_imports:
+            self.imports.add(stab.lookup(mh, t_import, Package))
+
+    def is_visible(self, n_pkg):
+        assert self.imports is not None
+        assert isinstance(n_pkg, Package)
+        return n_pkg == self.package or n_pkg in self.imports
+
+    def add_item(self, node):
+        assert isinstance(node, (Concrete_Type,
+                                 Check_Block,
+                                 Record_Object)), \
+            "trying to add %s to a compilation unit" % node.__class__.__name__
+        self.items.append(node)
+
+
 class Check(Node):
     """User defined check
 
@@ -2006,19 +2092,25 @@ class Package(Entity):
     both types and record objects. A package is not associated with
     just a single file, it can be spread over multiple files.
 
+    :attribute declared_late: indicates if this package is declared in a \
+      trlc file
+    :type: bool
+
     :attribute symbols: symbol table of the package
     :type: Symbol_Table
 
     """
-    def __init__(self, name, location, builtin_stab):
+    def __init__(self, name, location, builtin_stab, declared_late):
         super().__init__(name, location)
         assert isinstance(builtin_stab, Symbol_Table)
+        assert isinstance(declared_late, bool)
         self.symbols = Symbol_Table()
         self.symbols.make_visible(builtin_stab)
-        self.declared_late = False
+        self.declared_late = declared_late
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Package %s" % self.name)
+        self.write_indent(indent + 1, "Declared_Late: %s" % self.declared_late)
         self.symbols.dump(indent + 1, omit_heading=True)
 
 

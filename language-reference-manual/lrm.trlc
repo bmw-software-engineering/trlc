@@ -2,7 +2,7 @@ package LRM
 
 Versioning Version {
   major = 2
-  minor = 7
+  minor = 8
 }
 
 GFDL_License License {
@@ -246,7 +246,9 @@ after the first error.
 section "Preamble" {
 
   Grammar Preamble {
-    text = '''All TRLC files start with a package indication.'''
+    text = '''
+      All files start with a package indication and an optional import list.
+    '''
     bnf = '''
 file_preamble ::= package_indication
                   { import_clause }
@@ -262,9 +264,8 @@ import_clause ::= 'import' IDENTIFIER_name
   }
 
   Static_Semantics Import_Visibility {
-    text = '''A package declared in an RSL file may be imported, in which
-              case its name may be used as the prefix of a
-              `qualified_name`.'''
+    text = '''A package may be imported, in which case its name may be
+              used as the prefix of a `qualified_name`.'''
   }
 
   Static_Semantics Self_Imports {
@@ -429,10 +430,10 @@ section "Type declarations" {
   }
 
   Static_Semantics Duplicate_Types {
-    text = '''It is an error to create a type with a name that is
-              potentially visible. (Note: this especially
-              includes shadowing one of the builtin types,
-              but also means you cannot shadow packages.)'''
+    text = '''It is an error to create a type with a name that is already
+              visible. (Note: this especially includes
+              shadowing one of the builtin types, but also
+              means you cannot shadow packages.)'''
   }
 
   section "Enumerations" {
@@ -761,7 +762,7 @@ section "Check Files" {
   Grammar Check_File {
     text = '''A `.check` file is simply a set of check blocks.'''
     bnf = '''
-      check_file ::= package_indication
+      check_file ::= file_preamble
                      { check_block }
       '''
   }
@@ -770,6 +771,11 @@ section "Check Files" {
     text = '''It is an error to indicate a package that has not been
               declared in an `.rsl` file.'''
   }
+
+  Static_Semantics Import_In_Check {
+    text = '''A check file may not import any packages.'''
+  }
+
 
 }
 
@@ -1556,17 +1562,25 @@ section "TRLC Files" {
   }
 
   Static_Semantics Late_Package_Declarations {
-    text = '''Note that it is permitted to indicate a package that has
+    text = '''It is permitted to indicate a package that has
               not been declared in an `.rsl` file, in which
               case it is declared by the
               package_indication in the `.trlc` file. Such a package is
-              declared late.'''
+              declared late. If two `.trlc` files declare the same
+              package, then it is unspecified which file actually
+              declares it.'''
   }
 
-  Text Late_Package_Declarations_Implications {
-    text = '''*(Note that such a late declared package is properly declared,
-              i.e. if you attempt to have multiple late declared packages with
-              the same name you will get an error.)*'''
+  Recommendation Duplicate_Late_Packages {
+    text = '''It is recommended to issue a warning if two `.trlc` files
+              declare the same package.'''
+  }
+
+  Recommendation TRLC_Parse_Issue {
+    text = '''For TRLC files it is impossible fully parse a file
+              in isolation, since we must process at least the package
+              indication of every other trlc file to know which import
+              statements are valid.'''
   }
 
 }

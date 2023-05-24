@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 2.7 of [TRLC language reference
+Up to date with version 2.8 of [TRLC language reference
 manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
@@ -23,13 +23,18 @@ quantifying over all references.)
 * [TRLC] Relax errors surrounding array sizes, they are now lint
   messages like the language manual suggests.
 
-* [LRM] Clarify how late packages are supposed to work in the
-  LRM. This is not really a change, so no version increase.
+* [LRM, TRLC] Remove limitation on late packages. You may now declare
+  any number of packages in `trlc` files; and you may even import
+  them. It is still recommended to have a `rsl` file for a package
+  spanning multiple files, even if it's basically blank; however the
+  technical limitation and language rules surrounding late packages
+  have been removed.
 
-* [TRLC] Fix bug relating to late packages where multiple late
-  packages with the same name were not detected correctly. This is now
-  working as expected, and the case where we attempt to import a late
-  package has had it's error message improved as a side-effect.
+* [TRLC] A warning is now issued by the tools when encountering a
+  duplicate import statement.
+
+* [TRLC] A warning is now issued by the tools when encountering
+  duplicate late package declarations.
 
 ### 1.1.4
 

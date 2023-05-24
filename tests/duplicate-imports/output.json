@@ -1,0 +1,3 @@
+import Foo
+       ^^^ duplicate-imports/bar.trlc:4: warning: duplicate import of package Foo
+{}

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>TRLC Language Reference Manual, Version 2.7</title>
+<title>TRLC Language Reference Manual, Version 2.8</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -84,7 +84,7 @@ span.TRLC_STRING {
 </style>
 </head>
 <body>
-<h1>TRLC Language Reference Manual, Version 2.7</h1>
+<h1>TRLC Language Reference Manual, Version 2.8</h1>
 <div>
 Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.3 or any later version published by the Free SoftwareFoundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 A copy of the license is included in the section entitled "Appendix A: GNU Free Documentation License".
@@ -349,7 +349,7 @@ It is unspecified how an implementation treats errors in <code>.trlc</code> file
 </div>
 <h2 class="autosection" id="sec:1b5022091302172b7af39971681b5b026fc2fa64">Preamble</h2>
 <div>
-All TRLC files start with a package indication.
+All files start with a package indication and an optional import list.
 </div>
 <div class='code'>
 <pre>
@@ -366,7 +366,7 @@ All TRLC files start with a package indication.
 The package indication defines the &quot;current package&quot;.
 </div>
 <div>
-A package declared in an RSL file may be imported, in which case its name may be used as the prefix of a <code>qualified_name</code>.
+A package may be imported, in which case its name may be used as the prefix of a <code>qualified_name</code>.
 </div>
 <div>
 A package may not import itself.
@@ -468,7 +468,7 @@ The name must be a valid symbol in the current scope (if no package is provided)
 </div>
 <h3>Static Semantics</h3>
 <div>
-It is an error to create a type with a name that is potentially visible. (Note: this especially includes shadowing one of the builtin types, but also means you cannot shadow packages.)
+It is an error to create a type with a name that is already visible. (Note: this especially includes shadowing one of the builtin types, but also means you cannot shadow packages.)
 </div>
 <h3 class="autosection" id="sec:e1f8bb3ddd6a0895152a453fa14399b694157f38">Enumerations</h3>
 <div class='code'>
@@ -669,13 +669,16 @@ A <code>.check</code> file is simply a set of check blocks.
 </div>
 <div class='code'>
 <pre>
-<span id="bnf-check_file">check_file</span> ::= <span class="tooltip"><a href="#bnf-package_indication">package_indication</a><span class="tooltiptext">package IDENTIFIER</span></span>
+<span id="bnf-check_file">check_file</span> ::= <span class="tooltip"><a href="#bnf-file_preamble">file_preamble</a><span class="tooltiptext">package_indication { import_clause }</span></span>
                { <span class="tooltip"><a href="#bnf-check_block">check_block</a><span class="tooltiptext">checks IDENTIFIER { { check_declaration } }</span></span> }
 </pre>
 </div>
 <h3>Static Semantics</h3>
 <div>
 It is an error to indicate a package that has not been declared in an <code>.rsl</code> file.
+</div>
+<div>
+A check file may not import any packages.
 </div>
 <h2 class="autosection" id="sec:e927d676860613a7cb2f750b822d434b0064ea5e">Checks</h2>
 <div class='code'>
@@ -1113,10 +1116,14 @@ A <code>.trlc</code> file is simply a set of record object declarations.
 </div>
 <h3>Static Semantics</h3>
 <div>
-Note that it is permitted to indicate a package that has not been declared in an <code>.rsl</code> file, in which case it is declared by the package_indication in the <code>.trlc</code> file. Such a package is declared late.
+It is permitted to indicate a package that has not been declared in an <code>.rsl</code> file, in which case it is declared by the package_indication in the <code>.trlc</code> file. Such a package is declared late. If two <code>.trlc</code> files declare the same package, then it is unspecified which file actually declares it.
+</div>
+<h3>Implementation Recommendation</h3>
+<div>
+It is recommended to issue a warning if two <code>.trlc</code> files declare the same package.
 </div>
 <div>
-<i>(Note that such a late declared package is properly declared, i.e. if you attempt to have multiple late declared packages with the same name you will get an error.)</i>
+For TRLC files it is impossible fully parse a file in isolation, since we must process at least the package indication of every other trlc file to know which import statements are valid.
 </div>
 <h2 class="autosection" id="sec:6c2981b99c4b49558783bd900a1dc95a00a454f0">Sections</h2>
 <div>

@@ -1,2 +1,1 @@
-import Foo
-       ^^^ late-packages-2/bar.trlc:2: error: package must be declared in rsl file to be importable
+{}

@@ -91,7 +91,8 @@ class Linter:
             pass
         elif n_typ.lower_bound > n_typ.upper_bound:
             self.mh.check(n_typ.loc_upper,
-                          "upper bound must be at least %u" % n_typ.lower_bound,
+                          "upper bound must be at least %u" %
+                          n_typ.lower_bound,
                           "impossible_array_types")
         elif n_typ.upper_bound == 0:
             self.mh.check(n_typ.loc_upper,
@@ -105,5 +106,5 @@ class Linter:
         elif n_typ.upper_bound == 1 and n_typ.lower_bound == 0:
             self.mh.check(n_typ.loc_upper,
                           "consider making this array an"
-                          " optional %s" % c_typ.name,
+                          " optional %s" % n_typ.element_type.name,
                           "weird_array_types")

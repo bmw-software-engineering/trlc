@@ -1004,7 +1004,8 @@ def write_example(fd, mh, obj):
                             file_name = obj.location.file_name,
                             lint_mode = False,
                             lexer     = rsl_lexers)
-        rsl_parser.parse_rsl_preamble()
+        rsl_parser.parse_preamble("rsl")
+        rsl_parser.cu.resolve_imports(mh, stab)
         rsl_parser.parse_rsl_file()
     except TRLC_Error:
         valid_example = False
@@ -1023,7 +1024,7 @@ def write_example(fd, mh, obj):
                                  file_name = obj.location.file_name,
                                  lint_mode = False,
                                  lexer     = trlc_lexers)
-            trlc_parser.parse_trlc_preamble()
+            trlc_parser.parse_preamble("trlc")
             trlc_parser.parse_trlc_file()
         except TRLC_Error:
             valid_example = False
