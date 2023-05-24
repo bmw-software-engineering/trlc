@@ -18,7 +18,7 @@ def main():
     module = trlc.ast
     root   = module.Node
 
-    print("digraph {")
+    print('digraph "AST Hierarchy" {')
     print('rankdir="LR";')
     for name, c in inspect.getmembers(module, inspect.isclass):
         if not issubclass(c, root):
