@@ -17,8 +17,10 @@ test-all:
 
 docs:
 	rm -rf docs
-	sphinx-build -c sphinx -b html . docs
+	mkdir docs
 	@python3 trlc-lrm-generator.py
+	@python3 -m util.mk_ast_hierarchy | dot -Tsvg > docs/ast_hierarchy.svg
+	sphinx-build -c sphinx -b html . docs
 
 docs-and-commit: docs
 	git add docs
