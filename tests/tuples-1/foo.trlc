@@ -16,7 +16,7 @@ Migrated_Requirement Good_Kitten {
   description = "This is a nice potato."
   dim         = (42, 666)
   cb_link     = 12345@42
-  doors_id    = 500: 12345@6.1
+  doors_id    = 0x500:12345@6.1
 }
 
 Potato_Requirement Wibble {
