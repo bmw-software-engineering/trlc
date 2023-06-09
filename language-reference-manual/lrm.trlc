@@ -154,10 +154,14 @@ section "Lexing" {
 
   section "Integers" {
     Terminal Integers {
-      text = '''Integers are base 10, and leading zeros are
-                effectively ignored.'''
-      def = "INTEGER ::= [0-9]+"
-      examples = ["0", "42", "007"]
+      text = '''Integers are base 2 (prefixed by `0b`), 10, or 16 (prefixed
+                by `0x`), and leading zeros are effectively
+                ignored. It is possible to separate digit
+                groups with an underscore for
+                readability. It shall be a lexing error to
+                use digits that do not fit into the base.'''
+      def = "INTEGER ::= (0[xb])?[0-9a-fA-F]+(_[0-9a-fA-F]+)*"
+      examples = ["0", "42", "007", "1_000", "0xdeadbeef", "0b0010_1010"]
     }
   }
 
@@ -165,8 +169,8 @@ section "Lexing" {
     Terminal Decimals {
       text = '''Decimals are base 10, and leading and trailing zeros are
                 effectively ignored.'''
-      def = "DECIMAL ::= [0-9]+\.[0-9]+"
-      examples = ["12.0", "3.14", "0.0800"]
+      def = "DECIMAL ::= [0-9]+(_[0-9]+)*\.[0-9]+(_[0-9]+)*"
+      examples = ["12.0", "3.1415_9265_36", "0.0800", "1_000_000.00"]
     }
   }
 
@@ -545,6 +549,19 @@ section "Type declarations" {
       '''
     }
 
+    Recommendation Tuple_Based_Literal_Ambiguity {
+      text = '''
+        There is a potential source of ambiguity between
+        tuples with two or more integers separated by a `x`
+        or `b`. This is resolved by giving precedence to the
+        lexer. For example the string `0x123` should yield
+        the hex integer 291; but the string `0 x123` or `0 x
+        123` will generate the tuple. It is recommended to
+        warn when building tuples where a `b` or `x`
+        separator follows an integer.
+      '''
+    }
+
     Example Tuple_Example {
       hidden_rsl = '''package Example'''
       rsl = '''
@@ -552,6 +569,7 @@ section "Type declarations" {
          x Decimal
          y Decimal
       }
+      // allows you to write (4, 3)
 
       tuple Codebeamer_Item {
          item             Integer
@@ -567,7 +585,7 @@ section "Type declarations" {
          separator @
          baseline optional Decimal
       }
-      // allows you to write 42:666@1.0
+      // allows you to write 0xdeadbeef: 666@1.0
       '''
     }
 

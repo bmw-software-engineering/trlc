@@ -1,0 +1,2 @@
+T test1 { v = 5.5.5 }
+                 ^ int-literals-2/foo.trlc:3: lex error: decimal point is not allowed here

@@ -1,0 +1,2 @@
+T test1 { v = 0x_3 }
+                ^ int-literals-7/foo.trlc:3: lex error: base 16 digit is required here

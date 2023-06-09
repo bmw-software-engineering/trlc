@@ -16,13 +16,6 @@ quantifying over all references.)
 
 ### 1.1.5-dev
 
-* [TRLC] Improve --lint output by appending a rule name in the output
-  (in a style similar to clang-tidy). In the future it will be
-  possible to turn rules off you don't like.
-
-* [TRLC] Relax errors surrounding array sizes, they are now lint
-  messages like the language manual suggests.
-
 * [LRM, TRLC] Remove limitation on late packages. You may now declare
   any number of packages in `trlc` files; and you may even import
   them. It is still recommended to have a `rsl` file for a package
@@ -30,11 +23,29 @@ quantifying over all references.)
   technical limitation and language rules surrounding late packages
   have been removed.
 
+* [LRM, TRLC] Add base 2 and base 16 integer literals. You can now
+  write things like `0xdeadbeef` and `0b10010010`. Octal literals are
+  not supported.
+
+* [LRM, TRLC] Add support for readability separators in integer and
+  decimal literals. You can now write things like `1_000_000.00` or
+  `0b1001_0010`.
+
+* [TRLC] Improve --lint output by appending a rule name in the output
+  (in a style similar to clang-tidy). In the future it will be
+  possible to turn rules off you don't like.
+
+* [TRLC] Relax errors surrounding array sizes, they are now lint
+  messages like the language manual suggests.
+
 * [TRLC] A warning is now issued by the tools when encountering a
   duplicate import statement.
 
 * [TRLC] A warning is now issued by the tools when encountering
   duplicate late package declarations.
+
+* [TRLC] New --lint check for detecting tuples with separators that
+  could be confused with base 2 or base 16 integer literals.
 
 ### 1.1.4
 

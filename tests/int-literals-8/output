@@ -1,0 +1,2 @@
+T test1 { v = 0x
+              ^^ int-literals-8/foo.trlc:5: lex error: unfinished base 16 integer

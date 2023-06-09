@@ -1,0 +1,2 @@
+T test1 { v = 0bf00 }
+                ^ int-literals-5/foo.trlc:3: lex error: f is not a valid base 2 digit

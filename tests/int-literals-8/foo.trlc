@@ -1,0 +1,5 @@
+package foo
+
+/* Missing newline at end is intional */
+
+T test1 { v = 0x

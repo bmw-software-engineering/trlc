@@ -419,22 +419,94 @@ class TRLC_Lexer(Lexer_Base):
 
         elif self.is_numeric(self.cc):
             kind = "INTEGER"
-            while self.nc and self.is_numeric(self.nc):
-                self.advance()
 
-            if self.nc == "." and self.nnc != ".":
-                kind = "DECIMAL"
+            if self.cc == "0" and self.nc == "b":
+                digits_allowed   = "01"
+                digits_forbidden = "23456789abcdefABCDEF"
+                int_base         = 2
+                require_digit    = True
+                decimal_allowed  = False
                 self.advance()
-                if not self.nc or not self.is_numeric(self.nc):
+            elif self.cc == "0" and self.nc == "x":
+                digits_allowed   = "0123456789abcdefABCDEF"
+                digits_forbidden = ""
+                int_base         = 16
+                require_digit    = True
+                decimal_allowed  = False
+                self.advance()
+            else:
+                digits_allowed   = "0123456789"
+                digits_forbidden = "abcdefABCDEF"
+                int_base         = 10
+                require_digit    = False
+                decimal_allowed  = True
+
+            while self.nc:
+                if self.nc in digits_allowed:
+                    self.advance()
+                    require_digit = False
+
+                elif self.nc in digits_forbidden:
                     self.mh.lex_error(
                         Source_Reference(lexer      = self,
                                          start_line = start_line,
                                          start_col  = start_col,
-                                         start_pos  = start_pos,
-                                         end_pos    = self.lexpos),
-                        "unfinished decimal number")
-                while self.nc and self.is_numeric(self.nc):
+                                         start_pos  = self.lexpos + 1,
+                                         end_pos    = self.lexpos + 1),
+                        "%s is not a valid base %u digit" % (self.nc,
+                                                             int_base))
+
+                elif require_digit:
+                    self.mh.lex_error(
+                        Source_Reference(lexer      = self,
+                                         start_line = start_line,
+                                         start_col  = start_col,
+                                         start_pos  = self.lexpos + 1,
+                                         end_pos    = self.lexpos + 1),
+                        "base %u digit is required here" % int_base)
+
+                elif self.nc == "_":
                     self.advance()
+                    require_digit = True
+
+                elif self.nc == "." and self.nnc == ".":
+                    # This is a range token, so that one can't be part
+                    # of our number anymore
+                    break
+
+                elif self.nc == ".":
+                    self.advance()
+                    if not decimal_allowed:
+                        if int_base == 10:
+                            msg = "decimal point is not allowed here"
+                        else:
+                            msg = ("base %u integer may not contain a"
+                                   " decimal point" % int_base)
+                        self.mh.lex_error(
+                            Source_Reference(lexer      = self,
+                                             start_line = start_line,
+                                             start_col  = start_col,
+                                             start_pos  = self.lexpos,
+                                             end_pos    = self.lexpos),
+                            msg)
+                    decimal_allowed   = False
+                    require_digit     = True
+                    kind              = "DECIMAL"
+
+                else:  # pragma: no cover
+                    # This is actually a false
+                    # alarm, this line is covered (it's the only
+                    # normal way to exit this loop.
+                    break
+
+            if require_digit:
+                self.mh.lex_error(
+                    Source_Reference(lexer      = self,
+                                     start_line = start_line,
+                                     start_col  = start_col,
+                                     start_pos  = start_pos,
+                                     end_pos    = self.lexpos),
+                    "unfinished base %u integer" % int_base)
 
         else:
             self.mh.lex_error(self.current_location(),
@@ -469,10 +541,16 @@ class TRLC_Lexer(Lexer_Base):
                 value = triple_quoted_string_value(value)
 
         elif kind == "INTEGER":
-            value = int(sref.text())
+            base_text = sref.text().replace("_", "")
+            if int_base == 10:
+                value = int(base_text)
+            elif int_base == 2:
+                value = int(base_text[2:], base=2)
+            else:
+                value = int(base_text[2:], base=16)
 
         elif kind == "DECIMAL":
-            value = Fraction(sref.text())
+            value = Fraction(sref.text().replace("_", ""))
 
         elif kind == "COMMENT":
             value = sref.text()

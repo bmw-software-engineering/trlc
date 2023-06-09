@@ -1,0 +1,3 @@
+separator x
+          ^ lint-ambiguous-literals/foo.rsl:5: warning: x separator after integer component creates ambiguities with base 16 literals [separator_based_literal_ambiguity]
+Verified 1 model(s) and 0 check(s) and found 1 warning(s)

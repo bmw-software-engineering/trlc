@@ -1,0 +1,2 @@
+T test1 { v = 5_ }
+                ^ int-literals-3/foo.trlc:3: lex error: base 10 digit is required here

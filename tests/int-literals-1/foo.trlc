@@ -1,0 +1,6 @@
+package foo
+
+T test1 { v = 5 }
+T test2 { v = 1_000 }
+T test3 { v = 0b0010_1010 }
+T test4 { v = 0xdead_beef }

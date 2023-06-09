@@ -65,8 +65,36 @@ class Linter:
         if isinstance(n_typ, ast.Record_Type):
             self.verify_record_type(n_typ)
 
+        elif isinstance(n_typ, ast.Tuple_Type):
+            self.verify_tuple_type(n_typ)
+
         elif isinstance(n_typ, ast.Array_Type):
             self.verify_array_type(n_typ)
+
+    def verify_tuple_type(self, n_tuple_type):
+        assert isinstance(n_tuple_type, ast.Tuple_Type)
+
+        # Detect confusing separators
+        previous_was_int = False
+        for n_item in n_tuple_type.iter_sequence():
+            if isinstance(n_item, ast.Composite_Component) and \
+               isinstance(n_item.n_typ, ast.Builtin_Integer):
+                previous_was_int = True
+            elif isinstance(n_item, ast.Separator) and previous_was_int:
+                if n_item.token.kind == "IDENTIFIER" and \
+                   n_item.token.value in ("x", "b"):
+                    self.mh.check(n_item.location,
+                                  "%s separator after integer component"
+                                  " creates ambiguities with base %u literals"
+                                  % (n_item.token.value,
+                                     2 if n_item.token.value == "b" else 16),
+                                  "separator_based_literal_ambiguity")
+            else:
+                previous_was_int = False
+
+        # Walk over components
+        for n_component in n_tuple_type.components.values():
+            self.verify_type(n_component.n_typ)
 
     def verify_record_type(self, n_record_type):
         assert isinstance(n_record_type, ast.Record_Type)

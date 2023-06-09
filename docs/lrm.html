@@ -280,16 +280,19 @@ Preference is (obviously) given to longer delimiters if there is ambiguity; i.e.
 </div>
 <h3 class="autosection" id="sec:707590991971c8cbba0fcbbab41d495f5267f09b">Integers</h3>
 <div>
-Integers are base 10, and leading zeros are effectively ignored.
+Integers are base 2 (prefixed by <code>0b</code>), 10, or 16 (prefixed by <code>0x</code>), and leading zeros are effectively ignored. It is possible to separate digit groups with an underscore for readability. It shall be a lexing error to use digits that do not fit into the base.
 </div>
 <div class='code'>
-<code id="bnf-INTEGER">INTEGER ::= [0-9]+</code>
+<code id="bnf-INTEGER">INTEGER ::= (0[xb])?[0-9a-fA-F]+(_[0-9a-fA-F]+)*</code>
 </div>
 <div>
 Examples:<ul>
   <li>0</li>
   <li>42</li>
   <li>007</li>
+  <li>1_000</li>
+  <li>0xdeadbeef</li>
+  <li>0b0010_1010</li>
 </ul>
 </div>
 <h3 class="autosection" id="sec:6d1f18e149654f815a45d2f2e4a8c22b2fca2b30">Decimals</h3>
@@ -297,13 +300,14 @@ Examples:<ul>
 Decimals are base 10, and leading and trailing zeros are effectively ignored.
 </div>
 <div class='code'>
-<code id="bnf-DECIMAL">DECIMAL ::= [0-9]+\.[0-9]+</code>
+<code id="bnf-DECIMAL">DECIMAL ::= [0-9]+(_[0-9]+)*\.[0-9]+(_[0-9]+)*</code>
 </div>
 <div>
 Examples:<ul>
   <li>12.0</li>
-  <li>3.14</li>
+  <li>3.1415_9265_36</li>
   <li>0.0800</li>
+  <li>1_000_000.00</li>
 </ul>
 </div>
 <h3 class="autosection" id="sec:a1e5f01b700e2c39a01c965ab74b3939b47b1a27">Strings</h3>
@@ -537,6 +541,10 @@ After an optional field has been declared, all fields following it must also be 
 <div>
 It is an error to declare two fields with the same name in the same tuple. <i>(Note that it is possible, but a bad idea, to have a separator with the same identifier as a field.)</i>
 </div>
+<h4>Implementation Recommendation</h4>
+<div>
+There is a potential source of ambiguity between tuples with two or more integers separated by a <code>x</code> or <code>b</code>. This is resolved by giving precedence to the lexer. For example the string <code>0x123</code> should yield the hex integer 291; but the string <code>0 x123</code> or <code>0 x 123</code> will generate the tuple. It is recommended to warn when building tuples where a <code>b</code> or <code>x</code> separator follows an integer.
+</div>
 <h4>Example</h4>
 <div class='code'>
 <pre>
@@ -544,6 +552,7 @@ It is an error to declare two fields with the same name in the same tuple. <i>(N
    <span class="TRLC_IDENTIFIER">x</span> <span class="TRLC_IDENTIFIER">Decimal</span>
    <span class="TRLC_IDENTIFIER">y</span> <span class="TRLC_IDENTIFIER">Decimal</span>
 <span class="TRLC_C_KET">}</span>
+<span class="TRLC_COMMENT">// allows you to write (4, 3)</span>
 
 <span class="TRLC_KEYWORD">tuple</span> <span class="TRLC_IDENTIFIER">Codebeamer_Item</span> <span class="TRLC_C_BRA">{</span>
    <span class="TRLC_IDENTIFIER">item</span>             <span class="TRLC_IDENTIFIER">Integer</span>
@@ -559,7 +568,7 @@ It is an error to declare two fields with the same name in the same tuple. <i>(N
    <span class="TRLC_KEYWORD">separator</span> <span class="TRLC_AT">@</span>
    <span class="TRLC_IDENTIFIER">baseline</span> <span class="TRLC_KEYWORD">optional</span> <span class="TRLC_IDENTIFIER">Decimal</span>
 <span class="TRLC_C_KET">}</span>
-<span class="TRLC_COMMENT">// allows you to write 42:666@1.0</span></pre>
+<span class="TRLC_COMMENT">// allows you to write 0xdeadbeef: 666@1.0</span></pre>
 </div>
 <h3 class="autosection" id="sec:fff14f02c0a590def7283b89960c98af94922c47">Record declarations</h3>
 <div class='code'>
@@ -575,8 +584,8 @@ It is an error to declare two fields with the same name in the same tuple. <i>(N
 <span id="bnf-component_declaration">component_declaration</span> ::= <span class="tooltip"><a href="#bnf-described_name">described_name</a><span class="tooltiptext">IDENTIFIER [ STRING ]</span></span> [ 'optional' ]
                           <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_COMPONENT_TYPE</i> [ <span class="tooltip"><a href="#bnf-array_declaration">array_declaration</a><span class="tooltiptext">[ INTEGER .. * ] | [ INTEGER .. INTEGER ]</span></span> ]
 
-<span id="bnf-array_declaration">array_declaration</span> ::= '[' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span><i>_lower</i> '..' '*' ']'
-                    | '[' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span><i>_lower</i> '..' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span><i>_upper</i> ']'
+<span id="bnf-array_declaration">array_declaration</span> ::= '[' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">(0[xb])?[0-9a-fA-F]+(_[0-9a-fA-F]+)*</span></span><i>_lower</i> '..' '*' ']'
+                    | '[' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">(0[xb])?[0-9a-fA-F]+(_[0-9a-fA-F]+)*</span></span><i>_lower</i> '..' <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">(0[xb])?[0-9a-fA-F]+(_[0-9a-fA-F]+)*</span></span><i>_upper</i> ']'
 
 <span id="bnf-component_freezing">component_freezing</span> ::= 'freeze' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component</i> '=' <a href="#bnf-value">value</a>
 </pre>
@@ -776,8 +785,8 @@ It is an important design goal to keep the type system sane and following LSP. I
          | 'not' <a href="#bnf-primary">primary</a>
          | 'abs' <a href="#bnf-primary">primary</a>
 
-<span id="bnf-primary">primary</span> ::= <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span>
-          | <span class="tooltip"><a href="#bnf-DECIMAL">DECIMAL</a><span class="tooltiptext">[0-9]+\.[0-9]+</span></span>
+<span id="bnf-primary">primary</span> ::= <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">(0[xb])?[0-9a-fA-F]+(_[0-9a-fA-F]+)*</span></span>
+          | <span class="tooltip"><a href="#bnf-DECIMAL">DECIMAL</a><span class="tooltiptext">[0-9]+(_[0-9]+)*\.[0-9]+(_[0-9]+)*</span></span>
           | <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span>
           | 'true'
           | 'false'
@@ -1143,8 +1152,8 @@ A section has no semantic impact, and no impact on name resolution. Section name
 
 <span id="bnf-component_association">component_association</span> ::= <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_component_name</i> '=' <a href="#bnf-value">value</a>
 
-<span id="bnf-value">value</span> ::= [ <span class="tooltip"><a href="#bnf-adding_operator">adding_operator</a><span class="tooltiptext">+ | -</span></span> ] <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">[0-9]+</span></span>
-        | [ <span class="tooltip"><a href="#bnf-adding_operator">adding_operator</a><span class="tooltiptext">+ | -</span></span> ] <span class="tooltip"><a href="#bnf-DECIMAL">DECIMAL</a><span class="tooltiptext">[0-9]+\.[0-9]+</span></span>
+<span id="bnf-value">value</span> ::= [ <span class="tooltip"><a href="#bnf-adding_operator">adding_operator</a><span class="tooltiptext">+ | -</span></span> ] <span class="tooltip"><a href="#bnf-INTEGER">INTEGER</a><span class="tooltiptext">(0[xb])?[0-9a-fA-F]+(_[0-9a-fA-F]+)*</span></span>
+        | [ <span class="tooltip"><a href="#bnf-adding_operator">adding_operator</a><span class="tooltiptext">+ | -</span></span> ] <span class="tooltip"><a href="#bnf-DECIMAL">DECIMAL</a><span class="tooltiptext">[0-9]+(_[0-9]+)*\.[0-9]+(_[0-9]+)*</span></span>
         | <span class="tooltip"><a href="#bnf-STRING">STRING</a><span class="tooltiptext">(&quot;([^&quot;]|(\&quot;))*&quot;)|(&#x27;{3}.*?&#x27;{3})</span></span>
         | <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_RECORD_OBJECT</i>
         | <span class="tooltip"><a href="#bnf-qualified_name">qualified_name</a><span class="tooltiptext">[ IDENTIFIER . ] IDENTIFIER</span></span><i>_ENUM_TYPE</i> '.' <span class="tooltip"><a href="#bnf-IDENTIFIER">IDENTIFIER</a><span class="tooltiptext">[a-zA-Z][a-zA-Z0-9_]*</span></span><i>_enumeration_literal</i>

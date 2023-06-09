@@ -1,0 +1,2 @@
+T test1 { v = 0x10.3 }
+                  ^ int-literals-4/foo.trlc:3: lex error: base 16 integer may not contain a decimal point
