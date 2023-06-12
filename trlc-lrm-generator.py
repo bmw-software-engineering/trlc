@@ -48,6 +48,8 @@ CODE_BG    = "#f6f8fa"
 
 EMACS_STRING = "#8d2153"
 
+URL_BASE = "https://bmw-software-engineering.github.io/trlc"
+
 
 class BNF_Token:
     KIND = (
@@ -1303,12 +1305,14 @@ def main():
             if first and (major != version["major"] or
                           minor != version["minor"]):
                 if not options.tag:
-                    fd.write("* [Version %u.%u](lrm.html) (Development)\n" %
+                    fd.write("* [Version %u.%u](%s/lrm.html) (Development)\n" %
                              (version["major"],
-                              version["minor"]))
+                              version["minor"],
+                              URL_BASE))
 
-            fd.write("* [Version %u.%u](lrm-%u.%u.html)" % ((major, minor,
-                                                             major, minor)))
+            fd.write("* [Version %u.%u](%s/lrm-%u.%u.html)" % ((major, minor,
+                                                                URL_BASE,
+                                                                major, minor)))
             if first:
                 fd.write(" (Current Stable)")
                 first = False
