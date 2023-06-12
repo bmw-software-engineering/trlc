@@ -806,7 +806,9 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
                           "Keywords",
                           "Punctuation"):
         pass
-    elif obj.n_typ.name in ("Static_Semantics", "Dynamic_Semantics"):
+    elif obj.n_typ.name in ("Semantics",
+                            "Static_Semantics",
+                            "Dynamic_Semantics"):
         new_section.append(data["kind"] + " Semantics")
     elif obj.n_typ.name == "Name_Resolution":
         new_section.append("Name resolution")
@@ -815,7 +817,7 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
     elif obj.n_typ.name == "Example":
         new_section.append("Example")
     else:
-        assert False
+        assert False, "unexpected item kind '%s'" % obj.n_typ.name
 
     # Generate new headings as appropriate
     if context["old_section"] is not None:
@@ -1203,13 +1205,15 @@ def main():
     ap.add_argument("--tag",
                     action="store_true",
                     default=False)
+    ap.add_argument("--lrm_dir",
+                    default="language-reference-manual")
 
     options = ap.parse_args()
 
     mh = Message_Handler()
     sm = Source_Manager(mh)
 
-    sm.register_directory("language-reference-manual")
+    sm.register_directory(options.lrm_dir)
     symbols = sm.process()
     if symbols is None:
         sys.exit(1)
