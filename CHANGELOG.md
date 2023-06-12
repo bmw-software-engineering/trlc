@@ -14,7 +14,7 @@ quantifying over all references.)
 ## Changelog
 
 
-### 1.1.5-dev
+### 1.1.5
 
 * [LRM, TRLC] Remove limitation on late packages. You may now declare
   any number of packages in `trlc` files; and you may even import
