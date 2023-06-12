@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>AST &#8212; TRLC 1.1.4 documentation</title>
+    <title>AST &#8212; TRLC 1.1.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
     
@@ -27,7 +27,7 @@
         <li class="right" >
           <a href="errors.html" title="Error handling and reporting"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.1.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.1.5 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">AST</a></li> 
       </ul>
     </div>  
@@ -147,7 +147,7 @@ objects.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trlc.ast.Package">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builtin_stab</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Package" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Package</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builtin_stab</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">declared_late</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Package" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trlc.ast.Entity" title="trlc.ast.Entity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Entity</span></code></a></p>
 <p>Packages.</p>
 <p>A package is declared when it is first encountered (in either a
@@ -155,6 +155,12 @@ rsl or trlc file). A package contains all symbols declared in it,
 both types and record objects. A package is not associated with
 just a single file, it can be spread over multiple files.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Attribute declared_late<span class="colon">:</span></dt>
+<dd class="field-odd"><p>indicates if this package is declared in a       trlc file</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
 <dt class="field-odd">Attribute symbols<span class="colon">:</span></dt>
 <dd class="field-odd"><p>symbol table of the package</p>
 </dd>
@@ -366,6 +372,56 @@ name of the object itself is not in this returned dictionary.</p>
 <section id="miscellaneous">
 <h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Compilation_Unit">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Compilation_Unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Compilation_Unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Node" title="trlc.ast.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a></p>
+<p>Special node to represent the concrete file structure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute package<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the main package this file declares or contributes to</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Package" title="trlc.ast.Package">Package</a></p>
+</dd>
+<dt class="field-odd">Attribute imports<span class="colon">:</span></dt>
+<dd class="field-odd"><p>package imported by this file</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<a class="reference internal" href="#trlc.ast.Package" title="trlc.ast.Package">Package</a>]</p>
+</dd>
+<dt class="field-odd">Attribute items<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<a class="reference internal" href="#trlc.ast.Node" title="trlc.ast.Node">Node</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="trlc.ast.Check_Block">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Check_Block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_typ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Check_Block" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#trlc.ast.Node" title="trlc.ast.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a></p>
+<p>Node representing check blocks</p>
+<p>Semantically this has no meaning, but it’s nice to have some kind
+of similar representation to how it’s in the file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attribute n_typ<span class="colon">:</span></dt>
+<dd class="field-odd"><p>composite type for which the checks apply</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Composite_Type" title="trlc.ast.Composite_Type">Composite_Type</a></p>
+</dd>
+<dt class="field-odd">Attribute checks<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of checks</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[<a class="reference internal" href="#trlc.ast.Check" title="trlc.ast.Check">Check</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="trlc.ast.Check">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_anchor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">severity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trlc.ast.Node" title="trlc.ast.Node"><code class="xref py py-class docutils literal notranslate"><span class="pre">Node</span></code></a></p>
@@ -478,7 +534,7 @@ name of the object itself is not in this returned dictionary.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="trlc.ast.Array_Type">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Array_Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bound</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bound</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Array_Type" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">trlc.ast.</span></span><span class="sig-name descname"><span class="pre">Array_Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loc_lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bound</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loc_upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bound</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Array_Type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#trlc.ast.Type" title="trlc.ast.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a></p>
 <p>Anonymous array type.</p>
 <p>These are declared implicitly for each record component that has
@@ -494,11 +550,23 @@ an array specifier:</p>
 <dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>int</p>
 </dd>
+<dt class="field-odd">Attribute loc_lower<span class="colon">:</span></dt>
+<dd class="field-odd"><p>text location of the lower bound indicator</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="errors.html#trlc.errors.Location" title="trlc.errors.Location">Location</a></p>
+</dd>
 <dt class="field-odd">Attribute upper_bound<span class="colon">:</span></dt>
 <dd class="field-odd"><p>maximum number of elements (or None)</p>
 </dd>
 <dt class="field-even">Type<span class="colon">:</span></dt>
 <dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">Attribute loc_upper<span class="colon">:</span></dt>
+<dd class="field-odd"><p>text location of the upper bound indicator</p>
+</dd>
+<dt class="field-even">Type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="errors.html#trlc.errors.Location" title="trlc.errors.Location">Location</a></p>
 </dd>
 <dt class="field-odd">Attribute element_type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>type of the array elements</p>
@@ -1536,6 +1604,8 @@ Package, then the following error is issued:</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#miscellaneous">Miscellaneous</a><ul>
+<li><a class="reference internal" href="#trlc.ast.Compilation_Unit"><code class="docutils literal notranslate"><span class="pre">Compilation_Unit</span></code></a></li>
+<li><a class="reference internal" href="#trlc.ast.Check_Block"><code class="docutils literal notranslate"><span class="pre">Check_Block</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Check"><code class="docutils literal notranslate"><span class="pre">Check</span></code></a></li>
 <li><a class="reference internal" href="#trlc.ast.Separator"><code class="docutils literal notranslate"><span class="pre">Separator</span></code></a></li>
 </ul>
@@ -1618,7 +1688,7 @@ Package, then the following error is issued:</p>
         <li class="right" >
           <a href="errors.html" title="Error handling and reporting"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.1.4 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.1.5 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">AST</a></li> 
       </ul>
     </div>

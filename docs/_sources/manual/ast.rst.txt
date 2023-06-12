@@ -34,6 +34,10 @@ Entities
 Miscellaneous
 -------------
 
+.. autoclass:: trlc.ast.Compilation_Unit
+
+.. autoclass:: trlc.ast.Check_Block
+
 .. autoclass:: trlc.ast.Check
 
 .. autoclass:: trlc.ast.Separator
