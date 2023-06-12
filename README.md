@@ -6,7 +6,7 @@ The repository contains:
 
 * The [language reference
   manual](https://bmw-software-engineering.github.io/trlc/lrm.html)
-  for TRLC.
+  for TRLC. [Previous versions](docs/LRM.md) are also available.
 
 * A pure Python reference implementation of TRLC.
 

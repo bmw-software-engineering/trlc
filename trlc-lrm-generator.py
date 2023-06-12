@@ -21,11 +21,15 @@
 
 # pylint: disable=invalid-name
 
-import sys
-import html
-import re
-import os
+import argparse
+import glob
 import hashlib
+import html
+import os
+import re
+import shutil
+import sys
+
 from collections import OrderedDict
 
 from trlc.errors import Message_Handler, TRLC_Error
@@ -1195,6 +1199,13 @@ def write_toc(fd, pkg_lrm):
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--tag",
+                    action="store_true",
+                    default=False)
+
+    options = ap.parse_args()
+
     mh = Message_Handler()
     sm = Source_Manager(mh)
 
@@ -1249,10 +1260,12 @@ def main():
     except TRLC_Error:
         return
 
+    version = obj_version.to_python_dict()
     context = {
         "old_section" : None,
         "in_grammar"  : False
     }
+
     with open("docs/lrm.html", "w", encoding="UTF-8") as fd:
         write_header(fd, obj_version, obj_license)
         write_toc(fd, pkg_lrm)
@@ -1269,6 +1282,33 @@ def main():
 
         write_footer(fd, os.path.relpath(__file__))
 
+    if options.tag:
+        shutil.copyfile("docs/lrm.html",
+                        "docs/lrm-%u.%u.html" % (version["major"],
+                                                 version["minor"]))
+
+    lrm_versions = [tuple(map(int,
+                              re.match("docs/lrm-([0-9]+)\.([0-9]+)\.html",
+                                       filename).groups()))
+                    for filename in glob.glob("docs/lrm-*.*.html")]
+
+    with open("docs/LRM.md", "w", encoding="UTF-8") as fd:
+        fd.write("# TRLC LRM\n\n")
+        first = True
+        for major, minor in reversed(sorted(lrm_versions)):
+            if first and (major != version["major"] or
+                          minor != version["minor"]):
+                if not options.tag:
+                    fd.write("* [Version %u.%u](lrm.html) (Development)\n" %
+                             (version["major"],
+                              version["minor"]))
+
+            fd.write("* [Version %u.%u](lrm-%u.%u.html)" % ((major, minor,
+                                                             major, minor)))
+            if first:
+                fd.write(" (Current Stable)")
+                first = False
+            fd.write("\n")
 
 if __name__ == "__main__":
     main()
