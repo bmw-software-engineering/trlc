@@ -18,6 +18,7 @@ test-all:
 docs:
 	rm -rf docs
 	mkdir docs
+	@util/rebuild_old_lrm.sh
 	@python3 trlc-lrm-generator.py --tag
 	@python3 -m util.mk_ast_hierarchy | dot -Tsvg > docs/ast_hierarchy.svg
 	sphinx-build -c sphinx -b html . docs
