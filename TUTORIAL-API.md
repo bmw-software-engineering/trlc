@@ -239,7 +239,7 @@ req_base_type = pkg_example.symbols.lookup_assuming(
 for obj in symbols.iter_record_objects():
     values = obj.to_python_dict()
 
-    if not obj.e_typ.is_subclass_of(req_base_type):
+    if not obj.n_typ.is_subclass_of(req_base_type):
         continue
 
     if values["illustration"] is not None and \
