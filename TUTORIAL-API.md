@@ -8,7 +8,7 @@ The TRLC check language allows you to enforce internal consistency for
 requirements, but there are limitations to its scope. For example
 consider this requirement type:
 
-```
+```trlc
 package Example
 
 type Requirement {
@@ -26,7 +26,7 @@ Python API](https://bmw-software-engineering.github.io/trlc/).
 
 We also need a few requirements to test our tool:
 
-```
+```trlc
 package Example
 
 Requirement good_1 {
@@ -54,7 +54,7 @@ is the mechanism for issuing messages, and the
 is the main driver for the TRLC parser. There are other useful things
 we can import but for now this is sufficient.
 
-```
+```python
 #!/usr/bin/env python
 
 from trlc.errors import Message_Handler
@@ -64,7 +64,7 @@ import sys
 
 Next we need create an instance of the source manager:
 
-```
+```python
 mh = Message_Handler()
 sm = Source_Manager(mh)
 ```
@@ -78,7 +78,7 @@ can also provide individual files to the tool using
 [register_file](https://bmw-software-engineering.github.io/trlc/manual/infrastructure.html#trlc.trlc.Source_Manager.register_file),
 but often register_directory is a much easier way to set up the tools.
 
-```
+```python
 sm.register_directory(".")
 ```
 
@@ -93,7 +93,7 @@ returned. I.e. once the API lets you have the symbol table you know
 that everything is well formed and validated.
 
 
-```
+```python
 symbols = sm.process()
 if symbols is None:
     sys.exit(1)
@@ -102,7 +102,7 @@ if symbols is None:
 Finally, lets do something simple to see what happens. Here we just
 iterate overt all the objects and print them.
 
-```
+```python
 for obj in symbols.iter_record_objects():
     print(obj.name)
     print(obj.to_python_dict())
@@ -110,7 +110,7 @@ for obj in symbols.iter_record_objects():
 
 When running this script, we can see output like this:
 
-```
+```bash
 $ ./filename-1.py
 good_1
 {'illustration': None, 'description': 'this is a good example'}
@@ -125,7 +125,7 @@ bad_1
 Now that we can see that the API works, we can implement our check in
 a very basic way.
 
-```
+```python
 for obj in symbols.iter_record_objects():
     values = obj.to_python_dict()
 
@@ -138,7 +138,7 @@ for obj in symbols.iter_record_objects():
 
 When running the script, we actually get what we want:
 
-```
+```bash
 $ ./filename-2.py
 error: bad.png for requirement bad_1 is not a file
 ```
@@ -160,7 +160,7 @@ instead.
 
 This is what we do:
 
-```
+```python
 for obj in symbols.iter_record_objects():
     values = obj.to_python_dict()
 
@@ -177,7 +177,7 @@ This is quite different. The message is much shorter, and the location
 is the place where the message should be anchored. When running this
 check we can now see this:
 
-```
+```bash
 $ ./filename-3.py
   illustration = "bad.png"
                  ^^^^^^^^^ example.trlc:14: check error: is not a file
@@ -226,7 +226,7 @@ Then we can use the is_subclass_of test for the type of the object to
 determine if it is a Requirement or inherits from Requirement. If not,
 we move on to the next object.
 
-```
+```python
 pkg_example   = symbols.lookup_assuming(
     mh                = mh,
     name              = "Example",
