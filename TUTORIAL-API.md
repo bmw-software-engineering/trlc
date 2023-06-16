@@ -214,7 +214,7 @@ The final issue we should fix is making sure the object we look at is
 a Requirement type.
 
 This is a bit more complex, as testing the name of the type
-(e.g. `obj.e_typ.name == "Requirement"` is not enough: if we extend
+(e.g. `obj.n_typ.name == "Requirement"` is not enough: if we extend
 the Requirement type then we also want this check to apply.
 
 So first we need to find the actual
