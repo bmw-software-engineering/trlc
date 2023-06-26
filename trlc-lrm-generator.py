@@ -1294,7 +1294,7 @@ def main():
                                                  version["minor"]))
 
     lrm_versions = [tuple(map(int,
-                              re.match("docs/lrm-([0-9]+)\.([0-9]+)\.html",
+                              re.match(r"docs/lrm-([0-9]+)\.([0-9]+)\.html",
                                        filename).groups()))
                     for filename in glob.glob("docs/lrm-*.*.html")]
 
@@ -1317,6 +1317,7 @@ def main():
                 fd.write(" (Current Stable)")
                 first = False
             fd.write("\n")
+
 
 if __name__ == "__main__":
     main()

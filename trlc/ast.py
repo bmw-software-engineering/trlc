@@ -1026,8 +1026,8 @@ class Name_Reference(Expression):
         # The only way we could generate null here (without raising
         # error earlier) is when we refer to a component that is
         # optional.
-        if isinstance(entity, Composite_Component):
-            return entity.optional
+        if isinstance(self.entity, Composite_Component):
+            return self.entity.optional
         else:
             return False
 

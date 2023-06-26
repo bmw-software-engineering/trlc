@@ -20,6 +20,7 @@
 
 from trlc import ast
 from trlc.errors import Message_Handler, TRLC_Error
+from trlc.vcg import VCG
 
 
 class Linter:
@@ -96,6 +97,10 @@ class Linter:
         for n_component in n_tuple_type.components.values():
             self.verify_type(n_component.n_typ)
 
+        # Verify checks
+        vcg = VCG(self.mh, n_tuple_type)
+        vcg.analyze()
+
     def verify_record_type(self, n_record_type):
         assert isinstance(n_record_type, ast.Record_Type)
 
@@ -111,6 +116,10 @@ class Linter:
         # Walk over components
         for n_component in n_record_type.components.values():
             self.verify_type(n_component.n_typ)
+
+        # Verify checks
+        vcg = VCG(self.mh, n_record_type)
+        vcg.analyze()
 
     def verify_array_type(self, n_typ):
         assert isinstance(n_typ, ast.Array_Type)
