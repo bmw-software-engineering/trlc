@@ -437,6 +437,22 @@ class Expression(Node):
     def resolve_references(self, mh):
         assert isinstance(mh, Message_Handler)
 
+    def can_be_null(self):
+        """Test if the expression could return null
+
+        Checks the expression if it could generate a null value
+        *without* raising an error. For example `x` could generate a
+        null value if `x` is a record component that is
+        optional. However `x + 1` could not, since an error would
+        occur earlier.
+
+        :return: possibility of encountering null
+        :rtype: bool
+
+        """
+        assert False, "can_be_null not implemented for %s" % \
+            self.__class__.__name__
+
 
 class Implicit_Null(Expression):
     """Synthesised null values
@@ -483,6 +499,9 @@ class Implicit_Null(Expression):
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Implicit_Null")
+
+    def can_be_null(self):
+        return True
 
 
 class Literal(Expression):
@@ -791,6 +810,9 @@ class Array_Aggregate(Expression):
     def to_python_object(self):
         return [x.to_python_object() for x in self.value]
 
+    def can_be_null(self):
+        return False
+
 
 class Tuple_Aggregate(Expression):
     """Instances of a tuple
@@ -876,6 +898,9 @@ class Tuple_Aggregate(Expression):
         return {name: value.to_python_object()
                 for name, value in self.value.items()}
 
+    def can_be_null(self):
+        return False
+
 
 class Record_Reference(Expression):
     """Reference to another record object
@@ -951,6 +976,9 @@ class Record_Reference(Expression):
     def to_python_object(self):
         return self.target.fully_qualified_name()
 
+    def can_be_null(self):
+        return False
+
 
 class Name_Reference(Expression):
     """Reference to a name
@@ -993,6 +1021,15 @@ class Name_Reference(Expression):
 
         assert self.entity.name in context
         return context[self.entity.name].evaluate(mh, context)
+
+    def can_be_null(self):
+        # The only way we could generate null here (without raising
+        # error earlier) is when we refer to a component that is
+        # optional.
+        if isinstance(entity, Composite_Component):
+            return entity.optional
+        else:
+            return False
 
 
 class Unary_Expression(Expression):
@@ -1107,6 +1144,9 @@ class Unary_Expression(Expression):
             return -val
         else:
             return val
+
+    def can_be_null(self):
+        return False
 
 
 class Binary_Expression(Expression):
@@ -1523,6 +1563,9 @@ class Field_Access_Expression(Expression):
 
         return self.n_prefix.evaluate(mh, context).value[self.n_field.name]
 
+    def can_be_null(self):
+        return False
+
 
 class Range_Test(Expression):
     """Range membership test
@@ -1594,6 +1637,9 @@ class Range_Test(Expression):
         return Value(location = self.location,
                      value    = v_lower.value <= v_lhs.value <= v_upper.value,
                      typ      = self.typ)
+
+    def can_be_null(self):
+        return False
 
 
 class Action(Node):
@@ -1732,6 +1778,13 @@ class Conditional_Expression(Expression):
 
         return self.else_expr.evaluate(mh, context)
 
+    def can_be_null(self):
+        if self.else_expr and self.else_expr.can_be_null():
+            return True
+
+        return any(action.n_expr.can_be_null()
+                   for action in self.actions)
+
 
 class Quantified_Expression(Expression):
     """A quantified expression
@@ -1835,6 +1888,9 @@ class Quantified_Expression(Expression):
         return Value(location = loc,
                      value    = rv,
                      typ      = self.typ)
+
+    def can_be_null(self):
+        return False
 
 
 ##############################################################################
@@ -2150,6 +2206,13 @@ class Composite_Type(Concrete_Type):
 
     def iter_checks(self):
         yield from self.checks
+
+    def all_components(self):
+        """Convenience function to get a list of all components.
+
+        :rtype: list[Composite_Component]
+        """
+        return list(self.components.table.values())
 
 
 class Composite_Component(Typed_Entity):
