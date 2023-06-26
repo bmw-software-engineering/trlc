@@ -1,0 +1,10 @@
+package test_01
+
+type T {
+  a optional Integer
+  b optional Integer
+}
+
+checks T {
+  null == null, "potato"
+}
