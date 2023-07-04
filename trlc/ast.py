@@ -1387,14 +1387,15 @@ class Binary_Expression(Expression):
                                Binary_Operator.COMP_LEQ,
                                Binary_Operator.COMP_GT,
                                Binary_Operator.COMP_GEQ):
-            return Value(location = self.location,
-                         value    = {
-                             Binary_Operator.COMP_LT  : lambda l, r: l < r,
-                             Binary_Operator.COMP_LEQ : lambda l, r: l <= r,
-                             Binary_Operator.COMP_GT  : lambda l, r: l > r,
-                             Binary_Operator.COMP_GEQ : lambda l, r: l >= r,
-                         }[self.operator](v_lhs.value, v_rhs.value),
-                         typ      = self.typ)
+            return Value(
+                location = self.location,
+                value    = {
+                    Binary_Operator.COMP_LT  : lambda lhs, rhs: lhs < rhs,
+                    Binary_Operator.COMP_LEQ : lambda lhs, rhs: lhs <= rhs,
+                    Binary_Operator.COMP_GT  : lambda lhs, rhs: lhs > rhs,
+                    Binary_Operator.COMP_GEQ : lambda lhs, rhs: lhs >= rhs,
+                }[self.operator](v_lhs.value, v_rhs.value),
+                typ      = self.typ)
 
         elif self.operator == Binary_Operator.STRING_CONTAINS:
             assert isinstance(v_lhs.value, str)
