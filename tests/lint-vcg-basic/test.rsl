@@ -19,3 +19,13 @@ checks T2 {
   x > 1, fatal "must be positive", x
   x != 0, warning "potato"
 }
+
+type T3 {
+  x optional Boolean
+  y          Boolean
+}
+
+checks T3 {
+  x, "potato"
+  y, "potato"
+}

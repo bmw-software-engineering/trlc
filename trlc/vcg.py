@@ -145,11 +145,37 @@ class VCG:
                             exc.message)
             return
 
+    def checks_on_composite_type(self, n_ctyp):
+        assert isinstance(n_ctyp, Composite_Type)
+
+        # Create local variables
+        gn_locals = graph.Assumption(self.graph)
+        self.start.add_edge_to(gn_locals)
+        self.start = gn_locals
+        for n_component in n_ctyp.all_components():
+            self.tr_component_decl(n_component, self.start)
+
+        # Create paths for checks
+        for n_check in n_ctyp.iter_checks():
+            current_start = self.start
+            self.tr_check(n_check)
+
+            # Only fatal checks contribute to the total knowledge
+            if n_check.severity != "fatal":
+                self.start = current_start
+
+        # Emit debug graph
+        subprocess.run(["dot", "-Tpdf", "-o%s.pdf" % self.vc_name],
+                       input = self.graph.debug_render_dot(),
+                       check = True,
+                       encoding = "UTF-8")
+
+        # Generate VCs
         self.vcg.generate()
 
+        # Solve VCs and provide feedback
         nok_feasibility_checks = []
-        ok_feasibility_checks = set()
-
+        ok_feasibility_checks  = set()
         for vc_id, vc in enumerate(self.vcg.vcs):
             with open(self.vc_name + "_%04u.smt2" % vc_id, "w",
                       encoding="UTF-8") as fd:
@@ -203,33 +229,12 @@ class VCG:
         if isinstance(n_typ, Builtin_Integer):
             return str(value)
 
+        elif isinstance(n_typ, Builtin_Boolean):
+            return "true" if value else "false"
+
         else:
-            assert False
-
-    def checks_on_composite_type(self, n_ctyp):
-        assert isinstance(n_ctyp, Composite_Type)
-
-        # Create local variables
-        gn_locals = graph.Assumption(self.graph)
-        self.start.add_edge_to(gn_locals)
-        self.start = gn_locals
-        for n_component in n_ctyp.all_components():
-            self.tr_component_decl(n_component, self.start)
-
-        # Create paths for checks
-        for n_check in n_ctyp.iter_checks():
-            current_start = self.start
-            self.tr_check(n_check)
-
-            # Only fatal checks contribute to the total knowledge
-            if n_check.severity != "fatal":
-                self.start = current_start
-
-        # Emit debug graph
-        subprocess.run(["dot", "-Tpdf", "-o%s.pdf" % self.vc_name],
-                       input = self.graph.debug_render_dot(),
-                       check = True,
-                       encoding = "UTF-8")
+            self.flag_unsupported(n_typ,
+                                  "back-conversion from %s" % n_typ.name)
 
     def tr_component_value_name(self, n_component):
         return n_component.member_of.fully_qualified_name() + \
@@ -283,10 +288,10 @@ class VCG:
     def tr_check(self, n_check):
         assert isinstance(n_check, Check)
 
-        value, _ = self.tr_expression(n_check.n_expr)
+        value, valid = self.tr_expression(n_check.n_expr)
+        self.attach_validity_check(valid, n_check.n_expr)
         self.attach_feasability_check(value, n_check.n_expr)
         self.attach_assumption(value)
-        # TODO: Emit VC to test feasibility
 
     def tr_expression(self, n_expr):
         if isinstance(n_expr, Name_Reference):
