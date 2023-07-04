@@ -7,7 +7,15 @@ type T1 {
 }
 
 checks T1 {
-    x != null implies y == x, fatal "potato"
-    y != null implies x > 1, warning "potato"
-    x == z or y == z, warning "potato"
+  x != null implies y == x, fatal "potato"
+  y != null implies x > 1, warning "potato"
+}
+
+type T2 {
+  x Integer
+}
+
+checks T2 {
+  x > 1, fatal "must be positive", x
+  x != 0, warning "potato"
 }

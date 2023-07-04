@@ -43,6 +43,16 @@ class Unsupported(Exception):
         self.location = node.location
 
 
+class Feedback:
+    def __init__(self, node, message, expect_unsat=True):
+        assert isinstance(node, Expression)
+        assert isinstance(message, str)
+        assert isinstance(expect_unsat, bool)
+        self.node         = node
+        self.message      = message
+        self.expect_unsat = expect_unsat
+
+
 class VCG:
     def __init__(self, mh, n_ctyp):
         assert isinstance(mh, Message_Handler)
@@ -72,15 +82,33 @@ class VCG:
         self.tmp_id += 1
         return "tmp.%u" % self.tmp_id
 
-    def attach_validity_check(self, bool_expr):
+    def attach_validity_check(self, bool_expr, origin):
         assert isinstance(bool_expr, smt.Expression)
         assert bool_expr.sort is smt.BUILTIN_BOOLEAN
+        assert isinstance(origin, Expression)
 
         # Attach new graph node advance start
         gn_check = graph.Check(self.graph)
-        gn_check.add_goal(bool_expr)
+        gn_check.add_goal(bool_expr,
+                          Feedback(origin,
+                                   "expression could be null"),
+                          "validity check for %s" % origin.to_string())
         self.start.add_edge_to(gn_check)
         self.start = gn_check
+
+    def attach_feasability_check(self, bool_expr, origin):
+        assert isinstance(bool_expr, smt.Expression)
+        assert bool_expr.sort is smt.BUILTIN_BOOLEAN
+        assert isinstance(origin, Expression)
+
+        # Attach new graph node advance start
+        gn_check = graph.Check(self.graph)
+        gn_check.add_goal(bool_expr,
+                          Feedback(origin,
+                                   "expression is always true",
+                                   expect_unsat = False),
+                          "feasability check for %s" % origin.to_string())
+        self.start.add_edge_to(gn_check)
 
     def attach_assumption(self, bool_expr):
         assert isinstance(bool_expr, smt.Expression)
@@ -118,6 +146,68 @@ class VCG:
         except Unsupported as exc:
             self.mh.warning(exc.location,
                             exc.message)
+            return
+
+        self.vcg.generate()
+
+        nok_feasibility_checks = []
+        ok_feasibility_checks = set()
+
+        for vc_id, vc in enumerate(self.vcg.vcs):
+            with open(self.vc_name + "_%04u.smt2" % vc_id, "w",
+                      encoding="UTF-8") as fd:
+                fd.write(vc["script"].generate_vc(smt.SMTLIB_Generator()))
+
+            status, values = vc["script"].solve_vc(smt.CVC5_Solver())
+
+            if vc["feedback"].expect_unsat:
+                if status != "unsat":
+                    self.mh.failed_vc(vc["feedback"].node.location,
+                                      vc["feedback"].message,
+                                      self.create_counterexample(values))
+            else:
+                if status == "unsat":
+                    nok_feasibility_checks.append(vc["feedback"])
+                else:
+                    ok_feasibility_checks.add(vc["feedback"])
+
+        # This is a bit wonky, but this way we make sure the ording is
+        # consistent
+        for feedback in nok_feasibility_checks:
+            if feedback not in ok_feasibility_checks:
+                self.mh.failed_vc(feedback.node.location,
+                                  feedback.message)
+                ok_feasibility_checks.add(feedback)
+
+    def create_counterexample(self, values):
+        rv = [
+            "example %s triggering error:" %
+            self.n_ctyp.__class__.__name__.lower(),
+            "  %s bad_potato {" % self.n_ctyp.name
+        ]
+
+        for n_component in self.n_ctyp.all_components():
+            id_value = self.tr_component_value_name(n_component)
+            id_valid = self.tr_component_valid_name(n_component)
+            if values[id_valid]:
+                rv.append("    %s = %s" %
+                          (n_component.name,
+                           self.value_to_trlc(n_component.n_typ,
+                                              values[id_value])))
+            else:
+                rv.append("    /* %s is null */" % n_component.name)
+
+        rv.append("  }")
+        return "\n".join(rv)
+
+    def value_to_trlc(self, n_typ, value):
+        assert isinstance(n_typ, Type)
+
+        if isinstance(n_typ, Builtin_Integer):
+            return str(value)
+
+        else:
+            assert False
 
     def checks_on_composite_type(self, n_ctyp):
         assert isinstance(n_ctyp, Composite_Type)
@@ -196,7 +286,9 @@ class VCG:
     def tr_check(self, n_check):
         assert isinstance(n_check, Check)
 
-        _, _ = self.tr_expression(n_check.n_expr)
+        value, _ = self.tr_expression(n_check.n_expr)
+        self.attach_feasability_check(value, n_check.n_expr)
+        self.attach_assumption(value)
         # TODO: Emit VC to test feasibility
 
     def tr_expression(self, n_expr):
@@ -208,6 +300,12 @@ class VCG:
 
         elif isinstance(n_expr, Null_Literal):
             return None, smt.Boolean_Literal(False)
+
+        elif isinstance(n_expr, Boolean_Literal):
+            return smt.Boolean_Literal(n_expr.value), smt.Boolean_Literal(True)
+
+        elif isinstance(n_expr, Integer_Literal):
+            return smt.Integer_Literal(n_expr.value), smt.Boolean_Literal(True)
 
         else:
             self.flag_unsupported(n_expr)
@@ -226,46 +324,102 @@ class VCG:
     def tr_binary_expression(self, n_expr):
         assert isinstance(n_expr, Binary_Expression)
 
+        # Some operators deal with validity in a different way. We
+        # deal with them first and then exit.
         if n_expr.operator in (Binary_Operator.COMP_EQ,
                                Binary_Operator.COMP_NEQ):
             return self.tr_op_equality(n_expr)
 
-        if n_expr.operator == Binary_Operator.LOGICAL_IMPLIES:
-            lhs_value, lhs_valid = self.tr_expression(n_expr.n_lhs)
-            # Emit VC for validity
-            self.attach_validity_check(lhs_valid)
+        elif n_expr.operator == Binary_Operator.LOGICAL_IMPLIES:
+            return self.tr_op_implication(n_expr)
 
-            # Split into two paths.
-            current_start = self.start
-            sym_result = smt.Constant(smt.BUILTIN_BOOLEAN,
-                                      self.new_temp_name())
-            gn_end = graph.Node(self.graph)
+        # The remaining operators always check for validity, so we can
+        # obtain the values of both sides now.
+        lhs_value, lhs_valid = self.tr_expression(n_expr.n_lhs)
+        self.attach_validity_check(lhs_valid, n_expr.n_lhs)
+        rhs_value, rhs_valid = self.tr_expression(n_expr.n_rhs)
+        self.attach_validity_check(rhs_valid, n_expr.n_rhs)
+        sym_result = smt.Constant(self.tr_type(n_expr.typ),
+                                  self.new_temp_name())
+        sym_value = None
 
-            ### 1: Implication is not valid
-            self.start = current_start
-            self.attach_assumption(smt.Boolean_Negation(lhs_value))
-            self.attach_temp_declaration(n_expr,
-                                         sym_result,
-                                         smt.Boolean_Literal(True))
-            self.start.add_edge_to(gn_end)
+        if n_expr.operator in (Binary_Operator.PLUS,
+                               Binary_Operator.MINUS,
+                               Binary_Operator.TIMES):
+            # TODO: div and mod need semantics checking
 
-            ### 2: Implication is valid.
-            self.start = current_start
-            self.attach_assumption(lhs_value)
-            rhs_value, rhs_valid = self.tr_expression(n_expr.n_rhs)
-            self.attach_validity_check(rhs_valid)
-            self.attach_temp_declaration(n_expr,
-                                         sym_result,
-                                         rhs_value)
-            self.start.add_edge_to(gn_end)
+            smt_op = {
+                Binary_Operator.PLUS  : "+",
+                Binary_Operator.MINUS : "-",
+                Binary_Operator.TIMES : "*",
+            }[n_expr.operator]
 
-            # Join paths
-            self.start = gn_end
+            if isinstance(n_expr.n_lhs, Builtin_Integer):
+                sym_value = smt.Binary_Int_Arithmetic_Op(smt_op,
+                                                         lhs_value,
+                                                         rhs_value)
 
-            return sym_result, smt.Boolean_Literal(True)
+            else:
+                self.flag_unsupported(n_expr,
+                                      n_expr.operator.name + "for non-integer")
+
+        elif n_expr.operator in (Binary_Operator.COMP_LT,
+                                 Binary_Operator.COMP_LEQ,
+                                 Binary_Operator.COMP_GT,
+                                 Binary_Operator.COMP_GEQ):
+            smt_op = {
+                Binary_Operator.COMP_LT  : "<",
+                Binary_Operator.COMP_LEQ : "<=",
+                Binary_Operator.COMP_GT  : ">",
+                Binary_Operator.COMP_GEQ : ">=",
+            }[n_expr.operator]
+
+            sym_value = smt.Comparison(smt_op, lhs_value, rhs_value)
 
         else:
             self.flag_unsupported(n_expr, n_expr.operator.name)
+
+        self.attach_temp_declaration(n_expr,
+                                     sym_result,
+                                     sym_value)
+        return sym_result, smt.Boolean_Literal(True)
+
+    def tr_op_implication(self, n_expr):
+        assert isinstance(n_expr, Binary_Expression)
+        assert n_expr.operator == Binary_Operator.LOGICAL_IMPLIES
+
+        lhs_value, lhs_valid = self.tr_expression(n_expr.n_lhs)
+        # Emit VC for validity
+        self.attach_validity_check(lhs_valid, n_expr.n_lhs)
+
+        # Split into two paths.
+        current_start = self.start
+        sym_result = smt.Constant(smt.BUILTIN_BOOLEAN,
+                                  self.new_temp_name())
+        gn_end = graph.Node(self.graph)
+
+        ### 1: Implication is not valid
+        self.start = current_start
+        self.attach_assumption(smt.Boolean_Negation(lhs_value))
+        self.attach_temp_declaration(n_expr,
+                                     sym_result,
+                                     smt.Boolean_Literal(True))
+        self.start.add_edge_to(gn_end)
+
+        ### 2: Implication is valid.
+        self.start = current_start
+        self.attach_assumption(lhs_value)
+        rhs_value, rhs_valid = self.tr_expression(n_expr.n_rhs)
+        self.attach_validity_check(rhs_valid, n_expr.n_rhs)
+        self.attach_temp_declaration(n_expr,
+                                     sym_result,
+                                     rhs_value)
+        self.start.add_edge_to(gn_end)
+
+        # Join paths
+        self.start = gn_end
+
+        return sym_result, smt.Boolean_Literal(True)
 
     def tr_op_equality(self, n_expr):
         assert isinstance(n_expr, Binary_Expression)
