@@ -16,7 +16,8 @@ quantifying over all references.)
 
 ### 1.1.6-dev
 
-
+* [TRLC] Add new option `--no-user-warnings` to supress any warning
+  generated from a user-defined check.
 
 ### 1.1.5
 

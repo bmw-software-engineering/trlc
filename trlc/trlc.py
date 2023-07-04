@@ -369,6 +369,11 @@ def main():
                     default=False,
                     action="store_true",
                     help="simpler output intended for CI")
+    ap.add_argument("--no-user-warnings",
+                    default=False,
+                    action="store_true",
+                    help=("do not display any warnings from user defined"
+                          " checks, only errors"))
     ap.add_argument("items",
                     nargs="*",
                     metavar="DIR|FILE")
@@ -382,6 +387,10 @@ def main():
     options = ap.parse_args()
 
     mh = Message_Handler(options.brief)
+
+    if options.no_user_warnings:
+        mh.suppress("check warning")
+
     sm = Source_Manager(mh, options.lint)
 
     if not options.include_bazel_dirs:
@@ -452,6 +461,9 @@ def main():
             summary += " %u error(s)" % mh.errors
         else:
             summary += " no issues"
+
+        if mh.suppressed:
+            summary += " with %u supressed messages" % mh.suppressed
 
         print(summary)
 

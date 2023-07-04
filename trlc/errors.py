@@ -116,16 +116,25 @@ class Message_Handler:
     :attribute warnings: Number of system or user warnings raised
     :type: int
 
-    :attribute error: Number of system or user errors raised
+    :attribute errors: Number of system or user errors raised
+    :type: int
+
+    :attribute supressed: Number of messages supressed by policy
     :type: int
 
     """
     def __init__(self, brief=False):
         assert isinstance(brief, bool)
-        self.brief    = brief
-        self.warnings = 0
-        self.errors   = 0
-        self.sm       = None
+        self.brief             = brief
+        self.warnings          = 0
+        self.errors            = 0
+        self.suppressed        = 0
+        self.sm                = None
+        self.suppress_category = set()
+
+    def suppress(self, category):
+        assert isinstance(category, str)
+        self.suppress_category.add(category)
 
     def cross_file_reference(self, location):
         assert isinstance(location, Location)
@@ -154,21 +163,25 @@ class Message_Handler:
                                   kind,
                                   message)
 
-        if context:
-            assert len(context) == 2
-            print(context[0].replace("\t", " "))
-            print(context[1].replace("\t", " "), msg)
-        else:
-            print(msg)
+        if kind in self.suppress_category:
+            self.suppressed += 1
 
-        if not self.brief and extrainfo:
+        else:
             if context:
-                indent = len(context[1]) - 1
+                assert len(context) == 2
+                print(context[0].replace("\t", " "))
+                print(context[1].replace("\t", " "), msg)
             else:
-                indent = 0
-            for line in extrainfo.splitlines():
-                print("%s| %s" % (" " * indent,
-                                  line.rstrip()))
+                print(msg)
+
+            if not self.brief and extrainfo:
+                if context:
+                    indent = len(context[1]) - 1
+                else:
+                    indent = 0
+                for line in extrainfo.splitlines():
+                    print("%s| %s" % (" " * indent,
+                                      line.rstrip()))
 
         if fatal:
             raise TRLC_Error(location, kind, message)
