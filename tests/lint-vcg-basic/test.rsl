@@ -1,0 +1,13 @@
+package Test
+
+type T1 {
+    x optional Integer
+    y optional Integer
+    z          Integer
+}
+
+checks T1 {
+    x != null implies y == x, fatal "potato"
+    y != null implies x > 1, warning "potato"
+    x == z or y == z, warning "potato"
+}
