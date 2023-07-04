@@ -135,11 +135,12 @@ class Message_Handler:
         else:
             return self.sm.cross_file_reference(location)
 
-    def emit(self, location, kind, message, fatal=True):
+    def emit(self, location, kind, message, fatal=True, extrainfo=None):
         assert isinstance(location, Location)
         assert isinstance(kind, str)
         assert isinstance(message, str)
         assert isinstance(fatal, bool)
+        assert isinstance(extrainfo, str) or extrainfo is None
 
         if self.brief:
             context = None
@@ -159,6 +160,15 @@ class Message_Handler:
             print(context[1].replace("\t", " "), msg)
         else:
             print(msg)
+
+        if not self.brief and extrainfo:
+            if context:
+                indent = len(context[1]) - 1
+            else:
+                indent = 0
+            for line in extrainfo.splitlines():
+                print("%s| %s" % (" " * indent,
+                                  line.rstrip()))
 
         if fatal:
             raise TRLC_Error(location, kind, message)
@@ -240,6 +250,18 @@ class Message_Handler:
                   "warning",
                   "%s [%s]" % (message, check),
                   fatal=False)
+
+    def failed_vc(self, location, message, counterexample=None):
+        assert isinstance(location, Location)
+        assert isinstance(message, str)
+        assert isinstance(counterexample, str) or counterexample is None
+
+        self.warnings += 1
+        self.emit(location,
+                  "check",
+                  "%s" % message,
+                  fatal     = False,
+                  extrainfo = counterexample)
 
     def ice_loc(self, location, message):  # pragma: no cover
         assert isinstance(location, Location)
