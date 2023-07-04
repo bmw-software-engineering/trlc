@@ -58,6 +58,7 @@ it is better than nothing.
 ```emacs
 (defvar trlc-keywords
   '("abs"
+    "abstract"
     "and"
     "checks"
     "else"
@@ -68,7 +69,9 @@ it is better than nothing.
     "extends"
     "false"
     "fatal"
+    "final"
     "forall"
+    "freeze"
     "if"
     "implies"
     "import"
@@ -79,8 +82,10 @@ it is better than nothing.
     "or"
     "package"
     "section"
+    "separator"
     "then"
     "true"
+    "tuple"
     "type"
     "warning"
     "xor"))
