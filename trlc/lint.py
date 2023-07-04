@@ -24,15 +24,17 @@ from trlc.vcg import VCG
 
 
 class Linter:
-    def __init__(self, mh, stab):
+    def __init__(self, mh, stab, verify_checks):
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, ast.Symbol_Table)
+        assert isinstance(verify_checks, bool)
 
-        self.mh   = mh
-        self.stab = stab
+        self.mh            = mh
+        self.stab          = stab
+        self.verify_checks = verify_checks
 
         self.abstract_extensions = {}
-        self.checked_types = set()
+        self.checked_types       = set()
 
     def verify(self):
         ok = True
@@ -98,8 +100,9 @@ class Linter:
             self.verify_type(n_component.n_typ)
 
         # Verify checks
-        vcg = VCG(self.mh, n_tuple_type)
-        vcg.analyze()
+        if self.verify_checks:
+            vcg = VCG(self.mh, n_tuple_type)
+            vcg.analyze()
 
     def verify_record_type(self, n_record_type):
         assert isinstance(n_record_type, ast.Record_Type)
@@ -118,8 +121,9 @@ class Linter:
             self.verify_type(n_component.n_typ)
 
         # Verify checks
-        vcg = VCG(self.mh, n_record_type)
-        vcg.analyze()
+        if self.verify_checks:
+            vcg = VCG(self.mh, n_record_type)
+            vcg.analyze()
 
     def verify_array_type(self, n_typ):
         assert isinstance(n_typ, ast.Array_Type)

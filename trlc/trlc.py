@@ -22,7 +22,7 @@ import re
 import os
 import sys
 import json
-from argparse import ArgumentParser
+import argparse
 from fractions import Fraction
 
 from trlc import ast
@@ -30,6 +30,12 @@ from trlc import lint
 from trlc.errors import TRLC_Error, Location, Message_Handler
 from trlc.parser import Parser
 from trlc.version import TRLC_VERSION
+
+try:
+    from pyvcg import version
+    VCG_AVAILABLE = version.VERSION_TUPLE >= (0, 0, 1)
+except ImportError:
+    VCG_AVAILABLE = False
 
 
 class Source_Manager:
@@ -47,9 +53,10 @@ class Source_Manager:
     :type mh: Message_Handler
 
     """
-    def __init__(self, mh, lint_mode=False):
+    def __init__(self, mh, lint_mode=False, verify_mode=False):
         assert isinstance(mh, Message_Handler)
         assert isinstance(lint_mode, bool)
+        assert isinstance(verify_mode, bool)
 
         self.mh          = mh
         self.mh.sm       = self
@@ -59,6 +66,7 @@ class Source_Manager:
         self.trlc_files  = {}
         self.packages    = {}
         self.lint_mode   = lint_mode
+        self.verify_mode = verify_mode
 
         self.exclude_patterns = []
 
@@ -297,7 +305,7 @@ class Source_Manager:
         return ok
 
     def perform_sanity_checks(self):
-        linter = lint.Linter(self.mh, self.stab)
+        linter = lint.Linter(self.mh, self.stab, self.verify_mode)
         return linter.verify()
 
     def process(self):
@@ -349,7 +357,7 @@ class Source_Manager:
 
 
 def main():
-    ap = ArgumentParser(
+    ap = argparse.ArgumentParser(
         description="TRLC %s (Python reference implementation)" % TRLC_VERSION
     )
     op_mode = ap.add_mutually_exclusive_group()
@@ -357,6 +365,10 @@ def main():
                          default=False,
                          action="store_true",
                          help="sanity check models and checks")
+    ap.add_argument("--verify",
+                    default=False,
+                    action="store_true",
+                    help=argparse.SUPPRESS)
     ap.add_argument("--debug-dump",
                     default=False,
                     action="store_true",
@@ -386,12 +398,15 @@ def main():
                           "naming every file processed"))
     options = ap.parse_args()
 
+    if options.verify and not VCG_AVAILABLE:
+        ap.error("The --verify option requires the optional dependency PyVCG")
+
     mh = Message_Handler(options.brief)
 
     if options.no_user_warnings:
         mh.suppress("check warning")
 
-    sm = Source_Manager(mh, options.lint)
+    sm = Source_Manager(mh, options.lint, options.verify)
 
     if not options.include_bazel_dirs:
         sm.exclude_patterns.append(re.compile("^bazel-.*$"))

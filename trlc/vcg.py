@@ -55,6 +55,7 @@ class Feedback:
 
 class VCG:
     def __init__(self, mh, n_ctyp):
+        assert VCG_AVAILABLE
         assert isinstance(mh, Message_Handler)
         assert isinstance(n_ctyp, Composite_Type)
 
@@ -66,10 +67,9 @@ class VCG:
 
         self.tmp_id = 0
 
-        if VCG_AVAILABLE:
-            self.vcg   = vcg.VCG()
-            self.start = self.vcg.start
-            self.graph = self.vcg.graph
+        self.vcg   = vcg.VCG()
+        self.start = self.vcg.start
+        self.graph = self.vcg.graph
 
         self.constants = {}
 
@@ -138,9 +138,6 @@ class VCG:
         self.start = gn_decl
 
     def analyze(self):
-        if not VCG_AVAILABLE:
-            return
-
         try:
             self.checks_on_composite_type(self.n_ctyp)
         except Unsupported as exc:
