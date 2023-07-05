@@ -1,0 +1,14 @@
+package Test6
+
+type T {
+  a Integer
+  b Integer
+  c Integer
+  d Integer
+}
+
+checks T {
+  10 <= c and c <= 20, fatal "potato"
+  b < 0, fatal "potato"
+  a == b % (c + d * 2), "potato"
+}

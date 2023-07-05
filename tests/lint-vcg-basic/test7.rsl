@@ -1,0 +1,12 @@
+package Test7
+
+type T {
+  a Integer
+  b Integer
+}
+
+checks T {
+  10 <= a and a <= 20, fatal "potato"
+  10 <= b and b <= 20, fatal "potato"
+  13 % ((-a) % b + 7) > 0, "potato"
+}
