@@ -1081,6 +1081,31 @@ class Unary_Expression(Expression):
             mh.ice_loc(self.location,
                        "unexpected unary operation %s" % operator)
 
+    def to_string(self):
+        prefix_operators = {
+            Unary_Operator.MINUS          : "-",
+            Unary_Operator.PLUS           : "+",
+            Unary_Operator.ABSOLUTE_VALUE : "abs ",
+            Unary_Operator.LOGICAL_NOT    : "not ",
+        }
+        function_calls = {
+            Unary_Operator.STRING_LENGTH         : "len",
+            Unary_Operator.ARRAY_LENGTH          : "len",
+            Unary_Operator.CONVERSION_TO_INT     : "Integer",
+            Unary_Operator.CONVERSION_TO_DECIMAL : "Decimal"
+        }
+
+        if self.operator in prefix_operators:
+            return prefix_operators[self.operator] + \
+                self.n_operand.to_string()
+
+        elif self.operator in function_calls:
+            return "%s(%s)" % (function_calls[self.operator],
+                               self.n_operand.to_string())
+
+        else:
+            assert False
+
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Unary %s Expression" % self.operator)
         self.write_indent(indent + 1, "Type: %s" % self.typ.name)

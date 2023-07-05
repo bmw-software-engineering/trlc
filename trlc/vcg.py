@@ -333,6 +333,9 @@ class VCG:
         if isinstance(n_expr, Name_Reference):
             return self.tr_name_reference(n_expr)
 
+        elif isinstance(n_expr, Unary_Expression):
+            return self.tr_unary_expression(n_expr)
+
         elif isinstance(n_expr, Binary_Expression):
             return self.tr_binary_expression(n_expr)
 
@@ -364,6 +367,48 @@ class VCG:
         else:
             self.flag_unsupported(n_ref)
 
+    def tr_unary_expression(self, n_expr):
+        assert isinstance(n_expr, Unary_Expression)
+
+        operand_value, operand_valid = self.tr_expression(n_expr.n_operand)
+        self.attach_validity_check(operand_valid, n_expr.n_operand)
+
+        sym_result = smt.Constant(self.tr_type(n_expr.typ),
+                                  self.new_temp_name())
+        sym_value = None
+
+        if n_expr.operator == Unary_Operator.PLUS:
+            sym_value = operand_value
+
+        elif n_expr.operator == Unary_Operator.MINUS:
+            if isinstance(n_expr.n_operand.typ, Builtin_Integer):
+                sym_value = smt.Unary_Int_Arithmetic_Op("-",
+                                                        operand_value)
+
+            else:
+                self.flag_unsupported(n_expr,
+                                      n_expr.operator.name +
+                                      " for non-integer")
+
+        elif n_expr.operator == Unary_Operator.ABSOLUTE_VALUE:
+            if isinstance(n_expr.n_operand.typ, Builtin_Integer):
+                sym_value = smt.Unary_Int_Arithmetic_Op("abs",
+                                                        operand_value)
+
+            else:
+                self.flag_unsupported(n_expr,
+                                      n_expr.operator.name +
+                                      " for non-integer")
+
+        else:
+            self.flag_unsupported(n_expr,
+                                  n_expr.operator.name)
+
+        self.attach_temp_declaration(n_expr,
+                                     sym_result,
+                                     sym_value)
+        return sym_result, smt.Boolean_Literal(True)
+
     def tr_binary_expression(self, n_expr):
         assert isinstance(n_expr, Binary_Expression)
 
@@ -392,14 +437,15 @@ class VCG:
         if n_expr.operator in (Binary_Operator.PLUS,
                                Binary_Operator.MINUS,
                                Binary_Operator.TIMES,
-                               Binary_Operator.DIVIDE):
-            # TODO: mod needs semantics checking
+                               Binary_Operator.DIVIDE,
+                               Binary_Operator.REMAINDER):
 
             smt_op = {
-                Binary_Operator.PLUS   : "+",
-                Binary_Operator.MINUS  : "-",
-                Binary_Operator.TIMES  : "*",
-                Binary_Operator.DIVIDE : "floordiv",
+                Binary_Operator.PLUS      : "+",
+                Binary_Operator.MINUS     : "-",
+                Binary_Operator.TIMES     : "*",
+                Binary_Operator.DIVIDE    : "floor_div",
+                Binary_Operator.REMAINDER : "ada_remainder",
             }[n_expr.operator]
 
             if isinstance(n_expr.n_lhs.typ, Builtin_Integer):
@@ -413,7 +459,8 @@ class VCG:
 
             else:
                 self.flag_unsupported(n_expr,
-                                      n_expr.operator.name + " for non-integer")
+                                      n_expr.operator.name +
+                                      " for non-integer")
 
         elif n_expr.operator in (Binary_Operator.COMP_LT,
                                  Binary_Operator.COMP_LEQ,
