@@ -164,6 +164,8 @@ class Source_Manager:
 
         ok = True
         for path, dirs, files in os.walk(dir_name):
+            dirs.sort()
+
             for n, dirname in reversed(list(enumerate(dirs))):
                 keep = True
                 for exclude_pattern in self.exclude_patterns:
