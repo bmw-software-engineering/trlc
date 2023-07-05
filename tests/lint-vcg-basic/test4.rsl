@@ -1,0 +1,24 @@
+package Test4
+
+enum Colour { Red Green Blue }
+
+type T4 {
+  a Colour
+  b Colour
+  c Colour
+  d Colour
+  x optional Boolean
+}
+
+checks T4 {
+  a != b and a != c and a != d, fatal "potato"
+  b != c and b != d, fatal "potato"
+  x, "wibble"
+}
+
+type T4_Ext extends T4 {}
+
+checks T4_Ext {
+  c != d, fatal "potato"
+  x, "wibble"
+}

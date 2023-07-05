@@ -1,0 +1,10 @@
+package Test2
+
+type T2 {
+  x Integer
+}
+
+checks T2 {
+  x > 1, fatal "must be positive", x
+  x != 0, warning "potato"
+}

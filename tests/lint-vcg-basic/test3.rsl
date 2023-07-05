@@ -1,0 +1,11 @@
+package Test3
+
+type T3 {
+  x optional Boolean
+  y          Boolean
+}
+
+checks T3 {
+  x, "potato"
+  y, "potato"
+}
