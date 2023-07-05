@@ -71,7 +71,8 @@ class VCG:
         self.start = self.vcg.start
         self.graph = self.vcg.graph
 
-        self.constants = {}
+        self.constants    = {}
+        self.enumerations = {}
 
     @staticmethod
     def flag_unsupported(node, text=None):
@@ -232,6 +233,9 @@ class VCG:
         elif isinstance(n_typ, Builtin_Boolean):
             return "true" if value else "false"
 
+        elif isinstance(n_typ, Enumeration_Type):
+            return n_typ.name + "." + value
+
         else:
             self.flag_unsupported(n_typ,
                                   "back-conversion from %s" % n_typ.name)
@@ -282,6 +286,21 @@ class VCG:
             return smt.BUILTIN_BOOLEAN
         elif isinstance(n_type, Builtin_Integer):
             return smt.BUILTIN_INTEGER
+        elif isinstance(n_type, Enumeration_Type):
+            if n_type not in self.enumerations:
+                s_sort = smt.Enumeration(n_type.n_package.name +
+                                         "." + n_type.name)
+                for n_lit in n_type.literals.values():
+                    s_sort.add_literal(n_lit.name)
+                self.enumerations[n_type] = s_sort
+                self.start.add_statement(
+                    smt.Enumeration_Declaration(
+                        s_sort,
+                        "enumeration %s from %s" % (
+                            n_type.name,
+                            n_type.location.to_string())))
+
+            return self.enumerations[n_type]
         else:
             self.flag_unsupported(n_type)
 
@@ -309,6 +328,11 @@ class VCG:
         elif isinstance(n_expr, Integer_Literal):
             return smt.Integer_Literal(n_expr.value), smt.Boolean_Literal(True)
 
+        elif isinstance(n_expr, Enumeration_Literal):
+            s_lit = smt.Enumeration_Literal(self.tr_type(n_expr.typ),
+                                            n_expr.value.name)
+            return s_lit, smt.Boolean_Literal(True)
+
         else:
             self.flag_unsupported(n_expr)
 
@@ -334,6 +358,9 @@ class VCG:
 
         elif n_expr.operator == Binary_Operator.LOGICAL_IMPLIES:
             return self.tr_op_implication(n_expr)
+
+        elif n_expr.operator == Binary_Operator.LOGICAL_AND:
+            return self.tr_op_and(n_expr)
 
         # The remaining operators always check for validity, so we can
         # obtain the values of both sides now.
@@ -409,6 +436,43 @@ class VCG:
         self.start.add_edge_to(gn_end)
 
         ### 2: Implication is valid.
+        self.start = current_start
+        self.attach_assumption(lhs_value)
+        rhs_value, rhs_valid = self.tr_expression(n_expr.n_rhs)
+        self.attach_validity_check(rhs_valid, n_expr.n_rhs)
+        self.attach_temp_declaration(n_expr,
+                                     sym_result,
+                                     rhs_value)
+        self.start.add_edge_to(gn_end)
+
+        # Join paths
+        self.start = gn_end
+
+        return sym_result, smt.Boolean_Literal(True)
+
+    def tr_op_and(self, n_expr):
+        assert isinstance(n_expr, Binary_Expression)
+        assert n_expr.operator == Binary_Operator.LOGICAL_AND
+
+        lhs_value, lhs_valid = self.tr_expression(n_expr.n_lhs)
+        # Emit VC for validity
+        self.attach_validity_check(lhs_valid, n_expr.n_lhs)
+
+        # Split into two paths.
+        current_start = self.start
+        sym_result = smt.Constant(smt.BUILTIN_BOOLEAN,
+                                  self.new_temp_name())
+        gn_end = graph.Node(self.graph)
+
+        ### 1: LHS is not true
+        self.start = current_start
+        self.attach_assumption(smt.Boolean_Negation(lhs_value))
+        self.attach_temp_declaration(n_expr,
+                                     sym_result,
+                                     smt.Boolean_Literal(False))
+        self.start.add_edge_to(gn_end)
+
+        ### 2: LHS is true
         self.start = current_start
         self.attach_assumption(lhs_value)
         rhs_value, rhs_valid = self.tr_expression(n_expr.n_rhs)

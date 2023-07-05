@@ -1,9 +1,9 @@
 package Test
 
 type T1 {
-    x optional Integer
-    y optional Integer
-    z          Integer
+  x optional Integer
+  y optional Integer
+  z          Integer
 }
 
 checks T1 {
@@ -28,4 +28,22 @@ type T3 {
 checks T3 {
   x, "potato"
   y, "potato"
+}
+
+enum Colour { Red Green Blue }
+
+type T4 {
+  a Colour
+  b Colour
+  c Colour
+  d Colour
+  x optional Boolean
+}
+
+checks T4 {
+  a != b and a != c and a != d, fatal "potato"
+  b != c, fatal "potato"
+  c != d, fatal "potato"
+  d != a, fatal "potato"
+  x, "wibble"
 }
