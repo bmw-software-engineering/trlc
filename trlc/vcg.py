@@ -98,6 +98,22 @@ class VCG:
             self.start.add_edge_to(gn_check)
             self.start = gn_check
 
+    def attach_int_division_check(self, int_expr, origin):
+        assert isinstance(int_expr, smt.Expression)
+        assert int_expr.sort is smt.BUILTIN_INTEGER
+        assert isinstance(origin, Expression)
+
+        # Attach new graph node advance start
+        gn_check = graph.Check(self.graph)
+        gn_check.add_goal(
+            smt.Boolean_Negation(
+                smt.Comparison("=", int_expr, smt.Integer_Literal(0))),
+            Feedback(origin,
+                     "divisor could be 0"),
+            "division by zero check for %s" % origin.to_string())
+        self.start.add_edge_to(gn_check)
+        self.start = gn_check
+
     def attach_feasability_check(self, bool_expr, origin):
         assert isinstance(bool_expr, smt.Expression)
         assert bool_expr.sort is smt.BUILTIN_BOOLEAN
@@ -375,23 +391,29 @@ class VCG:
 
         if n_expr.operator in (Binary_Operator.PLUS,
                                Binary_Operator.MINUS,
-                               Binary_Operator.TIMES):
-            # TODO: div and mod need semantics checking
+                               Binary_Operator.TIMES,
+                               Binary_Operator.DIVIDE):
+            # TODO: mod needs semantics checking
 
             smt_op = {
-                Binary_Operator.PLUS  : "+",
-                Binary_Operator.MINUS : "-",
-                Binary_Operator.TIMES : "*",
+                Binary_Operator.PLUS   : "+",
+                Binary_Operator.MINUS  : "-",
+                Binary_Operator.TIMES  : "*",
+                Binary_Operator.DIVIDE : "floordiv",
             }[n_expr.operator]
 
-            if isinstance(n_expr.n_lhs, Builtin_Integer):
+            if isinstance(n_expr.n_lhs.typ, Builtin_Integer):
+                if n_expr.operator in (Binary_Operator.DIVIDE,
+                                       Binary_Operator.REMAINDER):
+                    self.attach_int_division_check(rhs_value, n_expr)
+
                 sym_value = smt.Binary_Int_Arithmetic_Op(smt_op,
                                                          lhs_value,
                                                          rhs_value)
 
             else:
                 self.flag_unsupported(n_expr,
-                                      n_expr.operator.name + "for non-integer")
+                                      n_expr.operator.name + " for non-integer")
 
         elif n_expr.operator in (Binary_Operator.COMP_LT,
                                  Binary_Operator.COMP_LEQ,
