@@ -89,13 +89,14 @@ class VCG:
         assert isinstance(origin, Expression)
 
         # Attach new graph node advance start
-        gn_check = graph.Check(self.graph)
-        gn_check.add_goal(bool_expr,
-                          Feedback(origin,
-                                   "expression could be null"),
-                          "validity check for %s" % origin.to_string())
-        self.start.add_edge_to(gn_check)
-        self.start = gn_check
+        if not bool_expr.is_static_true():
+            gn_check = graph.Check(self.graph)
+            gn_check.add_goal(bool_expr,
+                              Feedback(origin,
+                                       "expression could be null"),
+                              "validity check for %s" % origin.to_string())
+            self.start.add_edge_to(gn_check)
+            self.start = gn_check
 
     def attach_feasability_check(self, bool_expr, origin):
         assert isinstance(bool_expr, smt.Expression)
