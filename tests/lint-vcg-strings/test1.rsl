@@ -1,0 +1,16 @@
+package Test1
+
+type T {
+  x String
+  y optional Boolean
+}
+
+checks T {
+  len(x) > 10, fatal "string too short"
+  "kitten" in x, fatal "not enough cat"
+  "AA" not in x, fatal "too much AA"
+  startswith(x, "m"), fatal "bad start"
+  endswith(x, "?"), fatal "not enough question"
+
+  y, "potato"
+}

@@ -253,6 +253,12 @@ class VCG:
         elif isinstance(n_typ, Enumeration_Type):
             return n_typ.name + "." + value
 
+        elif isinstance(n_typ, Builtin_String):
+            if "\n" in value:
+                return "'''%s'''" % value
+            else:
+                return '"%s"' % value
+
         else:
             self.flag_unsupported(n_typ,
                                   "back-conversion from %s" % n_typ.name)
@@ -303,6 +309,8 @@ class VCG:
             return smt.BUILTIN_BOOLEAN
         elif isinstance(n_type, Builtin_Integer):
             return smt.BUILTIN_INTEGER
+        elif isinstance(n_type, Builtin_String):
+            return smt.BUILTIN_STRING
         elif isinstance(n_type, Enumeration_Type):
             if n_type not in self.enumerations:
                 s_sort = smt.Enumeration(n_type.n_package.name +
@@ -330,6 +338,8 @@ class VCG:
         self.attach_assumption(value)
 
     def tr_expression(self, n_expr):
+        value = None
+
         if isinstance(n_expr, Name_Reference):
             return self.tr_name_reference(n_expr)
 
@@ -343,18 +353,22 @@ class VCG:
             return None, smt.Boolean_Literal(False)
 
         elif isinstance(n_expr, Boolean_Literal):
-            return smt.Boolean_Literal(n_expr.value), smt.Boolean_Literal(True)
+            value = smt.Boolean_Literal(n_expr.value)
 
         elif isinstance(n_expr, Integer_Literal):
-            return smt.Integer_Literal(n_expr.value), smt.Boolean_Literal(True)
+            value = smt.Integer_Literal(n_expr.value)
 
         elif isinstance(n_expr, Enumeration_Literal):
-            s_lit = smt.Enumeration_Literal(self.tr_type(n_expr.typ),
+            value = smt.Enumeration_Literal(self.tr_type(n_expr.typ),
                                             n_expr.value.name)
-            return s_lit, smt.Boolean_Literal(True)
+
+        elif isinstance(n_expr, String_Literal):
+            value = smt.String_Literal(n_expr.value)
 
         else:
             self.flag_unsupported(n_expr)
+
+        return value, smt.Boolean_Literal(True)
 
     def tr_name_reference(self, n_ref):
         assert isinstance(n_ref, Name_Reference)
@@ -377,10 +391,7 @@ class VCG:
                                   self.new_temp_name())
         sym_value = None
 
-        if n_expr.operator == Unary_Operator.PLUS:
-            sym_value = operand_value
-
-        elif n_expr.operator == Unary_Operator.MINUS:
+        if n_expr.operator == Unary_Operator.MINUS:
             if isinstance(n_expr.n_operand.typ, Builtin_Integer):
                 sym_value = smt.Unary_Int_Arithmetic_Op("-",
                                                         operand_value)
@@ -389,6 +400,12 @@ class VCG:
                 self.flag_unsupported(n_expr,
                                       n_expr.operator.name +
                                       " for non-integer")
+
+        elif n_expr.operator == Unary_Operator.PLUS:
+            sym_value = operand_value
+
+        elif n_expr.operator == Unary_Operator.LOGICAL_NOT:
+            sym_value = smt.Boolean_Negation(operand_value)
 
         elif n_expr.operator == Unary_Operator.ABSOLUTE_VALUE:
             if isinstance(n_expr.n_operand.typ, Builtin_Integer):
@@ -399,6 +416,9 @@ class VCG:
                 self.flag_unsupported(n_expr,
                                       n_expr.operator.name +
                                       " for non-integer")
+
+        elif n_expr.operator == Unary_Operator.STRING_LENGTH:
+            sym_value = smt.String_Length(operand_value)
 
         else:
             self.flag_unsupported(n_expr,
@@ -474,6 +494,22 @@ class VCG:
             }[n_expr.operator]
 
             sym_value = smt.Comparison(smt_op, lhs_value, rhs_value)
+
+        elif n_expr.operator in (Binary_Operator.STRING_CONTAINS,
+                                 Binary_Operator.STRING_STARTSWITH,
+                                 Binary_Operator.STRING_ENDSWITH):
+
+            smt_op = {
+                Binary_Operator.STRING_CONTAINS   : "contains",
+                Binary_Operator.STRING_STARTSWITH : "prefixof",
+                Binary_Operator.STRING_ENDSWITH   : "suffixof"
+            }
+
+            # LHS / RHS ordering is not a mistake, in SMTLIB it's the
+            # other way around than in TRLC.
+            sym_value = smt.String_Predicate(smt_op[n_expr.operator],
+                                             rhs_value,
+                                             lhs_value)
 
         else:
             self.flag_unsupported(n_expr, n_expr.operator.name)
