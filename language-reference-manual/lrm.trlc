@@ -1395,7 +1395,7 @@ section "Operators" {
 
     Dynamic_Semantics Integer_Division_Semantics {
       text = '''The definition of `/` for integers is floor division. *(For
-                example `-5 / 2` is `2` and `-5 / 2` is
+                example `5 / 2` is `2` and `-5 / 2` is
                 `-3`.)*'''
     }
 
