@@ -18,13 +18,17 @@ all: $(TARGETS) bulk/output bulk/output.brief bulk/output.lint bulk/output.json
 
 .PRECIOUS: %/output
 %/output:
-	-coverage run -p --rcfile=coverage.cfg --branch ../trlc.py $(dir $@) > $@
+	-coverage run -p --rcfile=coverage.cfg --branch \
+		../trlc.py $(dir $@) > $@
 
 %/output.brief:
-	-coverage run -p --rcfile=coverage.cfg --branch ../trlc.py --brief $(dir $@) > $@
+	-coverage run -p --rcfile=coverage.cfg --branch \
+		../trlc.py --brief $(dir $@) > $@
 
 %/output.lint:
-	-coverage run -p --rcfile=coverage.cfg --branch ../trlc.py --lint $(dir $@) > $@
+	-coverage run -p --rcfile=coverage.cfg --branch \
+		../trlc.py --lint $(LINT_FLAGS) $(dir $@) > $@
 
 %/output.json:
-	-coverage run -p --rcfile=coverage.cfg --branch ../trlc.py --debug-api-dump $(dir $@) > $@
+	-coverage run -p --rcfile=coverage.cfg --branch \
+		../trlc.py --debug-api-dump $(dir $@) > $@
