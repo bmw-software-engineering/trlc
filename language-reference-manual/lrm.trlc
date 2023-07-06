@@ -1423,7 +1423,7 @@ section "Operators" {
 
     Static_Semantics Power_Domain {
       text = '''The exponentiation operator `**` is defined for integers and
-                rations bases, and returns the same type as
+                rational bases, and returns the same type as
                 its base. The exponent type is always an
                 Integer.'''
     }
