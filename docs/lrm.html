@@ -1286,10 +1286,10 @@ The name resolution rules for the qualified_name are exactly the same as they ar
 <h2 class="autosection" id="sec:cfe9573cce03cb2912c44176c44378eb3eaec3c5">Null Values</h2>
 <h3>Static Semantics</h3>
 <div>
-The null value has a polymorphic type that matches the required type given by context.
+The literal null value is only permitted to appear in an equality or inequality. Any other context (such as <code>(if a then null else b)</code> is rejected statically.
 </div>
 <div>
-It is an error to form an expression if the type of all operands cannot be statically determined. <i>(This means the expression <code>null == null</code> is not true, but an error.)</i>
+The expression <code>null == null</code> is statically true.
 </div>
 <h3>Dynamic Semantics</h3>
 <div>

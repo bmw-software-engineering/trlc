@@ -1891,16 +1891,14 @@ section "Markup strings" {
 
 section "Null Values" {
 
-  Static_Semantics Polymorphic_Null {
-    text = '''The null value has a polymorphic type that matches the
-              required type given by context.'''
+  Static_Semantics Restricted_Null {
+    text = '''The literal null value is only permitted to appear in
+              an equality or inequality. Any other context (such as
+              `(if a then null else b)` is rejected statically.'''
   }
 
-  Static_Semantics Expressions_Always_Resolve_Types {
-    text = '''It is an error to form an expression if the type of all
-              operands cannot be statically
-              determined. *(This means the expression `null
-              == null` is not true, but an error.)*'''
+  Static_Semantics Null_Equivalence {
+    text = '''The expression `null == null` is statically true.'''
   }
 
   Dynamic_Semantics Unspecified_Optional_Components {

@@ -916,6 +916,9 @@ class Parser(Parser_Base):
         if_cond = self.parse_expression(scope)
         self.match_kw("then")
         if_expr = self.parse_expression(scope)
+        if if_expr.typ is None:
+            self.mh.error(if_expr.location,
+                          "null is not permitted here")
         if_action = ast.Action(self.mh, t_if, if_cond, if_expr)
 
         rv = ast.Conditional_Expression(location  = t_if.location,

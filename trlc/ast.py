@@ -423,7 +423,10 @@ class Expression(Node):
 
     def ensure_type(self, mh, typ):
         assert isinstance(typ, (type, Type))
-        if isinstance(typ, type) and not isinstance(self.typ, typ):
+        if self.typ is None:
+            mh.error(self.location,
+                     "null is not permitted here")
+        elif isinstance(typ, type) and not isinstance(self.typ, typ):
             mh.error(self.location,
                      "expected expression of type %s, got %s instead" %
                      (typ.__name__,
@@ -1759,24 +1762,14 @@ class Conditional_Expression(Expression):
         assert isinstance(n_action, Action)
         assert n_action.kind == "elsif"
 
-        if n_action.n_expr.typ != self.typ:
-            mh.error(n_action.n_expr.location,
-                     "expression is of type %s, but must be of type %s" %
-                     (n_action.n_expr.typ.name,
-                      self.typ.name))
-
+        n_action.n_expr.ensure_type(mh, self.typ)
         self.actions.append(n_action)
 
     def set_else_part(self, mh, n_expr):
         assert isinstance(mh, Message_Handler)
         assert isinstance(n_expr, Expression)
 
-        if n_expr.typ != self.typ:
-            mh.error(n_expr.location,
-                     "expression is of type %s, but must be of type %s" %
-                     (n_expr.typ.name,
-                      self.typ.name))
-
+        n_expr.ensure_type(mh, self.typ)
         self.else_expr = n_expr
 
     def dump(self, indent=0):  # pragma: no cover

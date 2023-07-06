@@ -22,6 +22,11 @@ quantifying over all references.)
 * [TRLC] Fix missing static check on exponents (they must not be
   negative).
 
+* [TRLC, LRM] Fix several tool crashes when the `null` literal
+  appeared in expressions outside equality. Re-worded the section on
+  null values in the LRM to be much stricter. We consider this to be a
+  bug-fix and not a change of semantics.
+
 * [TRLC] Add new *experimental* option `--lint --verify`. This option
   requires [PyVCG](https://pypi.org/project/PyVCG) to be installed
   (which is only available on GNU/Linux or MacOS). This option
