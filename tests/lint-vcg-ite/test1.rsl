@@ -1,0 +1,13 @@
+package Test1
+
+type T {
+  a          Integer
+  x optional Boolean
+  y optional Boolean
+}
+
+checks T {
+  (if a > 0 then x
+   elsif a < 0 then y
+   else false), "wibble"
+}

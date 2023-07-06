@@ -185,7 +185,7 @@ class VCG:
         self.start = gn_ass
 
     def attach_temp_declaration(self, node, sym, value=None):
-        assert isinstance(node, Expression)
+        assert isinstance(node, (Expression, Action))
         assert isinstance(sym, smt.Constant)
         assert isinstance(value, smt.Expression) or value is None
 
@@ -505,6 +505,9 @@ class VCG:
         elif isinstance(n_expr, Range_Test):
             return self.tr_range_test(n_expr)
 
+        elif isinstance(n_expr, Conditional_Expression):
+            return self.tr_conditional_expression(n_expr)
+
         elif isinstance(n_expr, Null_Literal):
             return None, smt.Boolean_Literal(False)
 
@@ -757,6 +760,43 @@ class VCG:
             smt.Comparison(">=", lhs_value, lower_value),
             smt.Comparison("<=", lhs_value, upper_value))
         self.attach_temp_declaration(n_expr, sym_result, sym_value)
+        return sym_result, smt.Boolean_Literal(True)
+
+    def tr_conditional_expression(self, n_expr):
+        assert isinstance(n_expr, Conditional_Expression)
+
+        gn_end = graph.Node(self.graph)
+        sym_result = smt.Constant(self.tr_type(n_expr.typ),
+                                  self.new_temp_name())
+
+        for n_action in n_expr.actions:
+            test_value, test_valid = self.tr_expression(n_action.n_cond)
+            self.attach_validity_check(test_valid, n_action.n_cond)
+            current_start = self.start
+
+            # Create path where action is true
+            self.attach_assumption(test_value)
+            res_value, res_valid = self.tr_expression(n_action.n_expr)
+            self.attach_validity_check(res_valid, n_action.n_expr)
+            self.attach_temp_declaration(n_action,
+                                         sym_result,
+                                         res_value)
+            self.start.add_edge_to(gn_end)
+
+            # Reset to test and proceed with the other actions
+            self.start = current_start
+            self.attach_assumption(smt.Boolean_Negation(test_value))
+
+        # Finally execute the else part
+        res_value, res_valid = self.tr_expression(n_expr.else_expr)
+        self.attach_validity_check(res_valid, n_expr.else_expr)
+        self.attach_temp_declaration(n_expr,
+                                     sym_result,
+                                     res_value)
+        self.start.add_edge_to(gn_end)
+
+        # And join
+        self.start = gn_end
         return sym_result, smt.Boolean_Literal(True)
 
     def tr_op_implication(self, n_expr):
