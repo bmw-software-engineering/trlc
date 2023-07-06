@@ -1,0 +1,2 @@
+package Test1
+        ^^^^^ lint-vcg-power/test2.rsl:1: error: duplicate definition, previous definition at test1.rsl:1

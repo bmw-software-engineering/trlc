@@ -1,0 +1,12 @@
+package Test1
+
+type T {
+  x Integer
+  c optional Boolean
+}
+
+checks T {
+  x == 3 or x == 10 or x == 17, fatal "potato"
+  x > 5, fatal "blah"
+  c, "wibble"
+}

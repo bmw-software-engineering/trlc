@@ -1,0 +1,12 @@
+package Test2
+
+type T {
+  x Integer
+  y Integer
+  c optional Boolean
+}
+
+checks T {
+  x > 0 xor y > 0, fatal "potato"
+  y == -5 implies c, "wibble"
+}

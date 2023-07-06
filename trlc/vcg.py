@@ -338,11 +338,14 @@ class VCG:
             return str(value)
 
         elif isinstance(n_typ, Builtin_Decimal):
-            num, den = value.as_integer_ratio()
-            if den >= 1:
-                return self.fraction_to_decimal_string(num, den)
+            if isinstance(value, Fraction):
+                num, den = value.as_integer_ratio()
+                if den >= 1:
+                    return self.fraction_to_decimal_string(num, den)
+                else:
+                    return self.fraction_to_decimal_string(-num, -den)
             else:
-                return self.fraction_to_decimal_string(-num, -den)
+                return "/* unable to generate precise value */"
 
         elif isinstance(n_typ, Builtin_Boolean):
             return "true" if value else "false"
@@ -609,6 +612,9 @@ class VCG:
         elif n_expr.operator == Binary_Operator.LOGICAL_AND:
             return self.tr_op_and(n_expr)
 
+        elif n_expr.operator == Binary_Operator.LOGICAL_OR:
+            return self.tr_op_or(n_expr)
+
         # The remaining operators always check for validity, so we can
         # obtain the values of both sides now.
         lhs_value, lhs_valid = self.tr_expression(n_expr.n_lhs)
@@ -619,15 +625,18 @@ class VCG:
                                   self.new_temp_name())
         sym_value = None
 
-        if n_expr.operator in (Binary_Operator.PLUS,
-                               Binary_Operator.MINUS,
-                               Binary_Operator.TIMES,
-                               Binary_Operator.DIVIDE,
-                               Binary_Operator.REMAINDER):
+        if n_expr.operator == Binary_Operator.LOGICAL_XOR:
+            sym_value = smt.Exclusive_Disjunction(lhs_value, rhs_value)
+
+        elif n_expr.operator in (Binary_Operator.PLUS,
+                                 Binary_Operator.MINUS,
+                                 Binary_Operator.TIMES,
+                                 Binary_Operator.DIVIDE,
+                                 Binary_Operator.REMAINDER):
 
             if isinstance(n_expr.n_lhs.typ, Builtin_String):
                 assert n_expr.operator == Binary_Operator.PLUS
-                self.flag_unsupported(n_expr, "string concatenation")
+                sym_value = smt.String_Concatenation(lhs_value, rhs_value)
 
             elif isinstance(n_expr.n_lhs.typ, Builtin_Integer):
                 if n_expr.operator in (Binary_Operator.DIVIDE,
@@ -697,6 +706,32 @@ class VCG:
 
         elif n_expr.operator == Binary_Operator.ARRAY_CONTAINS:
             sym_value = smt.Sequence_Contains(rhs_value, lhs_value)
+
+        elif n_expr.operator == Binary_Operator.POWER:
+            # LRM says that the exponent is always static and an
+            # integer
+            static_value = n_expr.n_rhs.evaluate(self.mh, None).value
+            assert isinstance(static_value, int) and static_value >= 0
+
+            if static_value == 0:
+                if isinstance(n_expr.n_lhs.typ, Builtin_Integer):
+                    sym_value = smt.Integer_Literal(1)
+                else:
+                    assert isinstance(n_expr.n_lhs.typ, Builtin_Decimal)
+                    sym_value = smt.Real_Literal(1)
+
+            else:
+                sym_value = lhs_value
+                for _ in range(1, static_value):
+                    if isinstance(n_expr.n_lhs.typ, Builtin_Integer):
+                        sym_value = smt.Binary_Int_Arithmetic_Op("*",
+                                                                 sym_value,
+                                                                 lhs_value)
+                    else:
+                        assert isinstance(n_expr.n_lhs.typ, Builtin_Decimal)
+                        sym_value = smt.Binary_Real_Arithmetic_Op("*",
+                                                                  sym_value,
+                                                                  lhs_value)
 
         else:
             self.flag_unsupported(n_expr, n_expr.operator.name)
@@ -786,6 +821,43 @@ class VCG:
         ### 2: LHS is true
         self.start = current_start
         self.attach_assumption(lhs_value)
+        rhs_value, rhs_valid = self.tr_expression(n_expr.n_rhs)
+        self.attach_validity_check(rhs_valid, n_expr.n_rhs)
+        self.attach_temp_declaration(n_expr,
+                                     sym_result,
+                                     rhs_value)
+        self.start.add_edge_to(gn_end)
+
+        # Join paths
+        self.start = gn_end
+
+        return sym_result, smt.Boolean_Literal(True)
+
+    def tr_op_or(self, n_expr):
+        assert isinstance(n_expr, Binary_Expression)
+        assert n_expr.operator == Binary_Operator.LOGICAL_OR
+
+        lhs_value, lhs_valid = self.tr_expression(n_expr.n_lhs)
+        # Emit VC for validity
+        self.attach_validity_check(lhs_valid, n_expr.n_lhs)
+
+        # Split into two paths.
+        current_start = self.start
+        sym_result = smt.Constant(smt.BUILTIN_BOOLEAN,
+                                  self.new_temp_name())
+        gn_end = graph.Node(self.graph)
+
+        ### 1: LHS is true
+        self.start = current_start
+        self.attach_assumption(lhs_value)
+        self.attach_temp_declaration(n_expr,
+                                     sym_result,
+                                     smt.Boolean_Literal(True))
+        self.start.add_edge_to(gn_end)
+
+        ### 2: LHS is not true
+        self.start = current_start
+        self.attach_assumption(smt.Boolean_Negation(lhs_value))
         rhs_value, rhs_valid = self.tr_expression(n_expr.n_rhs)
         self.attach_validity_check(rhs_valid, n_expr.n_rhs)
         self.attach_temp_declaration(n_expr,

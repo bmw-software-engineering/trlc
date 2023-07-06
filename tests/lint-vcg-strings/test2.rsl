@@ -1,0 +1,15 @@
+package Test2
+
+type T {
+  x String
+  y String
+  c optional Boolean
+}
+
+checks T {
+  len(x + y) == 10, fatal "potato"
+  "foo" in x, fatal "potato"
+  "bar" in y, fatal "potato"
+
+  c, "potato"
+}
