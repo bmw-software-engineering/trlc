@@ -1,0 +1,15 @@
+package Test1
+
+type T {
+  num          Integer
+  den          Integer
+  r            Decimal
+  x   optional Boolean
+}
+
+checks T {
+  den > 0, fatal "potato"
+  r == 3.14, fatal "potato"
+  r == Decimal(num) / Decimal(den), fatal "potato"
+  x, "potato"
+}

@@ -575,6 +575,12 @@ class VCG:
         elif n_expr.operator == Unary_Operator.ARRAY_LENGTH:
             sym_value = smt.Sequence_Length(operand_value)
 
+        elif n_expr.operator == Unary_Operator.CONVERSION_TO_DECIMAL:
+            sym_value = smt.Conversion_To_Real(operand_value)
+
+        elif n_expr.operator == Unary_Operator.CONVERSION_TO_INT:
+            sym_value = smt.Conversion_To_Integer("rna", operand_value)
+
         else:
             self.flag_unsupported(n_expr,
                                   n_expr.operator.name)

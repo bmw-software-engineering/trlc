@@ -1,0 +1,13 @@
+package Test2
+
+type T {
+  i            Integer
+  r            Decimal
+  x   optional Boolean
+}
+
+checks T {
+  r == -3.14, fatal "potato"
+  i == Integer(r), fatal "potato"
+  x, "potato"
+}
