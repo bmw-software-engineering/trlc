@@ -1,0 +1,12 @@
+package Test1
+
+type T {
+  top_level             Boolean
+  derived_from optional T
+  x            optional Boolean
+}
+
+checks T {
+  not top_level implies derived_from != null, fatal "please link"
+  x, "potato"
+}

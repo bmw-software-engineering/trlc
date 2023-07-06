@@ -1,0 +1,13 @@
+package Test3
+import Other
+
+type T {
+  a          Other.T
+  b          Other.T
+  x optional Boolean
+}
+
+checks T {
+  a != b implies x, "potato"
+  a == b implies x, "potato"
+}

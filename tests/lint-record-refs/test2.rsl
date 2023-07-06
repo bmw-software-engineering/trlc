@@ -1,0 +1,12 @@
+package Test2
+
+type T {
+  a          T
+  b          T
+  x optional Boolean
+}
+
+checks T {
+  a != b implies x, "potato"
+  a == b implies x, "potato"
+}

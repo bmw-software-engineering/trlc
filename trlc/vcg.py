@@ -259,6 +259,14 @@ class VCG:
             else:
                 return '"%s"' % value
 
+        elif isinstance(n_typ, Record_Type):
+            if n_typ.n_package is self.n_ctyp.n_package:
+                return "%s_instance_%i" % (n_typ.name, value)
+            else:
+                return "%s.%s_instance_%i" % (n_typ.n_package.name,
+                                              n_typ.name,
+                                              value)
+
         else:
             self.flag_unsupported(n_typ,
                                   "back-conversion from %s" % n_typ.name)
@@ -326,6 +334,12 @@ class VCG:
                             n_type.location.to_string())))
 
             return self.enumerations[n_type]
+        elif isinstance(n_type, Record_Type):
+            # Record references are modelled as a free integer, since
+            # we can't really _do_ anything with them. We just need a
+            # variable with infinite range so we can generate
+            # arbitrary fictional record names
+            return smt.BUILTIN_INTEGER
         else:
             self.flag_unsupported(n_type)
 
