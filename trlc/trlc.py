@@ -53,10 +53,14 @@ class Source_Manager:
     :type mh: Message_Handler
 
     """
-    def __init__(self, mh, lint_mode=False, verify_mode=False):
+    def __init__(self, mh,
+                 lint_mode   = False,
+                 verify_mode = False,
+                 debug_vcg   = False):
         assert isinstance(mh, Message_Handler)
         assert isinstance(lint_mode, bool)
         assert isinstance(verify_mode, bool)
+        assert isinstance(debug_vcg, bool)
 
         self.mh          = mh
         self.mh.sm       = self
@@ -67,6 +71,7 @@ class Source_Manager:
         self.packages    = {}
         self.lint_mode   = lint_mode
         self.verify_mode = verify_mode
+        self.debug_vcg   = debug_vcg
 
         self.exclude_patterns = []
 
@@ -307,7 +312,10 @@ class Source_Manager:
         return ok
 
     def perform_sanity_checks(self):
-        linter = lint.Linter(self.mh, self.stab, self.verify_mode)
+        linter = lint.Linter(mh            = self.mh,
+                             stab          = self.stab,
+                             verify_checks = self.verify_mode,
+                             debug_vcg     = self.debug_vcg)
         return linter.verify()
 
     def process(self):
@@ -366,38 +374,60 @@ def main():
     op_mode.add_argument("--lint",
                          default=False,
                          action="store_true",
-                         help="sanity check models and checks")
-    ap.add_argument("--verify",
-                    default=False,
-                    action="store_true",
-                    help=argparse.SUPPRESS)
-    ap.add_argument("--debug-dump",
-                    default=False,
-                    action="store_true",
-                    help="dump symbol table")
-    ap.add_argument("--debug-api-dump",
-                    default=False,
-                    action="store_true",
-                    help="dump json")
-    ap.add_argument("--brief",
-                    default=False,
-                    action="store_true",
-                    help="simpler output intended for CI")
-    ap.add_argument("--no-user-warnings",
-                    default=False,
-                    action="store_true",
-                    help=("do not display any warnings from user defined"
-                          " checks, only errors"))
+                         help=("Sanity check models and checks, but do not"
+                               " process requirements."))
+
+    og_input = ap.add_argument_group("input options")
+    og_input.add_argument("--include-bazel-dirs",
+                          action="store_true",
+                          help=("Enter bazel-* directories, which are"
+                                " excluded by default."))
+
+    og_output = ap.add_argument_group("output options")
+    og_output.add_argument("--brief",
+                           default=False,
+                           action="store_true",
+                           help=("Simpler output intended for CI. Does not"
+                                 " show context or additional information."))
+    og_output.add_argument("--no-user-warnings",
+                           default=False,
+                           action="store_true",
+                           help=("Do not display any warnings from user"
+                                 " defined checks, only errors."))
+    og_output.add_argument("--show-file-list",
+                           action="store_true",
+                           help=("If there are no errors, produce a summary"
+                                 " naming every file processed."))
+
+    og_linter = ap.add_argument_group("linter options")
+    og_linter.add_argument("--verify",
+                           default=False,
+                           action="store_true",
+                           help=("[EXPERIMENTAL] Attempt to statically "
+                                 " verify absence of errors in user defined"
+                                 " checks. Does not yet support all language"
+                                 " constructs. Requires PyVCG to be "
+                                 " installed."))
+
+    og_debug = ap.add_argument_group("debug options")
+    og_debug.add_argument("--debug-dump",
+                          default=False,
+                          action="store_true",
+                          help="Dump symbol table.")
+    og_debug.add_argument("--debug-api-dump",
+                          default=False,
+                          action="store_true",
+                          help=("Dump json of to_python_object() for all"
+                                " objects."))
+    og_debug.add_argument("--debug-vcg",
+                          default=False,
+                          action="store_true",
+                          help=("Emit graph and individual VCs. Requires"
+                                " graphviz to be installed."))
+
     ap.add_argument("items",
                     nargs="*",
                     metavar="DIR|FILE")
-    ap.add_argument("--include-bazel-dirs",
-                    action="store_true",
-                    help="by default we do not enter bazel-* directories")
-    ap.add_argument("--show-file-list",
-                    action="store_true",
-                    help=("if there are no errors, produce a summary "
-                          "naming every file processed"))
     options = ap.parse_args()
 
     if options.verify and not VCG_AVAILABLE:
@@ -408,7 +438,10 @@ def main():
     if options.no_user_warnings:
         mh.suppress("check warning")
 
-    sm = Source_Manager(mh, options.lint, options.verify)
+    sm = Source_Manager(mh          = mh,
+                        lint_mode   = options.lint,
+                        verify_mode = options.verify,
+                        debug_vcg   = options.debug_vcg)
 
     if not options.include_bazel_dirs:
         sm.exclude_patterns.append(re.compile("^bazel-.*$"))

@@ -54,13 +54,15 @@ class Feedback:
 
 
 class VCG:
-    def __init__(self, mh, n_ctyp):
+    def __init__(self, mh, n_ctyp, debug):
         assert VCG_AVAILABLE
         assert isinstance(mh, Message_Handler)
         assert isinstance(n_ctyp, Composite_Type)
+        assert isinstance(debug, bool)
 
         self.mh      = mh
         self.n_ctyp  = n_ctyp
+        self.debug   = debug
 
         self.vc_name = "trlc-%s-%s" % (n_ctyp.n_package.name,
                                        n_ctyp.name)
@@ -183,10 +185,11 @@ class VCG:
                 self.start = current_start
 
         # Emit debug graph
-        subprocess.run(["dot", "-Tpdf", "-o%s.pdf" % self.vc_name],
-                       input = self.graph.debug_render_dot(),
-                       check = True,
-                       encoding = "UTF-8")
+        if self.debug:
+            subprocess.run(["dot", "-Tpdf", "-o%s.pdf" % self.vc_name],
+                           input = self.graph.debug_render_dot(),
+                           check = True,
+                           encoding = "UTF-8")
 
         # Generate VCs
         self.vcg.generate()
@@ -197,9 +200,10 @@ class VCG:
         nok_validity_checks    = set()
 
         for vc_id, vc in enumerate(self.vcg.vcs):
-            with open(self.vc_name + "_%04u.smt2" % vc_id, "w",
-                      encoding="UTF-8") as fd:
-                fd.write(vc["script"].generate_vc(smt.SMTLIB_Generator()))
+            if self.debug:
+                with open(self.vc_name + "_%04u.smt2" % vc_id, "w",
+                          encoding="UTF-8") as fd:
+                    fd.write(vc["script"].generate_vc(smt.SMTLIB_Generator()))
 
             # Checks that have already failed don't need to be checked
             # again on a different path
