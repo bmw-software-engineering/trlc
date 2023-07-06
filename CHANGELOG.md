@@ -19,6 +19,9 @@ quantifying over all references.)
 * [TRLC] Add new option `--no-user-warnings` to supress any warning
   generated from a user-defined check.
 
+* [TRLC] Fix missing static check on exponents (they must not be
+  negative).
+
 * [TRLC] Add new *experimental* option `--lint --verify`. This option
   requires [PyVCG](https://pypi.org/project/PyVCG) to be installed
   (which is only available on GNU/Linux or MacOS). This option

@@ -812,7 +812,7 @@ class Parser(Parser_Base):
                 self.match("OPERATOR")
                 t_op  = self.ct
                 n_rhs = self.parse_primary(scope)
-                n_rhs.evaluate(self.mh, None)
+                rhs_value = n_rhs.evaluate(self.mh, None)
                 n_lhs = ast.Binary_Expression(
                     mh       = self.mh,
                     location = t_op.location,
@@ -820,6 +820,9 @@ class Parser(Parser_Base):
                     operator = ast.Binary_Operator.POWER,
                     n_lhs    = n_lhs,
                     n_rhs    = n_rhs)
+                if rhs_value.value < 0:
+                    self.mh.error(n_rhs.location,
+                                  "exponent must not be negative")
             return n_lhs
 
     def parse_primary(self, scope):
