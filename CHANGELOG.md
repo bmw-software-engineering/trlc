@@ -19,6 +19,39 @@ quantifying over all references.)
 * [TRLC] Add new option `--no-user-warnings` to supress any warning
   generated from a user-defined check.
 
+* [TRLC] Add new *experimental* option `--lint --verify`. This option
+  requires [PyVCG](https://pypi.org/project/PyVCG) to be installed
+  (which is only available on GNU/Linux or MacOS). This option
+  attempts to statically verify all checks for error freedom (no null
+  dereferences, and no division by zero). For example with this `.rsl`:
+
+  ```
+  type T1 {
+    x optional Integer
+    y optional Integer
+    z          Integer
+  }
+
+  checks T1 {
+    x != null implies y == x, fatal "potato"
+    y != null implies x > 1, warning "potato"
+  }
+  ```
+
+  The `--lint --verify` option might say:
+
+  ```
+  y != null implies x > 1, warning "potato"
+                    ^ test1.rsl:11: check: expression could be null
+                    | example record_type triggering error:
+                    |   T1 bad_potato {
+                    |     /* x is null */
+                    |     y = 0
+                    |     z = 0
+                    |   }
+  ```
+
+
 ### 1.1.5
 
 * [LRM, TRLC] Remove limitation on late packages. You may now declare
