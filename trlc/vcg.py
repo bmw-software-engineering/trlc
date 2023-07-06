@@ -75,6 +75,7 @@ class VCG:
 
         self.constants    = {}
         self.enumerations = {}
+        self.arrays       = {}
 
     @staticmethod
     def flag_unsupported(node, text=None):
@@ -113,6 +114,33 @@ class VCG:
             Feedback(origin,
                      "divisor could be 0"),
             "division by zero check for %s" % origin.to_string())
+        self.start.add_edge_to(gn_check)
+        self.start = gn_check
+
+    def attach_index_check(self, seq_expr, index_expr, origin):
+        assert isinstance(seq_expr, smt.Expression)
+        assert isinstance(seq_expr.sort, smt.Sequence_Sort)
+        assert isinstance(index_expr, smt.Expression)
+        assert index_expr.sort is smt.BUILTIN_INTEGER
+        assert isinstance(origin, Binary_Expression)
+        assert origin.operator == Binary_Operator.INDEX
+
+        # Attach new graph node advance start
+        gn_check = graph.Check(self.graph)
+        gn_check.add_goal(
+            smt.Comparison(">=", index_expr, smt.Integer_Literal(0)),
+            Feedback(origin,
+                     "array index could be less than 0"),
+            "index lower bound check for %s" % origin.to_string())
+        gn_check.add_goal(
+            smt.Comparison("<",
+                           index_expr,
+                           smt.Sequence_Length(seq_expr)),
+            Feedback(origin,
+                     "array index could be larger than len(%s)" %
+                     origin.n_lhs.to_string()),
+            "index lower bound check for %s" % origin.to_string())
+
         self.start.add_edge_to(gn_check)
         self.start = gn_check
 
@@ -280,6 +308,11 @@ class VCG:
                                               n_typ.name,
                                               value)
 
+        elif isinstance(n_typ, Array_Type):
+            return "[%s]" % ", ".join(self.value_to_trlc(n_typ.element_type,
+                                                         item)
+                                      for item in value)
+
         else:
             self.flag_unsupported(n_typ,
                                   "back-conversion from %s" % n_typ.name)
@@ -311,6 +344,25 @@ class VCG:
         gn_locals.add_statement(s_decl)
         self.constants[id_value] = s_sym
 
+        # For arrays we need to add additional constraints for the
+        # length
+        if isinstance(n_component.n_typ, Array_Type):
+            if n_component.n_typ.lower_bound > 0:
+                s_lower = smt.Integer_Literal(n_component.n_typ.lower_bound)
+                gn_locals.add_statement(
+                    smt.Assertion(
+                        smt.Comparison(">=",
+                                       smt.Sequence_Length(s_sym),
+                                       s_lower)))
+
+            if n_component.n_typ.upper_bound is not None:
+                s_upper = smt.Integer_Literal(n_component.n_typ.upper_bound)
+                gn_locals.add_statement(
+                    smt.Assertion(
+                        smt.Comparison("<=",
+                                       smt.Sequence_Length(s_sym),
+                                       s_upper)))
+
         id_valid = self.tr_component_valid_name(n_component)
         s_sym  = smt.Constant(smt.BUILTIN_BOOLEAN, id_valid)
         s_val  = (None
@@ -328,10 +380,13 @@ class VCG:
 
         if isinstance(n_type, Builtin_Boolean):
             return smt.BUILTIN_BOOLEAN
+
         elif isinstance(n_type, Builtin_Integer):
             return smt.BUILTIN_INTEGER
+
         elif isinstance(n_type, Builtin_String):
             return smt.BUILTIN_STRING
+
         elif isinstance(n_type, Enumeration_Type):
             if n_type not in self.enumerations:
                 s_sort = smt.Enumeration(n_type.n_package.name +
@@ -345,14 +400,23 @@ class VCG:
                         "enumeration %s from %s" % (
                             n_type.name,
                             n_type.location.to_string())))
-
             return self.enumerations[n_type]
+
+        elif isinstance(n_type, Array_Type):
+            if n_type not in self.arrays:
+                s_element_sort = self.tr_type(n_type.element_type)
+                s_sequence = smt.Sequence_Sort(s_element_sort)
+                self.arrays[n_type] = s_sequence
+
+            return self.arrays[n_type]
+
         elif isinstance(n_type, Record_Type):
             # Record references are modelled as a free integer, since
             # we can't really _do_ anything with them. We just need a
             # variable with infinite range so we can generate
             # arbitrary fictional record names
             return smt.BUILTIN_INTEGER
+
         else:
             self.flag_unsupported(n_type)
 
@@ -447,6 +511,9 @@ class VCG:
         elif n_expr.operator == Unary_Operator.STRING_LENGTH:
             sym_value = smt.String_Length(operand_value)
 
+        elif n_expr.operator == Unary_Operator.ARRAY_LENGTH:
+            sym_value = smt.Sequence_Length(operand_value)
+
         else:
             self.flag_unsupported(n_expr,
                                   n_expr.operator.name)
@@ -537,6 +604,13 @@ class VCG:
             sym_value = smt.String_Predicate(smt_op[n_expr.operator],
                                              rhs_value,
                                              lhs_value)
+
+        elif n_expr.operator == Binary_Operator.INDEX:
+            self.attach_index_check(lhs_value, rhs_value, n_expr)
+            sym_value = smt.Sequence_Index(lhs_value, rhs_value)
+
+        elif n_expr.operator == Binary_Operator.ARRAY_CONTAINS:
+            sym_value = smt.Sequence_Contains(rhs_value, lhs_value)
 
         else:
             self.flag_unsupported(n_expr, n_expr.operator.name)

@@ -1,0 +1,12 @@
+package Test2
+
+type T {
+  arr1 Integer [3 .. 5]
+  x    Integer
+}
+
+checks T {
+  arr1[1] == 42, fatal "potato"
+  666 in arr1, fatal "potato"
+  arr1[x] > 0, "potato"
+}

@@ -1,0 +1,14 @@
+package Test1
+
+enum Colour { Red Green Blue }
+
+type T {
+  arr1 Integer [0 .. 5]
+  arr2 Colour  [3 .. 5]
+  arr3 String  [3 .. *]
+  x optional Boolean
+}
+
+checks T {
+  x, "potato"
+}
