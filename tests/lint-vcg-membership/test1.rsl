@@ -1,0 +1,14 @@
+package Test1
+
+type T {
+  x Integer
+  y Integer
+  z Integer
+  c optional Boolean
+}
+
+checks T {
+  y < z, fatal "potato"
+  x in y .. z, fatal "potato"
+  c, "wibble"
+}

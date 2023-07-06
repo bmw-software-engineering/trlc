@@ -1628,6 +1628,11 @@ class Range_Test(Expression):
         self.n_lower.ensure_type(mh, self.n_lhs.typ)
         self.n_upper.ensure_type(mh, self.n_lhs.typ)
 
+    def to_string(self):
+        return "%s in %s .. %s" % (self.n_lhs.to_string(),
+                                   self.n_lower.to_string(),
+                                   self.n_upper.to_string())
+
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Range Test")
         self.write_indent(indent + 1, "Type: %s" % self.typ)

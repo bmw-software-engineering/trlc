@@ -499,6 +499,9 @@ class VCG:
         elif isinstance(n_expr, Binary_Expression):
             return self.tr_binary_expression(n_expr)
 
+        elif isinstance(n_expr, Range_Test):
+            return self.tr_range_test(n_expr)
+
         elif isinstance(n_expr, Null_Literal):
             return None, smt.Boolean_Literal(False)
 
@@ -582,8 +585,9 @@ class VCG:
             sym_value = smt.Conversion_To_Integer("rna", operand_value)
 
         else:
-            self.flag_unsupported(n_expr,
-                                  n_expr.operator.name)
+            self.mh.ice_loc(n_expr,
+                            "unexpected unary operator %s" %
+                            n_expr.operator.name)
 
         self.attach_temp_declaration(n_expr,
                                      sym_result,
@@ -700,6 +704,24 @@ class VCG:
         self.attach_temp_declaration(n_expr,
                                      sym_result,
                                      sym_value)
+        return sym_result, smt.Boolean_Literal(True)
+
+    def tr_range_test(self, n_expr):
+        assert isinstance(n_expr, Range_Test)
+
+        lhs_value, lhs_valid     = self.tr_expression(n_expr.n_lhs)
+        self.attach_validity_check(lhs_valid, n_expr.n_lhs)
+        lower_value, lower_valid = self.tr_expression(n_expr.n_lower)
+        self.attach_validity_check(lower_valid, n_expr.n_lower)
+        upper_value, upper_valid = self.tr_expression(n_expr.n_upper)
+        self.attach_validity_check(upper_valid, n_expr.n_upper)
+
+        sym_result = smt.Constant(smt.BUILTIN_BOOLEAN,
+                                  self.new_temp_name())
+        sym_value = smt.Conjunction(
+            smt.Comparison(">=", lhs_value, lower_value),
+            smt.Comparison("<=", lhs_value, upper_value))
+        self.attach_temp_declaration(n_expr, sym_result, sym_value)
         return sym_result, smt.Boolean_Literal(True)
 
     def tr_op_implication(self, n_expr):
