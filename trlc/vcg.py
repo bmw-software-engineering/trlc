@@ -194,10 +194,18 @@ class VCG:
         # Solve VCs and provide feedback
         nok_feasibility_checks = []
         ok_feasibility_checks  = set()
+        nok_validity_checks    = set()
+
         for vc_id, vc in enumerate(self.vcg.vcs):
             with open(self.vc_name + "_%04u.smt2" % vc_id, "w",
                       encoding="UTF-8") as fd:
                 fd.write(vc["script"].generate_vc(smt.SMTLIB_Generator()))
+
+            # Checks that have already failed don't need to be checked
+            # again on a different path
+            if vc["feedback"].expect_unsat and \
+               vc["feedback"] in nok_validity_checks:
+                continue
 
             status, values = vc["script"].solve_vc(smt.CVC5_Solver())
 
@@ -206,6 +214,7 @@ class VCG:
                     self.mh.failed_vc(vc["feedback"].node.location,
                                       vc["feedback"].message,
                                       self.create_counterexample(values))
+                    nok_validity_checks.add(vc["feedback"])
             else:
                 if status == "unsat":
                     nok_feasibility_checks.append(vc["feedback"])
