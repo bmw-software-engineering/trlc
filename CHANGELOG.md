@@ -11,8 +11,17 @@ The new `Markup_String` type currently has limited language support,
 but we expect to add more features surrounding it later. (For example
 quantifying over all references.)
 
-## Changelog
+The `--verify` feature has several limitations:
 
+* Decimal numbers are modelled as real numbers instead of
+  decimals. This means there may be false alarms and counter-examples
+  produced that do not make sense.
+* It does not support the builtin `matches` function.
+* It does not support tuple components.
+* It does not support field access (the `.` operator).
+* It does not support quantifiers.
+
+## Changelog
 
 ### 1.1.6-dev
 
