@@ -1,0 +1,9 @@
+package Test2
+
+type T {
+  a Decimal
+}
+
+checks T {
+  1.0 / (a + (1.0 / 3.0)) > 0.0, fatal "potato"
+}

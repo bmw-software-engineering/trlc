@@ -1,0 +1,13 @@
+package Test1
+
+type T {
+  a Decimal
+  b Decimal
+  x optional Boolean
+}
+
+checks T {
+  a != b, fatal "potato"
+  a + (-a) == b * abs b, fatal "potato"
+  x, "potato"
+}

@@ -117,6 +117,22 @@ class VCG:
         self.start.add_edge_to(gn_check)
         self.start = gn_check
 
+    def attach_real_division_check(self, real_expr, origin):
+        assert isinstance(real_expr, smt.Expression)
+        assert real_expr.sort is smt.BUILTIN_REAL
+        assert isinstance(origin, Expression)
+
+        # Attach new graph node advance start
+        gn_check = graph.Check(self.graph)
+        gn_check.add_goal(
+            smt.Boolean_Negation(
+                smt.Comparison("=", real_expr, smt.Real_Literal(0))),
+            Feedback(origin,
+                     "divisor could be 0.0"),
+            "division by zero check for %s" % origin.to_string())
+        self.start.add_edge_to(gn_check)
+        self.start = gn_check
+
     def attach_index_check(self, seq_expr, index_expr, origin):
         assert isinstance(seq_expr, smt.Expression)
         assert isinstance(seq_expr.sort, smt.Sequence_Sort)
@@ -282,11 +298,51 @@ class VCG:
         rv.append("  }")
         return "\n".join(rv)
 
+    def fraction_to_decimal_string(self, num, den):
+        assert isinstance(num, int)
+        assert isinstance(den, int) and den >= 1
+
+        tmp = den
+        if tmp > 2:
+            while tmp > 1:
+                if tmp % 2 == 0:
+                    tmp = tmp // 2
+                elif tmp % 5 == 0:
+                    tmp = tmp // 5
+                else:
+                    return "%i / %u" % (num, den)
+
+        rv = str(abs(num) // den)
+
+        i = abs(num) % den
+        j = den
+
+        if i > 0:
+            rv += "."
+            while i > 0:
+                i *= 10
+                rv += str(i // j)
+                i = i % j
+        else:
+            rv += ".0"
+
+        if num < 0:
+            return "-" + rv
+        else:
+            return rv
+
     def value_to_trlc(self, n_typ, value):
         assert isinstance(n_typ, Type)
 
         if isinstance(n_typ, Builtin_Integer):
             return str(value)
+
+        elif isinstance(n_typ, Builtin_Decimal):
+            num, den = value.as_integer_ratio()
+            if den >= 1:
+                return self.fraction_to_decimal_string(num, den)
+            else:
+                return self.fraction_to_decimal_string(-num, -den)
 
         elif isinstance(n_typ, Builtin_Boolean):
             return "true" if value else "false"
@@ -384,6 +440,9 @@ class VCG:
         elif isinstance(n_type, Builtin_Integer):
             return smt.BUILTIN_INTEGER
 
+        elif isinstance(n_type, Builtin_Decimal):
+            return smt.BUILTIN_REAL
+
         elif isinstance(n_type, Builtin_String):
             return smt.BUILTIN_STRING
 
@@ -449,6 +508,9 @@ class VCG:
         elif isinstance(n_expr, Integer_Literal):
             value = smt.Integer_Literal(n_expr.value)
 
+        elif isinstance(n_expr, Decimal_Literal):
+            value = smt.Real_Literal(n_expr.value)
+
         elif isinstance(n_expr, Enumeration_Literal):
             value = smt.Enumeration_Literal(self.tr_type(n_expr.typ),
                                             n_expr.value.name)
@@ -486,11 +548,10 @@ class VCG:
             if isinstance(n_expr.n_operand.typ, Builtin_Integer):
                 sym_value = smt.Unary_Int_Arithmetic_Op("-",
                                                         operand_value)
-
             else:
-                self.flag_unsupported(n_expr,
-                                      n_expr.operator.name +
-                                      " for non-integer")
+                assert isinstance(n_expr.n_operand.typ, Builtin_Decimal)
+                sym_value = smt.Unary_Real_Arithmetic_Op("-",
+                                                         operand_value)
 
         elif n_expr.operator == Unary_Operator.PLUS:
             sym_value = operand_value
@@ -504,9 +565,9 @@ class VCG:
                                                         operand_value)
 
             else:
-                self.flag_unsupported(n_expr,
-                                      n_expr.operator.name +
-                                      " for non-integer")
+                assert isinstance(n_expr.n_operand.typ, Builtin_Decimal)
+                sym_value = smt.Unary_Real_Arithmetic_Op("abs",
+                                                         operand_value)
 
         elif n_expr.operator == Unary_Operator.STRING_LENGTH:
             sym_value = smt.String_Length(operand_value)
@@ -554,27 +615,42 @@ class VCG:
                                Binary_Operator.DIVIDE,
                                Binary_Operator.REMAINDER):
 
-            smt_op = {
-                Binary_Operator.PLUS      : "+",
-                Binary_Operator.MINUS     : "-",
-                Binary_Operator.TIMES     : "*",
-                Binary_Operator.DIVIDE    : "floor_div",
-                Binary_Operator.REMAINDER : "ada_remainder",
-            }[n_expr.operator]
+            if isinstance(n_expr.n_lhs.typ, Builtin_String):
+                assert n_expr.operator == Binary_Operator.PLUS
+                self.flag_unsupported(n_expr, "string concatenation")
 
-            if isinstance(n_expr.n_lhs.typ, Builtin_Integer):
+            elif isinstance(n_expr.n_lhs.typ, Builtin_Integer):
                 if n_expr.operator in (Binary_Operator.DIVIDE,
                                        Binary_Operator.REMAINDER):
                     self.attach_int_division_check(rhs_value, n_expr)
+
+                smt_op = {
+                    Binary_Operator.PLUS      : "+",
+                    Binary_Operator.MINUS     : "-",
+                    Binary_Operator.TIMES     : "*",
+                    Binary_Operator.DIVIDE    : "floor_div",
+                    Binary_Operator.REMAINDER : "ada_remainder",
+                }[n_expr.operator]
 
                 sym_value = smt.Binary_Int_Arithmetic_Op(smt_op,
                                                          lhs_value,
                                                          rhs_value)
 
             else:
-                self.flag_unsupported(n_expr,
-                                      n_expr.operator.name +
-                                      " for non-integer")
+                assert isinstance(n_expr.n_lhs.typ, Builtin_Decimal)
+                if n_expr.operator == Binary_Operator.DIVIDE:
+                    self.attach_real_division_check(rhs_value, n_expr)
+
+                smt_op = {
+                    Binary_Operator.PLUS   : "+",
+                    Binary_Operator.MINUS  : "-",
+                    Binary_Operator.TIMES  : "*",
+                    Binary_Operator.DIVIDE : "/",
+                }[n_expr.operator]
+
+                sym_value = smt.Binary_Real_Arithmetic_Op(smt_op,
+                                                          lhs_value,
+                                                          rhs_value)
 
         elif n_expr.operator in (Binary_Operator.COMP_LT,
                                  Binary_Operator.COMP_LEQ,

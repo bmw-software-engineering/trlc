@@ -1,0 +1,9 @@
+package Test3
+
+type T {
+  a Decimal
+}
+
+checks T {
+  1.0 / (a - 58.50823) > 0.0, "potato"
+}
