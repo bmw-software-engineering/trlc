@@ -76,6 +76,7 @@ class VCG:
         self.constants    = {}
         self.enumerations = {}
         self.arrays       = {}
+        self.bound_vars   = {}
 
     @staticmethod
     def flag_unsupported(node, text=None):
@@ -527,6 +528,9 @@ class VCG:
         elif isinstance(n_expr, String_Literal):
             value = smt.String_Literal(n_expr.value)
 
+        # elif isinstance(n_expr, Quantified_Expression):
+        #     return self.tr_quantified_expression(n_expr)
+
         else:
             self.flag_unsupported(n_expr)
 
@@ -541,7 +545,8 @@ class VCG:
             return self.constants[id_value], self.constants[id_valid]
 
         else:
-            self.flag_unsupported(n_ref)
+            assert isinstance(n_ref.entity, Quantified_Variable)
+            return self.bound_vars[n_ref.entity], smt.Boolean_Literal(True)
 
     def tr_unary_expression(self, n_expr):
         assert isinstance(n_expr, Unary_Expression)
@@ -949,3 +954,41 @@ class VCG:
         self.attach_temp_declaration(n_expr, sym_result, result)
 
         return sym_result, smt.Boolean_Literal(True)
+
+    def tr_quantified_expression(self, n_expr):
+        assert isinstance(n_expr, Quantified_Expression)
+
+        kind = "forall" if n_expr.universal else "exists"
+
+        # TRLC quantifier
+        #   (forall x in arr_name => body)
+        #
+        # SMT quantifier
+        #   (forall ((i Int))
+        #     (=> (and (>= i 0) (< i (seq.len arr_name)))
+        #         (... (seq.nth arr_name i) ... )))
+
+        # Create bound variable
+        s_var = smt.Bound_Variable(smt.BUILTIN_INTEGER,
+                                   self.new_temp_name())
+        self.bound_vars[n_expr.n_var] = s_var
+
+        # Create implication
+        s_subject_value, s_subject_valid = \
+            self.tr_name_reference(n_expr.n_source)
+        self.attach_validity_check(s_subject_valid, n_expr.n_source)
+
+        s_guard = smt.Conjunction(
+            smt.Comparison(">=",
+                           s_var,
+                           smt.Integer_Literal(0)),
+            smt.Comparison("<",
+                           s_var,
+                           smt.Sequence_Length(s_subject_value)))
+        s_body_value, _ = self.tr_expression(n_expr.n_expr)
+
+        s_quant = smt.Quantifier(kind,
+                                 [s_var],
+                                 smt.Implication(s_guard, s_body_value))
+
+        return s_quant, smt.Boolean_Literal(True)

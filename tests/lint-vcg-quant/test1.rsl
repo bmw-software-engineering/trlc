@@ -1,0 +1,11 @@
+package Test1
+
+type T {
+  arr Integer [3 .. 5]
+  c optional Boolean
+}
+
+checks T {
+  (forall item in arr => item >= 10 and item <= 20), fatal "potato"
+  c, "potato"
+}
