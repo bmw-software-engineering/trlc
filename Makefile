@@ -11,6 +11,10 @@ test:
 	coverage run -p --rcfile=tests/coverage.cfg --branch --data-file tests/.coverage ./trlc-lrm-generator.py
 	make -C tests -B -j6 fast
 
+test-verify:
+	coverage run -p --rcfile=tests/coverage.cfg --branch --data-file tests/.coverage ./trlc-lrm-generator.py
+	LINT_FLAGS=--verify make -C tests -B -j6 fast
+
 test-all:
 	coverage run -p --rcfile=tests/coverage.cfg --branch --data-file tests/.coverage ./trlc-lrm-generator.py
 	make -C tests -B -j6 all
