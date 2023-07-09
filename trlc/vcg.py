@@ -75,9 +75,11 @@ class VCG:
 
         self.constants    = {}
         self.enumerations = {}
+        self.tuples       = {}
         self.arrays       = {}
         self.bound_vars   = {}
         self.qe_vars      = {}
+        self.tuple_base   = {}
 
         self.functional   = False
         # If set to true, then we ignore validity checks and do not
@@ -115,6 +117,7 @@ class VCG:
         assert isinstance(bool_expr, smt.Expression)
         assert bool_expr.sort is smt.BUILTIN_BOOLEAN
         assert isinstance(origin, Expression)
+        assert not self.functional
 
         # Attach new graph node advance start
         if not bool_expr.is_static_true():
@@ -130,6 +133,7 @@ class VCG:
         assert isinstance(int_expr, smt.Expression)
         assert int_expr.sort is smt.BUILTIN_INTEGER
         assert isinstance(origin, Expression)
+        assert not self.functional
 
         # Attach new graph node advance start
         gn_check = graph.Check(self.graph)
@@ -146,6 +150,7 @@ class VCG:
         assert isinstance(real_expr, smt.Expression)
         assert real_expr.sort is smt.BUILTIN_REAL
         assert isinstance(origin, Expression)
+        assert not self.functional
 
         # Attach new graph node advance start
         gn_check = graph.Check(self.graph)
@@ -165,6 +170,7 @@ class VCG:
         assert index_expr.sort is smt.BUILTIN_INTEGER
         assert isinstance(origin, Binary_Expression)
         assert origin.operator == Binary_Operator.INDEX
+        assert not self.functional
 
         # Attach new graph node advance start
         gn_check = graph.Check(self.graph)
@@ -189,6 +195,7 @@ class VCG:
         assert isinstance(bool_expr, smt.Expression)
         assert bool_expr.sort is smt.BUILTIN_BOOLEAN
         assert isinstance(origin, Expression)
+        assert not self.functional
 
         # Attach new graph node advance start
         gn_check = graph.Check(self.graph)
@@ -202,6 +209,7 @@ class VCG:
     def attach_assumption(self, bool_expr):
         assert isinstance(bool_expr, smt.Expression)
         assert bool_expr.sort is smt.BUILTIN_BOOLEAN
+        assert not self.functional
 
         # Attach new graph node advance start
         gn_ass = graph.Assumption(self.graph)
@@ -213,6 +221,7 @@ class VCG:
         assert isinstance(node, (Expression, Action))
         assert isinstance(sym, smt.Constant)
         assert isinstance(value, smt.Expression) or value is None
+        assert not self.functional
 
         # Attach new graph node advance start
         gn_decl = graph.Assumption(self.graph)
@@ -227,6 +236,8 @@ class VCG:
         self.start = gn_decl
 
     def attach_empty_assumption(self):
+        assert not self.functional
+
         # Attach new graph node advance start
         gn_decl = graph.Assumption(self.graph)
         self.start.add_edge_to(gn_decl)
@@ -408,6 +419,31 @@ class VCG:
                                               n_typ.name,
                                               value)
 
+        elif isinstance(n_typ, Tuple_Type):
+            parts = []
+            for n_item in n_typ.iter_sequence():
+                if isinstance(n_item, Composite_Component):
+                    if n_item.optional and not value[n_item.name + ".valid"]:
+                        parts.pop()
+                        break
+                    parts.append(
+                        self.value_to_trlc(n_item.n_typ,
+                                           value[n_item.name + ".value"]))
+
+                else:
+                    assert isinstance(n_item, Separator)
+                    sep_text = {
+                        "AT"        : "@",
+                        "COLON"     : ":",
+                        "SEMICOLON" : ";"
+                    }.get(n_item.token.kind, n_item.token.value)
+                    parts.append(sep_text)
+
+            if n_typ.has_separators():
+                return "".join(parts)
+            else:
+                return "(%s)" % ", ".join(parts)
+
         elif isinstance(n_typ, Array_Type):
             return "[%s]" % ", ".join(self.value_to_trlc(n_typ.element_type,
                                                          item)
@@ -424,6 +460,57 @@ class VCG:
     def tr_component_valid_name(self, n_component):
         return n_component.member_of.fully_qualified_name() + \
             "." + n_component.name + ".valid"
+
+    def emit_tuple_constraints(self, n_tuple, s_sym):
+        assert isinstance(n_tuple, Tuple_Type)
+        assert isinstance(s_sym, smt.Constant)
+
+        old_functional, self.functional = self.functional, True
+        self.tuple_base[n_tuple] = s_sym
+
+        constraints = []
+
+        # The first tuple constraint is that all checks must have
+        # passed, otherwise the tool would just error. An error in a
+        # tuple is pretty much the same as a fatal in the enclosing
+        # record.
+
+        for n_check in n_tuple.iter_checks():
+            if n_check.severity == "warning":
+                continue
+            # We do consider both fatal and errors to be sources of
+            # truth here.
+            c_value, _ = self.tr_expression(n_check.n_expr)
+            constraints.append(c_value)
+
+        # The secopnd tuple constraint is that once you get a null
+        # field, all following fields must also be null.
+
+        components = n_tuple.all_components()
+        for i, component in enumerate(components):
+            if component.optional:
+                condition = smt.Boolean_Negation(
+                    smt.Record_Access(s_sym,
+                                      component.name + ".valid"))
+                consequences = [
+                    smt.Boolean_Negation(
+                        smt.Record_Access(s_sym,
+                                          c.name + ".valid"))
+                    for c in components[i + 1:]
+                ]
+                if len(consequences) == 0:
+                    break
+                elif len(consequences) == 1:
+                    consequence = consequences[0]
+                else:
+                    consequence = smt.Conjunction(*consequences)
+                constraints.append(smt.Implication(condition, consequence))
+
+        del self.tuple_base[n_tuple]
+        self.functional = old_functional
+
+        for cons in constraints:
+            self.start.add_statement(smt.Assertion(cons))
 
     def tr_component_decl(self, n_component, gn_locals):
         assert isinstance(n_component, Composite_Component)
@@ -443,6 +530,9 @@ class VCG:
             relevant = True)
         gn_locals.add_statement(s_decl)
         self.constants[id_value] = s_sym
+
+        if isinstance(n_component.n_typ, Tuple_Type):
+            self.emit_tuple_constraints(n_component.n_typ, s_sym)
 
         # For arrays we need to add additional constraints for the
         # length
@@ -504,6 +594,26 @@ class VCG:
                             n_type.name,
                             n_type.location.to_string())))
             return self.enumerations[n_type]
+
+        elif isinstance(n_type, Tuple_Type):
+            if n_type not in self.tuples:
+                s_sort = smt.Record(n_type.n_package.name +
+                                    "." + n_type.name)
+                for n_component in n_type.all_components():
+                    s_sort.add_component(n_component.name + ".value",
+                                         self.tr_type(n_component.n_typ))
+                    if n_component.optional:
+                        s_sort.add_component(n_component.name + ".valid",
+                                             smt.BUILTIN_BOOLEAN)
+                self.tuples[n_type] = s_sort
+                self.start.add_statement(
+                    smt.Record_Declaration(
+                        s_sort,
+                        "tuple %s from %s" % (
+                            n_type.name,
+                            n_type.location.to_string())))
+
+            return self.tuples[n_type]
 
         elif isinstance(n_type, Array_Type):
             if n_type not in self.arrays:
@@ -580,9 +690,21 @@ class VCG:
         assert isinstance(n_ref, Name_Reference)
 
         if isinstance(n_ref.entity, Composite_Component):
-            id_value = self.tr_component_value_name(n_ref.entity)
-            id_valid = self.tr_component_valid_name(n_ref.entity)
-            return self.constants[id_value], self.constants[id_valid]
+            if n_ref.entity.member_of in self.tuple_base:
+                sym = self.tuple_base[n_ref.entity.member_of]
+                if n_ref.entity.optional:
+                    s_valid = smt.Record_Access(sym,
+                                                n_ref.entity.name + ".valid")
+                else:
+                    s_valid = smt.Boolean_Literal(True)
+                s_value = smt.Record_Access(sym,
+                                            n_ref.entity.name + ".value")
+                return s_value, s_valid
+
+            else:
+                id_value = self.tr_component_value_name(n_ref.entity)
+                id_valid = self.tr_component_valid_name(n_ref.entity)
+                return self.constants[id_value], self.constants[id_valid]
 
         else:
             assert isinstance(n_ref.entity, Quantified_Variable)
@@ -664,9 +786,11 @@ class VCG:
         # The remaining operators always check for validity, so we can
         # obtain the values of both sides now.
         lhs_value, lhs_valid = self.tr_expression(n_expr.n_lhs)
-        self.attach_validity_check(lhs_valid, n_expr.n_lhs)
+        if not self.functional:
+            self.attach_validity_check(lhs_valid, n_expr.n_lhs)
         rhs_value, rhs_valid = self.tr_expression(n_expr.n_rhs)
-        self.attach_validity_check(rhs_valid, n_expr.n_rhs)
+        if not self.functional:
+            self.attach_validity_check(rhs_valid, n_expr.n_rhs)
         sym_value = None
 
         if n_expr.operator == Binary_Operator.LOGICAL_XOR:
@@ -965,6 +1089,57 @@ class VCG:
 
         return sym_result, smt.Boolean_Literal(True)
 
+    def tr_core_equality_tuple_component(self, n_component, lhs, rhs):
+        assert isinstance(n_component, Composite_Component)
+        assert isinstance(lhs, smt.Expression)
+        assert isinstance(rhs, smt.Expression)
+
+        value_lhs = smt.Record_Access(lhs,
+                                      n_component.name + ".value")
+        value_rhs = smt.Record_Access(rhs,
+                                      n_component.name + ".value")
+        valid_equal = self.tr_core_equality(n_component.n_typ,
+                                            value_lhs,
+                                            value_rhs)
+
+        if not n_component.optional:
+            return valid_equal
+
+        valid_lhs = smt.Record_Access(lhs,
+                                      n_component.name + ".valid")
+        valid_rhs = smt.Record_Access(rhs,
+                                      n_component.name + ".valid")
+
+        return smt.Conjunction(
+            smt.Comparison("=", valid_lhs, valid_rhs),
+            smt.Implication(valid_lhs, valid_equal))
+
+    def tr_core_equality(self, n_typ, lhs, rhs):
+        assert isinstance(n_typ, Type)
+        assert isinstance(lhs, smt.Expression)
+        assert isinstance(rhs, smt.Expression)
+
+        if isinstance(n_typ, Tuple_Type):
+            parts = []
+            for n_component in n_typ.all_components():
+                parts.append(
+                    self.tr_core_equality_tuple_component(n_component,
+                                                          lhs,
+                                                          rhs))
+
+            if len(parts) == 0:
+                return smt.Boolean_Literal(True)
+            elif len(parts) == 1:
+                return parts[0]
+            else:
+                result = smt.Conjunction(parts[0], parts[1])
+                for part in parts[2:]:
+                    result = smt.Conjunction(result, part)
+                return result
+
+        else:
+            return smt.Comparison("=", lhs, rhs)
+
     def tr_op_equality(self, n_expr):
         assert isinstance(n_expr, Binary_Expression)
         assert n_expr.operator in (Binary_Operator.COMP_EQ,
@@ -973,9 +1148,16 @@ class VCG:
         lhs_value, lhs_valid = self.tr_expression(n_expr.n_lhs)
         rhs_value, rhs_valid = self.tr_expression(n_expr.n_rhs)
 
+        if lhs_value is None:
+            comp_typ = n_expr.n_rhs.typ
+        else:
+            comp_typ = n_expr.n_lhs.typ
+
         if lhs_valid.is_static_true() and rhs_valid.is_static_true():
             # Simplified form, this is just x == y
-            result = smt.Comparison("=", lhs_value, rhs_value)
+            result = self.tr_core_equality(comp_typ,
+                                           lhs_value,
+                                           rhs_value)
 
         elif lhs_valid.is_static_false() and rhs_valid.is_static_false():
             # This is null == null, so true
@@ -992,7 +1174,7 @@ class VCG:
         else:
             # This is <expr> == <expr> without shortcuts
             result = smt.Conjunction(
-                smt.Comparison("=", lhs_valid, rhs_valid),
+                self.tr_core_equality(comp_typ, lhs_value, rhs_value),
                 smt.Implication(lhs_valid,
                                 smt.Comparison("=", lhs_value, rhs_value)))
 
@@ -1004,8 +1186,6 @@ class VCG:
     def tr_quantified_expression(self, n_expr):
         assert isinstance(n_expr, Quantified_Expression)
         assert not self.functional  # TODO
-
-        kind = "forall" if n_expr.universal else "exists"
 
         # TRLC quantifier
         #   (forall x in arr_name => body)

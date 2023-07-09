@@ -19,9 +19,10 @@ The `--verify` feature has several limitations:
 * Quantifiers are supported, however there may be false alarms and
   incorrect counter-examples generated. Especially for nested and
   nested alternating quantifiers.
+* Tuples in arrays currently not get their constraints asserted,
+  leading to false alarms and invalid counter-examples.
 * It does not support frozen components.
 * It does not support the builtin `matches` function.
-* It does not support tuple components.
 * It does not support field access (the `.` operator).
 
 ## Changelog

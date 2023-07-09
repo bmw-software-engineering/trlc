@@ -1,0 +1,16 @@
+package Test1
+import Common
+
+type T {
+  x Common.Item
+  y Common.Item
+  p Common.Chain
+  q Common.Chain
+  c optional Boolean
+}
+
+checks T {
+  x != y, fatal "potato"
+  p != q, fatal "potato"
+  c, "potato"
+}

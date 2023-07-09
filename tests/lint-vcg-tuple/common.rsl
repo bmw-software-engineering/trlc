@@ -1,0 +1,20 @@
+package Common
+
+tuple Item {
+  item Integer
+  separator @
+  version optional Integer
+}
+
+checks Item {
+  item >= 1, fatal "item must be positive", item
+  version != null implies version >= 1, "version must be positive", version
+}
+
+tuple Chain {
+  a Integer
+  separator :
+  b optional Integer
+  separator :
+  c optional Integer
+}
