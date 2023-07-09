@@ -33,7 +33,7 @@ from trlc.version import TRLC_VERSION
 
 try:
     from pyvcg import version
-    VCG_AVAILABLE = version.VERSION_TUPLE >= (0, 0, 1)
+    VCG_AVAILABLE = version.VERSION_TUPLE >= (1, 0, 0)
 except ImportError:
     VCG_AVAILABLE = False
 

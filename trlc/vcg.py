@@ -28,6 +28,8 @@ try:
     from pyvcg import smt
     from pyvcg import graph
     from pyvcg import vcg
+    from pyvcg.driver.file_smtlib import SMTLIB_Generator
+    from pyvcg.driver.cvc5_api import CVC5_Solver
     VCG_AVAILABLE = True
 except ImportError:
     VCG_AVAILABLE = False
@@ -289,7 +291,7 @@ class VCG:
             if self.debug:
                 with open(self.vc_name + "_%04u.smt2" % vc_id, "w",
                           encoding="UTF-8") as fd:
-                    fd.write(vc["script"].generate_vc(smt.SMTLIB_Generator()))
+                    fd.write(vc["script"].generate_vc(SMTLIB_Generator()))
 
             # Checks that have already failed don't need to be checked
             # again on a different path
@@ -297,7 +299,7 @@ class VCG:
                vc["feedback"] in nok_validity_checks:
                 continue
 
-            status, values = vc["script"].solve_vc(smt.CVC5_Solver())
+            status, values = vc["script"].solve_vc(CVC5_Solver())
 
             message = vc["feedback"].message
             if self.debug:
