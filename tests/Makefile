@@ -27,7 +27,7 @@ all: $(TARGETS) bulk/output bulk/output.brief bulk/output.lint bulk/output.json
 
 %/output.lint:
 	-coverage run -p --rcfile=coverage.cfg --branch \
-		../trlc.py --lint $(LINT_FLAGS) $(dir $@) > $@
+		../trlc.py --lint --verify $(dir $@) > $@
 
 %/output.json:
 	-coverage run -p --rcfile=coverage.cfg --branch \

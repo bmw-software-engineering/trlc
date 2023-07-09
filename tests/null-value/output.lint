@@ -1,1 +1,3 @@
-Verified 1 model(s) and 1 check(s) and found no issues
+other != null , "Other must not be null", other
+      ^^ null-value/checks.check:4: check: expression is always true
+Verified 1 model(s) and 1 check(s) and found 1 warning(s)

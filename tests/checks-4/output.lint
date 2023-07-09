@@ -1,1 +1,8 @@
-Verified 1 model(s) and 1 check(s) and found no issues
+(forall v in values => v != foo), "value cannot be same as value of foo", values
+             ^^^^^^ checks-4/foo.check:4: check: expression could be null
+                  | example record_type triggering error:
+                  |   T bad_potato {
+                  |     /* foo is null */
+                  |     /* values is null */
+                  |   }
+Verified 1 model(s) and 1 check(s) and found 1 warning(s)

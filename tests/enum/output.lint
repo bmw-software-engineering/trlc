@@ -1,1 +1,3 @@
-Verified 1 model(s) and 1 check(s) and found no issues
+status != null , "Internal error when evaluating enum value"
+       ^^ enum/checks.check:4: check: expression is always true
+Verified 1 model(s) and 1 check(s) and found 1 warning(s)

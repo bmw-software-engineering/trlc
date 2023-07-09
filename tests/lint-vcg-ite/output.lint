@@ -1,1 +1,17 @@
-Verified 1 model(s) and 0 check(s) and found no issues
+(if a > 0 then x
+               ^ lint-vcg-ite/test1.rsl:10: check: expression could be null
+               | example record_type triggering error:
+               |   T bad_potato {
+               |     a = 1
+               |     /* x is null */
+               |     /* y is null */
+               |   }
+elsif a < 0 then y
+                 ^ lint-vcg-ite/test1.rsl:11: check: expression could be null
+                 | example record_type triggering error:
+                 |   T bad_potato {
+                 |     a = -1
+                 |     /* x is null */
+                 |     /* y is null */
+                 |   }
+Verified 1 model(s) and 0 check(s) and found 2 warning(s)

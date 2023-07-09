@@ -11,9 +11,9 @@ The repository contains:
 * A pure Python reference implementation of TRLC.
 
 The implementation is not very fast, but designed to be pedantically
-correct in following the language definition.  Eventually it will also
-contain a powerful linter to find issues with types and check
-rules.
+correct in following the language definition. The tools also include a
+powerful static analysis tool to find issues with types and
+user-defined check rules.
 
 The Python implementation can be used for several purposes:
 
@@ -49,13 +49,22 @@ The Python implementation can be used for several purposes:
 ### Run-time
 * Python3 >= 3.9
 
+Optional dependencies (they are not installed automatically):
+* [PyVCG](https://pypi.org/project/PyVCG) (Linux or OSX only, required
+  when using the `--verify` option)
+
 ### Development tools
 * GNU Make
-* [PyCodeStyle](https://pypi.org/project/pycodestyle/) (from PyPI, for
+* Graphviz
+* [PyCodeStyle](https://pypi.org/project/pycodestyle) (from PyPI, for
   basic checking of source code style)
-* [PyLint](https://pypi.org/project/pylint/) (from PyPI, for basic bug
+* [PyLint](https://pypi.org/project/pylint) (from PyPI, for basic bug
   finding)
-* [Coverage](https://pypi.org/project/coverage/) (from PyPI, to
+* [Coverage](https://pypi.org/project/coverage) (from PyPI, to
   perform branch coverage when running the test suite)
-* [Sphinx](https://pypi.org/project/Sphinx/) (from PyPI, for building
+* [Sphinx](https://pypi.org/project/Sphinx) (from PyPI, for building
   the documentation)
+* [PyVCG](https://pypi.org/project/Sphinx) (from PyPI, for building
+  verification conditions)
+* [CVC5](https://pypi.org/project/cvc5) (from PyPI, for discharging
+  verification conditions)

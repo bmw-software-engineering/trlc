@@ -5,5 +5,5 @@ type T {
 }
 
 checks T {
-  D ** 2.0 > 0.0, warning "potato", D
+  D ** 2 >= 0.0, warning "potato", D
 }

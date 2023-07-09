@@ -1,1 +1,8 @@
-Verified 1 model(s) and 0 check(s) and found no issues
+f2 >= 0, warning "potato2", f2
+^^ tuples-4/foo.rsl:12: check: expression could be null
+ | example tuple_type triggering error:
+ |   T bad_potato {
+ |     f1 = R1_instance_0
+ |     /* f2 is null */
+ |   }
+Verified 1 model(s) and 0 check(s) and found 1 warning(s)

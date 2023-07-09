@@ -1,1 +1,91 @@
-Verified 1 model(s) and 1 check(s) and found no issues
+yay and yay and yay, "01: good and"
+            ^^^ expressions/foo.check:13: check: expression is always true
+nay or yay or nay, "02: or"
+           ^^ expressions/foo.check:16: check: expression is always true
+nay xor yay, "03: good xor"
+    ^^^ expressions/foo.check:19: check: expression is always true
+yay implies yay, "04: good implies"
+    ^^^^^^^ expressions/foo.check:22: check: expression is always true
+ione < itwo, "05: good i<"
+     ^ expressions/foo.check:25: check: expression is always true
+done < dtwo, "06: good d<"
+     ^ expressions/foo.check:28: check: expression is always true
+ione <= ione, "07: good i<="
+     ^^ expressions/foo.check:31: check: expression is always true
+done <= done, "08: good d<="
+     ^^ expressions/foo.check:34: check: expression is always true
+itwo > ione, "09: good i>"
+     ^ expressions/foo.check:37: check: expression is always true
+dtwo > done, "10: good d>"
+     ^ expressions/foo.check:40: check: expression is always true
+itwo >= ione, "11: good i>="
+     ^^ expressions/foo.check:43: check: expression is always true
+dtwo >= done, "12: good d>="
+     ^^ expressions/foo.check:46: check: expression is always true
+ione == ione, "13: good i=="
+     ^^ expressions/foo.check:49: check: expression is always true
+done == done, "14: good d=="
+     ^^ expressions/foo.check:52: check: expression is always true
+ione != itwo, "15: good i!="
+     ^^ expressions/foo.check:55: check: expression is always true
+done != dtwo, "16: good d!="
+     ^^ expressions/foo.check:58: check: expression is always true
+ione in 0 .. 10, "17: good range iin"
+     ^^ expressions/foo.check:61: check: expression is always true
+done in 0.0 .. 10.0, "18: good range din"
+     ^^ expressions/foo.check:64: check: expression is always true
+ione not in 5 .. 10, "19: good range not iin"
+     ^^^ expressions/foo.check:67: check: expression is always true
+done not in 5.0 .. 10.0, "20: good range not din"
+     ^^^ expressions/foo.check:70: check: expression is always true
+foo in foobar, "21: good substring"
+    ^^ expressions/foo.check:73: check: expression is always true
+(-ione) + ione + itwo == itwo, "22: good i adding"
+                      ^^ expressions/foo.check:76: check: expression is always true
+(-done) + done + dtwo == dtwo, "23: good d adding"
+                      ^^ expressions/foo.check:80: check: expression is always true
+ione * itwo * ione * itwo == itwo + itwo, "24: good i*"
+                          ^^ expressions/foo.check:84: check: expression is always true
+done * dtwo * done * dtwo == dtwo + dtwo, "25: good d*"
+                          ^^ expressions/foo.check:87: check: expression is always true
+10 / itwo / itwo == itwo, "26: good i/"
+                 ^^ expressions/foo.check:90: check: expression is always true
+10.0 / dtwo / dtwo == 2.5, "27: good d/"
+                   ^^ expressions/foo.check:93: check: expression is always true
+10 % 5 == 0,        "28: good % (1/12)"
+       ^^ expressions/foo.check:96: check: expression is always true
+11 % 5 == 1,        "28: good % (2/12)"
+       ^^ expressions/foo.check:97: check: expression is always true
+14 % 5 == 4,        "28: good % (3/12)"
+       ^^ expressions/foo.check:98: check: expression is always true
+(-10) % 5 == 0,     "28: good % (4/12)"
+          ^^ expressions/foo.check:99: check: expression is always true
+(-11) % 5 == -1,    "28: good % (5/12)"
+          ^^ expressions/foo.check:100: check: expression is always true
+(-14) % 5 == -4,    "28: good % (6/12)"
+          ^^ expressions/foo.check:101: check: expression is always true
+10 % (-5) == 0,     "28: good % (7/12)"
+          ^^ expressions/foo.check:102: check: expression is always true
+11 % (-5) == 1,     "28: good % (8/12)"
+          ^^ expressions/foo.check:103: check: expression is always true
+14 % (-5) == 4,     "28: good % (9/12)"
+          ^^ expressions/foo.check:104: check: expression is always true
+(-10) % (-5) == 0,  "28: good % (10/12)"
+             ^^ expressions/foo.check:105: check: expression is always true
+(-11) % (-5) == -1, "28: good % (11/12)"
+             ^^ expressions/foo.check:106: check: expression is always true
+(-14) % (-5) == -4, "28: good % (12/12)"
+             ^^ expressions/foo.check:107: check: expression is always true
+itwo ** (2 + 1) == 8, "29: good iexp"
+                ^^ expressions/foo.check:113: check: expression is always true
+dtwo ** (2 + 1) == 8.0, "30: good dexp"
+                ^^ expressions/foo.check:116: check: expression is always true
+not nay, "31: good lnot"
+^^^ expressions/foo.check:119: check: expression is always true
+abs (ione - itwo) == ione, "32: good iabs"
+                  ^^ expressions/foo.check:122: check: expression is always true
+abs (done - dtwo) == done, "33: good dabs"
+                  ^^ expressions/foo.check:125: check: expression is always true
+(if yay then ione else itwo) == ione, "34: good ifexpr"
+                             ^^ expressions/foo.check:128: check: expression is always true
+Verified 1 model(s) and 1 check(s) and found 45 warning(s)

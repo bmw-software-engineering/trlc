@@ -1,1 +1,41 @@
-Verified 4 model(s) and 0 check(s) and found no issues
+x, "potato"
+^ lint-record-refs/test1.rsl:11: check: expression could be null
+| example record_type triggering error:
+|   T bad_potato {
+|     top_level = true
+|     /* derived_from is null */
+|     /* x is null */
+|   }
+a != b implies x, "potato"
+               ^ lint-record-refs/test2.rsl:10: check: expression could be null
+               | example record_type triggering error:
+               |   T bad_potato {
+               |     a = T_instance_0
+               |     b = T_instance_1
+               |     /* x is null */
+               |   }
+a == b implies x, "potato"
+               ^ lint-record-refs/test2.rsl:11: check: expression could be null
+               | example record_type triggering error:
+               |   T bad_potato {
+               |     a = T_instance_0
+               |     b = T_instance_0
+               |     /* x is null */
+               |   }
+a != b implies x, "potato"
+               ^ lint-record-refs/test3.rsl:11: check: expression could be null
+               | example record_type triggering error:
+               |   T bad_potato {
+               |     a = Other.T_instance_0
+               |     b = Other.T_instance_1
+               |     /* x is null */
+               |   }
+a == b implies x, "potato"
+               ^ lint-record-refs/test3.rsl:12: check: expression could be null
+               | example record_type triggering error:
+               |   T bad_potato {
+               |     a = Other.T_instance_0
+               |     b = Other.T_instance_0
+               |     /* x is null */
+               |   }
+Verified 4 model(s) and 0 check(s) and found 5 warning(s)

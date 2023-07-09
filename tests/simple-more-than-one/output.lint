@@ -1,1 +1,3 @@
-Verified 1 model(s) and 1 check(s) and found no issues
+matches(name, "^Q.*"),  error "name must start with Q", name
+^^^^^^^ simple-more-than-one/checks.check:4: warning: STRING_REGEX not yet supported in VCG
+Verified 1 model(s) and 1 check(s) and found 1 warning(s)

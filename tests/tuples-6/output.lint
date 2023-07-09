@@ -1,1 +1,3 @@
-Verified 1 model(s) and 0 check(s) and found no issues
+verified == true implies coord.x == coord.y, warning "potato", verified
+                               ^ tuples-6/foo.rsl:15: warning: Field_Access_Expression not yet supported in VCG
+Verified 1 model(s) and 0 check(s) and found 1 warning(s)

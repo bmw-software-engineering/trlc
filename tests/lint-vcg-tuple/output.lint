@@ -1,9 +1,11 @@
 c, "potato"
-^ lint-vcg-quant/test1.rsl:10: check: expression could be null
+^ lint-vcg-tuple/test1.rsl:15: check: expression could be null
 | example record_type triggering error:
 |   T bad_potato {
-|     arr = [1, 1, 1]
+|     x = 1
+|     y = 2
+|     p = -1
+|     q = -3
 |     /* c is null */
 |   }
-| /* note: counter-example is unreliable in this case */
 Verified 2 model(s) and 0 check(s) and found 1 warning(s)
