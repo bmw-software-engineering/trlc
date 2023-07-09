@@ -1300,6 +1300,29 @@ section "Operators" {
                 result is a Boolean.'''
     }
 
+    Dynamic_Semantics Equality_On_Null {
+      text = '''Null is only equal to itself.
+             '''
+    }
+
+    Dynamic_Semantics Equality_On_Tuples {
+      text = '''Two tuple instances are equal if they both
+                contain the same values for all their components.
+             '''
+    }
+
+    Dynamic_Semantics Equality_On_Record_References {
+      text = '''Two record references are equal if they both
+                refer to the same record.
+             '''
+    }
+
+    Dynamic_Semantics Equality_On_Arrays {
+      text = '''Two arrays are equal if they both have the same length
+                and items (in the same order).
+             '''
+    }
+
     Dynamic_Semantics Simple_Relational_Semantics {
       text = '''The meaning of the relationship operators are the usual.'''
     }
@@ -1904,11 +1927,6 @@ section "Null Values" {
   Dynamic_Semantics Unspecified_Optional_Components {
     text = '''The value of an optional component or field that is
               not specified is `null`.'''
-  }
-
-  Dynamic_Semantics Null_Equality {
-    text = '''For equality the null value is considered equal to itself,
-              but not equal to any non-null value.'''
   }
 
   Dynamic_Semantics Null_Is_Invalid {

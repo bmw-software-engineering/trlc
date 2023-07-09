@@ -39,6 +39,10 @@ The `--verify` feature has several limitations:
   null values in the LRM to be much stricter. We consider this to be a
   bug-fix and not a change of semantics.
 
+* [LRM] Clarify equality semantics for arrays, tuples, and record
+  refereences. Moved the definition of null equality into the same
+  place.
+
 * [TRLC] Add new *experimental* option `--lint --verify`. This option
   requires [PyVCG](https://pypi.org/project/PyVCG) to be installed
   (which is only available on GNU/Linux or MacOS). This option

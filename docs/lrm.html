@@ -969,6 +969,18 @@ Array membership tests <code>not in</code> and <code>in</code> are defined for a
 </div>
 <h4>Dynamic Semantics</h4>
 <div>
+Null is only equal to itself.
+</div>
+<div>
+Two tuple instances are equal if they both contain the same values for all their components.
+</div>
+<div>
+Two record references are equal if they both refer to the same record.
+</div>
+<div>
+Two arrays are equal if they both have the same length and items (in the same order).
+</div>
+<div>
 The meaning of the relationship operators are the usual.
 </div>
 <div>
@@ -1294,9 +1306,6 @@ The expression <code>null == null</code> is statically true.
 <h3>Dynamic Semantics</h3>
 <div>
 The value of an optional component or field that is not specified is <code>null</code>.
-</div>
-<div>
-For equality the null value is considered equal to itself, but not equal to any non-null value.
 </div>
 <div>
 For any other operator or operation, the null value is considered out of bounds and raises an error. <i>(This means you can check if something is null or not, but any other use will cause an error.)</i>
