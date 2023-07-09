@@ -1241,7 +1241,7 @@ class VCG:
         self.start.add_statement(
             smt.Constant_Declaration(
                 symbol   = s_qe_sym,
-                value    = smt.Sequence_Index(s_subject_value, s_qe_sym),
+                value    = smt.Sequence_Index(s_subject_value, s_qe_index),
                 comment  = ("quantifier elimination (symbol) for %s at %s" %
                             (n_expr.to_string(),
                              n_expr.location.to_string()))))
