@@ -16,10 +16,12 @@ The `--verify` feature has several limitations:
 * Decimal numbers are modelled as real numbers instead of
   decimals. This means there may be false alarms and counter-examples
   produced that do not make sense.
+* Quantifiers are supported, however there may be false alarms and
+  incorrect counter-examples generated. Especially for nested and
+  nested alternating quantifiers.
 * It does not support the builtin `matches` function.
 * It does not support tuple components.
 * It does not support field access (the `.` operator).
-* It does not support quantifiers.
 
 ## Changelog
 

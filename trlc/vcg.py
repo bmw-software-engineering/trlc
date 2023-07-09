@@ -77,6 +77,12 @@ class VCG:
         self.enumerations = {}
         self.arrays       = {}
         self.bound_vars   = {}
+        self.qe_vars      = {}
+
+        self.functional   = False
+        # If set to true, then we ignore validity checks and do not
+        # create intermediates. We just build the value and validity
+        # expresions and return them.
 
     @staticmethod
     def flag_unsupported(node, text=None):
@@ -86,6 +92,24 @@ class VCG:
     def new_temp_name(self):
         self.tmp_id += 1
         return "tmp.%u" % self.tmp_id
+
+    def create_return(self, node, s_value, s_valid=None):
+        assert isinstance(node, Expression)
+        assert isinstance(s_value, smt.Expression)
+        assert isinstance(s_valid, smt.Expression) or s_valid is None
+
+        if s_valid is None:
+            s_valid = smt.Boolean_Literal(True)
+
+        if self.functional:
+            return s_value, s_valid
+
+        else:
+            sym_result = smt.Constant(s_value.sort,
+                                      self.new_temp_name())
+            self.attach_temp_declaration(node, sym_result, s_value)
+
+            return sym_result, s_valid
 
     def attach_validity_check(self, bool_expr, origin):
         assert isinstance(bool_expr, smt.Expression)
@@ -202,6 +226,12 @@ class VCG:
         self.start.add_edge_to(gn_decl)
         self.start = gn_decl
 
+    def attach_empty_assumption(self):
+        # Attach new graph node advance start
+        gn_decl = graph.Assumption(self.graph)
+        self.start.add_edge_to(gn_decl)
+        self.start = gn_decl
+
     def analyze(self):
         try:
             self.checks_on_composite_type(self.n_ctyp)
@@ -258,11 +288,16 @@ class VCG:
 
             status, values = vc["script"].solve_vc(smt.CVC5_Solver())
 
+            message = vc["feedback"].message
+            if self.debug:
+                message += " [vc_id = %u]" % vc_id
+
             if vc["feedback"].expect_unsat:
                 if status != "unsat":
                     self.mh.failed_vc(vc["feedback"].node.location,
-                                      vc["feedback"].message,
-                                      self.create_counterexample(values))
+                                      message,
+                                      self.create_counterexample(status,
+                                                                 values))
                     nok_validity_checks.add(vc["feedback"])
             else:
                 if status == "unsat":
@@ -278,7 +313,7 @@ class VCG:
                                   feedback.message)
                 ok_feasibility_checks.add(feedback)
 
-    def create_counterexample(self, values):
+    def create_counterexample(self, status, values):
         rv = [
             "example %s triggering error:" %
             self.n_ctyp.__class__.__name__.lower(),
@@ -288,7 +323,10 @@ class VCG:
         for n_component in self.n_ctyp.all_components():
             id_value = self.tr_component_value_name(n_component)
             id_valid = self.tr_component_valid_name(n_component)
-            if values[id_valid]:
+            if status == "unknown" and (id_value not in values or
+                                        id_valid not in values):
+                rv.append("    %s = ???" % n_component.name)
+            elif values.get(id_valid):
                 rv.append("    %s = %s" %
                           (n_component.name,
                            self.value_to_trlc(n_component.n_typ,
@@ -297,6 +335,8 @@ class VCG:
                 rv.append("    /* %s is null */" % n_component.name)
 
         rv.append("  }")
+        if status == "unknown":
+            rv.append("/* note: counter-example is unreliable in this case */")
         return "\n".join(rv)
 
     def fraction_to_decimal_string(self, num, den):
@@ -528,8 +568,8 @@ class VCG:
         elif isinstance(n_expr, String_Literal):
             value = smt.String_Literal(n_expr.value)
 
-        # elif isinstance(n_expr, Quantified_Expression):
-        #     return self.tr_quantified_expression(n_expr)
+        elif isinstance(n_expr, Quantified_Expression):
+            return self.tr_quantified_expression(n_expr)
 
         else:
             self.flag_unsupported(n_expr)
@@ -546,7 +586,10 @@ class VCG:
 
         else:
             assert isinstance(n_ref.entity, Quantified_Variable)
-            return self.bound_vars[n_ref.entity], smt.Boolean_Literal(True)
+            if n_ref.entity in self.qe_vars:
+                return self.qe_vars[n_ref.entity], smt.Boolean_Literal(True)
+            else:
+                return self.bound_vars[n_ref.entity], smt.Boolean_Literal(True)
 
     def tr_unary_expression(self, n_expr):
         assert isinstance(n_expr, Unary_Expression)
@@ -554,8 +597,6 @@ class VCG:
         operand_value, operand_valid = self.tr_expression(n_expr.n_operand)
         self.attach_validity_check(operand_valid, n_expr.n_operand)
 
-        sym_result = smt.Constant(self.tr_type(n_expr.typ),
-                                  self.new_temp_name())
         sym_value = None
 
         if n_expr.operator == Unary_Operator.MINUS:
@@ -600,10 +641,7 @@ class VCG:
                             "unexpected unary operator %s" %
                             n_expr.operator.name)
 
-        self.attach_temp_declaration(n_expr,
-                                     sym_result,
-                                     sym_value)
-        return sym_result, smt.Boolean_Literal(True)
+        return self.create_return(n_expr, sym_value)
 
     def tr_binary_expression(self, n_expr):
         assert isinstance(n_expr, Binary_Expression)
@@ -629,8 +667,6 @@ class VCG:
         self.attach_validity_check(lhs_valid, n_expr.n_lhs)
         rhs_value, rhs_valid = self.tr_expression(n_expr.n_rhs)
         self.attach_validity_check(rhs_valid, n_expr.n_rhs)
-        sym_result = smt.Constant(self.tr_type(n_expr.typ),
-                                  self.new_temp_name())
         sym_value = None
 
         if n_expr.operator == Binary_Operator.LOGICAL_XOR:
@@ -744,10 +780,7 @@ class VCG:
         else:
             self.flag_unsupported(n_expr, n_expr.operator.name)
 
-        self.attach_temp_declaration(n_expr,
-                                     sym_result,
-                                     sym_value)
-        return sym_result, smt.Boolean_Literal(True)
+        return self.create_return(n_expr, sym_value)
 
     def tr_range_test(self, n_expr):
         assert isinstance(n_expr, Range_Test)
@@ -759,16 +792,15 @@ class VCG:
         upper_value, upper_valid = self.tr_expression(n_expr.n_upper)
         self.attach_validity_check(upper_valid, n_expr.n_upper)
 
-        sym_result = smt.Constant(smt.BUILTIN_BOOLEAN,
-                                  self.new_temp_name())
         sym_value = smt.Conjunction(
             smt.Comparison(">=", lhs_value, lower_value),
             smt.Comparison("<=", lhs_value, upper_value))
-        self.attach_temp_declaration(n_expr, sym_result, sym_value)
-        return sym_result, smt.Boolean_Literal(True)
+
+        return self.create_return(n_expr, sym_value)
 
     def tr_conditional_expression(self, n_expr):
         assert isinstance(n_expr, Conditional_Expression)
+        assert not self.functional  # TODO
 
         gn_end = graph.Node(self.graph)
         sym_result = smt.Constant(self.tr_type(n_expr.typ),
@@ -808,6 +840,12 @@ class VCG:
         assert isinstance(n_expr, Binary_Expression)
         assert n_expr.operator == Binary_Operator.LOGICAL_IMPLIES
 
+        if self.functional:
+            lhs_value, _ = self.tr_expression(n_expr.n_lhs)
+            rhs_value, _ = self.tr_expression(n_expr.n_rhs)
+            return self.create_return(n_expr,
+                                      smt.Implication(lhs_value, rhs_value))
+
         lhs_value, lhs_valid = self.tr_expression(n_expr.n_lhs)
         # Emit VC for validity
         self.attach_validity_check(lhs_valid, n_expr.n_lhs)
@@ -845,6 +883,12 @@ class VCG:
         assert isinstance(n_expr, Binary_Expression)
         assert n_expr.operator == Binary_Operator.LOGICAL_AND
 
+        if self.functional:
+            lhs_value, _ = self.tr_expression(n_expr.n_lhs)
+            rhs_value, _ = self.tr_expression(n_expr.n_rhs)
+            return self.create_return(n_expr,
+                                      smt.Conjunction(lhs_value, rhs_value))
+
         lhs_value, lhs_valid = self.tr_expression(n_expr.n_lhs)
         # Emit VC for validity
         self.attach_validity_check(lhs_valid, n_expr.n_lhs)
@@ -881,6 +925,12 @@ class VCG:
     def tr_op_or(self, n_expr):
         assert isinstance(n_expr, Binary_Expression)
         assert n_expr.operator == Binary_Operator.LOGICAL_OR
+
+        if self.functional:
+            lhs_value, _ = self.tr_expression(n_expr.n_lhs)
+            rhs_value, _ = self.tr_expression(n_expr.n_rhs)
+            return self.create_return(n_expr,
+                                      smt.Disjunction(lhs_value, rhs_value))
 
         lhs_value, lhs_valid = self.tr_expression(n_expr.n_lhs)
         # Emit VC for validity
@@ -949,14 +999,11 @@ class VCG:
         if n_expr.operator == Binary_Operator.COMP_NEQ:
             result = smt.Boolean_Negation(result)
 
-        sym_result = smt.Constant(smt.BUILTIN_BOOLEAN,
-                                  self.new_temp_name())
-        self.attach_temp_declaration(n_expr, sym_result, result)
-
-        return sym_result, smt.Boolean_Literal(True)
+        return self.create_return(n_expr, result)
 
     def tr_quantified_expression(self, n_expr):
         assert isinstance(n_expr, Quantified_Expression)
+        assert not self.functional  # TODO
 
         kind = "forall" if n_expr.universal else "exists"
 
@@ -967,28 +1014,87 @@ class VCG:
         #   (forall ((i Int))
         #     (=> (and (>= i 0) (< i (seq.len arr_name)))
         #         (... (seq.nth arr_name i) ... )))
+        #
+        # There is an alternative which is:
+        #   (forall ((element ElementSort))
+        #     (=> (seq.contains arr_name (seq.unit element))
+        #         (... element ...)
+        #
+        # However it looks like for CVC5 at least this generates more
+        # unknown and less unsat if a check depends on the explicit
+        # value of some sequence member.
 
-        # Create bound variable
-        s_var = smt.Bound_Variable(smt.BUILTIN_INTEGER,
-                                   self.new_temp_name())
-        self.bound_vars[n_expr.n_var] = s_var
-
-        # Create implication
+        # Evaluate subject first and creat a null check
         s_subject_value, s_subject_valid = \
             self.tr_name_reference(n_expr.n_source)
         self.attach_validity_check(s_subject_valid, n_expr.n_source)
 
-        s_guard = smt.Conjunction(
-            smt.Comparison(">=",
-                           s_var,
-                           smt.Integer_Literal(0)),
-            smt.Comparison("<",
-                           s_var,
-                           smt.Sequence_Length(s_subject_value)))
-        s_body_value, _ = self.tr_expression(n_expr.n_expr)
+        # Create validity checks for the body. We do this by creating
+        # a new branch and eliminating the quantifier; pretending it's
+        # a forall (since we want to show that for all evaluations
+        # it's valid).
+        current_start = self.start
+        self.attach_empty_assumption()
+        src_typ = n_expr.n_source.typ
+        assert isinstance(src_typ, Array_Type)
+        s_qe_index = smt.Constant(smt.BUILTIN_INTEGER,
+                                  self.new_temp_name())
+        self.start.add_statement(
+            smt.Constant_Declaration(
+                symbol   = s_qe_index,
+                comment  = ("quantifier elimination (index) for %s at %s" %
+                            (n_expr.to_string(),
+                             n_expr.location.to_string()))))
+        self.start.add_statement(
+            smt.Assertion(smt.Comparison(">=",
+                                         s_qe_index,
+                                         smt.Integer_Literal(0))))
+        self.start.add_statement(
+            smt.Assertion(
+                smt.Comparison("<",
+                               s_qe_index,
+                               smt.Sequence_Length(s_subject_value))))
+        s_qe_sym = smt.Constant(self.tr_type(src_typ.element_type),
+                                self.new_temp_name())
+        self.start.add_statement(
+            smt.Constant_Declaration(
+                symbol   = s_qe_sym,
+                value    = smt.Sequence_Index(s_subject_value, s_qe_sym),
+                comment  = ("quantifier elimination (symbol) for %s at %s" %
+                            (n_expr.to_string(),
+                             n_expr.location.to_string()))))
+        self.qe_vars[n_expr.n_var] = s_qe_sym
 
-        s_quant = smt.Quantifier(kind,
-                                 [s_var],
-                                 smt.Implication(s_guard, s_body_value))
+        _, b_valid = self.tr_expression(n_expr.n_expr)
+        self.attach_validity_check(b_valid, n_expr.n_expr)
 
-        return s_quant, smt.Boolean_Literal(True)
+        self.start = current_start
+        del self.qe_vars[n_expr.n_var]
+
+        # We have now shown that any path in the quantifier cannot
+        # raise exception. Asserting the actual value of the
+        # quantifier is more awkward.
+
+        s_q_idx = smt.Bound_Variable(smt.BUILTIN_INTEGER,
+                                     self.new_temp_name())
+        s_q_sym = smt.Sequence_Index(s_subject_value, s_q_idx)
+        self.bound_vars[n_expr.n_var] = s_q_sym
+
+        temp, self.functional = self.functional, True
+        b_value, _ = self.tr_expression(n_expr.n_expr)
+        self.functional = temp
+
+        value = smt.Quantifier(
+            "forall" if n_expr.universal else "exists",
+            [s_q_idx],
+            smt.Implication(
+                smt.Conjunction(
+                    smt.Comparison(">=",
+                                   s_q_idx,
+                                   smt.Integer_Literal(0)),
+                    smt.Comparison("<",
+                                   s_q_idx,
+                                   smt.Sequence_Length(s_subject_value))),
+                b_value))
+
+        return value, smt.Boolean_Literal(True)
