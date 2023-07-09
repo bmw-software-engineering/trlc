@@ -47,7 +47,7 @@ The Python implementation can be used for several purposes:
 ## Dependencies
 
 ### Run-time
-* Python3 >= 3.7
+* Python3 >= 3.9
 
 ### Development tools
 * GNU Make

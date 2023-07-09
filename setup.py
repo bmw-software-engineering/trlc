@@ -47,7 +47,7 @@ setuptools.setup(
     license="GNU General Public License v3",
     packages=setuptools.find_packages(),
     # install_requires=["cvc5>=1.0.1"],
-    python_requires=">=3.7, <4",
+    python_requires=">=3.9, <4",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
