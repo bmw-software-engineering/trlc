@@ -1176,9 +1176,11 @@ class VCG:
         else:
             # This is <expr> == <expr> without shortcuts
             result = smt.Conjunction(
-                self.tr_core_equality(comp_typ, lhs_value, rhs_value),
+                smt.Comparison("=", lhs_valid, rhs_valid),
                 smt.Implication(lhs_valid,
-                                smt.Comparison("=", lhs_value, rhs_value)))
+                                self.tr_core_equality(comp_typ,
+                                                      lhs_value,
+                                                      rhs_value)))
 
         if n_expr.operator == Binary_Operator.COMP_NEQ:
             result = smt.Boolean_Negation(result)
