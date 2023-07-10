@@ -83,6 +83,13 @@ class VCG:
         self.qe_vars      = {}
         self.tuple_base   = {}
 
+        self.uf_matches = smt.Function("trlc.matches",
+                                       smt.BUILTIN_BOOLEAN,
+                                       smt.Bound_Variable(smt.BUILTIN_STRING,
+                                                          "subject"),
+                                       smt.Bound_Variable(smt.BUILTIN_STRING,
+                                                          "regex"))
+
         self.functional   = False
         # If set to true, then we ignore validity checks and do not
         # create intermediates. We just build the value and validity
@@ -274,10 +281,16 @@ class VCG:
     def checks_on_composite_type(self, n_ctyp):
         assert isinstance(n_ctyp, Composite_Type)
 
-        # Create local variables
+        # Create node for global declarations
         gn_locals = graph.Assumption(self.graph)
         self.start.add_edge_to(gn_locals)
         self.start = gn_locals
+
+        # Create UF for the matches function (for now, later we will
+        # deal with regex properly)
+        self.start.add_statement(smt.Function_Declaration(self.uf_matches))
+
+        # Create local variables
         for n_component in n_ctyp.all_components():
             self.tr_component_decl(n_component, self.start)
 
@@ -697,7 +710,10 @@ class VCG:
             return self.tr_range_test(n_expr)
 
         elif isinstance(n_expr, Conditional_Expression):
-            return self.tr_conditional_expression(n_expr)
+            if self.functional:
+                return self.tr_conditional_expression_functional(n_expr)
+            else:
+                return self.tr_conditional_expression(n_expr)
 
         elif isinstance(n_expr, Null_Literal):
             return None, smt.Boolean_Literal(False)
@@ -912,6 +928,15 @@ class VCG:
                                              rhs_value,
                                              lhs_value)
 
+        elif n_expr.operator == Binary_Operator.STRING_REGEX:
+            rhs_evaluation = n_expr.n_rhs.evaluate(self.mh, None).value
+            assert isinstance(rhs_evaluation, str)
+
+            sym_value = smt.Function_Application(
+                self.uf_matches,
+                lhs_value,
+                smt.String_Literal(rhs_evaluation))
+
         elif n_expr.operator == Binary_Operator.INDEX:
             self.attach_index_check(lhs_value, rhs_value, n_expr)
             sym_value = smt.Sequence_Index(lhs_value, rhs_value)
@@ -966,9 +991,20 @@ class VCG:
 
         return self.create_return(n_expr, sym_value)
 
+    def tr_conditional_expression_functional(self, n_expr):
+        assert isinstance(n_expr, Conditional_Expression)
+
+        s_result, _ = self.tr_expression(n_expr.else_expr)
+        for n_action in reversed(n_expr.actions):
+            s_condition, _ = self.tr_expression(n_action.n_cond)
+            s_true, _      = self.tr_expression(n_action.n_expr)
+            s_result = smt.Conditional(s_condition, s_true, s_result)
+
+        return self.create_return(n_expr, s_result)
+
     def tr_conditional_expression(self, n_expr):
         assert isinstance(n_expr, Conditional_Expression)
-        assert not self.functional  # TODO
+        assert not self.functional
 
         gn_end = graph.Node(self.graph)
         sym_result = smt.Constant(self.tr_type(n_expr.typ),
@@ -1231,7 +1267,11 @@ class VCG:
 
     def tr_quantified_expression(self, n_expr):
         assert isinstance(n_expr, Quantified_Expression)
-        assert not self.functional  # TODO
+
+        # Nested quantifiers are not supported yet
+        if self.functional:
+            self.flag_unsupported(n_expr,
+                                  "functional evaluation of quantifier")
 
         # TRLC quantifier
         #   (forall x in arr_name => body)

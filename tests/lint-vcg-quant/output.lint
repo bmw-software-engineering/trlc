@@ -6,4 +6,15 @@ c, "potato"
 |     /* c is null */
 |   }
 | /* note: counter-example is unreliable in this case */
-Verified 2 model(s) and 0 check(s) and found 1 warning(s)
+len(positives) > 0 implies 5 / positives[0] > 0, "potato"
+                             ^ lint-vcg-quant/test3.rsl:19: check: divisor could be 0
+                             | example record_type triggering error:
+                             |   T bad_potato {
+                             |     arr = [2]
+                             |     positives = [0]
+                             |     negatives = []
+                             |     zeros = []
+                             |     /* c is null */
+                             |   }
+                             | /* note: counter-example is unreliable in this case */
+Verified 3 model(s) and 0 check(s) and found 2 warning(s)

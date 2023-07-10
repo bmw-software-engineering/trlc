@@ -11,19 +11,16 @@ The new `Markup_String` type currently has limited language support,
 but we expect to add more features surrounding it later. (For example
 quantifying over all references.)
 
-The `--verify` feature has several limitations:
+The `--verify` feature has several limitations that can create false
+alarms and cause inaccurate or impossible counter-examples to be
+generated in the following situations:
 
-* Decimal numbers are modelled as real numbers instead of
-  decimals. This means there may be false alarms and counter-examples
-  produced that do not make sense.
-* Quantifiers are supported, however there may be false alarms and
-  incorrect counter-examples generated. Especially for nested and
-  nested alternating quantifiers.
-* Tuples in arrays currently not get their constraints asserted,
-  leading to false alarms and invalid counter-examples.
+* Decimal numbers may generate real or irrational examples.
+* Quantifiers.
+* Tuples in arrays.
 * Markup_Strings are treated just like strings (i.e. they do not carry
   a constraint yet about legal syntax of inline references).
-* It does not support the builtin `matches` function.
+* The builtin `matches` function
 
 ## Changelog
 

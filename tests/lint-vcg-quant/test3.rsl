@@ -1,0 +1,20 @@
+package Test3
+
+type T {
+  arr       Integer [1 .. *]
+  positives Integer [0 .. *]
+  negatives Integer [0 .. *]
+  zeros     Integer [0 .. *]
+
+  c optional Boolean
+}
+
+checks T {
+  (forall item in arr => (if item > 0 then item in positives
+			  elsif item < 0 then item in negatives
+			  else item in zeros)),
+  fatal "potato"
+
+  // Not a false alarm, but the CE doesn't make sense
+  len(positives) > 0 implies 5 / positives[0] > 0, "potato"
+}
