@@ -1187,6 +1187,9 @@ class Parser(Parser_Base):
         self.match("C_BRA")
         while not self.peek("C_KET"):
             c_expr = self.parse_expression(scope)
+            if not isinstance(c_expr.typ, ast.Builtin_Boolean):
+                self.mh.error(c_expr.location,
+                              "check expression must be Boolean")
 
             self.match("COMMA")
             if self.peek("KEYWORD"):

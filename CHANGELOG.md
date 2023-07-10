@@ -37,6 +37,9 @@ The `--verify` feature has several limitations:
 * [TRLC] Fix missing static check on exponents (they must not be
   negative).
 
+* [TRLC] Fix missing static check for boolean types on check
+  expressions (tools would crash without error message).
+
 * [TRLC, LRM] Fix several tool crashes when the `null` literal
   appeared in expressions outside equality. Re-worded the section on
   null values in the LRM to be much stricter. We consider this to be a
