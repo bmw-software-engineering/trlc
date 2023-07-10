@@ -26,8 +26,6 @@ The `--verify` feature has several limitations:
 * It does not support frozen components.
 * It does not support the builtin `matches` function.
 * It does not support field access (the `.` operator).
-* Issues with checks on record extensions are reported multiple times
-  (once for each extension).
 
 ## Changelog
 

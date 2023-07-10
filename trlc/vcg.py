@@ -88,6 +88,9 @@ class VCG:
         # create intermediates. We just build the value and validity
         # expresions and return them.
 
+        self.emit_checks  = True
+        # If set to false, we skip creating checks.
+
     @staticmethod
     def flag_unsupported(node, text=None):
         assert isinstance(node, Node)
@@ -121,6 +124,9 @@ class VCG:
         assert isinstance(origin, Expression)
         assert not self.functional
 
+        if not self.emit_checks:
+            return
+
         # Attach new graph node advance start
         if not bool_expr.is_static_true():
             gn_check = graph.Check(self.graph)
@@ -136,6 +142,9 @@ class VCG:
         assert int_expr.sort is smt.BUILTIN_INTEGER
         assert isinstance(origin, Expression)
         assert not self.functional
+
+        if not self.emit_checks:
+            return
 
         # Attach new graph node advance start
         gn_check = graph.Check(self.graph)
@@ -153,6 +162,9 @@ class VCG:
         assert real_expr.sort is smt.BUILTIN_REAL
         assert isinstance(origin, Expression)
         assert not self.functional
+
+        if not self.emit_checks:
+            return
 
         # Attach new graph node advance start
         gn_check = graph.Check(self.graph)
@@ -173,6 +185,9 @@ class VCG:
         assert isinstance(origin, Binary_Expression)
         assert origin.operator == Binary_Operator.INDEX
         assert not self.functional
+
+        if not self.emit_checks:
+            return
 
         # Attach new graph node advance start
         gn_check = graph.Check(self.graph)
@@ -198,6 +213,9 @@ class VCG:
         assert bool_expr.sort is smt.BUILTIN_BOOLEAN
         assert isinstance(origin, Expression)
         assert not self.functional
+
+        if not self.emit_checks:
+            return
 
         # Attach new graph node advance start
         gn_check = graph.Check(self.graph)
@@ -638,10 +656,20 @@ class VCG:
     def tr_check(self, n_check):
         assert isinstance(n_check, Check)
 
+        # If the check belongs to a different type then we are looking
+        # at a type extension. In this case we do not create checks
+        # again, because if a check would failt it would already have
+        # failed.
+        if n_check.n_type is not self.n_ctyp:
+            old_emit, self.emit_checks = self.emit_checks, False
+
         value, valid = self.tr_expression(n_check.n_expr)
         self.attach_validity_check(valid, n_check.n_expr)
         self.attach_feasability_check(value, n_check.n_expr)
         self.attach_assumption(value)
+
+        if n_check.n_type is not self.n_ctyp:
+            self.emit_checks = old_emit
 
     def tr_expression(self, n_expr):
         value = None

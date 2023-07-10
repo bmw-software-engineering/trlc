@@ -26,16 +26,6 @@ x, "wibble"
 |     /* x is null */
 |   }
 x, "wibble"
-^ lint-vcg-basic/test4.rsl:16: check: expression could be null
-| example record_type triggering error:
-|   T4_Ext bad_potato {
-|     a = Colour.Green
-|     b = Colour.Red
-|     c = Colour.Blue
-|     d = Colour.Blue
-|     /* x is null */
-|   }
-x, "wibble"
 ^ lint-vcg-basic/test4.rsl:23: check: expression is always true
 a == b / (c + d * 2), "potato"
        ^ lint-vcg-basic/test5.rsl:12: check: divisor could be 0
@@ -62,4 +52,4 @@ a == b % (c + d * 2), "potato"
    |     a = 19
    |     b = 12
    |   }
-Verified 7 model(s) and 0 check(s) and found 9 warning(s)
+Verified 7 model(s) and 0 check(s) and found 8 warning(s)
