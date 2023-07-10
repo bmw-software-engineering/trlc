@@ -536,11 +536,21 @@ class VCG:
         assert isinstance(n_component, Composite_Component)
         assert isinstance(gn_locals, graph.Assumption)
 
+        if isinstance(self.n_ctyp, Record_Type):
+            frozen = self.n_ctyp.is_frozen(n_component)
+        else:
+            frozen = False
+
         id_value = self.tr_component_value_name(n_component)
         s_sort = self.tr_type(n_component.n_typ)
         s_sym  = smt.Constant(s_sort, id_value)
-        # TODO: Frozen components
-        s_val  = None
+        if frozen:
+            old_functional, self.functional = self.functional, True
+            s_val, _ = self.tr_expression(
+                self.n_ctyp.get_freezing_expression(n_component))
+            self.functional = old_functional
+        else:
+            s_val = None
         s_decl = smt.Constant_Declaration(
             symbol   = s_sym,
             value    = s_val,
@@ -576,7 +586,7 @@ class VCG:
         id_valid = self.tr_component_valid_name(n_component)
         s_sym  = smt.Constant(smt.BUILTIN_BOOLEAN, id_valid)
         s_val  = (None
-                  if n_component.optional
+                  if n_component.optional and not frozen
                   else smt.Boolean_Literal(True))
         s_decl = smt.Constant_Declaration(
             symbol   = s_sym,
@@ -750,7 +760,8 @@ class VCG:
         assert isinstance(n_expr, Unary_Expression)
 
         operand_value, operand_valid = self.tr_expression(n_expr.n_operand)
-        self.attach_validity_check(operand_valid, n_expr.n_operand)
+        if not self.functional:
+            self.attach_validity_check(operand_valid, n_expr.n_operand)
 
         sym_value = None
 

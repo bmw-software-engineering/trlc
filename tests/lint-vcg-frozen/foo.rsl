@@ -1,0 +1,14 @@
+package Foo
+
+type T {
+  a optional Integer
+  b optional Integer
+}
+
+type Q extends T {
+  freeze a = 42
+}
+
+checks Q {
+  b != null implies a > b, "foo"
+}

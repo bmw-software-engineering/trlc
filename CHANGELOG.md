@@ -23,7 +23,6 @@ The `--verify` feature has several limitations:
   leading to false alarms and invalid counter-examples.
 * Markup_Strings are treated just like strings (i.e. they do not carry
   a constraint yet about legal syntax of inline references).
-* It does not support frozen components.
 * It does not support the builtin `matches` function.
 
 ## Changelog
