@@ -10,8 +10,15 @@ The easiest way to install the tools is through PyPI:
 $ pip3 install --user trlc
 ```
 
-There are currently no dependencies, all you need is a moderatly
-recent Python 3.7.
+There are currently no required dependencies, all you need is a
+moderatly recent Python 3.9.
+
+If you are on Linux however, you may want to also install PyVCG as
+this enables some advanced features for getting better error messages.
+
+```
+$ pip3 install --user PyVCG
+```
 
 Don't forget to adjust your `PATH` so that `.local/bin` (or the
 equivalent on Windows) is on it; so that the `trlc` executable can be
