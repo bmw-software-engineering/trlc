@@ -1,23 +1,23 @@
 matches(name, "^D.*"), error "name must start with D", name
-        ^^^^ simple-info-warn-error/checks.check:4: check: expression could be null
+        ^^^^ simple-info-warn-error/checks.check:4: warning: expression could be null [vcg-evaluation-of-null]
            | example record_type triggering error:
            |   MyType bad_potato {
            |     /* name is null */
            |   }
 matches(name, "^E.*"), error "name must start with E", name
-        ^^^^ simple-info-warn-error/checks.check:5: check: expression could be null
+        ^^^^ simple-info-warn-error/checks.check:5: warning: expression could be null [vcg-evaluation-of-null]
            | example record_type triggering error:
            |   MyType bad_potato {
            |     /* name is null */
            |   }
 matches(name, "^W.*"), warning "name must start with W", name
-        ^^^^ simple-info-warn-error/checks.check:6: check: expression could be null
+        ^^^^ simple-info-warn-error/checks.check:6: warning: expression could be null [vcg-evaluation-of-null]
            | example record_type triggering error:
            |   MyType bad_potato {
            |     /* name is null */
            |   }
 matches(name, "^I.*"),  warning "name must start with I", name
-        ^^^^ simple-info-warn-error/checks.check:7: check: expression could be null
+        ^^^^ simple-info-warn-error/checks.check:7: warning: expression could be null [vcg-evaluation-of-null]
            | example record_type triggering error:
            |   MyType bad_potato {
            |     /* name is null */

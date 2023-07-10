@@ -1,5 +1,5 @@
 matches(name, "^Q.*"),  error "name must start with Q", name
-        ^^^^ simple-more-than-one/checks.check:4: check: expression could be null
+        ^^^^ simple-more-than-one/checks.check:4: warning: expression could be null [vcg-evaluation-of-null]
            | example record_type triggering error:
            |   MyType bad_potato {
            |     /* name is null */

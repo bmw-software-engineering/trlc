@@ -1,5 +1,5 @@
 c, "potato"
-^ lint-vcg-quant/test1.rsl:10: check: expression could be null
+^ lint-vcg-quant/test1.rsl:10: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
 |     arr = [1, 1, 1]
@@ -7,7 +7,7 @@ c, "potato"
 |   }
 | /* note: counter-example is unreliable in this case */
 len(positives) > 0 implies 5 / positives[0] > 0, "potato"
-                             ^ lint-vcg-quant/test3.rsl:19: check: divisor could be 0
+                             ^ lint-vcg-quant/test3.rsl:19: warning: divisor could be 0 [vcg-div-by-zero]
                              | example record_type triggering error:
                              |   T bad_potato {
                              |     arr = [2]

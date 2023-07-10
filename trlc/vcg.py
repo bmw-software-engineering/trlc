@@ -46,12 +46,14 @@ class Unsupported(Exception):
 
 
 class Feedback:
-    def __init__(self, node, message, expect_unsat=True):
+    def __init__(self, node, message, kind, expect_unsat=True):
         assert isinstance(node, Expression)
         assert isinstance(message, str)
+        assert isinstance(kind, str)
         assert isinstance(expect_unsat, bool)
         self.node         = node
         self.message      = message
+        self.kind         = kind
         self.expect_unsat = expect_unsat
 
 
@@ -139,7 +141,8 @@ class VCG:
             gn_check = graph.Check(self.graph)
             gn_check.add_goal(bool_expr,
                               Feedback(origin,
-                                       "expression could be null"),
+                                       "expression could be null",
+                                       "evaluation-of-null"),
                               "validity check for %s" % origin.to_string())
             self.start.add_edge_to(gn_check)
             self.start = gn_check
@@ -159,7 +162,8 @@ class VCG:
             smt.Boolean_Negation(
                 smt.Comparison("=", int_expr, smt.Integer_Literal(0))),
             Feedback(origin,
-                     "divisor could be 0"),
+                     "divisor could be 0",
+                     "div-by-zero"),
             "division by zero check for %s" % origin.to_string())
         self.start.add_edge_to(gn_check)
         self.start = gn_check
@@ -179,7 +183,8 @@ class VCG:
             smt.Boolean_Negation(
                 smt.Comparison("=", real_expr, smt.Real_Literal(0))),
             Feedback(origin,
-                     "divisor could be 0.0"),
+                     "divisor could be 0.0",
+                     "div-by-zero"),
             "division by zero check for %s" % origin.to_string())
         self.start.add_edge_to(gn_check)
         self.start = gn_check
@@ -201,7 +206,8 @@ class VCG:
         gn_check.add_goal(
             smt.Comparison(">=", index_expr, smt.Integer_Literal(0)),
             Feedback(origin,
-                     "array index could be less than 0"),
+                     "array index could be less than 0",
+                     "array-index"),
             "index lower bound check for %s" % origin.to_string())
         gn_check.add_goal(
             smt.Comparison("<",
@@ -209,7 +215,8 @@ class VCG:
                            smt.Sequence_Length(seq_expr)),
             Feedback(origin,
                      "array index could be larger than len(%s)" %
-                     origin.n_lhs.to_string()),
+                     origin.n_lhs.to_string(),
+                     "array-index"),
             "index lower bound check for %s" % origin.to_string())
 
         self.start.add_edge_to(gn_check)
@@ -229,6 +236,7 @@ class VCG:
         gn_check.add_goal(bool_expr,
                           Feedback(origin,
                                    "expression is always true",
+                                   "always-true",
                                    expect_unsat = False),
                           "feasability check for %s" % origin.to_string())
         self.start.add_edge_to(gn_check)
@@ -340,6 +348,7 @@ class VCG:
                 if status != "unsat":
                     self.mh.failed_vc(vc["feedback"].node.location,
                                       message,
+                                      vc["feedback"].kind,
                                       self.create_counterexample(status,
                                                                  values))
                     nok_validity_checks.add(vc["feedback"])
@@ -354,7 +363,8 @@ class VCG:
         for feedback in nok_feasibility_checks:
             if feedback not in ok_feasibility_checks:
                 self.mh.failed_vc(feedback.node.location,
-                                  feedback.message)
+                                  feedback.message,
+                                  feedback.kind)
                 ok_feasibility_checks.add(feedback)
 
     def create_counterexample(self, status, values):

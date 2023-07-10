@@ -264,15 +264,15 @@ class Message_Handler:
                   "%s [%s]" % (message, check),
                   fatal=False)
 
-    def failed_vc(self, location, message, counterexample=None):
+    def failed_vc(self, location, message, kind, counterexample=None):
         assert isinstance(location, Location)
         assert isinstance(message, str)
         assert isinstance(counterexample, str) or counterexample is None
 
         self.warnings += 1
         self.emit(location,
-                  "check",
-                  "%s" % message,
+                  "warning",
+                  "%s [vcg-%s]" % (message, kind),
                   fatal     = False,
                   extrainfo = counterexample)
 

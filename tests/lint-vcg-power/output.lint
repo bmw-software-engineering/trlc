@@ -1,5 +1,5 @@
 c, "wibble"
-^ lint-vcg-power/test1.rsl:12: check: expression could be null
+^ lint-vcg-power/test1.rsl:12: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
 |     x = -9
@@ -7,7 +7,7 @@ c, "wibble"
 |     /* c is null */
 |   }
 c, "wibble"
-^ lint-vcg-power/test2.rsl:12: check: expression could be null
+^ lint-vcg-power/test2.rsl:12: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
 |     x = /* unable to generate precise value */

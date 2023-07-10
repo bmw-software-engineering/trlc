@@ -68,7 +68,7 @@ generated in the following situations:
 
   ```
   y != null implies x > 1, warning "potato"
-                    ^ test1.rsl:11: check: expression could be null
+                    ^ test1.rsl:11: warning: expression could be null [vcg-evaluation-of-null]
                     | example record_type triggering error:
                     |   T1 bad_potato {
                     |     /* x is null */

@@ -1,5 +1,5 @@
 y != null implies x > 1, warning "potato"
-                  ^ lint-vcg-basic/test1.rsl:11: check: expression could be null
+                  ^ lint-vcg-basic/test1.rsl:11: warning: expression could be null [vcg-evaluation-of-null]
                   | example record_type triggering error:
                   |   T1 bad_potato {
                   |     /* x is null */
@@ -7,16 +7,16 @@ y != null implies x > 1, warning "potato"
                   |     z = 0
                   |   }
 x != 0, warning "potato"
-  ^^ lint-vcg-basic/test2.rsl:9: check: expression is always true
+  ^^ lint-vcg-basic/test2.rsl:9: warning: expression is always true [vcg-always-true]
 x, "potato"
-^ lint-vcg-basic/test3.rsl:9: check: expression could be null
+^ lint-vcg-basic/test3.rsl:9: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T3 bad_potato {
 |     /* x is null */
 |     y = false
 |   }
 x, "wibble"
-^ lint-vcg-basic/test4.rsl:16: check: expression could be null
+^ lint-vcg-basic/test4.rsl:16: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T4 bad_potato {
 |     a = Colour.Green
@@ -26,9 +26,9 @@ x, "wibble"
 |     /* x is null */
 |   }
 x, "wibble"
-^ lint-vcg-basic/test4.rsl:23: check: expression is always true
+^ lint-vcg-basic/test4.rsl:23: warning: expression is always true [vcg-always-true]
 a == b / (c + d * 2), "potato"
-       ^ lint-vcg-basic/test5.rsl:12: check: divisor could be 0
+       ^ lint-vcg-basic/test5.rsl:12: warning: divisor could be 0 [vcg-div-by-zero]
        | example record_type triggering error:
        |   T bad_potato {
        |     a = 0
@@ -37,7 +37,7 @@ a == b / (c + d * 2), "potato"
        |     d = -5
        |   }
 a == b % (c + d * 2), "potato"
-       ^ lint-vcg-basic/test6.rsl:13: check: divisor could be 0
+       ^ lint-vcg-basic/test6.rsl:13: warning: divisor could be 0 [vcg-div-by-zero]
        | example record_type triggering error:
        |   T bad_potato {
        |     a = 0
@@ -46,7 +46,7 @@ a == b % (c + d * 2), "potato"
        |     d = -5
        |   }
 13 % ((-a) % b + 7) > 0, "potato"
-   ^ lint-vcg-basic/test7.rsl:11: check: divisor could be 0
+   ^ lint-vcg-basic/test7.rsl:11: warning: divisor could be 0 [vcg-div-by-zero]
    | example record_type triggering error:
    |   T bad_potato {
    |     a = 19

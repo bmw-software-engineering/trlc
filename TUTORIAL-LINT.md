@@ -70,7 +70,7 @@ When running the verifier we can see:
 ```plain
 $ trlc.py --lint --verify trivial.rsl
 x > 0, "please make this positive", x
-^ trivial.rsl:8: check: expression could be null
+^ trivial.rsl:8: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
 |     /* x is null */

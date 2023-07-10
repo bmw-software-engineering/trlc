@@ -1,5 +1,5 @@
 f2 >= 0, warning "potato2", f2
-^^ tuples-4/foo.rsl:12: check: expression could be null
+^^ tuples-4/foo.rsl:12: warning: expression could be null [vcg-evaluation-of-null]
  | example tuple_type triggering error:
  |   T bad_potato {
  |     f1 = R1_instance_0

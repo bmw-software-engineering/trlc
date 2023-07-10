@@ -1,5 +1,5 @@
 x, "potato"
-^ lint-vcg-int-real/test1.rsl:14: check: expression could be null
+^ lint-vcg-int-real/test1.rsl:14: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
 |     num = 157
@@ -8,7 +8,7 @@ x, "potato"
 |     /* x is null */
 |   }
 x, "potato"
-^ lint-vcg-int-real/test2.rsl:12: check: expression could be null
+^ lint-vcg-int-real/test2.rsl:12: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
 |     i = -3

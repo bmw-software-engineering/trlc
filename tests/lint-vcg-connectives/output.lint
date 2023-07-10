@@ -1,12 +1,12 @@
 c, "wibble"
-^ lint-vcg-connectives/test1.rsl:11: check: expression could be null
+^ lint-vcg-connectives/test1.rsl:11: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
 |     x = 10
 |     /* c is null */
 |   }
 y == -5 implies c, "wibble"
-                ^ lint-vcg-connectives/test2.rsl:11: check: expression could be null
+                ^ lint-vcg-connectives/test2.rsl:11: warning: expression could be null [vcg-evaluation-of-null]
                 | example record_type triggering error:
                 |   T bad_potato {
                 |     x = 1
