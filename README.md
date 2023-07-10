@@ -64,7 +64,7 @@ Optional dependencies (they are not installed automatically):
   perform branch coverage when running the test suite)
 * [Sphinx](https://pypi.org/project/Sphinx) (from PyPI, for building
   the documentation)
-* [PyVCG](https://pypi.org/project/Sphinx) (from PyPI, for building
+* [PyVCG](https://pypi.org/project/PyVCG) (from PyPI, for building
   verification conditions)
 * [CVC5](https://pypi.org/project/cvc5) (from PyPI, for discharging
   verification conditions)

@@ -13,6 +13,8 @@
   requirements to other requirements
 * [User defined checks](TUTORIAL-CHECKS.md): enforcing process/policy
   for requirements
+* [Using the TRLC linter](TUTORIAL-LINT.md): avoiding surprises and
+  run-time errors
 
 ## Using TRLC in big organisations
 

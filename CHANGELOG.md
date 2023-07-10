@@ -20,7 +20,7 @@ generated in the following situations:
 * Tuples in arrays.
 * Markup_Strings are treated just like strings (i.e. they do not carry
   a constraint yet about legal syntax of inline references).
-* The builtin `matches` function
+* The builtin `matches` function.
 
 ## Changelog
 
@@ -48,7 +48,8 @@ generated in the following situations:
   requires [PyVCG](https://pypi.org/project/PyVCG) to be installed
   (which is only available on GNU/Linux or MacOS). This option
   attempts to statically verify all checks for error freedom (no null
-  dereferences, and no division by zero). For example with this `.rsl`:
+  dereferences, no division by zero, and no array out of bounds
+  access). For example with this `.rsl`:
 
   ```
   type T1 {
