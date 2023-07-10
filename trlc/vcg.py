@@ -711,6 +711,9 @@ class VCG:
         elif isinstance(n_expr, Quantified_Expression):
             return self.tr_quantified_expression(n_expr)
 
+        elif isinstance(n_expr, Field_Access_Expression):
+            return self.tr_field_access_expression(n_expr)
+
         else:
             self.flag_unsupported(n_expr)
 
@@ -1310,3 +1313,19 @@ class VCG:
                 b_value))
 
         return value, smt.Boolean_Literal(True)
+
+    def tr_field_access_expression(self, n_expr):
+        assert isinstance(n_expr, Field_Access_Expression)
+
+        prefix_value, prefix_valid = self.tr_expression(n_expr.n_prefix)
+        self.attach_validity_check(prefix_valid, n_expr.n_prefix)
+
+        field_value = smt.Record_Access(prefix_value,
+                                        n_expr.n_field.name + ".value")
+        if n_expr.n_field.optional:
+            field_valid = smt.Record_Access(prefix_value,
+                                            n_expr.n_field.name + ".valid")
+        else:
+            field_valid = smt.Boolean_Literal(True)
+
+        return field_value, field_valid

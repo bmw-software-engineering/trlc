@@ -1,0 +1,11 @@
+package Test4
+import Common
+
+type T {
+  x Common.Chain
+}
+
+checks T {
+  x.c != null, fatal "potato"
+  x.b > 0, "wibble"
+}

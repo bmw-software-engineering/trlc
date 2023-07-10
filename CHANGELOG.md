@@ -25,7 +25,6 @@ The `--verify` feature has several limitations:
   a constraint yet about legal syntax of inline references).
 * It does not support frozen components.
 * It does not support the builtin `matches` function.
-* It does not support field access (the `.` operator).
 
 ## Changelog
 

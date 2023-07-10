@@ -1,0 +1,12 @@
+package Test2
+import Common
+
+type T {
+  x Common.Item
+}
+
+checks T {
+  (if x.item > 500
+   then x.version > 5
+   else x.version < 5), warning "potato"
+}

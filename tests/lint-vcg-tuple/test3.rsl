@@ -1,0 +1,13 @@
+package Test3
+import Common
+
+type T {
+  x Common.Item
+  y Common.Item
+  c optional Boolean
+}
+
+checks T {
+  x.version != y.version, fatal "versions match"
+  c, "potato"
+}

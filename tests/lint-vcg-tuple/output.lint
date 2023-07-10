@@ -8,4 +8,24 @@ c, "potato"
 |     q = -3
 |     /* c is null */
 |   }
-Verified 2 model(s) and 0 check(s) and found 1 warning(s)
+then x.version > 5
+       ^^^^^^^ lint-vcg-tuple/test2.rsl:10: check: expression could be null
+             | example record_type triggering error:
+             |   T bad_potato {
+             |     x = 501
+             |   }
+else x.version < 5), warning "potato"
+       ^^^^^^^ lint-vcg-tuple/test2.rsl:11: check: expression could be null
+             | example record_type triggering error:
+             |   T bad_potato {
+             |     x = 1
+             |   }
+c, "potato"
+^ lint-vcg-tuple/test3.rsl:12: check: expression could be null
+| example record_type triggering error:
+|   T bad_potato {
+|     x = 1@1
+|     y = 1
+|     /* c is null */
+|   }
+Verified 5 model(s) and 0 check(s) and found 4 warning(s)
