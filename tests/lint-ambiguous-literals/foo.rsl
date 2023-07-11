@@ -5,3 +5,9 @@ tuple T {
   separator x
   b Integer
 }
+
+tuple Q {
+  a Integer
+  separator x
+  b String
+}

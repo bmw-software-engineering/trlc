@@ -1,7 +1,13 @@
 type T4 extends T3 {
      ^^ type-qualifiers-3/foo.rsl:15: warning: consider clarifying that this record is final [clarify_final]
+      | Parent record Foo.T3 is final, making this record
+      | also final. Marking it explicitly as final
+      | clarifies this to casual readers.
 type T5 extends T4 {
      ^^ type-qualifiers-3/foo.rsl:19: warning: consider clarifying that this record is final [clarify_final]
+      | Parent record Foo.T4 is final, making this record
+      | also final. Marking it explicitly as final
+      | clarifies this to casual readers.
 w Integer
 ^ type-qualifiers-3/foo.rsl:20: error: cannot declare new components in final record type
 Verified 1 model(s) and 0 check(s) and found 2 warning(s) and 1 error(s)

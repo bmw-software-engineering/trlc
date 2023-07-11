@@ -516,7 +516,11 @@ class Parser(Parser_Base):
            not is_final:
             self.mh.check(name.location,
                           "consider clarifying that this record is final",
-                          "clarify_final")
+                          "clarify_final",
+                          ("Parent record %s is final, making this record\n"
+                           "also final. Marking it explicitly as final\n"
+                           "clarifies this to casual readers." %
+                           root_record.fully_qualified_name()))
 
         record = ast.Record_Type(name        = name.value,
                                  description = description,
@@ -731,6 +735,7 @@ class Parser(Parser_Base):
                               "brackets to clarify intent" %
                               n_lhs.to_string(),
                               "unary_minus_precedence")
+
             n_lhs = ast.Unary_Expression(
                 mh        = self.mh,
                 location  = t_unary.location,

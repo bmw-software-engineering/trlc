@@ -1985,6 +1985,9 @@ class Type(Entity):
         assert isinstance(value, Expression)
         return True
 
+    def get_example_value(self):
+        assert False
+
 
 class Concrete_Type(Type):
     """Abstract base class for all non-anonymous types.
@@ -2130,11 +2133,17 @@ class Array_Type(Type):
             assert isinstance(value, Implicit_Null)
             return True
 
+    def get_example_value(self):
+        return "[%s]" % self.element_type.get_example_value()
+
 
 class Builtin_Integer(Builtin_Numeric_Type):
     """Builtin integer type."""
     def __init__(self):
         super().__init__("Integer")
+
+    def get_example_value(self):
+        return "100"
 
 
 class Builtin_Decimal(Builtin_Numeric_Type):
@@ -2142,17 +2151,26 @@ class Builtin_Decimal(Builtin_Numeric_Type):
     def __init__(self):
         super().__init__("Decimal")
 
+    def get_example_value(self):
+        return "3.14"
+
 
 class Builtin_Boolean(Builtin_Type):
     """Builtin boolean type."""
     def __init__(self):
         super().__init__("Boolean")
 
+    def get_example_value(self):
+        return "true"
+
 
 class Builtin_String(Builtin_Type):
     """Builtin string type."""
     def __init__(self):
         super().__init__("String")
+
+    def get_example_value(self):
+        return "\"potato\""
 
 
 class Builtin_Markup_String(Builtin_String):
@@ -2162,6 +2180,9 @@ class Builtin_Markup_String(Builtin_String):
     def __init__(self):
         super().__init__()
         self.name = "Markup_String"
+
+    def get_example_value(self):
+        return "\"also see [[potato]]\""
 
 
 class Package(Entity):
@@ -2414,6 +2435,9 @@ class Record_Type(Composite_Type):
         else:
             assert False
 
+    def get_example_value(self):
+        return "%s_instance" % self.name
+
 
 class Tuple_Type(Composite_Type):
     """A user-defined tuple type.
@@ -2489,6 +2513,18 @@ class Tuple_Type(Composite_Type):
             assert isinstance(value, Implicit_Null)
             return True
 
+    def get_example_value(self):
+        parts = []
+        for n_item in self.iter_sequence():
+            if isinstance(n_item, Composite_Component):
+                parts.append(n_item.n_typ.get_example_value())
+            else:
+                parts.append(n_item.to_string())
+        if self.has_separators():
+            return " ".join(parts)
+        else:
+            return "(%s)" % ", ".join(parts)
+
 
 class Separator(Node):
     """User-defined syntactic separator
@@ -2508,6 +2544,13 @@ class Separator(Node):
                                                            "COLON",
                                                            "SEMICOLON")
         self.token = token
+
+    def to_string(self):
+        return {
+            "AT"        : "@",
+            "COLON"     : ":",
+            "SEMICOLON" : ";"
+        }.get(self.token.kind, self.token.value)
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Separator %s" % self.token.value)
@@ -2539,6 +2582,14 @@ class Enumeration_Type(Concrete_Type):
         if self.description:
             self.write_indent(indent + 1, "Description: %s" % self.description)
         self.literals.dump(indent + 1, omit_heading=True)
+
+    def get_example_value(self):
+        options = list(self.literals.values())
+        if options:
+            choice = len(options) // 2
+            return self.name + "." + choice.name
+        else:
+            return "ERROR"
 
 
 class Enumeration_Literal_Spec(Typed_Entity):

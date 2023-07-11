@@ -30,18 +30,17 @@ The linter can detect some questionable constructs, for example:
 tuple T {
   a Integer
   separator x
-            ^ lint-ambiguous-literals/foo.rsl:5: warning: x
-			    separator after integer component creates
-				ambiguities with base 16 literals
-				[separator_based_literal_ambiguity]
+            ^ ./foo.rsl:5: warning: x separator after integer
+              component creates ambiguities
+              [separator_based_literal_ambiguity]
+            | For example 0x100 would be a base 16 literal
+            | instead of the tuple segment 0 x 100.
   b optional Integer
 }
 ```
 
-In this example there is a possible problem with the tuple literal `0
-x 12` and the integer hex literal `0x12`. Even worse `0x12` is a valid
-instance of the tuple here (with a = 18), but `0 x 12` is a different
-instance (with a = 0, and b = 12).
+For some more difficult to understand problems (as seen above) a more
+detailed description with examples is attached.
 
 ## Verification
 

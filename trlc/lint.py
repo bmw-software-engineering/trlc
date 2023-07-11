@@ -80,22 +80,52 @@ class Linter:
         assert isinstance(n_tuple_type, ast.Tuple_Type)
 
         # Detect confusing separators
-        previous_was_int = False
+        previous_was_int     = False
+        previous_was_bad_sep = False
+        bad_separator        = None
+        location             = None
         for n_item in n_tuple_type.iter_sequence():
-            if isinstance(n_item, ast.Composite_Component) and \
+            if previous_was_bad_sep:
+                assert isinstance(n_item, ast.Composite_Component)
+                if isinstance(n_item.n_typ, ast.Builtin_Integer):
+                    explanation = [
+                        "For example 0%s100 would be a base %u literal" %
+                        (bad_separator,
+                         {"b" : 2, "x" : 16}[bad_separator]),
+                        "instead of the tuple segment 0 %s 100." %
+                        bad_separator
+                    ]
+                else:
+                    explanation = [
+                        "For example 0%s%s would be a lexer error" %
+                        (bad_separator,
+                         n_item.n_typ.get_example_value()),
+                        "instead of the tuple segment 0 %s %s." %
+                        (bad_separator,
+                         n_item.n_typ.get_example_value())
+                    ]
+
+                self.mh.check(
+                    location,
+                    "%s separator after integer component"
+                    " creates ambiguities" % bad_separator,
+                    "separator_based_literal_ambiguity",
+                    "\n".join(explanation))
+
+            elif isinstance(n_item, ast.Composite_Component) and \
                isinstance(n_item.n_typ, ast.Builtin_Integer):
                 previous_was_int = True
-            elif isinstance(n_item, ast.Separator) and previous_was_int:
-                if n_item.token.kind == "IDENTIFIER" and \
-                   n_item.token.value in ("x", "b"):
-                    self.mh.check(n_item.location,
-                                  "%s separator after integer component"
-                                  " creates ambiguities with base %u literals"
-                                  % (n_item.token.value,
-                                     2 if n_item.token.value == "b" else 16),
-                                  "separator_based_literal_ambiguity")
+
+            elif isinstance(n_item, ast.Separator) and \
+                 previous_was_int and \
+                 n_item.to_string() in ("x", "b"):
+                previous_was_bad_sep = True
+                bad_separator        = n_item.to_string()
+                location             = n_item.location
+
             else:
-                previous_was_int = False
+                previous_was_int     = False
+                previous_was_bad_sep = False
 
         # Walk over components
         for n_component in n_tuple_type.components.values():
@@ -145,9 +175,14 @@ class Linter:
             self.mh.check(n_typ.loc_upper,
                           "array of fixed size 1 "
                           "should not be an array",
-                          "weird_array_types")
+                          "weird_array_types",
+                          "An array with a fixed size of 1 should not\n"
+                          "be an array at all.")
         elif n_typ.upper_bound == 1 and n_typ.lower_bound == 0:
             self.mh.check(n_typ.loc_upper,
                           "consider making this array an"
                           " optional %s" % n_typ.element_type.name,
-                          "weird_array_types")
+                          "weird_array_types",
+                          "An array with 0 to 1 components should just\n"
+                          "be an optional %s instead." %
+                          n_typ.element_type.name)
