@@ -53,7 +53,7 @@ class Feedback:
         assert isinstance(expect_unsat, bool)
         self.node         = node
         self.message      = message
-        self.kind         = kind
+        self.kind         = "vcg-" + kind
         self.expect_unsat = expect_unsat
 
 
@@ -346,11 +346,11 @@ class VCG:
 
             if vc["feedback"].expect_unsat:
                 if status != "unsat":
-                    self.mh.failed_vc(vc["feedback"].node.location,
-                                      message,
-                                      vc["feedback"].kind,
-                                      self.create_counterexample(status,
-                                                                 values))
+                    self.mh.check(vc["feedback"].node.location,
+                                  message,
+                                  vc["feedback"].kind,
+                                  self.create_counterexample(status,
+                                                             values))
                     nok_validity_checks.add(vc["feedback"])
             else:
                 if status == "unsat":
@@ -362,9 +362,9 @@ class VCG:
         # consistent
         for feedback in nok_feasibility_checks:
             if feedback not in ok_feasibility_checks:
-                self.mh.failed_vc(feedback.node.location,
-                                  feedback.message,
-                                  feedback.kind)
+                self.mh.check(feedback.node.location,
+                              feedback.message,
+                              feedback.kind)
                 ok_feasibility_checks.add(feedback)
 
     def create_counterexample(self, status, values):

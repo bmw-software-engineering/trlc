@@ -253,7 +253,7 @@ class Message_Handler:
         self.warnings += 1
         self.emit(location, kind, message, fatal=False)
 
-    def check(self, location, message, check):
+    def check(self, location, message, check, explanation=None):
         assert isinstance(location, Location)
         assert isinstance(message, str)
         assert isinstance(check, str)
@@ -262,19 +262,8 @@ class Message_Handler:
         self.emit(location,
                   "warning",
                   "%s [%s]" % (message, check),
-                  fatal=False)
-
-    def failed_vc(self, location, message, kind, counterexample=None):
-        assert isinstance(location, Location)
-        assert isinstance(message, str)
-        assert isinstance(counterexample, str) or counterexample is None
-
-        self.warnings += 1
-        self.emit(location,
-                  "warning",
-                  "%s [vcg-%s]" % (message, kind),
                   fatal     = False,
-                  extrainfo = counterexample)
+                  extrainfo = explanation)
 
     def ice_loc(self, location, message):  # pragma: no cover
         assert isinstance(location, Location)
