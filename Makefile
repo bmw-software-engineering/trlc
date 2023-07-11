@@ -53,3 +53,22 @@ full_release:
 	make github_release
 	make bump
 	git push
+
+requirements.lobster: language-reference-manual/lobster-trlc.conf language-reference-manual/lrm.rsl language-reference-manual/lrm.trlc
+	lobster-trlc \
+		--config-file=language-reference-manual/lobster-trlc.conf \
+		--out requirements.lobster \
+		language-reference-manual
+
+code.lobster: $(wildcard trlc/*.py)
+	lobster-python --out code.lobster trlc
+
+report.lobster: lobster.conf requirements.lobster code.lobster
+	lobster-report \
+		--lobster-config=lobster.conf \
+		--out=report.lobster
+	lobster-online-report report.lobster
+
+tracing.html: report.lobster
+	lobster-html-report report.lobster --out=tracing.html
+	lobster-ci-report report.lobster
