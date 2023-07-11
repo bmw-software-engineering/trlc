@@ -31,11 +31,11 @@ try:
     from pyvcg.driver.file_smtlib import SMTLIB_Generator
     from pyvcg.driver.cvc5_api import CVC5_Solver
     VCG_AVAILABLE = True
-except ImportError:
+except ImportError:  # pragma: no cover
     VCG_AVAILABLE = False
 
 
-class Unsupported(Exception):
+class Unsupported(Exception):  # pragma: no cover
     def __init__(self, node, text):
         assert isinstance(node, Node)
         assert isinstance(text, str) or text is None
@@ -101,7 +101,7 @@ class VCG:
         # If set to false, we skip creating checks.
 
     @staticmethod
-    def flag_unsupported(node, text=None):
+    def flag_unsupported(node, text=None):  # pragma: no cover
         assert isinstance(node, Node)
         raise Unsupported(node, text)
 
@@ -281,7 +281,7 @@ class VCG:
     def analyze(self):
         try:
             self.checks_on_composite_type(self.n_ctyp)
-        except Unsupported as exc:
+        except Unsupported as exc:  # pragma: no cover
             self.mh.warning(exc.location,
                             exc.message)
             return
@@ -312,7 +312,7 @@ class VCG:
                 self.start = current_start
 
         # Emit debug graph
-        if self.debug:
+        if self.debug:  # pragma: no cover
             subprocess.run(["dot", "-Tpdf", "-o%s.pdf" % self.vc_name],
                            input = self.graph.debug_render_dot(),
                            check = True,
@@ -327,7 +327,7 @@ class VCG:
         nok_validity_checks    = set()
 
         for vc_id, vc in enumerate(self.vcg.vcs):
-            if self.debug:
+            if self.debug:  # pramga: no cover
                 with open(self.vc_name + "_%04u.smt2" % vc_id, "w",
                           encoding="UTF-8") as fd:
                     fd.write(vc["script"].generate_vc(SMTLIB_Generator()))
@@ -341,7 +341,7 @@ class VCG:
             status, values = vc["script"].solve_vc(CVC5_Solver())
 
             message = vc["feedback"].message
-            if self.debug:
+            if self.debug:  # pragma: no cover
                 message += " [vc_id = %u]" % vc_id
 
             if vc["feedback"].expect_unsat:
@@ -492,7 +492,7 @@ class VCG:
                                                          item)
                                       for item in value)
 
-        else:
+        else:  # pragma: no cover
             self.flag_unsupported(n_typ,
                                   "back-conversion from %s" % n_typ.name)
 
@@ -683,7 +683,7 @@ class VCG:
             # arbitrary fictional record names
             return smt.BUILTIN_INTEGER
 
-        else:
+        else:  # pragma: no cover
             self.flag_unsupported(n_type)
 
     def tr_check(self, n_check):
@@ -750,7 +750,7 @@ class VCG:
         elif isinstance(n_expr, Field_Access_Expression):
             return self.tr_field_access_expression(n_expr)
 
-        else:
+        else:  # pragma: no cover
             self.flag_unsupported(n_expr)
 
         return value, smt.Boolean_Literal(True)
@@ -980,7 +980,7 @@ class VCG:
                                                                   sym_value,
                                                                   lhs_value)
 
-        else:
+        else:  # pragma: no cover
             self.flag_unsupported(n_expr, n_expr.operator.name)
 
         return self.create_return(n_expr, sym_value)
@@ -1279,7 +1279,7 @@ class VCG:
         assert isinstance(n_expr, Quantified_Expression)
 
         # Nested quantifiers are not supported yet
-        if self.functional:
+        if self.functional:  # pragma: no cover
             self.flag_unsupported(n_expr,
                                   "functional evaluation of quantifier")
 
