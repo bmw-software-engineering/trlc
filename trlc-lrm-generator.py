@@ -849,7 +849,7 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
 
     # Emit
     if data["text"] or data["bullets"]:
-        fd.write("<div>\n")
+        fd.write("<div id='lrm-%s'>\n" % obj.name)
         if data["text"]:
             fd.write(fmt_text(data["text"]) + "\n")
         if data["bullets"]:
