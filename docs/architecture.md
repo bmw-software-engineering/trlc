@@ -177,8 +177,9 @@ The only reason the window is 3 characters instead of just 2 is the
 
 ### Parser
 
-The parser is a hand-crafted recursive descent parser. Again, we do
-not want to use a generated parser like PLY or AntLR because:
+The parser is a hand-crafted recursive descent parser. The parser
+considers only considers a single token look-ahead. Again, we do not
+want to use a generated parser like PLY or AntLR because:
 
 * No dependencies
 * Performance (especially when compared to AntLR)
@@ -186,8 +187,16 @@ not want to use a generated parser like PLY or AntLR because:
   possible when generating the AST.
 * Better error messages that come naturally with a recursive descent
   parser.
+* Two-stage parsing (see below).
 
-The parser considers only considers a single token look-ahead.
+Parsing is a bit weird for `.rsl` and `.trlc` files due to the import
+mechanism. When the `Source_Manager` first registers a `.rsl` file we
+immediately parse the
+[file_preamble](https://bmw-software-engineering.github.io/trlc/lrm.html#lrm-Preamble)
+to understand dependencies and determine a parse order. When we parse
+the `.trlc` files we again parse them in two parts: first we pre-parse
+the preamble for all files; and then in a second step we parse the
+rest of all files.
 
 The naming of parse methods generally follows the naming of
 non-terminals in the BNF grammar, e.g. `parse_qualified_name` for
@@ -212,7 +221,7 @@ tables" attached to them.
 
 For example an `Enumeration_Type` has a mini table that stores all its
 literals; and in turn this type is in the mini table of its
-`Package`. Only the package is stored in the global symbol table
+`Package`. Only the packages are stored in the global symbol table
 (which is provided by the `Source_Manager`).
 
 You can visualise the AST by using the `--debug-dump` option of the
@@ -313,4 +322,395 @@ specific. For example:
                                  Check_Block,
                                  Record_Object))
         self.items.append(node)
+```
+
+Other than this the AST is pretty boring; there is no rewriting or
+simplification. The only node worth pointing out as special is
+`Name_Reference`, as that is the only node where the entity it refers
+to may be filled in late.
+
+## Evaluation
+
+Evaluation of expressions is a major component of the language. Each
+`Expression` node has a function evaluate:
+
+```
+    def evaluate(self, mh, context):
+        assert isinstance(mh, Message_Handler)
+        assert context is None or isinstance(context, dict)
+```
+
+The context is a mapping of local names to values, this is used when
+evaluating a user defined check to bind the component names used in
+the check to concrete values.
+
+The context can be None, in which case evaluation fails with "cannot
+be used in a static context" if the expression is not static. This
+used in a few places to enforce static values:
+
+* The right-hand side of the power operator must be static
+* The regular expression given to matches must be static
+
+Evaluation in general is using Value (also defined in ast.py) as a
+polymorphic nullable value. Each individual evaluation method is
+responsible for the appropriate type checking; this is not delegated
+to the Value class (which is really just a container). The Value class
+has a type (typ) and value. The type is an instance of the node type
+`Type` (e.g. `Builtin_Integer` or `Record_Type`).
+
+The value is a python value representing it, or None (for null
+values).
+
+* `str` (for `Builtin_String` or `Builtin_Markup_String`)
+* `int` (for `Builtin_Integer`)
+* `bool` (for `Builtin_Boolean`)
+* `list` of `Value` (for `Array_Type`)
+* `dict` of `str` -> `Value` (for `Tuple_Aggregate`)
+* `fractions.Fraction` (for `Builtin_Decimal`)
+* `Record_Reference` (for `Record_Type`; i.e. we store the reference
+  itself not the object referred to)
+* `Enumeration_Literal_Spec` (for `Enumeration_Type`)
+
+Evaluation itself is pretty simple, we just apply the relevant python
+operator or something from math.py. For example for the unary
+operators:
+
+```python
+    def evaluate(self, mh, context):
+        assert isinstance(mh, Message_Handler)
+        assert context is None or isinstance(context, dict)
+
+        v_operand = self.n_operand.evaluate(mh, context)
+        if v_operand.value is None:
+            mh.error(v_operand.location,
+                     "input to unary expression %s (%s) must not be null" %
+                     (self.to_string(),
+                      mh.cross_file_reference(self.location)))
+
+        if self.operator == Unary_Operator.MINUS:
+            return Value(location = self.location,
+                         value    = -v_operand.value,
+                         typ      = self.typ)
+        elif self.operator == Unary_Operator.PLUS:
+			...
+```
+
+There is a big assumption made here, in that the tree is correctly
+formed (in terms of typ), but this is statically checked at
+construction. This is why we don't typecheck when we evaluate unary
+minus, but just rely on / assume that the value will be an integer or
+fraction.
+
+In evaluation there are (currently) three places where run-time errors
+can be created:
+
+* Evaluation of null in any context other than equality (or
+  inequality).
+* Division by zero (both integers and decimals).
+* Array out-of-bounds.
+
+Here is a good place to explain a design decision regarding the null
+rules of the language and why `null` is only allowed in a very
+specific context.
+
+Every expression is typed, and null should have the correct type,
+i.e. if we say `1 == null` then the null should be an
+`Builtin_Integer` null. However we also do not want to do multiple
+passes over the parse-tree to do type resolution (e.g. like Ada), and
+so expressions like `(if a then null elseif (...) else null)` would be
+infuriating to deal with.
+
+Name references that happen to be null are not an issue, because we
+always know the type they are supposed to be. For `null` we don't
+actually do this (have a polymorphic null), instead we have a
+`Null_Literal` that has no type, and then we just restrict the places
+it can appear.
+
+This effectively dodges the issue, without any real loss of generality
+in the language; and we can parse everything in one pass and resolve
+all types immediately.
+
+## Linter
+
+There are two parts to the linter; the classical static analysis part
+"linter" (in [lint.py](../trlc/lint.py)) and the more formal methods
+based analysis "verification condition generation" (in
+[vcg.py](../trlc/vcg.py).
+
+The traditional linter is pretty simple: after parsing everything we
+do another tree-walk and emit additional messages.
+
+There are a few exceptions, as some problems are best detected when
+parsing for the first time. Hence the `Parser` has a attribute
+`lint_mode` that can enable additional messages in this case. However
+a design goal in general is separation of concerns, so this method is
+only chosen if the alternative would be impossible or extremely
+awkward to do.
+
+An example is the lint check for clarifying final. In the AST we just
+know if a record is final or not, we do not know if this was
+inherited, or if the keyword was present. In the parser we do. We
+could of course modify the AST to record this, but that is generally
+not helpful since nobody else (currently) cares if this attribute was
+there or not.
+
+The linter itself is simple and reading the code should make it
+obvious how it works. The only important design goal is to try and
+implement new checks in lint.py and not parser.py, if at all possible.
+
+## Verification condition generation
+
+Once other lint checks have been performed, the linter constructs an
+object of class `VCG` (from [vcg.py](../trlc/vcg.py)) for record types
+and tuple types, and calls the analysis method. This intends to find
+deeper problems with the user types and rules.
+
+The overall approach is to encode a model of our source language in
+[SMTLIB](http://smtlib.cs.uiowa.edu/about.shtml) and feed these
+problems to an [SMT
+Solver](https://en.wikipedia.org/wiki/Satisfiability_modulo_theories). Depending
+on how the solver answers, we can then issue messages informing the
+user about problems.
+
+This feature is gated behind the `--verify` option, as it requires two
+additional run-time dependencies:
+
+* PyVCG [(Github)](https://github.com/florianschanda/PyVCG)
+  [(PyPI)](https://pypi.org/project/PyVCG/) (for building the SMTLIB
+  problems)
+* CVC5 [(Github)](https://github.com/cvc5/cvc5)
+  [(PyPI)](https://pypi.org/project/cvc5/) (for solving the SMTLIB
+  problems)
+
+### Terminology
+
+First some terminology that we shall be using:
+
+* VC: a **V**erification **C**ondition. This is a small logical
+  problem where we have known facts (e.g. `x > 10`) followed by a
+  conclusion we want to prove (e.g. `x != 0`). Generally we generate a
+  number of verification conditions for an expression / program /
+  function, and if we manage to prove *all* of them, then we can
+  conclude something (e.g. "we don't crash" or "we don't divide by
+  zero").
+* Path: a possible execution trace through an expression or program
+* Sound: a property of an analysis. A sound analysis has no false
+  positives, i.e. it does not miss bugs.
+* Complete: a property of an analysis. A complete analysis has no
+  false alarms, i.e. all messages raised really do correspond to a
+  problem.
+* Automatic: a property of an analysis. An automatic analysis does not
+  require human intelligence or input.
+* SAT: **SAT**isfiable, i.e. there is an assignment to a formula that
+  makes it true. For example `x >= 0 and x <= 10` is SAT, since `x =
+  3` would make the entire thing true.
+* UNSAT: **UNSAT**isfiable, i.e. there is no assignment to a formula
+  that makes it true. For example `x == 1 and x == 2` is UNSAT, since
+  there is no possible value for `x` that would make both equalities
+  true.
+
+### Example
+
+We shall explain the overall process based on a trivial example:
+
+```trlc
+package Potato
+
+type Kitten {
+  a Integer
+  b Integer
+  c Integer
+}
+
+checks Kitten {
+  a > 17 and 100 / (a + b * c) > 50, warning "Example"
+}
+```
+
+In this case there are no null derefence problems, but there is a
+potential division by zero.
+
+First we need to understand how many possible execution paths there
+are through this:
+
+* The warning is raised
+  * (1) Both `a > 17` and `100 / (a + b * c)` are true
+* The warning is not raised
+  * (2) `a <= 17` (in which case we do not care about the rest, as the
+    and operator has [short-cut
+    semantics](https://bmw-software-engineering.github.io/trlc/lrm.html#lrm-Shortcut_Logical_Operators).
+  * (3) `a > 17` and `100 / (a + b * c)` is false
+
+So here only path (1) and (3) is exciting, since those are the paths
+where we can get to the division. Path (2) can never raise a division
+by zero error, if the implementation follows the LRM.
+
+One of the features of PyVCG is that we can build a graph that models
+the execution paths of the source language; and we can then ask it to
+build VCs for all possible paths. The graph for this looks like this:
+
+![graph for example](vcg-example/trlc-Potato-Kitten.svg)
+
+We start at the top. First we need to introduce the things we talk
+about (these are the components of our record).
+
+```lisp
+;; value for a declared on potato.rsl:4:3
+(declare-const |Potato.Kitten.a.value| Int)
+(define-const |Potato.Kitten.a.valid| Bool true)
+;; value for b declared on potato.rsl:5:3
+(declare-const |Potato.Kitten.b.value| Int)
+(define-const |Potato.Kitten.b.valid| Bool true)
+;; value for c declared on potato.rsl:6:3
+(declare-const |Potato.Kitten.c.value| Int)
+(define-const |Potato.Kitten.c.valid| Bool true)
+```
+
+First note that SMTLIB should be read like LISP: `(` function
+operators+ `)`. This means in the first line we declare a constant
+(the SMT term for a free variable) by using the `declare-const`
+function, and it's arguments are `|Potato.Kitten.a.value|` (i.e. the
+name of this constant) and `Int` (i.e. it's type, or sort in SMT).
+
+We have two constants that we use to model each record field: One for
+the actual value, and one indicating if it's null or not. Since all
+fields are not optional, all of them are already defined to be
+`true`. Note that for the values we didn't do this, since we want the
+solver to figure out what they could be.
+
+Moving to the next node in the graph we see:
+
+```lisp
+;; validity check for a
+goal: |Potato.Kitten.a.valid|
+```
+
+This corresponds to the very first use of a in our expression:
+
+```
+  a > 17 and 100 / (a + b * c) > 50, warning "Example"
+  ^ this one right here
+```
+
+We need to check if this `a` could possibly be null. It's kinda
+obvious, but we need to do it anyway.
+
+So we now want to get an SMT solver to figuire out if
+`|Potato.Kitten.a.valid|` is always true, in every possible instance
+of this record.
+
+To do that is that we *negate* the goal and ask if there is a SAT
+assignment. Because if we can find one, the goal is obviously not
+always true, and even better we have a *counter-example* we can give
+to the user. If the problem turns out to be UNSAT, then we can
+conclude by the law of excluded middle, that the original statement
+must be always true.
+
+The complete VC for this check looks like this:
+
+(We have removed the matches function from this, because it's not
+relevant and we'll explain it later.)
+
+```
+(set-logic QF_UFLIA)
+(set-option :produce-models true)
+
+;; value for a declared on potato.rsl:4:3
+(declare-const |Potato.Kitten.a.value| Int)
+(define-const |Potato.Kitten.a.valid| Bool true)
+;; value for b declared on potato.rsl:5:3
+(declare-const |Potato.Kitten.b.value| Int)
+(define-const |Potato.Kitten.b.valid| Bool true)
+;; value for c declared on potato.rsl:6:3
+(declare-const |Potato.Kitten.c.value| Int)
+(define-const |Potato.Kitten.c.valid| Bool true)
+;; validity check for a
+(assert (not |Potato.Kitten.a.valid|))
+(check-sat)
+(get-value (|Potato.Kitten.a.value|))
+(get-value (|Potato.Kitten.a.valid|))
+(get-value (|Potato.Kitten.b.value|))
+(get-value (|Potato.Kitten.b.valid|))
+(get-value (|Potato.Kitten.c.value|))
+(get-value (|Potato.Kitten.c.valid|))
+(exit)
+```
+
+Note: You can see these files if you use the `--debug-vcg` option.
+
+If we now feed this to a solver, we will immediately get an UNSAT
+result.
+
+After this check we can proceed to the next step. We can compute a
+value for the result of `a > 17`.
+
+```lisp
+;; result of a > 17 at potato.rsl:10:5
+(define-const |tmp.1| Bool (> |Potato.Kitten.a.value| 17))
+```
+
+Here we store this in a new (intermediate) constant we define just for
+this purpose. This activity is not unlike SSA (static single
+assignment) that is a common step in compilers.
+
+We then introduce a branch. In the left hand side we assert that `not
+|tmp.1|` is true, and in the right-hand side we assert that `|tmp.1|` is true. This models the and semantics, where we do not proceed to the right-hand side if the left-hand side is false.
+
+We then continue adding more validity checks (for `a` (again), and
+also for `b` and `c`). You might think it would be good to not check
+for `a` again, but generally VCG is hard enough as it is, and such
+optimisations are more likely to introduce errors than not. So we
+leave this for much later if it turns out to be a real problem.
+
+Afterwards we define intermediates for `b * c` (tmp.3) and then `a +
+tmp.3` (tmp.4). We then need to check if this could be zero. So again
+we assert that it's not and ask for an assignment:
+
+```lisp
+(define-const |tmp.1| Bool
+  (> |Potato.Kitten.a.value| 17))
+(assert |tmp.1|)
+
+;; result of b * c at potato.rsl:10:27
+(define-const |tmp.3| Int
+  (* |Potato.Kitten.b.value| |Potato.Kitten.c.value|))
+
+;; result of a + b * c at potato.rsl:10:23
+(define-const |tmp.4| Int
+  (+ |Potato.Kitten.a.value| |tmp.3|))
+
+;; division by zero check for 100 / a + b * c
+(assert (not (not (= |tmp.4| 0))))
+(check-sat)
+```
+
+The `not not` seems surprising, but again it's just easier this
+way. What we want to be true is `tmp.4 != 0`, this translates to `(not
+(= |tmp.4| 0))`. So that is our goal, and to find out if the goal is
+always true we negate it. So `(not (not ...`.
+
+And now we get a SAT result, with an assignment:
+
+```plain
+$ cvc5 trlc-Potato-Kitten_0002.smt2
+sat
+((Potato.Kitten.a.value 18))
+((Potato.Kitten.a.valid true))
+((Potato.Kitten.b.value 2))
+((Potato.Kitten.b.valid true))
+((Potato.Kitten.c.value (- 9)))
+((Potato.Kitten.c.valid true))
+```
+
+So now we have a counter-example and we can feed this back to the user:
+
+```plain
+a > 17 and 100 / (a + b * c) > 50, warning "Example"
+               ^ potato.rsl:10: warning: divisor could be 0 [vc_id = 2] [vcg-div-by-zero]
+               | example record_type triggering error:
+               |   Kitten bad_potato {
+               |     a = 18
+               |     b = 2
+               |     c = -9
+               |   }
 ```
