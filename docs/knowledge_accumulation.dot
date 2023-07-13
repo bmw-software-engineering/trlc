@@ -1,0 +1,18 @@
+digraph G {
+	start;
+	fatal_error_1;
+	normal_error_1;
+	normal_warning_1;
+	fatal_error_2;
+	normal_error_2;
+	end;
+
+	start -> fatal_error_1;
+	fatal_error_1 -> normal_error_1;
+	fatal_error_1 -> normal_warning_1;
+	fatal_error_1 -> fatal_error_2;
+	fatal_error_2 -> normal_error_2;
+	normal_error_1 -> end;
+	normal_warning_1 -> end;
+	normal_error_2 -> end;
+}

@@ -43,6 +43,7 @@ The Python implementation can be used for several purposes:
   (API reference)
 * [AST Hierarchy](https://bmw-software-engineering.github.io/trlc/ast_hierarchy.svg)
   (overview over all classes in the AST)
+* [Tool Architecture Overview](docs/architecture.md)
 
 ## Dependencies
 

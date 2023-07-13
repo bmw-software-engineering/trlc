@@ -527,7 +527,7 @@ checks Kitten {
 }
 ```
 
-In this case there are no null derefence problems, but there is a
+In this case there are no null dereference problems, but there is a
 potential division by zero.
 
 First we need to understand how many possible execution paths there
@@ -595,7 +595,7 @@ This corresponds to the very first use of a in our expression:
 We need to check if this `a` could possibly be null. It's kinda
 obvious, but we need to do it anyway.
 
-So we now want to get an SMT solver to figuire out if
+So we now want to get an SMT solver to figure out if
 `|Potato.Kitten.a.valid|` is always true, in every possible instance
 of this record.
 
@@ -714,3 +714,374 @@ a > 17 and 100 / (a + b * c) > 50, warning "Example"
                |     c = -9
                |   }
 ```
+
+### Overall architecture
+
+The general structure of VCG is a tree transformation from the TRLC
+AST to the PyVCG graph.
+
+We start at a composite type, walk over each check's expressions and
+build the graph. In general for each expression node in the AST there
+is a corresponding `tr_` (for translate) function in VCG. For example
+to process `Unary_Expression` we have `tr_unary_expression`.
+
+Because it may be difficult to support new constructs in VCG when they
+are first created, we have a special mechanism to deal with "not yet
+supported" features. We have a special exception `Unsupported` and a
+`flag_unsupported` method that can be called with a node. For example
+at the end of `tr_expression`:
+
+```python
+        elif isinstance(n_expr, Field_Access_Expression):
+            return self.tr_field_access_expression(n_expr)
+
+        else:  # pragma: no cover
+            self.flag_unsupported(n_expr)
+
+        return value, smt.Boolean_Literal(True)
+```
+
+This is normally dead code, but if somebody adds a new expression type
+(maybe let expressions) then this will gracefully fail, e.g:
+
+```plain
+   let potato => (x + 1)
+   ^^^ warning: LET_EXPRESSION not supported yet in VCG
+```
+
+After the translation is done we use PyVCG to generate individual VCs
+for all paths and attempt to solve them. For each we fail, we just
+emit the error message that was stored in the VC (when we build VCs we
+already attach the message in case it would fail; we don't generate
+the message on-the-fly).
+
+### Model
+
+This section describes how we model each language construct.
+
+#### Checks
+
+For each used-define check we translate the expression and emit checks
+(e.g. division by zero) on the way. For fatal checks we then assert
+that the expression is true (to model that we only proceed with
+execution if the fatal error did not get raised). For any other check
+(warnings and errors) we forget the knowledge.
+
+In general this works by branching off the root node instead of
+following the current path in the graph.
+
+For example the following check sequence:
+
+```trlc
+checks Example {
+   ..., fatal   "fatal_error_1"
+   ..., error   "normal_error_1"
+   ..., warning "normal_warning_1"
+   ..., fatal   "fatal_error_2"
+   ..., error,  "normal_error_2
+}
+```
+
+Would generate a (reduced) graph like this:
+
+![knowledge accumulation example](knowledge_accumulation.svg)
+
+For example when proving anything about `normal_warning_1` we know
+that `fatal_error_1` could not have occurred. But we cannot make the
+same assumption about `normal_error_1`.
+
+#### Types
+
+We model types as follows
+
+| TRLC Type        | PyVCG Sort      | SMTLIB Sort |
+|------------------|-----------------|-------------|
+| Builtin_Boolean  | BUILTIN_BOOLEAN | Bool        |
+| Builtin_Integer  | BUILTIN_INTEGER | Int         |
+| Builtin_Decimal  | BUILTIN_REAL    | Real        |
+| Builtin_String   | BUILTIN_STRING  | String      |
+| Record_Type      | BUILTIN_INTEGER | Int         |
+| Tuple_Type       | Record          | datatype    |
+| Enumeration_Type | Enumeration     | datatype    |
+| Array_Type       | Sequence        | Seq         |
+
+A few of these need some additional explanation.
+
+##### Decimal
+
+The model of Builtin_Decimal as Real is not precise. A decimal number
+cannot be 1 / 3, but a real can be. In TRLC expression we can actually
+get rationals, but as the user we cannot assign 1 / 3 to a decimal
+value (the syntax does not permit it). The means something like
+
+```trlc
+   100 / (x - 1 / 3)
+```
+
+Should actually be fine, but with our chosen model it's not as there
+is an obvious counter-example. However at least this modelling is
+sound (but not complete).
+
+I have created a [ticket with
+CVC5](https://github.com/cvc5/cvc5/issues/9868) for a feature request
+to assert that some real is actually a decimal, but this is hard.
+
+We could also model our decimals as integers and then divide them, for
+example:
+
+```lisp
+(declare-const |foo.T.x.value.int| Int)
+(define-const |foo.T.x.value| Real (/ (to_real |foo.T.x.value.int|)
+                                      1000000))
+```
+
+However this is unsound (but complete), as we would need to guess the
+maximum accuracy that the user would use. We could do some tricks with
+interval arithmetic to estimate a required accuracy.
+
+In addition, converting between Real and Int in SMTLIB is generally
+bad, so there may be other problems attached to this.
+
+Finally we could also model our reals as rationals, and assert that
+the divisor must be a product of 2s and 5s. We tried this with a
+recursive function, but these things immediately make everything
+undecidable in general.
+
+##### Records
+
+It may appear surprising to model records as integers, but we can't
+actually access records in the check language. We just need to model
+that there are N different records the user could pick when
+referencing them.
+
+##### Tuples
+
+Tuples are modelled as SMTLIB datatypes, but there is additional
+complication here. A tuple is not just a random collection of data
+there are additional constraints.
+
+Specifically we know that:
+
+* A tuple is valid only if all error and all fatal checks have passed
+  (compare this to our record, where we can only assume fatal checks).
+* A tuple with optional components has an additional constraint that
+  once you have an optional component, all trailing components are
+  also null.
+
+This knowledge is generated with `emit_tuple_constraints` for a
+specific tuple. However this is currently not done for tuples in
+arrays.
+
+Note also that we don't worry about validity: in the spirit of modular
+analysis this would have been checked when generating VCs for the
+tuple type itself.
+
+We could simply add a universal quantifier for all tuples of type T,
+but then adding quantifiers is something we should only do as a last
+resort.
+
+In the future we can detect if we have an array, and only in that
+specific case add the quantified constraint.
+
+This may sound academic, but experience has shown that frivolous use
+of quantifiers can be a real problem.
+
+##### String and Markup_String
+
+We are using the newly added string theory in SMTLIB to model Strings.
+
+There are some constraints about our strings that are not yet
+asserted:
+
+* A string can either contain no newlines (it's a "..." String)
+* Or a string cannot contain ''' (it's a '''...''' String)
+* A markup string has additional constraints when it comes to `[[`,
+  `]]` and what is permissible between these.
+
+Right now it didn't seem important to add these constraints, as we
+hope that users don't write checks that actually depend on this, as
+that seems nuts. But you never know... :)
+
+##### Arrays
+
+Arrays are not modelled using the array theory, instead we use the
+[non-standard sequence
+theory](https://cvc5.github.io/docs-ci/docs-main/theories/sequences.html).
+
+There are a two good reasons for this choice:
+
+* Arrays do not have a cardinality constraint, so we'd need to model
+  that extra if we want to reason about array length.
+* Sequences provide some other builtins that we want to use (contains,
+  prefixof, and suffixof).
+
+If we want to target a solver in the future that doesn't support this
+theory then we can of course do it with Arrays, but it'll be annoying.
+
+#### Expressions
+
+Most of the expressions should be fairly simple, with a few exceptions
+that we mention here.
+
+A general note on the translation functions (e.g. `tr_expression`):
+each of these always returns a tuple of two values: the translated
+expression tree for the *value* of the expression, and the translated
+expression tree for the *validity* of the expression assuming no
+errors in sub-expressions.
+
+Especially the latter part ("assuming no errors") is important and
+needs to be explained in more detail.
+
+The value is simple enough: for an expression like `x + y` the value
+is some SMT tree that calculates this.
+
+The validity is more or less a null check. But it's a null check for
+*this* expression, not it's sub-expressions. We build VCs in a modular
+deductive fashion, and so we have emitted checks earlier.
+
+Hence for almost all expressions (including `x + y` the validity is
+statically true).
+
+However for the sub-expression the validity is NOT always true,
+e.g. for `x` it's the true or false if `x` is optional.
+
+We do it this way because otherwise we have to consider three-valued
+logic, or arithmetic with null, e.g. is the value of `x or y` true if
+`x = null` but `y = true`?
+
+There is one big down-side, that we'll come to later (hint:
+quantifiers).
+
+##### Short-circuits
+
+The short-circuit expressions (`and`, `or`, `implies`, and `if`) are
+modelled in the graph as branches.
+
+##### Equality
+
+Equality is the only place where null is considered properly, and it's
+weird as a result.
+
+In general, two things are equal if they are either both null, or they
+are not and their values match. But due to our modelling we can't just
+do:
+
+```lisp
+(or (= x_value y_value)
+    (= x_valid y_valid))
+```
+
+Specifically this gives the wrong answer if x is null, but y is not
+and they both happen to have the same value (since value is
+independently modelled from validity).
+
+In an earlier draft we considered modelling all values as datatypes
+that could be null OR carry the value; but this approach was pretty
+nasty as it complicated a lot of simple things.
+
+So instead we define equality instead as:
+
+```lisp
+(and (= x_valid y_valid)
+     (=> x_valid (= x_value y_value)))
+```
+
+There is a bit of optimisation in `tr_op_equality` to simplify this to
+just `(= x_value y_value)` in most cases, but we can't always do that.
+
+In addition tuples also make this awful, because we may need to
+consider the sequence of optional items. So for tuples we build a very
+big conjunction of these kinds of equalities in `tr_core_equality` and
+`tr_core_equality_tuple_component`.
+
+It should be noted that this conjunction for tuple equality relies on
+the tuple constraints, so currently for tuples in arrays we don't get
+quite the correct answer.
+
+##### Quantifiers
+
+Quantifiers are always horrific, and we've made a number of decisions
+when it comes to dealing with them. The primary design goal is to not
+have them, if in any way possible. This is also why we have not used
+tools like [Why3](https://why3.lri.fr/doc/) as our intermediate
+language), and instead wrote something new
+([PyVCG](https://github.com/florianschanda/PyVCG)).
+
+First, quantifiers and validity checks work differently. We decided to
+over-approximate how they work in order to keep things sane, as the
+[LRM
+suggests](https://bmw-software-engineering.github.io/trlc/lrm.html#lrm-Quantification_Short_Circuit_Evaluation).
+
+For the validity checks in quantifiers we perform a quantifier
+elimination: we create a new free variable that represents an
+arbitrary index into the subject array, and then walk our tree for the
+quantifier expression emitting validity checks.
+
+However for the value of the quantifier and its body we perform a very
+different evaluation, eliminating short-circuit semantics. We can do
+this because we've proved earlier that there are no run-time errors
+for an arbitrary element.
+
+The VCG class has for this purpose a global variable `functional`,
+which we enable and disable to generate the body. If this is set then
+instead of modifying the graph we just build one monolithic SMT
+expression for the value:
+
+```python
+        temp, self.functional = self.functional, True
+        b_value, _ = self.tr_expression(n_expr.n_expr)
+        self.functional = temp
+```
+
+Additional caveat: right now nested quantifiers remain unsupported by
+VCG and it's unclear if users ever need this feature.
+
+A note on expressive power: in our source language we can only ever
+quantify over elements of some array; we cannot quantify over the
+_index_. This makes some things easier, although in the future this
+may be a possible language extension.
+
+However we've chosen to model quantifiers by quantifying over the
+index (with some constraints as to its range) instead of quantifying
+over element type and asserting this element is in the array; as the
+former gave much better results.
+
+##### The matches function
+
+Finally, the builtin `matches` regular expression test is modelled as
+an uninterpreted function right now.
+
+This means for any given string and regex, the solver just decides
+randomly; as long as it's consistent.
+
+Right now this doesn't lose us much, but we could add proper support
+for regular expressions as the [SMTLIB String
+theory](http://smtlib.cs.uiowa.edu/theories-UnicodeStrings.shtml)
+supports it.
+
+### Building the graph
+
+When creating the PyVCG graph for our model, we use several utility
+functions in VCG to do so:
+
+* We keep track of the "current" node in `self.current_start`, the
+  functions below create new things, glue them to the current start,
+  and then advance current start to point to the new thing. Several
+  functions that deal with branches make a node of the current start
+  and restore it at appropriate times.
+* `attach_validity_check` is used to create a new check testing if the
+  given expression is true
+* `attach_int_division_check` and `attach_real_division_check` take a
+  divisor expressions and emit a VC to make sure it's not zero
+* `attach_index_check` take a index expression and emit a VC to make
+  sure it fits in the bounds of the corresponding array
+* `attach_feasability_check` works a bit different. It creates a VC to
+  make sure that the given expression _can_ actually be false. We use
+  this to figure out if checks are redundant (i.e. always true).
+* `attach_assumption` simply injects some new knowledge in the current
+  branch
+* `attach_temp_declaration` also injects new knowledge by creating a
+  new temporary variable (and optionally statically defining to be
+  some value)
+* `attach_empty_assumption` just creates a new do-nothing node. This
+  is used in quantifier elimination.
