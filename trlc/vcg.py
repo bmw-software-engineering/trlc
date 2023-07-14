@@ -338,7 +338,9 @@ class VCG:
                vc["feedback"] in nok_validity_checks:
                 continue
 
-            status, values = vc["script"].solve_vc(CVC5_Solver())
+            solver = CVC5_Solver()
+            solver.solver.setOption("tlimit-per", "2500")
+            status, values = vc["script"].solve_vc(solver)
 
             message = vc["feedback"].message
             if self.debug:  # pragma: no cover

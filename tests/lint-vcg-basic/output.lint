@@ -19,10 +19,10 @@ x, "wibble"
 ^ lint-vcg-basic/test4.rsl:16: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T4 bad_potato {
-|     a = Colour.Green
-|     b = Colour.Red
-|     c = Colour.Blue
-|     d = Colour.Blue
+|     a = Colour.Blue
+|     b = Colour.Green
+|     c = Colour.Red
+|     d = Colour.Red
 |     /* x is null */
 |   }
 x, "wibble"
@@ -49,7 +49,7 @@ a == b % (c + d * 2), "potato"
    ^ lint-vcg-basic/test7.rsl:11: warning: divisor could be 0 [vcg-div-by-zero]
    | example record_type triggering error:
    |   T bad_potato {
-   |     a = 19
-   |     b = 12
+   |     a = 20
+   |     b = 13
    |   }
 Verified 7 model(s) and 0 check(s) and found 8 warning(s)

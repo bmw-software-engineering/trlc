@@ -10,8 +10,9 @@ c, "wibble"
 ^ lint-vcg-power/test2.rsl:12: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
-|     x = /* unable to generate precise value */
+|     x = 0.0
 |     y = 30.0
 |     /* c is null */
 |   }
+| /* note: counter-example is unreliable in this case */
 Verified 2 model(s) and 0 check(s) and found 2 warning(s)
