@@ -455,12 +455,16 @@ class VCG:
                 return '"%s"' % value
 
         elif isinstance(n_typ, Record_Type):
+            if value < 0:
+                instance_id = value * -2 - 1
+            else:
+                instance_id = value * 2
             if n_typ.n_package is self.n_ctyp.n_package:
-                return "%s_instance_%i" % (n_typ.name, value)
+                return "%s_instance_%i" % (n_typ.name, instance_id)
             else:
                 return "%s.%s_instance_%i" % (n_typ.n_package.name,
                                               n_typ.name,
-                                              value)
+                                              instance_id)
 
         elif isinstance(n_typ, Tuple_Type):
             parts = []
