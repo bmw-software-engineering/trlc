@@ -34,6 +34,12 @@ project_urls = {
     "Source Code"   : "%s/%s"        % (gh_root, gh_project),
 }
 
+required_packages = []
+python_required = ">=3.8, <4"
+if "--plat-name" in sys.argv or "-p" in sys.argv:
+     required_packages.append("PyVCG>=1.0.1")
+     python_required = ">=3.8, <=3.10"
+
 setuptools.setup(
     name="trlc",
     version=version.TRLC_VERSION,
@@ -46,8 +52,8 @@ setuptools.setup(
     project_urls=project_urls,
     license="GNU General Public License v3",
     packages=setuptools.find_packages(),
-    # install_requires=["cvc5>=1.0.1"],
-    python_requires=">=3.9, <4",
+    install_requires=required_packages,
+    python_requires=python_required,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",

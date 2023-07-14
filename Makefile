@@ -30,6 +30,8 @@ docs-and-commit: docs
 package:
 	@git clean -xdf
 	@python3 setup.py sdist bdist_wheel
+	@python3 setup.py bdist_wheel -p linux_x86_64
+	@python3 setup.py bdist_wheel -p macosx_x86_64
 
 upload_main: package
 	python3 -m twine upload --repository pypi dist/*

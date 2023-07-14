@@ -48,7 +48,7 @@ The Python implementation can be used for several purposes:
 ## Dependencies
 
 ### Run-time
-* Python3 >= 3.9
+* 3.8 <= Python3 <= 3.10
 
 Optional dependencies (they are not installed automatically):
 * [PyVCG](https://pypi.org/project/PyVCG) (Linux or OSX only, required
