@@ -26,6 +26,7 @@ from trlc.errors import Location, Message_Handler
 
 
 def triple_quoted_string_value(raw_value):
+    # lobster-trace: LRM.Complex_String_Value
     assert isinstance(raw_value, str)
     assert raw_value.startswith("'''")
     assert raw_value.endswith("'''")
@@ -182,17 +183,23 @@ class Lexer_Base(metaclass=ABCMeta):
 
     @staticmethod
     def is_alpha(char):
+        # lobster-trace: LRM.Identifier
+        # lobster-trace: LRM.Builtin_Identifier
         assert isinstance(char, str) and len(char) == 1
         return ord('a') <= ord(char) <= ord('z') or \
             ord('A') <= ord(char) <= ord('Z')
 
     @staticmethod
     def is_numeric(char):
+        # lobster-trace: LRM.Integers
+        # lobster-trace: LRM.Decimals
         assert isinstance(char, str) and len(char) == 1
         return ord('0') <= ord(char) <= ord('9')
 
     @staticmethod
     def is_alnum(char):
+        # lobster-trace: LRM.Identifier
+        # lobster-trace: LRM.Builtin_Identifier
         assert isinstance(char, str) and len(char) == 1
         return ord('a') <= ord(char) <= ord('z') or \
             ord('A') <= ord(char) <= ord('Z') or \
@@ -207,6 +214,7 @@ class Lexer_Base(metaclass=ABCMeta):
         pass
 
     def skip_whitespace(self):
+        # lobster-trace: LRM.Whitespace
         while self.nc and self.nc.isspace():
             self.advance()
         self.advance()
@@ -309,17 +317,20 @@ class TRLC_Lexer(Lexer_Base):
         start_col  = self.col_no
 
         if self.cc == "/" and self.nc == "/":
+            # lobster-trace: LRM.Comments
             kind = "COMMENT"
             while self.cc and self.nc != "\n":
                 self.advance()
 
         elif self.cc == "/" and self.nc == "*":
+            # lobster-trace: LRM.Comments
             kind = "COMMENT"
             while self.nc and not (self.cc == "*" and self.nc == "/"):
                 self.advance()
             self.advance()
 
         elif self.is_alpha(self.cc):
+            # lobster-trace: LRM.Identifier
             kind = "IDENTIFIER"
             while self.nc and (self.is_alnum(self.nc) or
                                self.nc == "_" or
@@ -327,9 +338,12 @@ class TRLC_Lexer(Lexer_Base):
                 self.advance()
 
         elif self.cc in TRLC_Lexer.PUNCTUATION:
+            # lobster-trace: LRM.Single_Delimiters
             kind = TRLC_Lexer.PUNCTUATION[self.cc]
 
         elif self.cc == "=":
+            # lobster-trace: LRM.Single_Delimiters
+            # lobster-trace: LRM.Double_Delimiters
             if self.nc == ">":
                 kind = "ARROW"
                 self.advance()
@@ -340,6 +354,8 @@ class TRLC_Lexer(Lexer_Base):
                 kind = "ASSIGN"
 
         elif self.cc == ".":
+            # lobster-trace: LRM.Single_Delimiters
+            # lobster-trace: LRM.Double_Delimiters
             if self.nc == ".":
                 kind = "RANGE"
                 self.advance()
@@ -347,11 +363,14 @@ class TRLC_Lexer(Lexer_Base):
                 kind = "DOT"
 
         elif self.cc in ("<", ">"):
+            # lobster-trace: LRM.Single_Delimiters
+            # lobster-trace: LRM.Double_Delimiters
             kind = "OPERATOR"
             if self.nc == "=":
                 self.advance()
 
         elif self.cc == "!":
+            # lobster-trace: LRM.Double_Delimiters
             kind = "OPERATOR"
             if self.nc == "=":
                 self.advance()
@@ -360,11 +379,14 @@ class TRLC_Lexer(Lexer_Base):
                                   "malformed != operator")
 
         elif self.cc == "*":
+            # lobster-trace: LRM.Single_Delimiters
+            # lobster-trace: LRM.Double_Delimiters
             kind = "OPERATOR"
             if self.nc == "*":
                 self.advance()
 
         elif self.cc == '"':
+            # lobster-trace: LRM.Strings
             kind = "STRING"
             while self.nc != '"':
                 if self.nc is None:
@@ -390,6 +412,7 @@ class TRLC_Lexer(Lexer_Base):
             self.advance()
 
         elif self.cc == "'":
+            # lobster-trace: LRM.Strings
             kind = "STRING"
             for _ in range(2):
                 self.advance()
@@ -418,6 +441,8 @@ class TRLC_Lexer(Lexer_Base):
                         "unterminated triple-quoted string")
 
         elif self.is_numeric(self.cc):
+            # lobster-trace: LRM.Integers
+            # lobster-trace: LRM.Decimals
             kind = "INTEGER"
 
             if self.cc == "0" and self.nc == "b":
@@ -521,8 +546,10 @@ class TRLC_Lexer(Lexer_Base):
         if kind == "IDENTIFIER":
             value = sref.text()
             if value in TRLC_Lexer.KEYWORDS:
+                # lobster-trace: LRM.TRLC_Keywords
                 kind = "KEYWORD"
             elif ":" in value:
+                # lobster-trace: LRM.Builtin_Identifier
                 kind = "BUILTIN"
                 if not value.startswith("trlc:"):
                     self.mh.lex_error(sref,
@@ -541,6 +568,7 @@ class TRLC_Lexer(Lexer_Base):
                 value = triple_quoted_string_value(value)
 
         elif kind == "INTEGER":
+            # lobster-trace: LRM.Integer_Values
             base_text = sref.text().replace("_", "")
             if int_base == 10:
                 value = int(base_text)
@@ -550,6 +578,7 @@ class TRLC_Lexer(Lexer_Base):
                 value = int(base_text[2:], base=16)
 
         elif kind == "DECIMAL":
+            # lobster-trace: LRM.Decimal_Values
             value = Fraction(sref.text().replace("_", ""))
 
         elif kind == "COMMENT":
