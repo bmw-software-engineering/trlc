@@ -26,28 +26,10 @@ generated in the following situations:
 
 ### 1.1.6-dev
 
-* [TRLC] Add new option `--no-user-warnings` to supress any warning
-  generated from a user-defined check.
-
-* [TRLC] Fix missing static check on exponents (they must not be
-  negative).
-
-* [TRLC] Fix missing static check for boolean types on check
-  expressions (tools would crash without error message).
-
-* [TRLC, LRM] Fix several tool crashes when the `null` literal
-  appeared in expressions outside equality. Re-worded the section on
-  null values in the LRM to be much stricter. We consider this to be a
-  bug-fix and not a change of semantics.
-
-* [LRM] Clarify equality semantics for arrays, tuples, and record
-  refereences. Moved the definition of null equality into the same
-  place.
-
-* [TRLC] Add new *experimental* option `--lint --verify`. This option
-  requires [PyVCG](https://pypi.org/project/PyVCG) to be installed
-  (which is only available on GNU/Linux or MacOS). This option
-  attempts to statically verify all checks for error freedom (no null
+* [TRLC] Add new option `--lint --verify`. This option requires
+  [PyVCG](https://pypi.org/project/PyVCG) to be installed (which is
+  only available on GNU/Linux or OSX). This option attempts to
+  statically verify all checks for freedom of run-time errors (no null
   dereferences, no division by zero, and no array out of bounds
   access). For example with this `.rsl`:
 
@@ -77,6 +59,28 @@ generated in the following situations:
                     |   }
   ```
 
+* [Package] Provide Linux and OSX packages, along with the default
+  package, which should automatically install PyVCG where it is
+  available. On Windows PIP should fall back to the platform agnostic
+  package.
+
+* [TRLC] Add new option `--no-user-warnings` to suppress any warning
+  generated from a user-defined check.
+
+* [TRLC] Fix missing static check on exponents (they must not be
+  negative).
+
+* [TRLC] Fix missing static check for Boolean types on check
+  expressions (tools would crash without error message).
+
+* [TRLC, LRM] Fix several tool crashes when the `null` literal
+  appeared in expressions outside equality. Re-worded the section on
+  null values in the LRM to be much stricter. We consider this to be a
+  bug-fix and not a change of semantics.
+
+* [LRM] Clarify equality semantics for arrays, tuples, and record
+  references. Moved the definition of null equality into the same
+  place.
 
 ### 1.1.5
 
