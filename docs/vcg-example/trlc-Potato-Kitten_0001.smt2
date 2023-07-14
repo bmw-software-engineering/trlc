@@ -1,4 +1,4 @@
-(set-logic QF_UFNIA)
+(set-logic QF_UFSNIA)
 (set-option :produce-models true)
 (define-fun floor_div ((lhs Int) (rhs Int)) Int
   (ite (< rhs 0)

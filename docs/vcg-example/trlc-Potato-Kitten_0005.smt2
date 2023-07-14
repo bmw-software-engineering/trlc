@@ -1,4 +1,4 @@
-(set-logic QF_UFLIA)
+(set-logic QF_UFSLIA)
 (set-option :produce-models true)
 
 (declare-fun |trlc.matches| (String String) Bool)
