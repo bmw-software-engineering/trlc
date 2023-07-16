@@ -35,6 +35,15 @@ with some changes:
 	  assert isinstance(other, Some_Object)
   ```
 
+* Never assume anything in conditions, always deal with all cases. In
+  practice this means the final else clause in an if statement that
+  distinguishes on three shape should always raise an ICE (internal
+  compiler error). That way if somebody adds a new AST node in the
+  future or changes the tree in some way we immediately get a failre,
+  instead of silent success or worse silent failure. This is essential
+  in making sure we can qualify this tool under ISO 26262 with minimal
+  effort.
+
 * Avoid throwing or catching exceptions, unless there is no reasonable
   alternative. Instead write code that works. :) An exception here is
   the actual error mechanism of TRLC, but again there just use the
@@ -157,6 +166,28 @@ default). If set then after creating the error an exception of type
 
 The tool catches this exception at the top-level, there should be no
 other place where this is caught.
+
+### Lexer and Parser overview
+
+The class hierarch for the lexer and parser is a bit more complex:
+
+![Lexer/Parser Overview](parser_hierarchy.svg)
+
+In short, the `_Base` classes are abstract bases. There are two lexers
+and parsers, one for TRLC itself, and one for the Markup_String
+mini-language. The `Nested_Lexer` lexer is used build a new lexer
+where the input is not a source file, but instead a string from
+TRLC. There is a lot of magic happening with translating from token
+error locations from "inside" to the outside string.
+
+Location is an abstract base for filename / line / column
+information. The Source_Reference is a more detailed version of this
+linked to a lexer, which also contains source context (e.g. the
+original source line).
+
+The [LRM generator](../trlc-lrm-generator.py) defines its own
+`Nested_Lexer`, which should eventually be unified with the
+Nested_Lexer from TRLC.
 
 ### Lexer
 

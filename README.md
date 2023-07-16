@@ -29,20 +29,25 @@ The Python implementation can be used for several purposes:
 
 ## Documentation
 
-### For users
+### For normal users
 
 * [Tutorial](TUTORIAL.md) (read this as a first introduction)
 * [Release Notes](CHANGELOG.md) (read this to find out whats new)
-* [Language Reference Manual](https://bmw-software-engineering.github.io/trlc/lrm.html)
-  (for language lawyers)
 * [License](LICENSE)
 
-### For developers
+### For API users
 
+* [Language Reference Manual](https://bmw-software-engineering.github.io/trlc/lrm.html)
+  (for language lawyers)
 * [Python API Documentation](https://bmw-software-engineering.github.io/trlc/)
-  (API reference)
+  (API reference for end-users)
 * [AST Hierarchy](https://bmw-software-engineering.github.io/trlc/ast_hierarchy.svg)
   (overview over all classes in the AST)
+
+### For TRLC developers
+
+* [Lexer/Parser Hierarchy](https://bmw-software-engineering.github.io/trlc/parser_hierarchy.svg)
+  (overview over all classes releated to the lexing and parsing of TRLC)
 * [Tool Architecture Overview](docs/architecture.md)
 
 ## Dependencies
