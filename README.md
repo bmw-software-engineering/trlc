@@ -74,3 +74,9 @@ Optional dependencies (they are not installed automatically):
   verification conditions)
 * [CVC5](https://pypi.org/project/cvc5) (from PyPI, for discharging
   verification conditions)
+
+You can install all Python dependencies by doing:
+
+```
+pip3 install -r requirements.txt
+```

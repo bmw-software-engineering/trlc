@@ -1,0 +1,6 @@
+pycodestyle>=2.10
+pylint>=2.17
+coverage>=7.2
+sphinx>=7.0
+pyvcg>=1.0.1
+cvc5>=1.0.5
