@@ -34,6 +34,10 @@ try:
 except ImportError:  # pragma: no cover
     VCG_AVAILABLE = False
 
+CVC5_OPTIONS = {
+    "tlimit-per" : 2500
+}
+
 
 class Unsupported(Exception):  # pragma: no cover
     def __init__(self, node, text):
@@ -352,7 +356,8 @@ class VCG:
                 continue
 
             solver = CVC5_Solver()
-            solver.solver.setOption("tlimit-per", "2500")
+            for name, value in CVC5_OPTIONS.items():
+                solver.solver.setOption(name, str(value))
             status, values = vc["script"].solve_vc(solver)
 
             message = vc["feedback"].message
