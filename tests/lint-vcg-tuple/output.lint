@@ -3,9 +3,9 @@ c, "potato"
 | example record_type triggering error:
 |   T bad_potato {
 |     x = 1
-|     y = 2@1
-|     p = -1:3:4
-|     q = 0:-3:-4
+|     y = 2
+|     p = -1
+|     q = -3
 |     /* c is null */
 |   }
 then x.version > 5
@@ -24,8 +24,8 @@ c, "potato"
 ^ lint-vcg-tuple/test3.rsl:12: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
-|     x = 1
-|     y = 1@1
+|     x = 1@1
+|     y = 1
 |     /* c is null */
 |   }
 Verified 5 model(s) and 0 check(s) and found 4 warning(s)

@@ -73,9 +73,13 @@ class VCG:
 
         self.tmp_id = 0
 
-        self.vcg   = vcg.VCG()
-        self.start = self.vcg.start
-        self.graph = self.vcg.graph
+        self.vcg      = vcg.VCG()
+        self.graph    = self.vcg.graph
+        self.start    = self.vcg.start
+        # Current start node, we will update this as we go along.
+        self.preamble = None
+        # We do remember the first node where we put all our
+        # declarations, in case we need to add some more later.
 
         self.constants    = {}
         self.enumerations = {}
@@ -85,12 +89,10 @@ class VCG:
         self.qe_vars      = {}
         self.tuple_base   = {}
 
-        self.uf_matches = smt.Function("trlc.matches",
-                                       smt.BUILTIN_BOOLEAN,
-                                       smt.Bound_Variable(smt.BUILTIN_STRING,
-                                                          "subject"),
-                                       smt.Bound_Variable(smt.BUILTIN_STRING,
-                                                          "regex"))
+        self.uf_matches   = None
+        # Pointer to the UF we use for matches. We only generate it
+        # when we must, as it may affect the logics selected due to
+        # string theory being used.
 
         self.functional   = False
         # If set to true, then we ignore validity checks and do not
@@ -108,6 +110,20 @@ class VCG:
     def new_temp_name(self):
         self.tmp_id += 1
         return "tmp.%u" % self.tmp_id
+
+    def get_uf_matches(self):
+        self.uf_matches = smt.Function("trlc.matches",
+                                       smt.BUILTIN_BOOLEAN,
+                                       smt.Bound_Variable(smt.BUILTIN_STRING,
+                                                          "subject"),
+                                       smt.Bound_Variable(smt.BUILTIN_STRING,
+                                                          "regex"))
+
+        # Create UF for the matches function (for now, later we will
+        # deal with regex properly).
+        self.preamble.add_statement(smt.Function_Declaration(self.uf_matches))
+
+        return self.uf_matches
 
     def create_return(self, node, s_value, s_valid=None):
         assert isinstance(node, Expression)
@@ -292,11 +308,8 @@ class VCG:
         # Create node for global declarations
         gn_locals = graph.Assumption(self.graph)
         self.start.add_edge_to(gn_locals)
-        self.start = gn_locals
-
-        # Create UF for the matches function (for now, later we will
-        # deal with regex properly)
-        self.start.add_statement(smt.Function_Declaration(self.uf_matches))
+        self.start    = gn_locals
+        self.preamble = gn_locals
 
         # Create local variables
         for n_component in n_ctyp.all_components():
@@ -949,7 +962,7 @@ class VCG:
             assert isinstance(rhs_evaluation, str)
 
             sym_value = smt.Function_Application(
-                self.uf_matches,
+                self.get_uf_matches(),
                 lhs_value,
                 smt.String_Literal(rhs_evaluation))
 

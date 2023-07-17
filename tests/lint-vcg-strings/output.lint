@@ -2,7 +2,7 @@ y, "potato"
 ^ lint-vcg-strings/test1.rsl:15: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
-|     x = "mCBDkitten?"
+|     x = "mCDBkitten?"
 |     /* y is null */
 |   }
 c, "potato"
