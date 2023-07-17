@@ -12,11 +12,23 @@
 <!-- start -->
 <g id="node1" class="node">
 <title>start</title>
-<ellipse fill="none" stroke="black" cx="198.89" cy="-306" rx="33.29" ry="18"/>
-<text text-anchor="middle" x="198.89" y="-302.3" font-family="Times,serif" font-size="14.00">start</text>
+<ellipse fill="none" stroke="black" cx="136.89" cy="-306" rx="33.29" ry="18"/>
+<text text-anchor="middle" x="136.89" y="-302.3" font-family="Times,serif" font-size="14.00">start</text>
+</g>
+<!-- normal_error_1 -->
+<g id="node2" class="node">
+<title>normal_error_1</title>
+<ellipse fill="none" stroke="black" cx="81.89" cy="-90" rx="81.79" ry="18"/>
+<text text-anchor="middle" x="81.89" y="-86.3" font-family="Times,serif" font-size="14.00">normal_error_1</text>
+</g>
+<!-- start&#45;&gt;normal_error_1 -->
+<g id="edge2" class="edge">
+<title>start&#45;&gt;normal_error_1</title>
+<path fill="none" stroke="black" d="M129.97,-288.33C120.42,-264.65 103.31,-219.75 93.89,-180 89.05,-159.55 85.98,-135.96 84.16,-118.21"/>
+<polygon fill="black" stroke="black" points="87.64,-117.87 83.2,-108.25 80.67,-118.53 87.64,-117.87"/>
 </g>
 <!-- fatal_error_1 -->
-<g id="node2" class="node">
+<g id="node3" class="node">
 <title>fatal_error_1</title>
 <ellipse fill="none" stroke="black" cx="198.89" cy="-234" rx="70.39" ry="18"/>
 <text text-anchor="middle" x="198.89" y="-230.3" font-family="Times,serif" font-size="14.00">fatal_error_1</text>
@@ -24,20 +36,20 @@
 <!-- start&#45;&gt;fatal_error_1 -->
 <g id="edge1" class="edge">
 <title>start&#45;&gt;fatal_error_1</title>
-<path fill="none" stroke="black" d="M198.89,-287.7C198.89,-279.98 198.89,-270.71 198.89,-262.11"/>
-<polygon fill="black" stroke="black" points="202.39,-262.1 198.89,-252.1 195.39,-262.1 202.39,-262.1"/>
+<path fill="none" stroke="black" d="M150.65,-289.46C158.42,-280.69 168.31,-269.53 177.11,-259.6"/>
+<polygon fill="black" stroke="black" points="179.86,-261.77 183.87,-251.96 174.62,-257.13 179.86,-261.77"/>
 </g>
-<!-- normal_error_1 -->
-<g id="node3" class="node">
-<title>normal_error_1</title>
-<ellipse fill="none" stroke="black" cx="81.89" cy="-90" rx="81.79" ry="18"/>
-<text text-anchor="middle" x="81.89" y="-86.3" font-family="Times,serif" font-size="14.00">normal_error_1</text>
+<!-- end -->
+<g id="node7" class="node">
+<title>end</title>
+<ellipse fill="none" stroke="black" cx="198.89" cy="-18" rx="27.9" ry="18"/>
+<text text-anchor="middle" x="198.89" y="-14.3" font-family="Times,serif" font-size="14.00">end</text>
 </g>
-<!-- fatal_error_1&#45;&gt;normal_error_1 -->
-<g id="edge2" class="edge">
-<title>fatal_error_1&#45;&gt;normal_error_1</title>
-<path fill="none" stroke="black" d="M152.17,-220.41C131.07,-212.31 107.81,-199.55 93.89,-180 81.21,-162.19 78.82,-137.18 79.26,-118.2"/>
-<polygon fill="black" stroke="black" points="82.76,-118.26 79.76,-108.1 75.77,-117.91 82.76,-118.26"/>
+<!-- normal_error_1&#45;&gt;end -->
+<g id="edge6" class="edge">
+<title>normal_error_1&#45;&gt;end</title>
+<path fill="none" stroke="black" d="M108.73,-72.94C127.17,-61.91 151.61,-47.29 170.4,-36.05"/>
+<polygon fill="black" stroke="black" points="172.33,-38.97 179.11,-30.84 168.73,-32.97 172.33,-38.97"/>
 </g>
 <!-- normal_warning_1 -->
 <g id="node4" class="node">
@@ -62,18 +74,6 @@
 <title>fatal_error_1&#45;&gt;fatal_error_2</title>
 <path fill="none" stroke="black" d="M236.57,-218.67C265.22,-207.77 304.83,-192.7 335.61,-180.99"/>
 <polygon fill="black" stroke="black" points="337.16,-184.14 345.26,-177.32 334.67,-177.6 337.16,-184.14"/>
-</g>
-<!-- end -->
-<g id="node7" class="node">
-<title>end</title>
-<ellipse fill="none" stroke="black" cx="198.89" cy="-18" rx="27.9" ry="18"/>
-<text text-anchor="middle" x="198.89" y="-14.3" font-family="Times,serif" font-size="14.00">end</text>
-</g>
-<!-- normal_error_1&#45;&gt;end -->
-<g id="edge6" class="edge">
-<title>normal_error_1&#45;&gt;end</title>
-<path fill="none" stroke="black" d="M108.73,-72.94C127.17,-61.91 151.61,-47.29 170.4,-36.05"/>
-<polygon fill="black" stroke="black" points="172.33,-38.97 179.11,-30.84 168.73,-32.97 172.33,-38.97"/>
 </g>
 <!-- normal_warning_1&#45;&gt;end -->
 <g id="edge7" class="edge">

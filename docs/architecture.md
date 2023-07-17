@@ -805,8 +805,8 @@ For example the following check sequence:
 
 ```trlc
 checks Example {
-   ..., fatal   "fatal_error_1"
    ..., error   "normal_error_1"
+   ..., fatal   "fatal_error_1"
    ..., warning "normal_warning_1"
    ..., fatal   "fatal_error_2"
    ..., error,  "normal_error_2
@@ -819,7 +819,8 @@ Would generate a (reduced) graph like this:
 
 For example when proving anything about `normal_warning_1` we know
 that `fatal_error_1` could not have occurred. But we cannot make the
-same assumption about `normal_error_1`.
+same assumption about `normal_error_1`, any checks under
+`fatal_error_1` do *not* get the truth of `normal_error_1` asserted.
 
 #### Types
 
