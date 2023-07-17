@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>TRLC Language Reference Manual, Version 2.5</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRLC 2.5 LRM</title>
+<link rel="icon" type="image/x-icon" href="bmw_favicon.ico"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
   font-family: sans;
@@ -164,7 +164,7 @@ A copy of the license is included in the section entitled "Appendix A: GNU Free 
   </li>
 </ol>
 <h2 class="autosection" id="sec:1babfba499a35bc8dd53df02b58c26f65fe9b497">Design Goals</h2>
-<div>
+<div id='lrm-Goals'>
 It is important to have design goals for a language. The design goals of TRLC are:
 <ul>
   <li>The intended domain is requirements writing in an industrial safety-critical context, where requirements carry a lot of meta-data and linkage.</li>
@@ -176,22 +176,22 @@ It is important to have design goals for a language. The design goals of TRLC ar
 </div>
 <h2 class="autosection" id="sec:a7d832e9bb00d9ab844f20e6fbf5d1d776afbacf">Lexing</h2>
 <h3 class="autosection" id="sec:6fae88d0d44b306c96b9a5cadd3577b36e2cec22">Encoding</h3>
-<div>
+<div id='lrm-File_Encoding'>
 All input files are encoded in UTF-8. Passing a file with a different encoding to TRLC results in undefined behaviour.
 </div>
 <h4>Implementation Recommendation</h4>
-<div>
+<div id='lrm-File_Encoding_Fixed'>
 It is recommended to try to detect this in an implementation and raise a fatal error; but in the interest of compatibility and sanity an implementation shall not provide a way to switch the encoding (at the command-line or otherwise).
 </div>
 <h3 class="autosection" id="sec:2fffbe8811832e6bc87d8e87f5fe868af27c5884">Whitespace and comments</h3>
-<div>
+<div id='lrm-Whitespace'>
 Whitespace is ignored.
 </div>
-<div>
+<div id='lrm-Comments'>
 Comments are C-Style <code>/* .. */</code> and C++ style <code>//</code>, and are ignored. The matching for C-style comments is non-greedy.
 </div>
 <h3 class="autosection" id="sec:e8ffb2f75005b380605ac7cd84bd1e8135d8d484">Identifiers and keywords</h3>
-<div>
+<div id='lrm-Identifier'>
 Identifiers start with a letter and are followed by letters, numbers, or underscores.
 </div>
 <div class='code'>
@@ -204,7 +204,7 @@ Examples:<ul>
   <li>Kitten_Exploder</li>
 </ul>
 </div>
-<div>
+<div id='lrm-Builtin_Identifier'>
 There is also a legacy &quot;builtin&quot; identifier that is deprecated. It will be removed in a future major release.
 </div>
 <div class='code'>
@@ -215,7 +215,7 @@ Examples:<ul>
   <li>trlc:len</li>
 </ul>
 </div>
-<div>
+<div id='lrm-TRLC_Keywords'>
 A keyword is an identifier that is one of the following reserved words:
 <ul>
   <li>abs</li>
@@ -248,7 +248,7 @@ A keyword is an identifier that is one of the following reserved words:
 </ul>
 </div>
 <h3 class="autosection" id="sec:aecefa911f304b068a66634b6c79442544731fcd">Punctuation</h3>
-<div>
+<div id='lrm-Single_Delimiters'>
 Single character delimiters:
 <ul>
   <li>Brackets: <code>(</code> <code>)</code> <code>[</code> <code>]</code> <code>{</code> <code>}</code></li>
@@ -257,7 +257,7 @@ Single character delimiters:
   <li>Boolean operators: <code>&lt;</code> <code>&gt;</code></li>
 </ul>
 </div>
-<div>
+<div id='lrm-Double_Delimiters'>
 Double character delimiters:
 <ul>
   <li>Operators: <code>**</code></li>
@@ -265,11 +265,11 @@ Double character delimiters:
   <li>Punctuation: <code>=&gt;</code> <code>..</code></li>
 </ul>
 </div>
-<div>
+<div id='lrm-Lexing_Disambiguation'>
 Preference is (obviously) given to longer delimiters if there is ambiguity; i.e. <code>==</code> takes precedence over two <code>=</code> tokens.
 </div>
 <h3 class="autosection" id="sec:707590991971c8cbba0fcbbab41d495f5267f09b">Integers</h3>
-<div>
+<div id='lrm-Integers'>
 Integers are base 10, and leading zeros are effectively ignored.
 </div>
 <div class='code'>
@@ -283,7 +283,7 @@ Examples:<ul>
 </ul>
 </div>
 <h3 class="autosection" id="sec:6d1f18e149654f815a45d2f2e4a8c22b2fca2b30">Decimals</h3>
-<div>
+<div id='lrm-Decimals'>
 Decimals are base 10, and leading and trailing zeros are effectively ignored.
 </div>
 <div class='code'>
@@ -297,7 +297,7 @@ Examples:<ul>
 </ul>
 </div>
 <h3 class="autosection" id="sec:a1e5f01b700e2c39a01c965ab74b3939b47b1a27">Strings</h3>
-<div>
+<div id='lrm-Strings'>
 There are two versions of a string, double quoted and triple quoted:
 </div>
 <div class='code'>
@@ -311,14 +311,14 @@ Examples:<ul>
 </ul>
 </div>
 <h4>Static Semantics</h4>
-<div>
+<div id='lrm-Simple_String_Value'>
 The value of a double quoted string is precisely the characters between the two double quotes, with all instances of the <code>\&quot;</code> escape sequence being replaced with <code>&quot;</code>.
 </div>
-<div>
+<div id='lrm-Complex_String_Value'>
 The value of a triple quoted string is the whitespace trimmed string of characters between the triple quotes (including the line breaks), The common whitespace at the beginning of each line (ignoring blank lines) starting at the second is removed. The trailing whitespace on every line is removed. There is no escaping in a triple quoted string.
 </div>
 <h2 class="autosection" id="sec:405023229ad0daa7843f23de4264ea6671dbd124">Layout and file structure</h2>
-<div>
+<div id='lrm-Layout'>
 There are three types of files:
 <ul>
   <li><code>.rls</code> They contains the user-defined type definitions and optionally user-defined warnings or checks</li>
@@ -327,18 +327,18 @@ There are three types of files:
 </ul>
 </div>
 <h3>Dynamic Semantics</h3>
-<div>
+<div id='lrm-File_Parsing_Order'>
 First, all <code>.rls</code> files are parsed. Then, if no errors are raised, all <code>.check</code> files are parsed. Finally, if no errors are raised, all <code>.trlc</code> files are parsed.
 </div>
-<div>
+<div id='lrm-File_Parsing_References'>
 After all files are parsed, references are resolved and user-defined checks are applied.
 </div>
 <h3>Implementation Recommendation</h3>
-<div>
+<div id='lrm-Errors_In_TRLC_Files'>
 It is unspecified how an implementation treats errors in <code>.trlc</code> files, but it is recommended to not stop processing after the first error.
 </div>
 <h2 class="autosection" id="sec:1b5022091302172b7af39971681b5b026fc2fa64">Preamble</h2>
-<div>
+<div id='lrm-Preamble'>
 All TRLC files start with a package indication.
 </div>
 <div class='code'>
@@ -352,17 +352,17 @@ All TRLC files start with a package indication.
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Current_Package'>
 The package indication defines the &quot;current package&quot;.
 </div>
-<div>
+<div id='lrm-Import_Visibility'>
 A package declared in an RSL file may be imported, in which case its name may be used as the prefix of a <code>qualified_name</code>.
 </div>
-<div>
+<div id='lrm-Self_Imports'>
 A package may not import itself.
 </div>
 <h2 class="autosection" id="sec:347156ba7288ce580b92312542aba49980af6614">Metamodel (RLS) files</h2>
-<div>
+<div id='lrm-RLS_File'>
 A <code>.rls</code> file starts with a package declaration and is followed by type declarations.
 </div>
 <div class='code'>
@@ -372,13 +372,13 @@ A <code>.rls</code> file starts with a package declaration and is followed by ty
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Package_Declaration'>
 A package indication in an <code>.rls</code> file declares a package. Any given package name may only be declared once globally.
 </div>
-<div>
+<div id='lrm-Circular_Dependencies'>
 In a <code>.rsl</code> file, a package may not import a package that imports itself, directly or indirectly.
 </div>
-<div>
+<div id='lrm-Builtin_Types'>
 An implementation shall support the following builtin types, that shall be made available for all packages:
 <ul>
   <li>Boolean</li>
@@ -388,22 +388,22 @@ An implementation shall support the following builtin types, that shall be made 
   <li>Markup_String</li>
 </ul>
 </div>
-<div>
+<div id='lrm-Boolean_Values'>
 A <code>Boolean</code> has two values, <code>false</code> and <code>true</code>.
 </div>
-<div>
+<div id='lrm-Integer_Values'>
 An <code>Integer</code> is a signed integer, with an implementation defined range. This range shall be at least -1000 to 1000, and this can be infinite.
 </div>
-<div>
+<div id='lrm-Decimal_Values'>
 A <code>Decimal</code> is a signed rational with a power-of-ten denominator, with an implementation defined range. This range for the numerator shall be at least -1000 to 1000, and denominator is always a natural number with a range of at least 1 to 1000. Any of these ranges can be infinite (but the denominator is always non-negative).
 </div>
-<div>
+<div id='lrm-String_Values'>
 A <code>String</code> is a sequence of implementation defined characters. <i>(The decision to support Unicode or not is left unspecified.)</i> The maximum length of a String, if any, is implementation defined, but shall be at least 1000.
 </div>
-<div>
+<div id='lrm-Markup_String_Values'>
 A <code>Markup_String</code> is identical to a <code>String</code>, except for a few additional constraints on the string contents. Any value of type <code>Markup_String</code> is a valid instance of <code>String</code>, but not the other way around.
 </div>
-<div>
+<div id='lrm-Builtin_Functions'>
 A package also includes a number of builtin functions that are made available:
 <ul>
   <li>len</li>
@@ -412,7 +412,7 @@ A package also includes a number of builtin functions that are made available:
   <li>matches</li>
 </ul>
 </div>
-<div>
+<div id='lrm-Builtin_Type_Conversion_Functions'>
 A package also makes available a number of numeric type conversion functions:
 <ul>
   <li>Integer</li>
@@ -426,13 +426,13 @@ A package also makes available a number of numeric type conversion functions:
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Described_Name_Description'>
 A described name names an entity. The optional string description has no static or dynamic semantics.
 </div>
-<div>
+<div id='lrm-Described_Name_Equality'>
 Two described names are considered equal if their names are equal.
 </div>
-<div>
+<div id='lrm-Described_Name_Notes'>
 The description has no bearing on equality. The string description should be exported to the API, so that downstream tools can make use of it. This way we don&#x27;t have to give some comments special meaning, and we don&#x27;t have to implement error-prone heuristics in downstream tools for discovering these descriptions.
 </div>
 <h2 class="autosection" id="sec:2b0ce86a93da5b26c4b4929399d43cfb10393c60">Type declarations</h2>
@@ -443,7 +443,7 @@ The description has no bearing on equality. The string description should be exp
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Duplicate_Types'>
 It is an error to create a type with a name that already exists in the current package. (Note: this especially includes shadowing one of the builtin types.)
 </div>
 <h2 class="autosection" id="sec:541918791ee5c9789a3fa79a547a313c021b753a">Enumerations</h2>
@@ -455,13 +455,13 @@ It is an error to create a type with a name that already exists in the current p
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Unique_Enumeration_Literals'>
 Each described name declares an enumeration literal specification, which shall have a unique name in that enumeration.
 </div>
-<div>
+<div id='lrm-Shared_Literals'>
 It is not an error to have the same literal specification for different enumerations.
 </div>
-<div>
+<div id='lrm-Literals_Shadowing_Permitted'>
 It is not an error to have an enumeration literal with the same name as a record or enumeration - as there is no ambiguity - but it is recommended that an implementation emits a warning in this case.
 </div>
 <h3>Example</h3>
@@ -485,10 +485,10 @@ It is not an error to have an enumeration literal with the same name as a record
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Valid_Qualifier'>
 The package name of a qualified name must be the current package or an imported package.
 </div>
-<div>
+<div id='lrm-Valid_Name'>
 The name must be a valid symbol in the current scope (if no package is provided) or a valid symbol of the indicated package.
 </div>
 <h2 class="autosection" id="sec:9aedc52d18c85a678921842cf6748e8e21be3b0b">Record declarations</h2>
@@ -505,45 +505,45 @@ The name must be a valid symbol in the current scope (if no package is provided)
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Valid_Root_Type'>
 The root type for a record extension must be a valid record type.
 </div>
-<div>
+<div id='lrm-Unique_Record_Components'>
 Each component declaration shall have a unique name in that record declaration, or any of its root types. <i>(Two separate record extensions may defined the same component, and they may even have different types. But you cannot re-define a component from a parent type.)</i>
 </div>
-<div>
+<div id='lrm-Valid_Component_Type'>
 Each component type shall refer to a valid type, or to the name of the record type itself. It is an error to refer to a type that has not been declared yet. <i>(As there are no forward declarations in the language, this forces the user type hierarchy to be a DAG, but permitting self-references.)</i>
 </div>
-<div>
+<div id='lrm-Anonymous_Arrays'>
 A component with an array declaration introduces an anonymous array type. This means the type of the record component is not the type as specified, but rather an array where the element type is that type.
 </div>
-<div>
+<div id='lrm-Upper_Bound_Greater_Than_Lower_Bound'>
 It is an error to specify an upper bound that is less than the lower bound. <i>(Note that it is permitted for them to be equal.)</i>
 </div>
 <h3>Dynamic Semantics</h3>
-<div>
+<div id='lrm-Array_Indexing'>
 Arrays are indexed by natural numbers and the first index is 0.
 </div>
-<div>
+<div id='lrm-Array_Lower_Bound'>
 An instance of an array shall not have fewer elements than its lower bound.
 </div>
-<div>
+<div id='lrm-Array_Upper_Bound'>
 An array type has no upper bound if <code>*</code> is specified. An array instance for an array type with an upper bound shall not have more elements than its upper bound.
 </div>
-<div>
+<div id='lrm-Array_Implementation_Upper_Bound'>
 An implementation may impose an arbitrary limit to the actual upper bound of an array <i>(that is treat the <code>*</code> as if it was that limit)</i>. This limit, if it exists, shall be greater than or equal to 1000.
 </div>
-<div>
+<div id='lrm-Type_Extensions_Inherit_Everything'>
 A record type that extends another inherits all components and user defined checks specified for its root type.
 </div>
-<div>
+<div id='lrm-Type_Extensions_Polymorphism'>
 Instances of an extension may be provided as a reference where a root type is required; but not the other way around. <i>(This provide a limited form of polymorphism, but with the Liskov substitution principle guaranteed.)</i>
 </div>
 <h3>Implementation Recommendation</h3>
-<div>
+<div id='lrm-Zero_Upper_Bound'>
 It is recommended to emit an error on array types with an upper bound of zero.
 </div>
-<div>
+<div id='lrm-Arrays_Sized_One'>
 It is recommended to emit a warning on array types with an upper bound of one.
 </div>
 <h3>Example</h3>
@@ -566,7 +566,7 @@ It is recommended to emit a warning on array types with an upper bound of one.
 <span class="TRLC_C_KET">}</span></pre>
 </div>
 <h2 class="autosection" id="sec:5103569cc5a86b8e2f77bec0c907d17d4a4567da">Check Files</h2>
-<div>
+<div id='lrm-Check_File'>
 A <code>.check</code> file is simply a set of check blocks.
 </div>
 <div class='code'>
@@ -576,7 +576,7 @@ A <code>.check</code> file is simply a set of check blocks.
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Cannot_Declare_In_Check_File'>
 It is an error to indicate a package that has not been declared in an <code>.rsl</code> file.
 </div>
 <h2 class="autosection" id="sec:e927d676860613a7cb2f750b822d434b0064ea5e">Checks</h2>
@@ -594,29 +594,29 @@ It is an error to indicate a package that has not been declared in an <code>.rsl
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Applicable_Types'>
 It is an error to refer to a type that does not exist in the current package, or is not a record type.
 </div>
-<div>
+<div id='lrm-Applicable_Components'>
 In a check declaration or expression, it is an error to refer to a component name that does not belong to the record indicated.
 </div>
-<div>
+<div id='lrm-Only_Current_Package'>
 Note that it is never possible to add checks to a type from a foreign package. In check files this is more obvious as you cannot have an import clause, but this is also true for checks declared in <code>.rsl</code> files since it is not possible to specify a qalified name.
 </div>
 <h3>Dynamic Semantics</h3>
-<div>
+<div id='lrm-Check_Evaluation_Order'>
 Each check inside a check block evaluated in the specified order.
 </div>
-<div>
+<div id='lrm-Check_Evaluation_Order_Across_Blocks'>
 If multiple check blocks are declared for the same record, then the order of evaluation of each check block is unspecified.
 </div>
-<div>
+<div id='lrm-Check_Evaluation_Order_For_Extensions'>
 For record extensions, all checks for the base record must be evaluated before any check of the record extension is evaluated.
 </div>
-<div>
+<div id='lrm-Check_Messages'>
 If the evaluated expression is true, no action is taken. If it is false, then a message emitted with the specified message text.
 </div>
-<div>
+<div id='lrm-Check_Severity'>
 The severity, if provided, controls how future errors are treated, and how the TRLC implementation terminates.
 <ul>
   <li>A warning has no effect other than emitting the message.</li>
@@ -624,10 +624,10 @@ The severity, if provided, controls how future errors are treated, and how the T
   <li>A fatal message is like an error, except that no further checks from this check block shall be evaluated for this record instance.</li>
 </ul>
 </div>
-<div>
+<div id='lrm-Anchoring'>
 The component name (if specified) is a hint where the message should be anchored. It is implementation defined how or if this is taken into account. A suitable anchoring for a message without a component could be the record object declaration itself. If only a single component is used in the expression then the message could be anchored the same way as if the component was indicated explicitly in the check.
 </div>
-<div>
+<div id='lrm-Sane_Typing'>
 It is an important design goal to keep the type system sane and following LSP. I.e. each subtype may only narrow the values permitted in a type. This means for a record R and its extension RE; any valid instance of RE is always a valid instance of R if a new binding of R is created considering only the fields that are in R. It will never be possible to delete, suppress, widen, or omit checks in record extensions.
 </div>
 <h3>Example</h3>
@@ -682,7 +682,7 @@ It is an important design goal to keep the type system sane and following LSP. I
 </pre>
 </div>
 <h3>Implementation Recommendation</h3>
-<div>
+<div id='lrm-Unary_Minus_Parsing'>
 The parsing of unary minus can be confusing: <code>-a % b</code> is actually <code>- (a % b)</code>. The semantics of <code>%</code> are carefully specified so that this does not matter. It does also mean that <code>-a / -b</code> is not legal and needs to be written as either <code>-a / (-b)</code> or even better <code>(-a) / (-b)</code>. It is recommended that a linter warns whenever a unary minus is encountered that has a non-trivial <code>term</code> or <code>factor</code> as its operand.
 </div>
 <h3>Example</h3>
@@ -713,42 +713,42 @@ The parsing of unary minus can be confusing: <code>-a % b</code> is actually <co
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Signature_Len'>
 The builtin function <code>len</code> is of arity 1. Its parameter must be of type <code>String</code> or an array type. Its return type is <code>Integer</code>.
 </div>
-<div>
+<div id='lrm-Signature_String_End_Functions'>
 The builtin functions <code>startswith</code> and <code>endswith</code> are of arity 2. All of their parameters must be of type <code>String</code>. The return type of either function is <code>Boolean</code>.
 </div>
-<div>
+<div id='lrm-Signature_Matches'>
 The builtin function <code>matches</code> is of arity 2. Its parameters must be of type <code>String</code>. The return type is <code>Boolean</code>. The second parameter must be a valid regular expression. <i>(It is implementation defined which regular expression language is used, but it is highly, _highly_ recommended to implement the standard POSIX regular expressions.)</i>
 </div>
-<div>
+<div id='lrm-Static_Regular_Expression'>
 In addition, the second parameter to the <code>matches</code> function must be a static compile-time constant, i.e. it must not depend on the value of a record field or the value of a quantified variable.
 </div>
-<div>
+<div id='lrm-Signature_Type_Conversion'>
 The numeric type conversion functions are of arity 1 and polymorphic (they are defined for both integer and rationals). They return the type indicated by the function name. <i>(They are polymorphic in case we want to introduce a true rational type, or a floating point type.)</i>
 </div>
 <h3>Dynamic Semantics</h3>
-<div>
+<div id='lrm-Len_Semantics'>
 The <code>len</code> function computes the length of the given string or array.
 </div>
-<div>
+<div id='lrm-Startswith_Semantics'>
 The <code>startswith</code> function returns true iff the first parameter fully contains the second parameter at its start.
 </div>
-<div>
+<div id='lrm-Endswith_Semantics'>
 The <code>endswith</code> function returns true iff the first parameter fully contains the second parameter at its end.
 </div>
-<div>
+<div id='lrm-Matches_Semantics'>
 The <code>matches</code> function returns true iff the first parameter is matched by the regular expression given in the second parameter.
 </div>
-<div>
+<div id='lrm-Integer_Conversion_Semantics'>
 The <code>Integer</code> type conversion rounds to the nearest integral, away from zero in the case of ties.
 </div>
-<div>
+<div id='lrm-Decimal_Conversion_Semantics'>
 The <code>Decimal</code> type conversion simply converts the given integer to the exact same rational.
 </div>
 <h3>Name resolution</h3>
-<div>
+<div id='lrm-Case_Sensitive'>
 Name resolution is case sensitive.
 </div>
 <h3>Example</h3>
@@ -787,128 +787,128 @@ Name resolution is case sensitive.
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Association'>
 For a chain of operators of the same category, the association is left to right.
 </div>
 <h3>Dynamic Semantics</h3>
-<div>
+<div id='lrm-Range_Checks'>
 It is implementation defined if type checks (range or length) are performed for intermediate values; if type checks are not performed then the resulting expression must not be an error.
 </div>
-<div>
+<div id='lrm-Range_Checks_Example'>
 <i>(This means you either type check all the time, or you guarantee that any intermediate will not create an error in the implementation, as long as the final value fits in the relevant type. For example if A and B are maximum length Strings, then <code>&quot;potato&quot; in A + B</code> may either create an error when attempting to concatenate the strings, OR it must work correctly. What you cannot do is cause undefined behaviour in the evaluation.)</i>
 </div>
 <h3 class="autosection" id="sec:1b7d2da842f3f6074070526b5a4a3c424dcc604a">Logical operators</h3>
 <h4>Static Semantics</h4>
-<div>
+<div id='lrm-Logical_Operators'>
 There are five Boolean operators defined (not, and, or, xor, implies) for expressions of Boolean type. The type of the result is Boolean.
 </div>
 <h4>Dynamic Semantics</h4>
-<div>
+<div id='lrm-Shortcut_Logical_Operators'>
 Operators with short-cut semantics are <code>and</code>, <code>or</code>, and <code>implies</code>. They first evaluate their left-hand side and proceed to evaluate the right-hand side if it could influence the final result. The semantics of these operators are the usual ones.
 </div>
-<div>
+<div id='lrm-Regular_Logical_Operators'>
 Operators with standard semantics are <code>xor</code>, and <code>not</code>. They do the usual thing.
 </div>
 <h3 class="autosection" id="sec:6853dd1f3f0e39c6d5d79baddfca46e8c9f0f9dc">Relational operators and membership tests</h3>
 <h4>Static Semantics</h4>
-<div>
+<div id='lrm-Equality_Domain'>
 The equality operators <code>==</code> and <code>!=</code> are defined for all types, as long as the types are compatible, i.e. they are the same types or one type is a (transitive) record extension of the other. The result is a Boolean.
 </div>
-<div>
+<div id='lrm-Relational_Domain'>
 The ordering relations <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, and <code>&gt;</code> are defined for pairs of integers or pairs of rationals only. The result is a Boolean.
 </div>
-<div>
+<div id='lrm-Membership_Domain'>
 Range membership tests <code>not in</code> and <code>in</code> are defined for integers and rationals only. All operands must have the same type, and the result is a Boolean.
 </div>
-<div>
+<div id='lrm-Substring_Domain'>
 Substring tests <code>not in</code> and <code>in</code> are defined for Strings only. The result is a Boolean.
 </div>
-<div>
+<div id='lrm-Array_Membership_Domain'>
 Array membership tests <code>not in</code> and <code>in</code> are defined for all arrays. The type of the left-hand side must match the element type of the array. The result is a Boolean.
 </div>
 <h4>Dynamic Semantics</h4>
-<div>
+<div id='lrm-Simple_Relational_Semantics'>
 The meaning of the relationship operators are the usual.
 </div>
-<div>
+<div id='lrm-Inclusive_Membership_Test_Semantics'>
 An inclusive range membership test <code>x in a .. b</code> has the same meaning as the Boolean expression <code>x &gt;= a and x &lt;= b</code>. <i>(This means if a is less than b, it is not an error. Instead the result of such a test is always false.)</i>
 </div>
-<div>
+<div id='lrm-Exclusive_Membership_Test_Semantics'>
 An exclusive range membership test <code>x not in a .. b</code> has the same meaning as the Boolean expression <code>x &lt; a or x &gt; b</code>.
 </div>
-<div>
+<div id='lrm-Simple_Substring_Semantics'>
 The meaning of the substring test is the usual. <i>(Note that the substring test is of course performed on the value of the string, not the original literal.)</i>
 </div>
-<div>
+<div id='lrm-Array_Membership_Semantics'>
 The array membership test <code>X in A</code> is equivalent to <code>(exists item in A =&gt; item == X)</code>. The array non-membership test <code>X not in A</code> is equivalent to <code>(forall item in A =&gt; item != X)</code>.
 </div>
 <h3 class="autosection" id="sec:4cfc517e70194486df511c43ed091f8aacc89d72">Adding operators</h3>
 <h4>Static Semantics</h4>
-<div>
+<div id='lrm-Binary_Addition_Domain'>
 The binary adding operator <code>+</code> is defined for integers, rationals, and strings. The binary subtraction operator <code>-</code> is defined for only integers and rationals.
 </div>
-<div>
+<div id='lrm-String_Concatenation_Downgrade'>
 When <code>+</code> is used to concatenate strings, the result is always a <code>String</code>, even if one or both operands if of type <code>Markup_String</code>. <i>(This means the only way you can create a markup string is when you construct it at record object declaration.)</i>
 </div>
-<div>
+<div id='lrm-Unary_Addition_Domain'>
 The unary adding operator <code>+</code>, and the unary subtraction operator <code>-</code> is defined only for integers and rationals.
 </div>
-<div>
+<div id='lrm-Adding_Types'>
 For binary adding operators the types of the operands have to match, and the result is the same type as the two operands. For unary adding operators the result is always the same as the operand.
 </div>
 <h4>Dynamic Semantics</h4>
-<div>
+<div id='lrm-Adding_Semantics'>
 The definition of <code>+</code> and <code>-</code> for integers and rationals is the usual one.
 </div>
-<div>
+<div id='lrm-Concatenation_Semantics'>
 The definition of <code>+</code> for strings is string concatenation.
 </div>
 <h3 class="autosection" id="sec:f5d45ad47a83ce6dd7573306a9ee187e6342f5bb">Multiplying operators</h3>
 <h4>Static Semantics</h4>
-<div>
+<div id='lrm-Multiplying_Domain'>
 The multiplying operators <code>*</code>, <code>/</code> are defined for integers and rational types. The remainder operator <code>%</code> is defined for integers only. For any of these the result is always the same type as the operands.
 </div>
 <h4>Dynamic Semantics</h4>
-<div>
+<div id='lrm-Multiplying_Semantics'>
 The definition of <code>*</code> is the usual one.
 </div>
-<div>
+<div id='lrm-Integer_Division_Semantics'>
 The definition of <code>/</code> for integers is floor division. <i>(For example <code>-5 / 2</code> is <code>2</code> and <code>-5 / 2</code> is <code>-3</code>.)</i>
 </div>
-<div>
+<div id='lrm-Rational_Division_Semantics'>
 The definition of <code>/</code> for rationals is the usual one.
 </div>
-<div>
+<div id='lrm-Remainder_Semantics'>
 The modulus division for <code>x % y</code> satisfies the relation <code>x = y*N + (x % y)</code>, for some (signed) value of <code>N</code>, with one of the following constraints met:
 <ul>
   <li><code>x % y</code> is <code>0</code></li>
   <li><code>x % y</code> has the same sign as <code>y</code> and an absolute value less than <code>y</code></li>
 </ul>
 </div>
-<div>
+<div id='lrm-Division_By_Zero'>
 Division by zero or modulo division by 0 is an error.
 </div>
 <h3 class="autosection" id="sec:775410b4cb9a8b0b8469f6d72d31fe25d0cbb54a">Highest precedence operators</h3>
 <h4>Static Semantics</h4>
-<div>
+<div id='lrm-Power_Domain'>
 The exponentiation operator <code>**</code> is defined for integers and rations bases, and returns the same type as its base. The exponent type is always an Integer.
 </div>
-<div>
+<div id='lrm-Power_Static_Exponent'>
 The right-hand side parameter of <code>**</code> must be a static compile-time constant, i.e. it must not depend on the value of a record field or the value of a quantified variable. It must not be negative.
 </div>
-<div>
+<div id='lrm-Absolute_Value_Domain'>
 The absolute value prefix operator <code>abs</code> is defined for integers and rationals, and returns a (positive) integer or rational respectively.
 </div>
-<div>
+<div id='lrm-Negation_Domain'>
 The logical negation prefix operator <code>not</code> is defined for Booleans only, and returns a Boolean.
 </div>
-<div>
+<div id='lrm-Power_Semantics'>
 The definition of exponentiation <code>**</code> is the usual one.
 </div>
-<div>
+<div id='lrm-Absolute_Value_Semantics'>
 The definition of absolute value <code>abs</code> is the usual one.
 </div>
-<div>
+<div id='lrm-Negation_Semantics'>
 The definition of logical negation <code>not</code> is the usual one.
 </div>
 <h2 class="autosection" id="sec:bcc19cc6284b0508f332d585fa6ddb294172206c">Quantification</h2>
@@ -922,28 +922,28 @@ The definition of logical negation <code>not</code> is the usual one.
 </pre>
 </div>
 <h3>Name resolution</h3>
-<div>
+<div id='lrm-Quantification_Object'>
 The component name must be defined in the current record, and must be an array type.
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Quantification_Naming_Scope'>
 A quantified expression introduces a new name, that is valid only inside the predicate. This new name must not shadow any other. <i>(This means two separate quantified expressions may use the same name, but you may not nest and shadow, and you may not shadow a component name either.)</i>
 </div>
-<div>
+<div id='lrm-Quantification_Type'>
 The type of the predicate must be Boolean. The result of a quantified expression is Boolean.
 </div>
 <h3>Dynamic Semantics</h3>
-<div>
+<div id='lrm-Quantification_Evaluation'>
 During evaluation of the quantified expression, each element of the array is evaluated in sequence and its value is bound to the declared name. The predicated is then evaluated with this binding.
 </div>
-<div>
+<div id='lrm-Universal_Quantification_Semantics'>
 For universal <i>(forall)</i> quantification the final value is true iff all predicates evaluate to true. <i>(This means universal quantification over an empty array is vacuously true.)</i>
 </div>
-<div>
+<div id='lrm-Existential_Quantification_Semantics'>
 For existential <i>(exists)</i> quantification the final value is true iff the predicate evaluate to true at least once. <i>(This means existential quantification over an empty array is vacuously false.)</i>
 </div>
 <h3>Implementation Recommendation</h3>
-<div>
+<div id='lrm-Quantification_Short_Circuit_Evaluation'>
 In general Quantification is equivalent to a chain of <code>and</code> or <code>or</code> expressions, however it is left unspecified if quantification is using short-circuit semantics or not. It is recommended (for sanity) to do the following:
 <ul>
   <li>For actual evaluation, use short-circuit semantics, as speed is important.</li>
@@ -959,18 +959,18 @@ In general Quantification is equivalent to a chain of <code>and</code> or <code>
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Conditional_Expression_Types'>
 The condition expressions must be of Boolean type. The dependent expressions must all be of the same type, and the type of the entire conditional expression is also of that type.
 </div>
 <h3>Dynamic Semantics</h3>
-<div>
+<div id='lrm-Conditional_Expression_Evaluation'>
 Each condition is evaluated in sequence. Evaluation stops on the first condition that evaluates to true; after which the corresponding dependent expression is evaluated and returned.
 </div>
-<div>
+<div id='lrm-Conditional_Expression_Else'>
 If all condition are evaluated to false, then the else dependent expression is evaluated and returned.
 </div>
 <h2 class="autosection" id="sec:0a6f86b9bdb92972913eb249076315dce5a0d5db">TRLC Files</h2>
-<div>
+<div id='lrm-TRLC_File'>
 A <code>.trlc</code> file is simply a set of record object declarations.
 </div>
 <div class='code'>
@@ -982,11 +982,11 @@ A <code>.trlc</code> file is simply a set of record object declarations.
              | <a href="#bnf-record_object_declaration">record_object_declaration</a>
 </pre>
 </div>
-<div>
+<div id='lrm-Package_Declarations_In_TRLC'>
 <i>(Note that it is possible to indicate a package that has not been declared in an <code>.rsl</code> file, in which case it is declared by the package_indication. Note that such a package cannot be imported in by other <code>.trlc</code> files.)</i>
 </div>
 <h2 class="autosection" id="sec:6c2981b99c4b49558783bd900a1dc95a00a454f0">Sections</h2>
-<div>
+<div id='lrm-Section_Declaration'>
 A section has no semantic impact, and no impact on name resolution. Section names do not have to be unique. It may be exposed in an API, for example to section a HTML view of requirements.
 </div>
 <div class='code'>
@@ -1012,46 +1012,46 @@ A section has no semantic impact, and no impact on name resolution. Section name
 </pre>
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Valid_Record_Types'>
 The type of the declaration must be a valid record type. If no qualified name is given, the record type must be in the indicated package.
 </div>
-<div>
+<div id='lrm-Unique_Object_Names'>
 The name of the declaration must be a unique name and sufficiently distinct in the current package. <i>(See name resolution for a definition of sufficiently distinct.)</i> The name of the declaration must not shadow a type name or package.
 </div>
-<div>
+<div id='lrm-Valid_Components'>
 Each component name must be a valid component of the record type.
 </div>
-<div>
+<div id='lrm-Valid_Enumeration_Literals'>
 Each enumeration must be a valid enumeration type in the indicated (or qualified) package. Each enumeration literal must be a valid literal of the indicated enumeration in the prefix.
 </div>
-<div>
+<div id='lrm-Matching_Value_Types'>
 The type of each value must match each component or array element type. Records are specified through references <i>(there is no way to specify an inline anonymous instance)</i>.
 </div>
-<div>
+<div id='lrm-Mandatory_Components'>
 It is an error to not provide a value for a non-optional component.
 </div>
 <h3>Dynamic Semantics</h3>
-<div>
+<div id='lrm-Evaluation_Of_Checks'>
 A record object declaration creates a new binding for a record. After references are resolved, all applicable checks are evaluated in the context of this binding.
 </div>
-<div>
+<div id='lrm-Late_Reference_Checking'>
 It is an error to refer to a record by name that does not exist. It is legal to refer to an record that has not been encountered yet, as references are resolved after parsing.
 </div>
-<div>
+<div id='lrm-References_To_Extensions'>
 A record reference must match in type, i.e. be of the correct type or any record extension of that type. <i>(For example if RE extends R, then a list of R may contain references to instances of R and RE. A list of RE may not contain any references to R.)</i>
 </div>
 <h3>Name resolution</h3>
-<div>
+<div id='lrm-Sufficiently_Distinct'>
 When declaring record objects there are wider rules that indicate name clashes. Specifically a record may not be declared if its &quot;simplified name&quot; clashes with any other &quot;simplified name&quot;. A &quot;simplified name&quot; is the name converted to lowercase and all underscored removed.
 </div>
-<div>
+<div id='lrm-Simplified_Name_Example'>
 <i>(For example the simplified name of <code>Foo_Bar</code> is <code>foobar</code> and therefore it clashes with <code>Foobar</code>, <code>F_Oobar</code>, or <code>Foo_B_A_R</code>. But only at record declaration; when referring to other object you still have to use a precise match.)</i>
 </div>
-<div>
+<div id='lrm-Simplified_Name_Rationale'>
 <i>(The purpose of this rule is to avoid requirements that have hard to distinguish names.)</i>
 </div>
 <h3>Implementation Recommendation</h3>
-<div>
+<div id='lrm-Record_Object_API'>
 When exposing record instances through the API, it is required to make the type of the instance available. There are some alternatives, none of which are required:
 <ul>
   <li>Provide an implicit String record field named <code>type</code> that carries this information (it is safe to do that, as it is impossible to specify a record type with a field named <code>type</code>).</li>
@@ -1060,22 +1060,22 @@ When exposing record instances through the API, it is required to make the type 
 </ul>
 </div>
 <h2 class="autosection" id="sec:aca473accda10e90bfeb1af192c0d372dfaae446">Markup Strings</h2>
-<div>
+<div id='lrm-Markup_String_Format'>
 A <code>Markup_String</code> allows you to inline references to TRLC record in a string. The format is limited and simple: any name or comma-separated list of names enclosed in double square brackets (i.e. <code>[[</code> and <code>]]</code>) is considered a reference.
 </div>
-<div>
+<div id='lrm-Markup_String_Errors'>
 Attempting to nest, or close a list that does not exist, or not close an open list before the end of the string is an error.
 </div>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Markup_String_Types'>
 The fragment of BNF grammar applicable is qualified_name. The type of each named object must be a record type. <i>(This means you cannot reference types or enumerations.)</i>
 </div>
 <h3>Dynamic Semantics</h3>
-<div>
+<div id='lrm-Markup_String_Late_Reference_Resolution'>
 The references are resolved late, just like an ordinary record reference. <i>(This means you can forward-reference objects, or reference yourself.)</i>
 </div>
 <h3>Name resolution</h3>
-<div>
+<div id='lrm-Markup_String_Resolution'>
 The name resolution rules for the qualified_name are exactly the same as they are for any other qualified_name. <i>(This means you need to import all packages from which you reference objects.)</i>
 </div>
 <h3>Example</h3>
@@ -1107,20 +1107,20 @@ The name resolution rules for the qualified_name are exactly the same as they ar
 </div>
 <h2 class="autosection" id="sec:cfe9573cce03cb2912c44176c44378eb3eaec3c5">Null Values</h2>
 <h3>Static Semantics</h3>
-<div>
+<div id='lrm-Polymorphic_Null'>
 The null value has a polymorphic type that matches the required type given by context.
 </div>
-<div>
+<div id='lrm-Expressions_Always_Resolve_Types'>
 It is an error to form an expression if the type of all operands cannot be statically determined. <i>(This means the expression <code>null == null</code> is not true, but an error.)</i>
 </div>
 <h3>Dynamic Semantics</h3>
-<div>
+<div id='lrm-Unspecified_Optional_Components'>
 The value of an optional field that is not specified is <code>null</code>.
 </div>
-<div>
+<div id='lrm-Null_Equality'>
 For equality the null value is considered equal to itself, but not equal to any non-null value.
 </div>
-<div>
+<div id='lrm-Null_Is_Invalid'>
 For any other operator or operation, the null value is considered out of bounds and raises an error. <i>(This means you can check if something is null or not, but any other use will cause an error.)</i>
 </div>
 <h1>Appendix A: GNU Free Documentation License</h1>

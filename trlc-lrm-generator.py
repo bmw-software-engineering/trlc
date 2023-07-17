@@ -608,11 +608,14 @@ def write_header(fd, obj_version, obj_license):
     ver = obj_version.to_python_dict()
     title = "TRLC Language Reference Manual, Version %u.%u" % (ver["major"],
                                                                ver["minor"])
+    short_title = "TRLC %u.%u LRM" % (ver["major"], ver["minor"])
 
     fd.write("<!DOCTYPE html>\n")
     fd.write("<html lang=\"en\">\n")
     fd.write("<head>\n")
-    fd.write("<title>%s</title>\n" % title)
+    fd.write("<title>%s</title>\n" % short_title)
+    fd.write("<link rel=\"icon\" type=\"image/x-icon\""
+             " href=\"bmw_favicon.ico\">")
     fd.write("<meta name=\"viewport\" "
              "content=\"width=device-width, initial-scale=1.0\">\n")
     fd.write("<style>\n")
