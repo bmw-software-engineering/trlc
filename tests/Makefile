@@ -9,12 +9,12 @@ TARGETS=\
 fast: $(TARGETS)
 	coverage combine
 	coverage html --rcfile=coverage.cfg
-	coverage report --rcfile=coverage.cfg
+	coverage report --rcfile=coverage.cfg --fail-under=93
 
 all: $(TARGETS) bulk/output bulk/output.brief bulk/output.lint bulk/output.json
 	coverage combine
 	coverage html --rcfile=coverage.cfg
-	coverage report --rcfile=coverage.cfg
+	coverage report --rcfile=coverage.cfg --fail-under=93
 
 .PRECIOUS: %/output
 %/output:
