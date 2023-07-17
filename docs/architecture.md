@@ -466,7 +466,7 @@ all types immediately.
 There are two parts to the linter; the classical static analysis part
 "linter" (in [lint.py](../trlc/lint.py)) and the more formal methods
 based analysis "verification condition generation" (in
-[vcg.py](../trlc/vcg.py).
+[vcg.py](../trlc/vcg.py)).
 
 The traditional linter is pretty simple: after parsing everything we
 do another tree-walk and emit additional messages.

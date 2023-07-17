@@ -287,6 +287,8 @@ class TRLC_Lexer(Lexer_Base):
     }
 
     def __init__(self, mh, file_name, file_content=None):
+        assert isinstance(file_name, str)
+        assert isinstance(file_content, str) or file_content is None
         if file_content:
             super().__init__(mh, file_content)
         else:
