@@ -1,0 +1,12 @@
+package Test3
+
+type T {
+  s String
+  c optional Boolean
+}
+
+checks T {
+  '''pot
+     ato''' in s, fatal "potato"
+  c,              warning "potato"
+}

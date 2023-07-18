@@ -13,4 +13,12 @@ c, "potato"
 |     y = "AAAAbar"
 |     /* c is null */
 |   }
-Verified 2 model(s) and 0 check(s) and found 2 warning(s)
+c,              warning "potato"
+^ lint-vcg-strings/test3.rsl:11: warning: expression could be null [vcg-evaluation-of-null]
+| example record_type triggering error:
+|   T bad_potato {
+|     s = '''pot
+| ato'''
+|     /* c is null */
+|   }
+Verified 3 model(s) and 0 check(s) and found 3 warning(s)
