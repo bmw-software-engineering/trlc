@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>AST &#8212; TRLC 1.1.5 documentation</title>
+    <title>AST &#8212; TRLC 1.1.6 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
     
@@ -27,7 +27,7 @@
         <li class="right" >
           <a href="errors.html" title="Error handling and reporting"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.1.5 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.1.6 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">AST</a></li> 
       </ul>
     </div>  
@@ -640,6 +640,17 @@ an array specifier:</p>
 <dd class="field-even"><p>list[<a class="reference internal" href="#trlc.ast.Check" title="trlc.ast.Check">Check</a>]</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Composite_Type.all_components">
+<span class="sig-name descname"><span class="pre">all_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Composite_Type.all_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience function to get a list of all components.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<a class="reference internal" href="#trlc.ast.Composite_Component" title="trlc.ast.Composite_Component">Composite_Component</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -825,6 +836,25 @@ precisely one less separator than components.</p>
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Expression.can_be_null">
+<span class="sig-name descname"><span class="pre">can_be_null</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Expression.can_be_null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the expression could return null</p>
+<p>Checks the expression if it could generate a null value
+<em>without</em> raising an error. For example <cite>x</cite> could generate a
+null value if <cite>x</cite> is a record component that is
+optional. However <cite>x + 1</cite> could not, since an error would
+occur earlier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>possibility of encountering null</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="trlc.ast.Expression.evaluate">
 <span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Expression.evaluate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the expression in the given context</p>
@@ -878,6 +908,25 @@ implicit null expression for this.</p>
 <p>Each field will get its own implicit null. Further note that this
 implicit null is distinct from the explicit <a class="reference internal" href="#trlc.ast.Null_Literal" title="trlc.ast.Null_Literal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Null_Literal</span></code></a>
 that can appear in check expressions.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Implicit_Null.can_be_null">
+<span class="sig-name descname"><span class="pre">can_be_null</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Implicit_Null.can_be_null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the expression could return null</p>
+<p>Checks the expression if it could generate a null value
+<em>without</em> raising an error. For example <cite>x</cite> could generate a
+null value if <cite>x</cite> is a record component that is
+optional. However <cite>x + 1</cite> could not, since an error would
+occur earlier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>possibility of encountering null</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -905,6 +954,25 @@ limited:</p>
 <dd class="field-even"><p>list[<a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a>]</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Array_Aggregate.can_be_null">
+<span class="sig-name descname"><span class="pre">can_be_null</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Array_Aggregate.can_be_null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the expression could return null</p>
+<p>Checks the expression if it could generate a null value
+<em>without</em> raising an error. For example <cite>x</cite> could generate a
+null value if <cite>x</cite> is a record component that is
+optional. However <cite>x + 1</cite> could not, since an error would
+occur earlier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>possibility of encountering null</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -933,6 +1001,25 @@ syntactic sugar.</p>
 <dd class="field-even"><p>dict[str, <a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a>]</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Tuple_Aggregate.can_be_null">
+<span class="sig-name descname"><span class="pre">can_be_null</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Tuple_Aggregate.can_be_null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the expression could return null</p>
+<p>Checks the expression if it could generate a null value
+<em>without</em> raising an error. For example <cite>x</cite> could generate a
+null value if <cite>x</cite> is a record component that is
+optional. However <cite>x + 1</cite> could not, since an error would
+occur earlier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>possibility of encountering null</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -975,6 +1062,25 @@ in this AST node.</p>
 <dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Package" title="trlc.ast.Package">Package</a></p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Record_Reference.can_be_null">
+<span class="sig-name descname"><span class="pre">can_be_null</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Record_Reference.can_be_null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the expression could return null</p>
+<p>Checks the expression if it could generate a null value
+<em>without</em> raising an error. For example <cite>x</cite> could generate a
+null value if <cite>x</cite> is a record component that is
+optional. However <cite>x + 1</cite> could not, since an error would
+occur earlier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>possibility of encountering null</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1001,6 +1107,25 @@ refers to a <a class="reference internal" href="#trlc.ast.Composite_Component" t
 <dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Composite_Component" title="trlc.ast.Composite_Component">Composite_Component</a>, <a class="reference internal" href="#trlc.ast.Quantified_Variable" title="trlc.ast.Quantified_Variable">Quantified_Variable</a></p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Name_Reference.can_be_null">
+<span class="sig-name descname"><span class="pre">can_be_null</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Name_Reference.can_be_null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the expression could return null</p>
+<p>Checks the expression if it could generate a null value
+<em>without</em> raising an error. For example <cite>x</cite> could generate a
+null value if <cite>x</cite> is a record component that is
+optional. However <cite>x + 1</cite> could not, since an error would
+occur earlier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>possibility of encountering null</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1034,6 +1159,25 @@ refers to a <a class="reference internal" href="#trlc.ast.Composite_Component" t
 <dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a></p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Unary_Expression.can_be_null">
+<span class="sig-name descname"><span class="pre">can_be_null</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Unary_Expression.can_be_null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the expression could return null</p>
+<p>Checks the expression if it could generate a null value
+<em>without</em> raising an error. For example <cite>x</cite> could generate a
+null value if <cite>x</cite> is a record component that is
+optional. However <cite>x + 1</cite> could not, since an error would
+occur earlier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>possibility of encountering null</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1115,6 +1259,25 @@ rationals and strings.</p>
 <dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Composite_Component" title="trlc.ast.Composite_Component">Composite_Component</a></p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Field_Access_Expression.can_be_null">
+<span class="sig-name descname"><span class="pre">can_be_null</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Field_Access_Expression.can_be_null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the expression could return null</p>
+<p>Checks the expression if it could generate a null value
+<em>without</em> raising an error. For example <cite>x</cite> could generate a
+null value if <cite>x</cite> is a record component that is
+optional. However <cite>x + 1</cite> could not, since an error would
+occur earlier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>possibility of encountering null</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1149,6 +1312,25 @@ you can have arbitrarily complex expressions here.</p>
 <dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a></p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Range_Test.can_be_null">
+<span class="sig-name descname"><span class="pre">can_be_null</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Range_Test.can_be_null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the expression could return null</p>
+<p>Checks the expression if it could generate a null value
+<em>without</em> raising an error. For example <cite>x</cite> could generate a
+null value if <cite>x</cite> is a record component that is
+optional. However <cite>x + 1</cite> could not, since an error would
+occur earlier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>possibility of encountering null</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1218,6 +1400,25 @@ of all actions and the else expression will match.</p>
 <dd class="field-even"><p><a class="reference internal" href="#trlc.ast.Expression" title="trlc.ast.Expression">Expression</a></p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Conditional_Expression.can_be_null">
+<span class="sig-name descname"><span class="pre">can_be_null</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Conditional_Expression.can_be_null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the expression could return null</p>
+<p>Checks the expression if it could generate a null value
+<em>without</em> raising an error. For example <cite>x</cite> could generate a
+null value if <cite>x</cite> is a record component that is
+optional. However <cite>x + 1</cite> could not, since an error would
+occur earlier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>possibility of encountering null</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1260,6 +1461,25 @@ each component of the source in turn.</p>
 <dd class="field-even"><p>Boolean</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="trlc.ast.Quantified_Expression.can_be_null">
+<span class="sig-name descname"><span class="pre">can_be_null</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#trlc.ast.Quantified_Expression.can_be_null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test if the expression could return null</p>
+<p>Checks the expression if it could generate a null value
+<em>without</em> raising an error. For example <cite>x</cite> could generate a
+null value if <cite>x</cite> is a record component that is
+optional. However <cite>x + 1</cite> could not, since an error would
+occur earlier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>possibility of encountering null</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -1688,7 +1908,7 @@ Package, then the following error is issued:</p>
         <li class="right" >
           <a href="errors.html" title="Error handling and reporting"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.1.5 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">TRLC 1.1.6 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">AST</a></li> 
       </ul>
     </div>
