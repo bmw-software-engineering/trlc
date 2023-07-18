@@ -24,6 +24,10 @@ generated in the following situations:
 
 ## Changelog
 
+
+### 1.1.7-dev
+
+
 ### 1.1.6
 
 * [TRLC] Add new option `--lint --verify`. This option requires
