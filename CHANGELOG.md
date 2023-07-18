@@ -61,8 +61,8 @@ generated in the following situations:
 
 * [Package] Provide Linux and OSX packages, along with the default
   package, which should automatically install PyVCG where it is
-  available. On Windows PIP should fall back to the platform agnostic
-  package.
+  available. On Windows, `pip` should fall back to the platform
+  agnostic package.
 
 * [TRLC] Add new option `--no-user-warnings` to suppress any warning
   generated from a user-defined check.
