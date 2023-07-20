@@ -18,6 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
+from abc import ABCMeta, abstractmethod
 import re
 
 from copy import copy
@@ -95,7 +96,7 @@ class Value:
 # AST Nodes
 ##############################################################################
 
-class Node:
+class Node(metaclass=ABCMeta):
     """Base class for all AST items.
 
     :attribute location: source location
@@ -111,6 +112,7 @@ class Node:
         assert isinstance(message, str)
         print(" " * (3 * indent) + message)
 
+    @abstractmethod
     def dump(self, indent=0):  # pragma: no cover
         """Visualise the parse tree.
 
@@ -182,6 +184,12 @@ class Check_Block(Node):
         assert isinstance(n_check, Check)
         self.checks.append(n_check)
 
+    def dump(self, indent=0):  # pragma: no cover
+        self.write_indent(indent, "Check_Block")
+        self.write_indent(indent + 1, "Type: %s" % self.n_typ.name)
+        for n_check in self.checks:
+            n_check.dump(indent + 1)
+
 
 class Compilation_Unit(Node):
     """Special node to represent the concrete file structure
@@ -202,6 +210,14 @@ class Compilation_Unit(Node):
         self.imports       = None
         self.raw_imports   = []
         self.items         = []
+
+    def dump(self, indent=0):  # pragma: no cover
+        self.write_indent(indent, "Compilation_Unit (%s)" %
+                          self.location.file_name)
+        for t_import in self.raw_imports:
+            self.write_indent(indent + 1, "Import: %s" % t_import.value)
+        for n_item in self.items:
+            n_item.dump(indent + 1)
 
     def set_package(self, pkg):
         assert isinstance(pkg, Package)
@@ -385,7 +401,7 @@ class Binary_Operator(Enum):
     INDEX = auto()
 
 
-class Expression(Node):
+class Expression(Node, metaclass=ABCMeta):
     """Abstract base class for all expressions.
 
     :attribute typ: The type of this expression (or None for null values)
@@ -417,6 +433,7 @@ class Expression(Node):
         assert False, "evaluate not implemented for %s" % \
             self.__class__.__name__
 
+    @abstractmethod
     def to_string(self):  # pragma: no cover
         assert False, "to_string not implemented for %s" % \
             self.__class__.__name__
@@ -440,6 +457,7 @@ class Expression(Node):
     def resolve_references(self, mh):
         assert isinstance(mh, Message_Handler)
 
+    @abstractmethod
     def can_be_null(self):
         """Test if the expression could return null
 
@@ -507,7 +525,7 @@ class Implicit_Null(Expression):
         return True
 
 
-class Literal(Expression):
+class Literal(Expression, metaclass=ABCMeta):
     """Abstract base for all Literals
 
     Does not offer any additional features, but it's a nice way to
@@ -517,6 +535,7 @@ class Literal(Expression):
       isinstance(my_expression, Literal)
 
     """
+    @abstractmethod
     def to_python_object(self):
         assert False
 
@@ -552,6 +571,9 @@ class Null_Literal(Literal):
 
     def to_python_object(self):
         return None
+
+    def can_be_null(self):
+        return True
 
 
 class Integer_Literal(Literal):
@@ -595,6 +617,9 @@ class Integer_Literal(Literal):
     def to_python_object(self):
         return self.value
 
+    def can_be_null(self):
+        return False
+
 
 class Decimal_Literal(Literal):
     """Decimal literals
@@ -636,6 +661,9 @@ class Decimal_Literal(Literal):
 
     def to_python_object(self):
         return float(self.value)
+
+    def can_be_null(self):
+        return False
 
 
 class String_Literal(Literal):
@@ -688,6 +716,9 @@ class String_Literal(Literal):
         for ref in self.references:
             ref.resolve_references(mh)
 
+    def can_be_null(self):
+        return False
+
 
 class Boolean_Literal(Literal):
     """Boolean values
@@ -717,6 +748,9 @@ class Boolean_Literal(Literal):
 
     def to_python_object(self):
         return self.value
+
+    def can_be_null(self):
+        return False
 
 
 class Enumeration_Literal(Literal):
@@ -761,6 +795,9 @@ class Enumeration_Literal(Literal):
     def to_python_object(self):
         return self.value.name
 
+    def can_be_null(self):
+        return False
+
 
 class Array_Aggregate(Expression):
     """Instances of array types
@@ -784,6 +821,11 @@ class Array_Aggregate(Expression):
     def __init__(self, location, typ):
         super().__init__(location, typ)
         self.value = []
+
+    def dump(self, indent=0):  # pragma: no cover
+        self.write_indent(indent, "Array_Aggregate")
+        for n_value in self.value:
+            n_value.dump(indent + 1)
 
     def append(self, value):
         assert isinstance(value, (Literal,
@@ -1553,6 +1595,9 @@ class Binary_Expression(Expression):
             mh.ice_loc(self.location,
                        "unexpected binary operator %s" % self.operator)
 
+    def can_be_null(self):
+        return False
+
 
 class Field_Access_Expression(Expression):
     """Tuple field access
@@ -1921,7 +1966,7 @@ class Quantified_Expression(Expression):
 # AST Nodes (Entities)
 ##############################################################################
 
-class Entity(Node):
+class Entity(Node, metaclass=ABCMeta):
     """Base class for all entities.
 
     An entity is a concrete object (with a name) for which we need to
@@ -1938,7 +1983,7 @@ class Entity(Node):
         self.name = name
 
 
-class Typed_Entity(Entity):
+class Typed_Entity(Entity, metaclass=ABCMeta):
     """Base class for entities with a type.
 
     A typed entity is a concrete object (with a name and TRLC type)
@@ -1976,7 +2021,7 @@ class Quantified_Variable(Typed_Entity):
         self.n_typ.dump(indent + 1)
 
 
-class Type(Entity):
+class Type(Entity, metaclass=ABCMeta):
     """Abstract base class for all types.
 
     """
@@ -1989,7 +2034,7 @@ class Type(Entity):
         assert False
 
 
-class Concrete_Type(Type):
+class Concrete_Type(Type, metaclass=ABCMeta):
     """Abstract base class for all non-anonymous types.
 
     :attribute n_package: package where this type was declared
@@ -2124,6 +2169,16 @@ class Array_Type(Type):
         self.loc_upper    = loc_upper
         self.element_type = element_type
 
+    def dump(self, indent=0):  # pragma: no cover
+        self.write_indent(indent, "Array_Type")
+        self.write_indent(indent + 1, "Lower bound: %u" % self.lower_bound)
+        if self.upper_bound is None:
+            self.write_indent(indent + 1, "Upper bound: *")
+        else:
+            self.write_indent(indent + 1, "Upper bound: %u" % self.upper_bound)
+        self.write_indent(indent + 1, "Element type: %s" %
+                          self.element_type.name)
+
     def perform_type_checks(self, mh, value):
         assert isinstance(mh, Message_Handler)
         if isinstance(value, Array_Aggregate):
@@ -2215,7 +2270,7 @@ class Package(Entity):
         self.symbols.dump(indent + 1, omit_heading=True)
 
 
-class Composite_Type(Concrete_Type):
+class Composite_Type(Concrete_Type, metaclass=ABCMeta):
     """Abstract base for record and tuple types, as they share some
        functionality.
 
