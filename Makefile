@@ -58,7 +58,9 @@ full_release:
 	make bump
 	git push
 
-requirements.lobster: language-reference-manual/lobster-trlc.conf language-reference-manual/lrm.rsl language-reference-manual/lrm.trlc
+requirements.lobster: language-reference-manual/lobster-trlc.conf \
+                      language-reference-manual/lrm.rsl \
+                      language-reference-manual/lrm.trlc
 	lobster-trlc \
 		--config-file=language-reference-manual/lobster-trlc.conf \
 		--out requirements.lobster \
@@ -67,7 +69,16 @@ requirements.lobster: language-reference-manual/lobster-trlc.conf language-refer
 code.lobster: $(wildcard trlc/*.py)
 	lobster-python --out code.lobster trlc
 
-report.lobster: lobster.conf requirements.lobster code.lobster
+system-tests.lobster: $(wildcard tests/*/*.rsl) \
+                      $(wildcard tests/*/*.check) \
+                      $(wildcard tests/*/*.trlc) \
+                      $(wildcard tests/*/tracing)
+	python3 lobster-trlc-system-test.py
+
+report.lobster: lobster.conf \
+                requirements.lobster \
+                code.lobster \
+                system-tests.lobster
 	lobster-report \
 		--lobster-config=lobster.conf \
 		--out=report.lobster
