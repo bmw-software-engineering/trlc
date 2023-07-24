@@ -289,12 +289,17 @@ class TRLC_Lexer(Lexer_Base):
     def __init__(self, mh, file_name, file_content=None):
         assert isinstance(file_name, str)
         assert isinstance(file_content, str) or file_content is None
+        self.file_name = file_name
         if file_content:
             super().__init__(mh, file_content)
         else:
+            # lobster-trace: LRM.File_Encoding
+            # lobster-trace: LRM.File_Encoding_Fixed
             with open(file_name, "r", encoding="UTF-8") as fd:
-                super().__init__(mh, fd.read())
-        self.file_name = file_name
+                try:
+                    super().__init__(mh, fd.read())
+                except UnicodeDecodeError as err:
+                    mh.error(Location(file_name), str(err))
 
     def current_location(self):
         return Source_Reference(lexer      = self,

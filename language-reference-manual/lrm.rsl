@@ -12,8 +12,9 @@ type GFDL_License {
 }
 
 type Text {
-  text    optional String
-  bullets optional String [2 .. *]
+  text            optional String
+  bullets         optional String [2 .. *]
+  untraced_reason optional String
 }
 
 type Grammar extends Text {

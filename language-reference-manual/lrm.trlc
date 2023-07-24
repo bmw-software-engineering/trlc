@@ -29,6 +29,8 @@ section "Design Goals" {
          training or understanding of the language.''',
       '''No business logic should be encoded in the language design.'''
     ]
+
+    untraced_reason = "Design goals are reflected in language design."
   }
 
 }

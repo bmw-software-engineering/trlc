@@ -27,6 +27,8 @@ generated in the following situations:
 
 ### 1.1.7-dev
 
+* [TRLC] Fix tool crash when encountering a file not in UTF-8
+  encoding. We now print an error message indicating the issue.
 
 ### 1.1.6
 
