@@ -137,6 +137,7 @@ class Parser_Base:
         self.advance()
 
     def advance(self):
+        # lobster-trace: LRM.Comments
         self.ct = self.nt
         while True:
             self.nt = self.lexer.token()

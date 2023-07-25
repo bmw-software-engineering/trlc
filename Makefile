@@ -8,12 +8,20 @@ style:
 	@python3 -m pycodestyle trlc trlc*.py
 
 test:
-	coverage run -p --rcfile=tests/coverage.cfg --branch --data-file tests/.coverage ./trlc-lrm-generator.py
-	make -C tests -B -j6 fast
+	coverage run -p --rcfile=coverage.cfg --branch --data-file .coverage \
+		./trlc-lrm-generator.py
+	make -C tests-system -B -j8 fast
+	coverage combine
+	coverage html --rcfile=coverage.cfg
+	coverage report --rcfile=coverage.cfg --fail-under=93
 
 test-all:
-	coverage run -p --rcfile=tests/coverage.cfg --branch --data-file tests/.coverage ./trlc-lrm-generator.py
-	make -C tests -B -j6 all
+	coverage run -p --rcfile=coverage.cfg --branch --data-file .coverage \
+		./trlc-lrm-generator.py
+	make -C tests-system -B -j8 all
+	coverage combine
+	coverage html --rcfile=coverage.cfg
+	coverage report --rcfile=coverage.cfg --fail-under=93
 
 docs:
 	rm -rf docs
@@ -69,10 +77,10 @@ requirements.lobster: language-reference-manual/lobster-trlc.conf \
 code.lobster: $(wildcard trlc/*.py)
 	lobster-python --out code.lobster trlc
 
-system-tests.lobster: $(wildcard tests/*/*.rsl) \
-                      $(wildcard tests/*/*.check) \
-                      $(wildcard tests/*/*.trlc) \
-                      $(wildcard tests/*/tracing)
+system-tests.lobster: $(wildcard tests-system/*/*.rsl) \
+                      $(wildcard tests-system/*/*.check) \
+                      $(wildcard tests-system/*/*.trlc) \
+                      $(wildcard tests-system/*/tracing)
 	python3 lobster-trlc-system-test.py
 
 report.lobster: lobster.conf \

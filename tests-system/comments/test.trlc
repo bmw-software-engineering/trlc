@@ -1,0 +1,9 @@
+/* this is a comment */
+// this too
+package
+
+/* this is /* not a nested comment */
+
+Potato
+
+// If matching is greedy this should be a syntax error

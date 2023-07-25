@@ -26,7 +26,7 @@ from lobster.location import File_Reference
 from lobster.io import lobster_write
 
 
-TEST_DIR = "tests"
+TEST_DIR = "tests-system"
 TARGET   = "system-tests.lobster"
 
 
