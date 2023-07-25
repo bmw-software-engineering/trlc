@@ -62,7 +62,8 @@ class Test_Lexer(unittest.TestCase):
     def match(self, kind, value):
         self.assertGreater(len(self.tokens), 0)
         token, self.tokens = self.tokens[0], self.tokens[1:]
-        self.assertEqual(token.kind, kind)
+        self.assertEqual(token.kind, kind,
+                         "%s does not have the right kind" % str(token))
         if value is not None:
             self.assertEqual(token.value, value)
 
@@ -84,3 +85,43 @@ class Test_Lexer(unittest.TestCase):
         with self.assertRaises(TRLC_Error):
             self.input("_foo_")
         self.matchError("unexpected character '_'")
+
+    def testKeywords(self):
+        # lobster-trace: LRM.TRLC_Keywords
+        bullets = [
+            "abs",
+            "abstract",
+            "and",
+            "checks",
+            "else",
+            "elsif",
+            "enum",
+            "error",
+            "exists",
+            "extends",
+            "false",
+            "fatal",
+            "final",
+            "forall",
+            "freeze",
+            "if",
+            "implies",
+            "import",
+            "in",
+            "not",
+            "null",
+            "optional",
+            "or",
+            "package",
+            "section",
+            "separator",
+            "then",
+            "true",
+            "tuple",
+            "type",
+            "warning",
+            "xor"
+        ]
+        self.input(" ".join(bullets))
+        for kw in bullets:
+            self.match("KEYWORD", kw)

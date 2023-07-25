@@ -25,7 +25,7 @@ Potato_Requirement Wibble {
   cb_link     = 12345@42
   relations   = [
     Good_Potato,
-    Bad_Potato; "this is dodgy"
+    Bad_Potato; "this is dodgy",
     Good_Kitten; "this is fine"
   ]
 }

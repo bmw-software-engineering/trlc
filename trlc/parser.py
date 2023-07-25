@@ -1308,6 +1308,8 @@ class Parser(Parser_Base):
                 rv.append(self.parse_value(typ.element_type))
                 if self.peek("COMMA"):
                     self.match("COMMA")
+                else:
+                    break
             self.match("S_KET")
 
             if len(rv.value) < typ.lower_bound:

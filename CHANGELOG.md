@@ -30,6 +30,9 @@ generated in the following situations:
 * [TRLC] Fix tool crash when encountering a file not in UTF-8
   encoding. We now print an error message indicating the issue.
 
+* [TRLC] Fix bug when parsing arrays: arrays without comma separators
+  were accapted when they should have been rejected.
+
 ### 1.1.6
 
 * [TRLC] Add new option `--lint --verify`. This option requires
