@@ -41,7 +41,8 @@ def triple_quoted_string_value(raw_value):
     common_ws  = ""
     common_len = 0
     if len(non_empty_lines) >= 2:
-        for c in non_empty_lines[1]:
+        # The loop below cannot complete by construction
+        for c in non_empty_lines[1]:  # pragma: no cover
             if c not in (" \t"):
                 break
             common_ws  += c
@@ -302,6 +303,7 @@ class TRLC_Lexer(Lexer_Base):
                     mh.error(Location(file_name), str(err))
 
     def current_location(self):
+        # lobster-exclude: Utility function
         return Source_Reference(lexer      = self,
                                 start_line = self.line_no,
                                 start_col  = self.col_no,
@@ -309,6 +311,7 @@ class TRLC_Lexer(Lexer_Base):
                                 end_pos    = self.lexpos)
 
     def file_location(self):
+        # lobster-exclude: Utility function
         return Location(self.file_name, 1, 1)
 
     def token(self):
@@ -351,6 +354,7 @@ class TRLC_Lexer(Lexer_Base):
         elif self.cc == "=":
             # lobster-trace: LRM.Single_Delimiters
             # lobster-trace: LRM.Double_Delimiters
+            # lobster-trace: LRM.Lexing_Disambiguation
             if self.nc == ">":
                 kind = "ARROW"
                 self.advance()
@@ -363,6 +367,7 @@ class TRLC_Lexer(Lexer_Base):
         elif self.cc == ".":
             # lobster-trace: LRM.Single_Delimiters
             # lobster-trace: LRM.Double_Delimiters
+            # lobster-trace: LRM.Lexing_Disambiguation
             if self.nc == ".":
                 kind = "RANGE"
                 self.advance()
@@ -372,12 +377,14 @@ class TRLC_Lexer(Lexer_Base):
         elif self.cc in ("<", ">"):
             # lobster-trace: LRM.Single_Delimiters
             # lobster-trace: LRM.Double_Delimiters
+            # lobster-trace: LRM.Lexing_Disambiguation
             kind = "OPERATOR"
             if self.nc == "=":
                 self.advance()
 
         elif self.cc == "!":
             # lobster-trace: LRM.Double_Delimiters
+            # lobster-trace: LRM.Lexing_Disambiguation
             kind = "OPERATOR"
             if self.nc == "=":
                 self.advance()
@@ -388,6 +395,7 @@ class TRLC_Lexer(Lexer_Base):
         elif self.cc == "*":
             # lobster-trace: LRM.Single_Delimiters
             # lobster-trace: LRM.Double_Delimiters
+            # lobster-trace: LRM.Lexing_Disambiguation
             kind = "OPERATOR"
             if self.nc == "*":
                 self.advance()
@@ -569,6 +577,7 @@ class TRLC_Lexer(Lexer_Base):
         elif kind == "STRING":
             value = sref.text()
             if value.startswith('"'):
+                # lobster-trace: LRM.Simple_String_Value
                 value = value[1:-1]
                 value = value.replace('\\"', '"')
             else:
@@ -605,6 +614,7 @@ class TRLC_Lexer(Lexer_Base):
 
 
 def sanity_test():
+    # lobster-exclude: Developer test function
     mh    = Message_Handler()
     lexer = TRLC_Lexer(mh, sys.argv[1])
 
