@@ -548,7 +548,7 @@ class TRLC_Lexer(Lexer_Base):
                                 start_line = start_line,
                                 start_col  = start_col,
                                 start_pos  = start_pos,
-                                end_pos    = self.lexpos)
+                                end_pos    = min(self.lexpos, self.length - 1))
 
         if kind == "IDENTIFIER":
             value = sref.text()

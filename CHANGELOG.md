@@ -33,6 +33,9 @@ generated in the following situations:
 * [TRLC] Fix bug when parsing arrays: arrays without comma separators
   were accapted when they should have been rejected.
 
+* [TRLC] Fix tool crash when parsing a file with an unterminated `/*`
+  comment.
+
 ### 1.1.6
 
 * [TRLC] Add new option `--lint --verify`. This option requires
