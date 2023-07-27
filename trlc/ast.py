@@ -62,6 +62,7 @@ class Value:
     :type: Type
     """
     def __init__(self, location, value, typ):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(location, Location)
         assert value is None or \
             isinstance(value, (str,
@@ -103,6 +104,7 @@ class Node(metaclass=ABCMeta):
     :type: Location
     """
     def __init__(self, location):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(location, Location)
         self.location = location
 
@@ -159,6 +161,7 @@ class Node(metaclass=ABCMeta):
         """
         assert isinstance(indent, int) and indent >= 0
         assert False, "dump not implemented for %s" % self.__class__.__name__
+        # lobster-exclude: Debugging feature
 
 
 class Check_Block(Node):
@@ -175,6 +178,7 @@ class Check_Block(Node):
 
     """
     def __init__(self, location, n_typ):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(location)
         assert isinstance(n_typ, Composite_Type)
         self.n_typ  = n_typ
@@ -185,6 +189,7 @@ class Check_Block(Node):
         self.checks.append(n_check)
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Check_Block")
         self.write_indent(indent + 1, "Type: %s" % self.n_typ.name)
         for n_check in self.checks:
@@ -205,6 +210,7 @@ class Compilation_Unit(Node):
 
     """
     def __init__(self, file_name):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(Location(file_name))
         self.package       = None
         self.imports       = None
@@ -212,6 +218,7 @@ class Compilation_Unit(Node):
         self.items         = []
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Compilation_Unit (%s)" %
                           self.location.file_name)
         for t_import in self.raw_imports:
@@ -220,10 +227,13 @@ class Compilation_Unit(Node):
             n_item.dump(indent + 1)
 
     def set_package(self, pkg):
+        # lobster-trace: LRM.Current_Package
         assert isinstance(pkg, Package)
         self.package = pkg
 
     def add_import(self, mh, t_import):
+        # lobster-trace: LRM.Import_Visibility
+        # lobster-trace: LRM.Self_Imports
         assert isinstance(mh, Message_Handler)
         assert isinstance(t_import, Token)
         assert t_import.kind == "IDENTIFIER"
@@ -242,6 +252,7 @@ class Compilation_Unit(Node):
         self.raw_imports.append(t_import)
 
     def resolve_imports(self, mh, stab):
+        # lobster-trace: LRM.Import_Visibility
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, Symbol_Table)
         self.imports = set()
@@ -249,11 +260,15 @@ class Compilation_Unit(Node):
             self.imports.add(stab.lookup(mh, t_import, Package))
 
     def is_visible(self, n_pkg):
+        # lobster-trace: LRM.Import_Visibility
         assert self.imports is not None
         assert isinstance(n_pkg, Package)
         return n_pkg == self.package or n_pkg in self.imports
 
     def add_item(self, node):
+        # lobster-trace: LRM.RLS_File
+        # lobster-trace: LRM.Check_File
+        # lobster-trace: LRM.TRLC_File
         assert isinstance(node, (Concrete_Type,
                                  Check_Block,
                                  Record_Object)), \
@@ -288,6 +303,7 @@ class Check(Node):
     :type: str
     """
     def __init__(self, n_type, n_expr, n_anchor, severity, t_message):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(n_type, Composite_Type)
         assert isinstance(n_expr, Expression)
         assert isinstance(n_anchor, Composite_Component) or n_anchor is None
@@ -303,6 +319,7 @@ class Check(Node):
         self.message  = t_message.value
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         if self.severity == "warning":
             self.write_indent(indent, "Warning '%s'" % self.message)
         elif self.severity == "error":
@@ -408,6 +425,7 @@ class Expression(Node, metaclass=ABCMeta):
     :type: Type
     """
     def __init__(self, location, typ):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(location)
         assert typ is None or isinstance(typ, Type)
         self.typ = typ
@@ -502,6 +520,7 @@ class Implicit_Null(Expression):
 
     """
     def __init__(self, composite_object, composite_component):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(composite_object, (Record_Object,
                                              Tuple_Aggregate))
         assert isinstance(composite_component, Composite_Component)
@@ -519,6 +538,7 @@ class Implicit_Null(Expression):
         return None
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Implicit_Null")
 
     def can_be_null(self):
@@ -553,12 +573,14 @@ class Null_Literal(Literal):
 
     """
     def __init__(self, token):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(token, Token)
         assert token.kind == "KEYWORD"
         assert token.value == "null"
         super().__init__(token.location, None)
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Null Literal")
 
     def to_string(self):
@@ -596,6 +618,7 @@ class Integer_Literal(Literal):
     :type: int
     """
     def __init__(self, token, typ):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(token, Token)
         assert token.kind == "INTEGER"
         assert isinstance(typ, Builtin_Integer)
@@ -604,6 +627,7 @@ class Integer_Literal(Literal):
         self.value = token.value
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Integer Literal %u" % self.value)
 
     def to_string(self):
@@ -641,6 +665,7 @@ class Decimal_Literal(Literal):
     :type: fractions.Fraction
     """
     def __init__(self, token, typ):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(token, Token)
         assert token.kind == "DECIMAL"
         assert isinstance(typ, Builtin_Decimal)
@@ -649,6 +674,7 @@ class Decimal_Literal(Literal):
         self.value = token.value
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Decimal Literal %u" % self.value)
 
     def to_string(self):
@@ -684,6 +710,7 @@ class String_Literal(Literal):
 
     """
     def __init__(self, token, typ):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(token, Token)
         assert token.kind == "STRING"
         assert isinstance(typ, Builtin_String)
@@ -694,6 +721,7 @@ class String_Literal(Literal):
         self.references     = []
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "String Literal %s" % repr(self.value))
         if self.has_references:
             self.write_indent(indent + 1, "Markup References")
@@ -727,6 +755,7 @@ class Boolean_Literal(Literal):
     :type: bool
     """
     def __init__(self, token, typ):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(token, Token)
         assert token.kind == "KEYWORD"
         assert token.value in ("false", "true")
@@ -736,6 +765,7 @@ class Boolean_Literal(Literal):
         self.value = token.value == "true"
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Boolean Literal %s" % self.value)
 
     def to_string(self):
@@ -774,12 +804,14 @@ class Enumeration_Literal(Literal):
 
     """
     def __init__(self, location, literal):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(literal, Enumeration_Literal_Spec)
         super().__init__(location, literal.n_typ)
 
         self.value = literal
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent,
                           "Enumeration Literal %s.%s" % (self.typ.name,
                                                          self.value.name))
@@ -819,10 +851,12 @@ class Array_Aggregate(Expression):
 
     """
     def __init__(self, location, typ):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(location, typ)
         self.value = []
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Array_Aggregate")
         for n_value in self.value:
             n_value.dump(indent + 1)
@@ -897,6 +931,7 @@ class Tuple_Aggregate(Expression):
         self.value[field] = value
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Tuple_Aggregate")
         self.write_indent(indent + 1, "Type: %s" % self.typ.name)
         for n_item in self.typ.iter_sequence():
@@ -979,6 +1014,7 @@ class Record_Reference(Expression):
 
     """
     def __init__(self, location, name, typ, package):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(location, Location)
         assert isinstance(name, str)
         assert isinstance(typ, Record_Type) or typ is None
@@ -990,6 +1026,7 @@ class Record_Reference(Expression):
         self.package = package
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Record Reference %s" % self.name)
         self.write_indent(indent + 1,
                           "Resolved: %s" % (self.target is not None))
@@ -1045,12 +1082,14 @@ class Name_Reference(Expression):
     :type: Composite_Component, Quantified_Variable
     """
     def __init__(self, location, entity):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(entity, (Composite_Component,
                                    Quantified_Variable))
         super().__init__(location, entity.n_typ)
         self.entity = entity
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Name Reference to %s" % self.entity.name)
 
     def to_string(self):
@@ -1152,6 +1191,7 @@ class Unary_Expression(Expression):
             assert False
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Unary %s Expression" % self.operator)
         self.write_indent(indent + 1, "Type: %s" % self.typ.name)
         self.n_operand.dump(indent + 1)
@@ -1340,6 +1380,7 @@ class Binary_Expression(Expression):
                        "unexpected binary operation %s" % operator)
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Binary %s Expression" % self.operator)
         self.write_indent(indent + 1, "Type: %s" % self.typ.name)
         self.n_lhs.dump(indent + 1)
@@ -1625,6 +1666,7 @@ class Field_Access_Expression(Expression):
         self.n_prefix.ensure_type(mh, self.n_field.member_of)
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Field_Access (%s)" % self.n_field.name)
         self.n_prefix.dump(indent + 1)
 
@@ -1682,6 +1724,7 @@ class Range_Test(Expression):
                                    self.n_upper.to_string())
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Range Test")
         self.write_indent(indent + 1, "Type: %s" % self.typ)
         self.n_lhs.dump(indent + 1)
@@ -1759,6 +1802,7 @@ class Action(Node):
         self.n_cond.ensure_type(mh, Builtin_Boolean)
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "%s Action" % self.kind.capitalize())
         self.write_indent(indent + 1, "Condition")
         self.n_cond.dump(indent + 2)
@@ -1796,6 +1840,7 @@ class Conditional_Expression(Expression):
 
     """
     def __init__(self, location, if_action):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(if_action, Action)
         assert if_action.kind == "if"
         super().__init__(location, if_action.n_expr.typ)
@@ -1818,6 +1863,7 @@ class Conditional_Expression(Expression):
         self.else_expr = n_expr
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Conditional expression")
         for action in self.actions:
             action.dump(indent + 1)
@@ -1900,6 +1946,7 @@ class Quantified_Expression(Expression):
         self.n_expr.ensure_type(mh, Builtin_Boolean)
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         if self.universal:
             self.write_indent(indent, "Universal quantified expression")
         else:
@@ -1978,6 +2025,7 @@ class Entity(Node, metaclass=ABCMeta):
 
     """
     def __init__(self, name, location):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(location)
         assert isinstance(name, str)
         self.name = name
@@ -1995,6 +2043,7 @@ class Typed_Entity(Entity, metaclass=ABCMeta):
 
     """
     def __init__(self, name, location, n_typ):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(name, location)
         assert isinstance(n_typ, Type)
         self.n_typ = n_typ
@@ -2017,6 +2066,7 @@ class Quantified_Variable(Typed_Entity):
 
     """
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Quantified Variable %s" % self.name)
         self.n_typ.dump(indent + 1)
 
@@ -2041,6 +2091,7 @@ class Concrete_Type(Type, metaclass=ABCMeta):
     :type: Package
     """
     def __init__(self, name, location, n_package):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(name, location)
         assert isinstance(n_package, Package)
         self.n_package = n_package
@@ -2068,9 +2119,11 @@ class Builtin_Type(Type):
     LOCATION = Location(file_name = "<builtin>")
 
     def __init__(self, name):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(name, Builtin_Type.LOCATION)
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, self.__class__.__name__)
 
 
@@ -2079,6 +2132,7 @@ class Builtin_Numeric_Type(Builtin_Type):
 
     """
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, self.__class__.__name__)
 
 
@@ -2097,6 +2151,7 @@ class Builtin_Function(Entity):
     LOCATION = Location(file_name = "<builtin>")
 
     def __init__(self, name, arity):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(name, Builtin_Function.LOCATION)
         assert isinstance(arity, int)
         assert arity >= 0
@@ -2104,6 +2159,7 @@ class Builtin_Function(Entity):
         self.deprecated = ":" in name
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, self.__class__.__name__ + " " + self.name)
 
 
@@ -2139,6 +2195,7 @@ class Array_Type(Type):
                  lower_bound,
                  loc_upper,
                  upper_bound):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(element_type, Type) or element_type is None
         assert isinstance(lower_bound, int)
         assert lower_bound >= 0
@@ -2170,6 +2227,7 @@ class Array_Type(Type):
         self.element_type = element_type
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Array_Type")
         self.write_indent(indent + 1, "Lower bound: %u" % self.lower_bound)
         if self.upper_bound is None:
@@ -2195,6 +2253,7 @@ class Array_Type(Type):
 class Builtin_Integer(Builtin_Numeric_Type):
     """Builtin integer type."""
     def __init__(self):
+        # lobster-exclude: Constructor only declares variables
         super().__init__("Integer")
 
     def get_example_value(self):
@@ -2204,6 +2263,7 @@ class Builtin_Integer(Builtin_Numeric_Type):
 class Builtin_Decimal(Builtin_Numeric_Type):
     """Builtin decimal type."""
     def __init__(self):
+        # lobster-exclude: Constructor only declares variables
         super().__init__("Decimal")
 
     def get_example_value(self):
@@ -2213,6 +2273,7 @@ class Builtin_Decimal(Builtin_Numeric_Type):
 class Builtin_Boolean(Builtin_Type):
     """Builtin boolean type."""
     def __init__(self):
+        # lobster-exclude: Constructor only declares variables
         super().__init__("Boolean")
 
     def get_example_value(self):
@@ -2222,6 +2283,7 @@ class Builtin_Boolean(Builtin_Type):
 class Builtin_String(Builtin_Type):
     """Builtin string type."""
     def __init__(self):
+        # lobster-exclude: Constructor only declares variables
         super().__init__("String")
 
     def get_example_value(self):
@@ -2233,6 +2295,7 @@ class Builtin_Markup_String(Builtin_String):
        objects.
     """
     def __init__(self):
+        # lobster-exclude: Constructor only declares variables
         super().__init__()
         self.name = "Markup_String"
 
@@ -2257,6 +2320,7 @@ class Package(Entity):
 
     """
     def __init__(self, name, location, builtin_stab, declared_late):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(name, location)
         assert isinstance(builtin_stab, Symbol_Table)
         assert isinstance(declared_late, bool)
@@ -2265,6 +2329,7 @@ class Package(Entity):
         self.declared_late = declared_late
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Package %s" % self.name)
         self.write_indent(indent + 1, "Declared_Late: %s" % self.declared_late)
         self.symbols.dump(indent + 1, omit_heading=True)
@@ -2291,6 +2356,7 @@ class Composite_Type(Concrete_Type, metaclass=ABCMeta):
                  location,
                  package,
                  inherited_symbols=None):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(name, location, package)
         assert isinstance(description, str) or description is None
         assert isinstance(inherited_symbols, Symbol_Table) or \
@@ -2344,6 +2410,7 @@ class Composite_Component(Typed_Entity):
                  member_of,
                  n_typ,
                  optional):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(name, location, n_typ)
         assert isinstance(description, str) or description is None
         assert isinstance(member_of, Composite_Type)
@@ -2353,6 +2420,7 @@ class Composite_Component(Typed_Entity):
         self.optional    = optional
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Composite_Component %s" % self.name)
         if self.description:
             self.write_indent(indent + 1, "Description: %s" % self.description)
@@ -2391,6 +2459,7 @@ class Record_Type(Composite_Type):
                  package,
                  n_parent,
                  is_abstract):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(n_parent, Record_Type) or n_parent is None
         assert isinstance(is_abstract, bool)
         super().__init__(name,
@@ -2409,6 +2478,7 @@ class Record_Type(Composite_Type):
         yield from self.checks
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Record_Type %s" % self.name)
         if self.description:
             self.write_indent(indent + 1, "Description: %s" % self.description)
@@ -2513,6 +2583,7 @@ class Tuple_Type(Composite_Type):
 
     """
     def __init__(self, name, description, location, package):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(name,
                          description,
                          location,
@@ -2543,6 +2614,7 @@ class Tuple_Type(Composite_Type):
         return bool(self.separators)
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Tuple_Type %s" % self.name)
         if self.description:
             self.write_indent(indent + 1, "Description: %s" % self.description)
@@ -2593,6 +2665,7 @@ class Separator(Node):
     :type: Token
     """
     def __init__(self, token):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(token.location)
         assert isinstance(token, Token) and token.kind in ("IDENTIFIER",
                                                            "AT",
@@ -2608,6 +2681,7 @@ class Separator(Node):
         }.get(self.token.kind, self.token.value)
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Separator %s" % self.token.value)
 
 
@@ -2627,12 +2701,14 @@ class Enumeration_Type(Concrete_Type):
 
     """
     def __init__(self, name, description, location, package):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(name, location, package)
         assert isinstance(description, str) or description is None
         self.literals    = Symbol_Table()
         self.description = description
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Enumeration_Type %s" % self.name)
         if self.description:
             self.write_indent(indent + 1, "Description: %s" % self.description)
@@ -2663,12 +2739,14 @@ class Enumeration_Literal_Spec(Typed_Entity):
 
     """
     def __init__(self, name, description, location, enum):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(name, location, enum)
         assert isinstance(description, str) or description is None
         assert isinstance(enum, Enumeration_Type)
         self.description = description
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Enumeration_Literal_Spec %s" % self.name)
         if self.description:
             self.write_indent(indent + 1, "Description: %s" % self.description)
@@ -2756,6 +2834,7 @@ class Record_Object(Typed_Entity):
         self.field[component.name] = value
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Record_Object %s" % self.name)
         self.write_indent(indent + 1, "Type: %s" % self.n_typ.name)
         for key, value in self.field.items():
@@ -2806,11 +2885,13 @@ class Section(Entity):
 
     """
     def __init__(self, name, location, parent):
+        # lobster-exclude: Constructor only declares variables
         super().__init__(name, location)
         assert isinstance(parent, Section) or parent is None
         self.parent  = parent
 
     def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Section %s" % self.name)
         if self.parent is None:
             self.write_indent(indent + 1, "Parent: None")
@@ -2826,6 +2907,7 @@ class Symbol_Table:
     """ Symbol table mapping names to entities
     """
     def __init__(self, parent=None):
+        # lobster-exclude: Constructor only declares variables
         assert isinstance(parent, Symbol_Table) or parent is None
         self.parent   = parent
         self.imported = []
@@ -3038,6 +3120,7 @@ class Symbol_Table:
         print(" " * (3 * indent) + message)
 
     def dump(self, indent=0, omit_heading=False):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         if omit_heading:
             new_indent = indent
         else:
@@ -3082,6 +3165,7 @@ class Symbol_Table:
 
 class Scope:
     def __init__(self):
+        # lobster-exclude: Constructor only declares variables
         self.scope = []
 
     def push(self, stab):

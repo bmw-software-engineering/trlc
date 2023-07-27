@@ -1,0 +1,5 @@
+package Foo
+
+T t2 {
+  links = t1
+}

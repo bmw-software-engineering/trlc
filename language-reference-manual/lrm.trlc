@@ -239,10 +239,14 @@ user-defined checks are applied.
 
   Recommendation Errors_In_TRLC_Files {
     text = '''
-It is unspecified how an implementation treats errors in
-`.trlc` files, but it is recommended to not stop processing
-after the first error.
-'''
+      It is unspecified how an implementation treats errors
+      in `.trlc` files, but it is recommended to not stop
+      processing after the first error.
+    '''
+    untraced_reason = '''
+      This recommendation is not followed, as it would make the
+      qualification of the tool more difficult.
+    '''
   }
 
 }

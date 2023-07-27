@@ -1,0 +1,2 @@
+preamble-1/bar.rsl:1:1: trlc error: expected keyword package, encountered keyword import instead
+preamble-1/foo.rsl:1:1: trlc error: expected keyword package, encountered keyword type instead

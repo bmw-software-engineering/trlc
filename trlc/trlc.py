@@ -134,6 +134,7 @@ class Source_Manager:
         :rtype: bool
         """
         assert os.path.isfile(file_name)
+        # lobster-trace: LRM.Layout
 
         ok = True
         if file_name.endswith(".rsl"):
@@ -166,6 +167,7 @@ class Source_Manager:
         :rtype: bool
         """
         assert os.path.isdir(dir_name)
+        # lobster-trace: LRM.Layout
 
         ok = True
         for path, dirs, files in os.walk(dir_name):
@@ -190,6 +192,7 @@ class Source_Manager:
     def register_rsl_file(self, file_name):
         assert os.path.isfile(file_name)
         assert file_name not in self.rsl_files
+        # lobster-trace: LRM.Preamble
 
         self.update_common_root(file_name)
 
@@ -219,6 +222,8 @@ class Source_Manager:
         self.trlc_files[file_name] = self.create_parser(file_name)
 
     def parse_rsl_files(self):
+        # lobster-trace: LRM.Preamble
+
         # First, check that each package import is known
         for parser in self.rsl_files.values():
             parser.cu.resolve_imports(self.mh, self.stab)
@@ -258,6 +263,8 @@ class Source_Manager:
                 del self.packages[pkg]
 
     def parse_check_files(self):
+        # lobster-trace: LRM.Preamble
+
         ok = True
         for name in sorted(self.check_files):
             try:
@@ -267,6 +274,8 @@ class Source_Manager:
         return ok
 
     def parse_trlc_files(self):
+        # lobster-trace: LRM.Preamble
+
         ok = True
 
         # First, pre-parse the file_preamble of all files to discover
@@ -324,6 +333,8 @@ class Source_Manager:
         :return: a symbol table (or None if there were any errors)
         :rtype: Symbol_Table
         """
+        # lobster-trace: LRM.File_Parsing_Order
+
         # Parse RSL files (topologically sorted, in order to deal with
         # dependencies)
         try:
@@ -353,6 +364,7 @@ class Source_Manager:
 
         # Resolve record reference names and do the missing semantic
         # analysis.
+        # lobster-trace: LRM.File_Parsing_References
         if not self.resolve_record_references():
             return None
 

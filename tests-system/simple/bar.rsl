@@ -1,7 +1,5 @@
-          package bar
+package bar
 
-
-
-            type MyType {
-               name String
-            }
+type MyType {
+  name String
+}

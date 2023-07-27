@@ -1482,6 +1482,8 @@ class Parser(Parser_Base):
 
     def parse_preamble(self, kind):
         assert kind in ("rsl", "check", "trlc")
+        # lobster-trace: LRM.Layout
+        # lobster-trace: LRM.Preamble
 
         # First, parse package indication, declaring the package if
         # needed
@@ -1513,10 +1515,13 @@ class Parser(Parser_Base):
                     (pkg.name,
                      self.mh.cross_file_reference(pkg.location)))
 
+        # lobster-trace: LRM.Current_Package
         self.cu.set_package(pkg)
+
         self.default_scope.push(self.cu.package.symbols)
 
         # Second, parse import list (but don't resolve names yet)
+        # lobster-trace: LRM.Import_Visibility
         if kind != "check":
             while self.peek_kw("import"):
                 self.match_kw("import")
