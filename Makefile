@@ -40,7 +40,8 @@ docs:
 		dot -Tsvg > docs/ast_hierarchy.svg
 	@python3 -m util.mk_parser_hierarchy | \
 		dot -Tsvg > docs/parser_hierarchy.svg
-	sphinx-build -c sphinx -b html . docs
+	@make tracing
+	@sphinx-build -c sphinx -b html . docs
 
 docs-and-commit: docs
 	git add docs
@@ -104,6 +105,6 @@ report.lobster: lobster.conf \
 		--out=report.lobster
 	lobster-online-report report.lobster
 
-tracing.html: report.lobster
-	lobster-html-report report.lobster --out=tracing.html
+tracing: report.lobster
+	lobster-html-report report.lobster --out=docs/tracing.html
 	lobster-ci-report report.lobster
