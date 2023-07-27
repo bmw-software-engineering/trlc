@@ -27,6 +27,10 @@ generated in the following situations:
 
 ### 1.1.7-dev
 
+* [TRLC] Add alternative entry-point for users who cannot modify their
+  PATH. You can now do `python3 -m trlc [args...]` and it works just
+  like `trlc [args...]`.
+
 * [TRLC] Fix tool crash when encountering a file not in UTF-8
   encoding. We now print an error message indicating the issue.
 

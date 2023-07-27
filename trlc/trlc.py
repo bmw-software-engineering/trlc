@@ -380,7 +380,12 @@ class Source_Manager:
 
 def main():
     ap = argparse.ArgumentParser(
-        description="TRLC %s (Python reference implementation)" % TRLC_VERSION
+        prog="trlc",
+        description="TRLC %s (Python reference implementation)" % TRLC_VERSION,
+        epilog=("TRLC is licensed under the GPLv3."
+                " Report bugs here:"
+                " https://github.com/bmw-software-engineering/trlc/issues"),
+        allow_abbrev=False,
     )
     op_mode = ap.add_mutually_exclusive_group()
     op_mode.add_argument("--lint",
