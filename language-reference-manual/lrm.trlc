@@ -213,7 +213,7 @@ section "Layout and file structure" {
   Text Layout {
     text = "There are three types of files:"
     bullets = [
-      '''`.rls` They contains the user-defined type definitions and
+      '''`.rsl` They contains the user-defined type definitions and
          optionally user-defined warnings or checks''',
       '''`.check` They contain only user-defined warning or error messages
          for types declared in `.rsl` files''',
@@ -224,7 +224,7 @@ section "Layout and file structure" {
 
   Dynamic_Semantics File_Parsing_Order {
     text = '''
-First, all `.rls` files are parsed. Then, if no errors are
+First, all `.rsl` files are parsed. Then, if no errors are
 raised, all `.check` files are parsed. Finally, if no errors
 are raised, all `.trlc` files are parsed.
 '''
@@ -286,19 +286,19 @@ import_clause ::= 'import' IDENTIFIER_name
 
 /***********************************************************************/
 
-section "Metamodel (RLS) files" {
+section "Metamodel (RSL) files" {
 
-  Grammar RLS_File {
-    text = '''A `.rls` file starts with a package declaration and is
+  Grammar RSL_File {
+    text = '''A `.rsl` file starts with a package declaration and is
               followed by type declarations.'''
     bnf = '''
-      rls_file ::= file_preamble
+      rsl_file ::= file_preamble
                    { type_declaration | check_block }
     '''
   }
 
   Static_Semantics Package_Declaration {
-    text = '''A package indication in an `.rls` file declares a
+    text = '''A package indication in an `.rsl` file declares a
               package. Any given package name may only be
               declared once globally.'''
   }

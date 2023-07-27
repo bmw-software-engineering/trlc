@@ -114,7 +114,7 @@ A copy of the license is included in the section entitled "Appendix A: GNU Free 
   </li>
   <li><a href="#sec:1b5022091302172b7af39971681b5b026fc2fa64">Preamble</a>
   </li>
-  <li><a href="#sec:347156ba7288ce580b92312542aba49980af6614">Metamodel (RLS) files</a>
+  <li><a href="#sec:e32754541894d8d5a8aa8cd2d14c960cb81f0cf8">Metamodel (RSL) files</a>
   </li>
   <li><a href="#sec:0034d3d04e5c64801a54b17b470e6a49a500b621">Described names</a>
   </li>
@@ -335,14 +335,14 @@ The value of a triple quoted string is the whitespace trimmed string of characte
 <div id='lrm-Layout'>
 There are three types of files:
 <ul>
-  <li><code>.rls</code> They contains the user-defined type definitions and optionally user-defined warnings or checks</li>
+  <li><code>.rsl</code> They contains the user-defined type definitions and optionally user-defined warnings or checks</li>
   <li><code>.check</code> They contain only user-defined warning or error messages for types declared in <code>.rsl</code> files</li>
   <li><code>.trlc</code> They contain instances of the types (this is where your requirements go)</li>
 </ul>
 </div>
 <h3>Dynamic Semantics</h3>
 <div id='lrm-File_Parsing_Order'>
-First, all <code>.rls</code> files are parsed. Then, if no errors are raised, all <code>.check</code> files are parsed. Finally, if no errors are raised, all <code>.trlc</code> files are parsed.
+First, all <code>.rsl</code> files are parsed. Then, if no errors are raised, all <code>.check</code> files are parsed. Finally, if no errors are raised, all <code>.trlc</code> files are parsed.
 </div>
 <div id='lrm-File_Parsing_References'>
 After all files are parsed, references are resolved and user-defined checks are applied.
@@ -375,19 +375,19 @@ A package may be imported, in which case its name may be used as the prefix of a
 <div id='lrm-Self_Imports'>
 A package may not import itself.
 </div>
-<h2 class="autosection" id="sec:347156ba7288ce580b92312542aba49980af6614">Metamodel (RLS) files</h2>
-<div id='lrm-RLS_File'>
-A <code>.rls</code> file starts with a package declaration and is followed by type declarations.
+<h2 class="autosection" id="sec:e32754541894d8d5a8aa8cd2d14c960cb81f0cf8">Metamodel (RSL) files</h2>
+<div id='lrm-RSL_File'>
+A <code>.rsl</code> file starts with a package declaration and is followed by type declarations.
 </div>
 <div class='code'>
 <pre>
-<span id="bnf-rls_file">rls_file</span> ::= <span class="tooltip"><a href="#bnf-file_preamble">file_preamble</a><span class="tooltiptext">package_indication { import_clause }</span></span>
+<span id="bnf-rsl_file">rsl_file</span> ::= <span class="tooltip"><a href="#bnf-file_preamble">file_preamble</a><span class="tooltiptext">package_indication { import_clause }</span></span>
              { <a href="#bnf-type_declaration">type_declaration</a> | <span class="tooltip"><a href="#bnf-check_block">check_block</a><span class="tooltiptext">checks IDENTIFIER { { check_declaration } }</span></span> }
 </pre>
 </div>
 <h3>Static Semantics</h3>
 <div id='lrm-Package_Declaration'>
-A package indication in an <code>.rls</code> file declares a package. Any given package name may only be declared once globally.
+A package indication in an <code>.rsl</code> file declares a package. Any given package name may only be declared once globally.
 </div>
 <div id='lrm-Circular_Dependencies'>
 In a <code>.rsl</code> file, a package may not import a package that imports itself, directly or indirectly.

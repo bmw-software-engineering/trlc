@@ -36,6 +36,8 @@ generated in the following situations:
 * [TRLC] Fix tool crash when parsing a file with an unterminated `/*`
   comment.
 
+* [LRM] Fix typo in in several places: `.rls` should be `.rsl`.
+
 ### 1.1.6
 
 * [TRLC] Add new option `--lint --verify`. This option requires
