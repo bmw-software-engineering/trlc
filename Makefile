@@ -14,7 +14,7 @@ test: unit-tests system-tests
 	util/check_local_modifications.sh
 
 coverage:
-	coverage combine
+	coverage combine -q
 	coverage html --rcfile=coverage.cfg
 	coverage report --rcfile=coverage.cfg --fail-under=93
 
