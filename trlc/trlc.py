@@ -240,6 +240,7 @@ class Source_Manager:
                             pkg["deps"] <= processed_packages]
 
             if not work_list:
+                # lobster-trace: LRM.Circular_Dependencies
                 conflicts = list(sorted(self.packages))
                 if self.mh.brief:
                     self.mh.error(

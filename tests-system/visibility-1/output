@@ -1,0 +1,2 @@
+Foo.T {}
+^^^ visibility-1/bar.trlc:3: error: package must be imported before use

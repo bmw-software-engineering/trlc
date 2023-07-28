@@ -1,4 +1,6 @@
 import Potato
 ^^^^^^ preamble-1/bar.rsl:1: error: expected keyword package, encountered keyword import instead
+import Baz
+       ^^^ preamble-1/baz.rsl:2: error: package Baz cannot import itself
 type T {}
 ^^^^ preamble-1/foo.rsl:1: error: expected keyword package, encountered keyword type instead

@@ -3134,6 +3134,9 @@ class Symbol_Table:
 
     @classmethod
     def create_global_table(cls, mh):
+        # lobster-trace: LRM.Builtin_Types
+        # lobster-trace: LRM.Builtin_Functions
+        # lobster-trace: LRM.Builtin_Type_Conversion_Functions
         stab = Symbol_Table()
         stab.register(mh, Builtin_Integer())
         stab.register(mh, Builtin_Decimal())

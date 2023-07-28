@@ -847,6 +847,7 @@ class Parser(Parser_Base):
             return ast.String_Literal(self.ct, self.builtin_str)
 
         elif self.peek_kw("true") or self.peek_kw("false"):
+            # lobster-trace: LRM.Boolean_Values
             self.match("KEYWORD")
             return ast.Boolean_Literal(self.ct, self.builtin_bool)
 
@@ -1498,6 +1499,7 @@ class Parser(Parser_Base):
             declare_package = not self.stab.contains(self.ct.value)
 
         if declare_package:
+            # lobster-trace: LRM.Package_Declaration
             pkg = ast.Package(name          = self.ct.value,
                               location      = self.ct.location,
                               builtin_stab  = self.stab,
@@ -1529,6 +1531,7 @@ class Parser(Parser_Base):
                 self.cu.add_import(self.mh, self.ct)
 
     def parse_rsl_file(self):
+        # lobster-trace: LRM.RSL_File
         assert self.cu.package is not None
 
         while not self.peek_eof():
