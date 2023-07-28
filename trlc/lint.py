@@ -24,6 +24,7 @@ from trlc.vcg import VCG
 
 
 class Linter:
+    # lobster-exclude: Not safety relevant
     def __init__(self, mh, stab, verify_checks, debug_vcg):
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, ast.Symbol_Table)

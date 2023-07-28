@@ -40,6 +40,7 @@ CVC5_OPTIONS = {
 
 
 class Unsupported(Exception):  # pragma: no cover
+    # lobster-exclude: Not safety relevant
     def __init__(self, node, text):
         assert isinstance(node, Node)
         assert isinstance(text, str) or text is None
@@ -50,6 +51,7 @@ class Unsupported(Exception):  # pragma: no cover
 
 
 class Feedback:
+    # lobster-exclude: Not safety relevant
     def __init__(self, node, message, kind, expect_unsat=True):
         assert isinstance(node, Expression)
         assert isinstance(message, str)
@@ -62,6 +64,7 @@ class Feedback:
 
 
 class VCG:
+    # lobster-exclude: Not safety relevant
     def __init__(self, mh, n_ctyp, debug):
         assert VCG_AVAILABLE
         assert isinstance(mh, Message_Handler)
