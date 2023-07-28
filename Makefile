@@ -2,10 +2,12 @@
 
 lint: style
 	@python3 -m pylint --rcfile=pylint3.cfg \
-		--reports=no trlc trlc*.py
+		--reports=no \
+		--score=no \
+		trlc trlc*.py lobster-*.py
 
 style:
-	@python3 -m pycodestyle trlc trlc*.py
+	@python3 -m pycodestyle trlc trlc*.py lobster-*.py
 
 test: unit-tests system-tests
 	make coverage
