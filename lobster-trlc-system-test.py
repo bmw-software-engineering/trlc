@@ -51,8 +51,11 @@ def process(testname):
                     if line.strip()]
         for tag in tags:
             item.add_tracing_target(tag)
+        return [item]
 
-    return item
+    else:
+        # We don't need to know about untraced regression tests
+        return []
 
 
 def main():
@@ -62,7 +65,7 @@ def main():
         if dirent.is_dir():
             if dirent.name == "htmlcov":
                 continue
-            items.append(process(dirent.name))
+            items += process(dirent.name)
 
     with open(TARGET, "w", encoding="UTF-8") as fd:
         lobster_write(fd, Activity, "lobster-trlc-system-test", items)
