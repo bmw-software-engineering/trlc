@@ -35,7 +35,9 @@ except ImportError:  # pragma: no cover
     VCG_AVAILABLE = False
 
 CVC5_OPTIONS = {
-    "tlimit-per" : 2500
+    "tlimit-per"      : 2500,
+    "seed"            : 42,
+    "sat-random-seed" : 42,
 }
 
 
