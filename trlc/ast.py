@@ -109,6 +109,7 @@ class Node(metaclass=ABCMeta):
         self.location = location
 
     def write_indent(self, indent, message):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         assert isinstance(indent, int)
         assert indent >= 0
         assert isinstance(message, str)
@@ -331,6 +332,7 @@ class Check(Node):
         self.n_expr.dump(indent + 1)
 
     def get_real_location(self, composite_object):
+        # lobster-exclude: LRM.Anchoring
         assert isinstance(composite_object, (Record_Object,
                                              Tuple_Aggregate))
         if isinstance(composite_object, Record_Object):
@@ -375,6 +377,7 @@ class Check(Node):
 
 
 class Unary_Operator(Enum):
+    # lobster-exclude: Utility enumeration for unary operators
     MINUS          = auto()
     PLUS           = auto()
     LOGICAL_NOT    = auto()
@@ -388,6 +391,7 @@ class Unary_Operator(Enum):
 
 
 class Binary_Operator(Enum):
+    # lobster-exclude: Utility enumeration for binary operators
     LOGICAL_AND     = auto()    # Short-circuit
     LOGICAL_OR      = auto()    # Short-circuit
     LOGICAL_XOR     = auto()
