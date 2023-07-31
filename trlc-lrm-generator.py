@@ -1301,7 +1301,7 @@ def main():
                                        filename).groups()))
                     for filename in glob.glob("docs/lrm-*.*.html")]
 
-    with open("docs/LRM.md", "w", encoding="UTF-8") as fd:
+    with open("documentation/LRM.md", "w", encoding="UTF-8") as fd:
         fd.write("# TRLC LRM\n\n")
         first = True
         for major, minor in reversed(sorted(lrm_versions)):

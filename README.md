@@ -6,7 +6,7 @@ The repository contains:
 
 * The [language reference
   manual](https://bmw-software-engineering.github.io/trlc/lrm.html)
-  for TRLC. [Previous versions](docs/LRM.md) are also available.
+  for TRLC. [Previous versions](documentation/LRM.md) are also available.
 
 * A pure Python reference implementation of TRLC.
 
@@ -48,7 +48,7 @@ The Python implementation can be used for several purposes:
 
 * [Lexer/Parser Hierarchy](https://bmw-software-engineering.github.io/trlc/parser_hierarchy.svg)
   (overview over all classes releated to the lexing and parsing of TRLC)
-* [Tool Architecture Overview](docs/architecture.md)
+* [Tool Architecture Overview](documentation/architecture.md)
 
 ## Dependencies
 
