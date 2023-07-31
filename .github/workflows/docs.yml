@@ -41,6 +41,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install sphinx
           pip install bmw-lobster-core bmw-lobster-tool-trlc
+          sudo apt-get install -y graphviz
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Generate docs
