@@ -1309,8 +1309,14 @@ class Parser(Parser_Base):
                 rv.append(self.parse_value(typ.element_type))
                 if self.peek("COMMA"):
                     self.match("COMMA")
-                else:
+                elif self.peek("S_KET") or self.nt is None:
                     break
+                else:
+                    self.mh.error(self.ct.location,
+                                  "comma separating array elements is "
+                                  "missing",
+                                  fatal = False)
+
             self.match("S_KET")
 
             if len(rv.value) < typ.lower_bound:
