@@ -110,5 +110,6 @@ report.lobster: lobster.conf \
 	lobster-online-report report.lobster
 
 tracing: report.lobster
+	mkdir -p docs
 	lobster-html-report report.lobster --out=docs/tracing.html
 	lobster-ci-report report.lobster

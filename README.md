@@ -31,7 +31,7 @@ The Python implementation can be used for several purposes:
 
 ### For normal users
 
-* [Tutorial](TUTORIAL.md) (read this as a first introduction)
+* [Tutorial](documentation/TUTORIAL.md) (read this as a first introduction)
 * [Release Notes](CHANGELOG.md) (read this to find out whats new)
 * [License](LICENSE)
 
@@ -77,6 +77,20 @@ Optional dependencies (they are not installed automatically):
 
 You can install all Python dependencies by doing:
 
-```
+```bash
 pip3 install -r requirements.txt
 ```
+
+When building the traceability report you also need to install two
+lobster packages. Since there is a circular dependency, please install
+like this:
+
+```bash
+pip3 install --no-deps bmw-lobster-core bmw-lobster-tool-trlc
+```
+
+The most important make targets when developing TRLC are:
+
+* `lint` (runs pycodestyle and pylint)
+* `test` (performs unit and system tests and shows coverage)
+* `tracing` (generates traceability report)
