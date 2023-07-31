@@ -86,7 +86,8 @@ lobster packages. Since there is a circular dependency, please install
 like this:
 
 ```bash
-pip3 install --no-deps bmw-lobster-core bmw-lobster-tool-trlc
+pip3 install bmw-lobster-core bmw-lobster-tool-python
+pip3 install --no-deps bmw-lobster-tool-trlc
 ```
 
 The most important make targets when developing TRLC are:
