@@ -43,7 +43,7 @@ docs:
 		dot -Tsvg > docs/ast_hierarchy.svg
 	@python3 -m util.mk_parser_hierarchy | \
 		dot -Tsvg > docs/parser_hierarchy.svg
-	@make tracing
+	@-make tracing
 	@sphinx-build -c sphinx -b html . docs
 
 docs-and-commit: docs
