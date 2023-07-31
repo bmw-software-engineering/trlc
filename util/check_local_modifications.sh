@@ -2,7 +2,7 @@
 
 if [[ $(git status -s) ]]; then
     echo "Local modifications found:"
-    git diff -P
+    git -P diff
     echo "Summary:"
     git status -s
     exit 1
