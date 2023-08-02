@@ -1,0 +1,17 @@
+package Foo
+
+R Test1 {
+  x = 1 @ 2 @ 3 @ 4
+}
+
+R Test2 {
+  x = 1 @ 2 @ 3
+}
+
+R Test3 {
+  x = 1 @ 2
+}
+
+R Test4 {
+  x = 1
+}

@@ -440,6 +440,19 @@ class Parser(Parser_Base):
 
         self.match("C_KET")
 
+        # Final check to ban tuples with separators containing other
+        # tuples.
+        if has_separators:
+            # lobster-trace: LRM.Restricted_Tuple_Nesting
+            for n_field in n_tuple.components.values():
+                if isinstance(n_field.n_typ, ast.Tuple_Type) and \
+                   n_field.n_typ.has_separators():
+                    self.mh.error(
+                        n_field.location,
+                        "tuple type %s, which contains separators,"
+                        " may not contain another tuple with separators"
+                        % n_tuple.name)
+
         # Late registration to avoid recursion in tuples
         self.cu.package.symbols.register(self.mh, n_tuple)
 

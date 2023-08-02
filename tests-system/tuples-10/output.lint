@@ -1,0 +1,3 @@
+a T
+^ tuples-10/foo.rsl:10: error: tuple type Q, which contains separators, may not contain another tuple with separators
+Verified 1 model(s) and 0 check(s) and found 1 error(s)

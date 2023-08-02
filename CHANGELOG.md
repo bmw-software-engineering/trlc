@@ -27,6 +27,13 @@ generated in the following situations:
 
 ### 1.1.7-dev
 
+* [TRLC, LRM] Fixed a missing restriction on tuple types that
+  permitted interesting nesting of tuples with separators and optional
+  components. The restriction forbids any tuple with declared
+  separators from having components that are themselves tuples. We may
+  relax this restriction in the future to permit some combinations
+  where this doesn't lead to parsing problems for values.
+
 * [TRLC] Add alternative entry-point for users who cannot modify their
   PATH. You can now do `python3 -m trlc [args...]` and it works just
   like `trlc [args...]`.

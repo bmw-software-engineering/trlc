@@ -1,0 +1,17 @@
+package Foo
+
+tuple T {
+  x Integer
+  separator @
+  y optional String
+}
+
+tuple Q {
+  a T
+  separator @
+  b optional T
+}
+
+type R {
+  x Q
+}

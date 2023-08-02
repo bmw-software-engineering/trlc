@@ -532,6 +532,15 @@ section "Type declarations" {
        '''
     }
 
+    Static_Semantics Restricted_Tuple_Nesting {
+      text = '''
+        A tuple type with separators may not contain fields
+        that have tuple types with separators. *(This is to
+        avoid parsing ambiguities for values such as `1; 2;
+        3`.)*
+      '''
+    }
+
     Static_Semantics Tuple_Optional_Requires_Separators {
       text = '''
        Only tuples with separators may use optional fields. Tuples
