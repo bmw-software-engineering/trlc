@@ -30,9 +30,32 @@ generated in the following situations:
 * [TRLC, LRM] Fixed a missing restriction on tuple types that
   permitted interesting nesting of tuples with separators and optional
   components. The restriction forbids any tuple with declared
-  separators from having components that are themselves tuples. We may
-  relax this restriction in the future to permit some combinations
-  where this doesn't lead to parsing problems for values.
+  separators from having components that are themselves tuples with
+  separators. We may relax this restriction in the future to permit
+  some combinations where this doesn't lead to parsing problems for
+  values.
+
+  The problem can be seen in this example:
+
+  ```trlc
+  tuple T {
+     a String
+	 separator @
+	 b optional Integer
+  }
+
+  tuple Q {
+     a T
+	 separator @
+	 b optional Integer
+  }
+  ```
+
+  If we now write `"foo" @ 12` then there is no possible way to
+  specify if you meant:
+
+  * Instance of Q where `a` is `"foo" @ 12` and `b` is unspecified
+  * Instance of Q where `a` is just `"foo"` and `b` is `12`
 
 * [TRLC] Add alternative entry-point for users who cannot modify their
   PATH. You can now do `python3 -m trlc [args...]` and it works just
