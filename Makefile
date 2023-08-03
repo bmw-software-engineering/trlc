@@ -25,11 +25,13 @@ unit-tests:
                 -m unittest discover -s tests-unit -v
 
 system-tests:
+	mkdir -p docs
 	coverage run -p --rcfile=coverage.cfg --branch --data-file .coverage \
 		./trlc-lrm-generator.py
 	make -C tests-system -B -j8 fast
 
 system-tests-all:
+	mkdir -p docs
 	coverage run -p --rcfile=coverage.cfg --branch --data-file .coverage \
 		./trlc-lrm-generator.py
 	make -C tests-system -B -j8 all

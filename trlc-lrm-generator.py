@@ -1210,6 +1210,9 @@ def main():
     ap.add_argument("--tag",
                     action="store_true",
                     default=False)
+    ap.add_argument("--update-index",
+                    action="store_true",
+                    default=False)
     ap.add_argument("--lrm_dir",
                     default="language-reference-manual")
 
@@ -1295,6 +1298,9 @@ def main():
         shutil.copyfile("docs/lrm.html",
                         "docs/lrm-%u.%u.html" % (version["major"],
                                                  version["minor"]))
+
+    if not options.update_index:
+        return
 
     lrm_versions = [tuple(map(int,
                               re.match(r"docs/lrm-([0-9]+)\.([0-9]+)\.html",
