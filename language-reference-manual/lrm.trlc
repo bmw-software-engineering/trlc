@@ -1739,7 +1739,8 @@ section "Record object declarations" {
     text = '''A tuple value for a tuple with separators must
               contain the separator symbols as indicated in the type,
               in order. Optional fields and their preceding separator
-              may be omitted.'''
+              may be omitted. Once an optional field has been omitted,
+              all following (optional) fields must also be omitted.'''
   }
 
   Dynamic_Semantics Evaluation_Of_Checks {
