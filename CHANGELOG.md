@@ -25,7 +25,7 @@ generated in the following situations:
 ## Changelog
 
 
-### 1.1.7-dev
+### 1.1.7
 
 * [TRLC, LRM] Fixed a missing restriction on tuple types that
   permitted interesting nesting of tuples with separators and optional
