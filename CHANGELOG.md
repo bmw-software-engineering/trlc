@@ -57,6 +57,12 @@ generated in the following situations:
   * Instance of Q where `a` is `"foo" @ 12` and `b` is unspecified
   * Instance of Q where `a` is just `"foo"` and `b` is `12`
 
+* [TRLC, LRM] Fixed LRM and tools allowing empty enumerations. This is
+  now explicitly forbidden. It was always unreasonable to do this as
+  it would have been impossible to use the enumeration type, and there
+  is no legitimate use-case anyway since you cannot add more literals
+  later through e.g. a type extension.
+
 * [TRLC] Add alternative entry-point for users who cannot modify their
   PATH. You can now do `python3 -m trlc [args...]` and it works just
   like `trlc [args...]`.

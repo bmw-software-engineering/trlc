@@ -1,0 +1,2 @@
+enum E {}
+     ^ lint-vcg-empty-enum/foo.rsl:3: error: empty enumerations are not permitted

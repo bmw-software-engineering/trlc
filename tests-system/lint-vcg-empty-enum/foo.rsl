@@ -1,0 +1,12 @@
+package Foo
+
+enum E {}
+
+type T {
+  b optional Boolean
+  e          E
+}
+
+checks T {
+  b, "potato"
+}

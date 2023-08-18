@@ -337,6 +337,7 @@ class Parser(Parser_Base):
         return n_item
 
     def parse_enum_declaration(self):
+        # lobster-trace: LRM.Enumeration_Declaration
         self.match_kw("enum")
         name, description = self.parse_described_name()
 
@@ -347,14 +348,22 @@ class Parser(Parser_Base):
         self.cu.package.symbols.register(self.mh, enum)
 
         self.match("C_BRA")
+        empty = True
         while not self.peek("C_KET"):
             name, description = self.parse_described_name()
             lit = ast.Enumeration_Literal_Spec(name        = name.value,
                                                description = description,
                                                location    = name.location,
                                                enum        = enum)
+            empty = False
+            # lobster-trace: LRM.Unique_Enumeration_Literals
             enum.literals.register(self.mh, lit)
         self.match("C_KET")
+
+        if empty:
+            # lobster-trace: LRM.No_Empty_Enumerations
+            self.mh.error(enum.location,
+                          "empty enumerations are not permitted")
 
         return enum
 

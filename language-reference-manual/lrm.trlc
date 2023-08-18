@@ -476,6 +476,11 @@ section "Type declarations" {
               case.'''
     }
 
+    Static_Semantics No_Empty_Enumerations {
+      text = '''It is an error to specify an (empty) enumeration without any
+                literals.'''
+    }
+
     Example Enumeration_Example {
       hidden_rsl = '''package Example'''
       rsl = '''
