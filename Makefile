@@ -49,10 +49,6 @@ docs:
 	@-make tracing
 	@sphinx-build -c sphinx -b html . docs
 
-docs-and-commit: docs
-	git add docs
-	git commit -m "Re-generate documentation for release."
-
 package:
 	@git clean -xdf
 	@python3 setup.py sdist bdist_wheel
@@ -73,7 +69,6 @@ bump:
 
 full_release:
 	make remove_dev
-	make docs-and-commit
 	git push
 	make package
 	make upload_main
