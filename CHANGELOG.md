@@ -25,7 +25,7 @@ generated in the following situations:
 ## Changelog
 
 
-### 1.1.8-dev
+### 1.1.8
 
 * [TRLC] Hotfix for the CVC5 API issue: pinning PyVCG to 1.0.3, which
   in turn pins CVC5 to 1.0.5 (the last known good version).
