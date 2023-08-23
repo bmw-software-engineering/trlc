@@ -27,7 +27,8 @@ generated in the following situations:
 
 ### 1.1.8-dev
 
-
+* [TRLC] Hotfix for the CVC5 API issue: pinning PyVCG to 1.0.3, which
+  in turn pins CVC5 to 1.0.5 (the last known good version).
 
 ### 1.1.7
 
