@@ -6,3 +6,6 @@ dist
 docs
 .coverage*
 *.lobster
+.DS_Store
+.venv/
+.idea
