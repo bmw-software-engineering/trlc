@@ -421,11 +421,20 @@ def main():
     og_linter.add_argument("--verify",
                            default=False,
                            action="store_true",
-                           help=("[EXPERIMENTAL] Attempt to statically "
+                           help=("[EXPERIMENTAL] Attempt to statically"
                                  " verify absence of errors in user defined"
                                  " checks. Does not yet support all language"
                                  " constructs. Requires PyVCG to be "
                                  " installed."))
+    og_linter.add_argument("--no-detailed-info",
+                           default=False,
+                           action="store_true",
+                           help=("Do not print counter-examples and other"
+                                 " supplemental information on failed"
+                                 " checks. The specific values of"
+                                 " counter-examples are unpredictable"
+                                 " from system to system, so if you need 100%"
+                                 " reproducible output then use this option."))
 
     og_debug = ap.add_argument_group("debug options")
     og_debug.add_argument("--debug-dump",
@@ -451,7 +460,7 @@ def main():
     if options.verify and not VCG_AVAILABLE:
         ap.error("The --verify option requires the optional dependency PyVCG")
 
-    mh = Message_Handler(options.brief)
+    mh = Message_Handler(options.brief, not options.no_detailed_info)
 
     if options.no_user_warnings:
         mh.suppress("check warning")

@@ -123,9 +123,10 @@ class Message_Handler:
     :type: int
 
     """
-    def __init__(self, brief=False):
+    def __init__(self, brief=False, detailed_info=True):
         assert isinstance(brief, bool)
         self.brief             = brief
+        self.show_details      = detailed_info
         self.warnings          = 0
         self.errors            = 0
         self.suppressed        = 0
@@ -174,7 +175,9 @@ class Message_Handler:
             else:
                 print(msg)
 
-            if not self.brief and extrainfo:
+            if not self.brief \
+               and self.show_details \
+               and extrainfo:
                 if context:
                     indent = len(context[1]) - 1
                 else:

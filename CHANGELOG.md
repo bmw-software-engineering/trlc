@@ -27,7 +27,9 @@ generated in the following situations:
 
 ### 1.1.9-dev
 
-
+* [TRLC] Add new option `--no-detailed-info` which supresses the
+  additional information the linter may add to a message, such as
+  counter-examples or reasoning.
 
 ### 1.1.8
 
