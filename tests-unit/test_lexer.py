@@ -298,7 +298,6 @@ class Test_Lexer(unittest.TestCase):
         self.match("COMMENT")
 
     def testLocation1(self):
-        # lobster-trace: LRM.Comments
         self.input("""foo '''bar\nbaz''' bork""")
         t = self.match("IDENTIFIER")
         self.assertEqual(t.location.line_no, 1)
