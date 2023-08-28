@@ -68,6 +68,7 @@ class Test_Lexer(unittest.TestCase):
                          "%s does not have the right kind" % str(token))
         if value is not None:
             self.assertEqual(token.value, value)
+        return token
 
     def testIdentifiers1(self):
         # lobster-trace: LRM.Identifier
@@ -295,3 +296,27 @@ class Test_Lexer(unittest.TestCase):
         self.input("""foo /* bar""")
         self.match("IDENTIFIER")
         self.match("COMMENT")
+
+    def testLocation1(self):
+        # lobster-trace: LRM.Comments
+        self.input("""foo '''bar\nbaz''' bork""")
+        t = self.match("IDENTIFIER")
+        self.assertEqual(t.location.line_no, 1)
+        self.assertEqual(t.location.col_no, 1)
+        end = t.location.get_end_location()
+        self.assertEqual(end.line_no, 1)
+        self.assertEqual(end.col_no, 3)
+
+        t = self.match("STRING")
+        self.assertEqual(t.location.line_no, 1)
+        self.assertEqual(t.location.col_no, 5)
+        end = t.location.get_end_location()
+        self.assertEqual(end.line_no, 2)
+        self.assertEqual(end.col_no, 6)
+
+        t = self.match("IDENTIFIER")
+        self.assertEqual(t.location.line_no, 2)
+        self.assertEqual(t.location.col_no, 8)
+        end = t.location.get_end_location()
+        self.assertEqual(end.line_no, 2)
+        self.assertEqual(end.col_no, 11)
