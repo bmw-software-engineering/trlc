@@ -75,7 +75,20 @@ class Location:
         return []
 
     def get_end_location(self):
-        """Get location pointing to the end of a source."""
+        """Get location point to the end of this location
+
+        When we generate a location for a longer sequence then this
+        function gets the "end" of it::
+
+           for example here
+               ^^^^^^^ this is the whole range
+               ^ file/line/col points here
+                     ^ file/line/col of end_location points here
+
+        :returns: a pointer to the last character in a location
+        :rtype: Location
+
+        """
         return self
 
 
