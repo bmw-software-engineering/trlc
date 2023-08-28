@@ -1,11 +1,18 @@
-*~
-*.pyc
-*.egg-info
-build
-dist
+# Project ignores
 docs
 .coverage*
 *.lobster
-.DS_Store
+
+# Python ignores
+*.pyc
+*.egg-info
 .venv/
+build
+dist
+
+# EMACS ignores
+*~
+
+# OSX / VSCode ignores
+.DS_Store
 .idea
