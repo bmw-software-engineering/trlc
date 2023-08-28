@@ -74,6 +74,10 @@ class Location:
     def context_lines(self):
         return []
 
+    def get_end_location(self):
+        """Get location pointing to the end of a source."""
+        return self
+
 
 class TRLC_Error(Exception):
     """ The universal exception that TRLC raises if something goes wrong

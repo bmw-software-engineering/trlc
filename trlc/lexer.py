@@ -108,6 +108,20 @@ class Source_Reference(Location):
         return [stripped_line,
                 " " * stripped_offset + "^" * min(tlen, maxtrail)]
 
+    def get_end_location(self):
+        lines_in_between = self.lexer.content[
+            self.start_pos : self.end_pos + 1
+        ].count("\n")
+        end_line = self.line_no + lines_in_between
+
+        end_col = self.end_pos + 1
+        for n in range(self.end_pos, self.col_no, -1):
+            if self.lexer.content[n] == "\n":
+                end_col = self.end_pos - n
+                break
+
+        return Location(self.file_name, end_line, end_col)
+
 
 class Token_Base:
     def __init__(self, location, kind, value):
