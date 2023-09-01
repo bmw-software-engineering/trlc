@@ -5,8 +5,7 @@ This is part of the [TRLC Tutorial](TUTORIAL.md).
 ## Using the linter
 
 The TRLC tools come with a static analysis tool that can diagnose some
-potential issues with `.rsl` and `.check` files before they are
-deployed and used.
+potential issues with `.rsl` files before they are deployed and used.
 
 To do this simply use the `--lint` feature:
 

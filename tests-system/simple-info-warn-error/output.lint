@@ -1,3 +1,5 @@
+checks MyType {
+       ^^^^^^ simple-info-warn-error/checks.check:3: warning: move this check block into bar.rsl:1 [deprecated_feature]
 matches(name, "^D.*"), error "name must start with D", name
         ^^^^ simple-info-warn-error/checks.check:4: warning: expression could be null [vcg-evaluation-of-null]
            | example record_type triggering error:
@@ -22,4 +24,4 @@ matches(name, "^I.*"),  warning "name must start with I", name
            |   MyType bad_potato {
            |     /* name is null */
            |   }
-Verified 1 model(s) and 1 check(s) and found 4 warning(s)
+Verified 1 model(s) and 1 check(s) and found 5 warning(s)

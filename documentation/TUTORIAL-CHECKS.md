@@ -30,12 +30,10 @@ don't need one.
 
 We could solve this through type extension, but there is an
 alternative way to deal with this issue. You can create additional
-rules on what is permitted by creating a `.check` file next to the
-`.rsl` files:
+rules on what is permitted by adding this after the type declaration
+of `Requirement`:
 
 ```
-package Example
-
 checks Requirement {
   functional implies integrity != null,
     error "a functional requirement requires an integrity"
@@ -84,8 +82,6 @@ For better error messages, you can also specify a record component
 where the message is attached. For example:
 
 ```
-package Example
-
 checks Requirement {
   functional implies integrity != null,
     error "a functional requirement requires an integrity"

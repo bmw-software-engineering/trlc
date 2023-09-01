@@ -1,3 +1,5 @@
+checks T {
+       ^ expressions/foo.check:3: warning: move this check block into foo.rsl:1 [deprecated_feature]
 yay and yay and yay, "01: good and"
             ^^^ expressions/foo.check:13: warning: expression is always true [vcg-always-true]
 nay or yay or nay, "02: or"
@@ -88,4 +90,4 @@ abs (done - dtwo) == done, "33: good dabs"
                   ^^ expressions/foo.check:125: warning: expression is always true [vcg-always-true]
 (if yay then ione else itwo) == ione, "34: good ifexpr"
                              ^^ expressions/foo.check:128: warning: expression is always true [vcg-always-true]
-Verified 1 model(s) and 1 check(s) and found 45 warning(s)
+Verified 1 model(s) and 1 check(s) and found 46 warning(s)

@@ -31,6 +31,10 @@ generated in the following situations:
   additional information the linter may add to a message, such as
   counter-examples or reasoning.
 
+* [LRM] Mark `.check` files as a deprecated feature. You should move
+  your checks into the corresponding `.rsl` file. The linter also
+  complains about these now.
+
 ### 1.1.8
 
 * [TRLC] Hotfix for the CVC5 API issue: pinning PyVCG to 1.0.3, which

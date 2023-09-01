@@ -215,8 +215,9 @@ section "Layout and file structure" {
     bullets = [
       '''`.rsl` They contains the user-defined type definitions and
          optionally user-defined warnings or checks''',
-      '''`.check` They contain only user-defined warning or error messages
-         for types declared in `.rsl` files''',
+      '''(deprecated) `.check` They contain only user-defined warning
+         or error messages for types declared in `.rsl`
+         files''',
       '''`.trlc` They contain instances of the types (this is where
          your requirements go)'''
     ]
@@ -814,6 +815,21 @@ section "Check Files" {
     text = '''A check file may not import any packages.'''
   }
 
+  Recommendation Deprecated_Check_Files {
+    text = '''Check files are a deprecated feature that allows you to
+              specify checks separate from type
+              declarations. While this seems like a good
+              idea at first, in a large project this can
+              create confusion: consider a global definition
+              for your requirement type stored in a central
+              place which everyone is supposed to use. In
+              this example some random user can create in
+              their sub-project a check file that applies to
+              the global definitions, causing hassle for
+              everyone. It is recommended that an
+              implementation suggests moving any check from
+              a `.check` file into the package `.rsl` file.'''
+  }
 
 }
 

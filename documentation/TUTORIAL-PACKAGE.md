@@ -13,8 +13,7 @@ software projects, but in gigantic projects they can be very helpful.
 
 Packages are a way to segment and structure the name space.
 
-Each `.rsl`, `.check` and `.trlc` file must start with a package
-indication.
+Each `.rsl` and `.trlc` file must start with a package indication.
 
 This has two effects:
 

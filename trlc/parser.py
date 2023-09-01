@@ -1575,7 +1575,14 @@ class Parser(Parser_Base):
         self.cu.resolve_imports(self.mh, self.stab)
 
         while not self.peek_eof():
-            self.cu.add_item(self.parse_check_block())
+            n_block = self.parse_check_block()
+            if self.lint_mode:
+                self.mh.check(
+                    n_block.location,
+                    "move this check block into %s" %
+                    self.mh.cross_file_reference(self.cu.package.location),
+                    "deprecated_feature")
+            self.cu.add_item(n_block)
 
         self.match_eof()
 

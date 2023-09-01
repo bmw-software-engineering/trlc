@@ -43,7 +43,7 @@ The components of this regular expression are:
 ## Enabling extra checks
 
 The TRLC tools also come with a separate `--lint` mode that performs
-additional checks. This mode only considers `.rsl` and `.check` files,
+additional checks. This mode only considers `.rsl` (and `.check`) files,
 and in a CI environment this should be run first. A full CI
 integration should do the following:
 

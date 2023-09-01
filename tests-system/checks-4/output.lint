@@ -1,3 +1,5 @@
+checks T {
+       ^ checks-4/foo.check:3: warning: move this check block into foo.rsl:1 [deprecated_feature]
 (forall v in values => v != foo), "value cannot be same as value of foo", values
              ^^^^^^ checks-4/foo.check:4: warning: expression could be null [vcg-evaluation-of-null]
                   | example record_type triggering error:
@@ -5,4 +7,4 @@
                   |     /* foo is null */
                   |     /* values is null */
                   |   }
-Verified 1 model(s) and 1 check(s) and found 1 warning(s)
+Verified 1 model(s) and 1 check(s) and found 2 warning(s)

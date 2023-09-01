@@ -1,5 +1,7 @@
+checks MyType {
+       ^^^^^^ mult/checks.check:3: warning: move this check block into bar.rsl:1 [deprecated_feature]
 mult String [5..3]
                 ^ mult/bar.rsl:23: warning: upper bound must be at least 5 [impossible_array_types]
 mult String [0..0]
                 ^ mult/bar.rsl:17: warning: this array makes no sense [impossible_array_types]
-Verified 1 model(s) and 1 check(s) and found 2 warning(s)
+Verified 1 model(s) and 1 check(s) and found 3 warning(s)

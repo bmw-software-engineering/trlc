@@ -9,19 +9,15 @@ large (possibly safety critical) software projects. In large
 organisations you have a lot of requirements, a lot of links,
 different levels and a ton of meta-data.
 
-In TRLC there are currently three kinds of files, split into two
-areas. For the requirements managers:
+In TRLC there are currently two kinds of files. For the requirements
+managers:
 
-* `.rsl` files that define the global structure (e.g. what is a requirement)
-* `.check` files that define constraints (e.g. when is a requirement
-  well-formed)
+* `.rsl` files that define the global structure (e.g. what is a
+  requirement) and policy (e.g. when is a requirement well-formed)
 
 And for the software developers:
 
 * `.trlc` files that define actual requirements
-
-This split is maybe not interesting for small projects, but for large
-organisations (like BMW) it is quite helpful.
 
 ## First example
 
