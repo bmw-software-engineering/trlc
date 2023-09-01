@@ -13,6 +13,10 @@ test: unit-tests system-tests
 	make coverage
 	util/check_local_modifications.sh
 
+test-all: unit-tests system-tests-all
+	make coverage
+	util/check_local_modifications.sh
+
 coverage:
 	coverage combine -q
 	coverage html --rcfile=coverage.cfg
