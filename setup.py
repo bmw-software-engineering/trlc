@@ -37,8 +37,8 @@ project_urls = {
 required_packages = []
 python_required = ">=3.8, <4"
 if "--plat-name" in sys.argv or "-p" in sys.argv:
-     required_packages.append("PyVCG==1.0.3")
-     python_required = ">=3.8, <=3.10"
+     required_packages.append("PyVCG==1.0.4")
+     python_required = ">=3.8, <=3.11"
 
 setuptools.setup(
     name="trlc",

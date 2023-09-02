@@ -27,6 +27,9 @@ generated in the following situations:
 
 ### 1.1.9-dev
 
+* [TRLC] Add support for Python 3.11. We now support Python 3.8 up to
+  and including 3.11.
+
 * [TRLC] Add new option `--no-detailed-info` which supresses the
   additional information the linter may add to a message, such as
   counter-examples or reasoning.
