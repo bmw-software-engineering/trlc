@@ -1,1 +1,2 @@
 tuples-11/foo.rsl:10:3: trlc error: tuple type Q, which contains separators, may not contain another tuple with separators
+tuples-11/foo.trlc:3:1: trlc error: unknown symbol R

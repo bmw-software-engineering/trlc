@@ -27,7 +27,7 @@ from enum import Enum, auto
 from collections import OrderedDict
 from fractions import Fraction
 
-from trlc.errors import Location, Message_Handler
+from trlc.errors import TRLC_Error, Location, Message_Handler
 from trlc.lexer import Token
 from trlc import math
 
@@ -258,7 +258,12 @@ class Compilation_Unit(Node):
         assert isinstance(stab, Symbol_Table)
         self.imports = set()
         for t_import in self.raw_imports:
-            self.imports.add(stab.lookup(mh, t_import, Package))
+            # We can ignore errors here, because that just means we
+            # generate more error later.
+            try:
+                self.imports.add(stab.lookup(mh, t_import, Package))
+            except TRLC_Error:
+                pass
 
     def is_visible(self, n_pkg):
         # lobster-trace: LRM.Import_Visibility

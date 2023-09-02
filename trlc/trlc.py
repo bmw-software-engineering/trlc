@@ -224,6 +224,8 @@ class Source_Manager:
     def parse_rsl_files(self):
         # lobster-trace: LRM.Preamble
 
+        ok = True
+
         # First, check that each package import is known
         for parser in self.rsl_files.values():
             parser.cu.resolve_imports(self.mh, self.stab)
@@ -246,7 +248,9 @@ class Source_Manager:
                     self.mh.error(
                         Location(list(self.packages.values())[0]["file"]),
                         "circular inheritence between %s" %
-                        " | ".join(conflicts))
+                        " | ".join(conflicts),
+                        fatal = False)
+                    return False
                 else:
                     for name in conflicts:
                         deps = sorted(set(self.packages[name]["deps"]) -
@@ -256,12 +260,19 @@ class Source_Manager:
                                ", ".join(deps)))
                     self.mh.error(
                         Location(list(self.packages.values())[0]["file"]),
-                        "circular inheritence")
+                        "circular inheritence",
+                        fatal = False)
+                    return False
 
             for pkg in sorted(work_list):
-                self.rsl_files[self.packages[pkg]["file"]].parse_rsl_file()
+                try:
+                    self.rsl_files[self.packages[pkg]["file"]].parse_rsl_file()
+                except TRLC_Error:
+                    ok = False
                 processed_packages.add(pkg)
                 del self.packages[pkg]
+
+        return ok
 
     def parse_check_files(self):
         # lobster-trace: LRM.Preamble
@@ -281,16 +292,18 @@ class Source_Manager:
 
         # First, pre-parse the file_preamble of all files to discover
         # all late packages
+        packages_with_errors = set()
         for name in sorted(self.trlc_files):
             try:
                 self.trlc_files[name].parse_preamble("trlc")
             except TRLC_Error:
+                packages_with_errors.add(name)
                 ok = False
-        if not ok:
-            return False
 
         # Then actually parse
         for name in sorted(self.trlc_files):
+            if name in packages_with_errors:
+                continue
             try:
                 self.trlc_files[name].parse_trlc_file()
             except TRLC_Error:
@@ -338,16 +351,11 @@ class Source_Manager:
 
         # Parse RSL files (topologically sorted, in order to deal with
         # dependencies)
-        try:
-            self.parse_rsl_files()
-        except TRLC_Error:
-            return None
+        ok = self.parse_rsl_files()
 
         # Parse check files. At this point we cannot introduce anything
         # new in terms of packages.
-        ok = True
-        if not self.parse_check_files():
-            ok = False
+        ok &= self.parse_check_files()
 
         # If we run in lint mode, then we perform the checks now and then
         # stop. We do not process the TRLC files.

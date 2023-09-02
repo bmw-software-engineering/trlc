@@ -1,2 +1,4 @@
 a T
 ^ tuples-10/foo.rsl:10: error: tuple type Q, which contains separators, may not contain another tuple with separators
+R Test1 {
+^ tuples-10/foo.trlc:3: error: unknown symbol R
