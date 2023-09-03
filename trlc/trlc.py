@@ -266,7 +266,8 @@ class Source_Manager:
 
             for pkg in sorted(work_list):
                 try:
-                    self.rsl_files[self.packages[pkg]["file"]].parse_rsl_file()
+                    parser  = self.rsl_files[self.packages[pkg]["file"]]
+                    ok     &= parser.parse_rsl_file()
                 except TRLC_Error:
                     ok = False
                 processed_packages.add(pkg)
@@ -280,7 +281,7 @@ class Source_Manager:
         ok = True
         for name in sorted(self.check_files):
             try:
-                self.check_files[name].parse_check_file()
+                ok &= self.check_files[name].parse_check_file()
             except TRLC_Error:
                 ok = False
         return ok
@@ -305,7 +306,7 @@ class Source_Manager:
             if name in packages_with_errors:
                 continue
             try:
-                self.trlc_files[name].parse_trlc_file()
+                ok &= self.trlc_files[name].parse_trlc_file()
             except TRLC_Error:
                 ok = False
 

@@ -22,7 +22,7 @@ import re
 
 from trlc.nested import Nested_Lexer
 from trlc.lexer import Token_Base, Token, Lexer_Base, TRLC_Lexer
-from trlc.errors import Message_Handler
+from trlc.errors import Message_Handler, TRLC_Error
 from trlc import ast
 
 
@@ -143,6 +143,13 @@ class Parser_Base:
             self.nt = self.lexer.token()
             if self.nt is None or self.nt.kind != "COMMENT":
                 break
+
+    def skip_until_newline(self):
+        if self.ct is None:
+            return
+        current_line = self.ct.location.line_no
+        while self.nt and self.nt.location.line_no == current_line:
+            self.advance()
 
     def peek(self, kind):
         assert kind in self.language_tokens, \
@@ -1487,7 +1494,7 @@ class Parser(Parser_Base):
 
         # Check that each non-optional component has been specified
         for comp in r_typ.all_components():
-            if obj.field[comp.name] is None:
+            if isinstance(obj.field[comp.name], ast.Implicit_Null):
                 if r_typ.is_frozen(comp):
                     obj.assign(comp, r_typ.get_freezing_expression(comp))
                 elif not comp.optional:
@@ -1496,8 +1503,6 @@ class Parser(Parser_Base):
                         "required component %s (see %s) is not defined" %
                         (comp.name,
                          self.mh.cross_file_reference(comp.location)))
-                else:
-                    obj.assign(comp, ast.Implicit_Null(obj, comp))
 
         self.match("C_KET")
 
@@ -1562,35 +1567,105 @@ class Parser(Parser_Base):
         # lobster-trace: LRM.RSL_File
         assert self.cu.package is not None
 
+        ok = True
+
         while not self.peek_eof():
-            if self.peek_kw("checks"):
-                self.cu.add_item(self.parse_check_block())
-            else:
-                self.cu.add_item(self.parse_type_declaration())
+            try:
+                if self.peek_kw("checks"):
+                    self.cu.add_item(self.parse_check_block())
+                else:
+                    self.cu.add_item(self.parse_type_declaration())
+            except TRLC_Error as err:
+                ok = False
+                if err.kind == "lex error":
+                    raise
+
+                # Recovery strategy is to scan until we get the next
+                # relevant keyword
+                self.skip_until_newline()
+                while not self.peek_eof():
+                    if self.peek_kw("checks") or \
+                       self.peek_kw("type") or \
+                       self.peek_kw("abstract") or \
+                       self.peek_kw("final") or \
+                       self.peek_kw("enum"):
+                        break
+                    self.advance()
+                    self.skip_until_newline()
 
         self.match_eof()
+
+        return ok
 
     def parse_check_file(self):
         self.parse_preamble("check")
         self.cu.resolve_imports(self.mh, self.stab)
 
+        ok = True
+
         while not self.peek_eof():
-            n_block = self.parse_check_block()
-            if self.lint_mode:
-                self.mh.check(
-                    n_block.location,
-                    "move this check block into %s" %
-                    self.mh.cross_file_reference(self.cu.package.location),
-                    "deprecated_feature")
-            self.cu.add_item(n_block)
+            try:
+                n_block = self.parse_check_block()
+                self.cu.add_item(n_block)
+                if self.lint_mode:
+                    self.mh.check(
+                        n_block.location,
+                        "move this check block into %s" %
+                        self.mh.cross_file_reference(self.cu.package.location),
+                        "deprecated_feature")
+            except TRLC_Error as err:
+                ok = False
+                if err.kind == "lex error":
+                    raise
+
+                # Recovery strategy is to look for the next check
+                # block
+                self.skip_until_newline()
+                while not self.peek_eof() and not self.peek_kw("checks"):
+                    self.advance()
+                    self.skip_until_newline()
 
         self.match_eof()
+
+        return ok
 
     def parse_trlc_file(self):
         assert self.cu.package is not None
         self.cu.resolve_imports(self.mh, self.stab)
 
+        ok = True
+
         while self.peek_kw("section") or self.peek("IDENTIFIER"):
-            self.parse_trlc_entry()
+            try:
+                self.parse_trlc_entry()
+            except TRLC_Error as err:
+                ok = False
+                if err.kind == "lex error":
+                    raise
+
+                # Recovery strategy is to keep going until we find an
+                # identifier that is a package or type, or section, or
+                # EOF
+                self.skip_until_newline()
+                while not self.peek_eof():
+                    if self.peek_kw("section"):
+                        break
+                    elif not self.peek("IDENTIFIER"):
+                        pass
+                    elif self.stab.contains(self.nt.value):
+                        n_sym = self.stab.lookup_assuming(self.mh,
+                                                          self.nt.value)
+                        if isinstance(n_sym, ast.Package):
+                            break
+                    elif self.cu.package.symbols.contains(self.nt.value):
+                        n_sym = self.cu.package.symbols.lookup_assuming(
+                            self.mh,
+                            self.nt.value)
+                        if isinstance(n_sym, ast.Record_Type):
+                            break
+                    self.advance()
+                    self.skip_until_newline()
 
         self.match_eof()
+
+        return ok

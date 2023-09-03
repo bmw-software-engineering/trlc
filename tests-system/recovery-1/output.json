@@ -1,0 +1,6 @@
+type Q {
+^^^^ recovery-1/test_1.rsl:6: error: expected identifier, encountered keyword instead
+i really <3 potato
+^ recovery-1/test_1.trlc:12: error: unknown symbol i
+kitten = 99
+^^^^^^ recovery-1/test_1.trlc:15: error: unknown symbol kitten

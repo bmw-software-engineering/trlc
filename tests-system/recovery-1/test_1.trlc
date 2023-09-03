@@ -1,0 +1,20 @@
+package Package_1
+
+T Test_1 {
+  x = 42
+}
+
+Q Test_2 {
+  y = 42
+}
+
+T Test_3 {
+  i really <3 potato
+
+Q Test_4 {
+  kitten = 99
+}
+
+Q Test_5 {
+  y = 123
+}

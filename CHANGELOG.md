@@ -34,9 +34,11 @@ generated in the following situations:
   additional information the linter may add to a message, such as
   counter-examples or reasoning.
 
-* [TRLC] The tool is now much less likely to abort on early parse
-  errors, instead we continue where it's possible to generate more
-  errors in other unrelated packages.
+* [TRLC] The tool is now much less likely to abort on parse errors,
+  instead we continue where it's possible to generate more errors in
+  other unrelated packages and declarations. This may occasionally
+  generate follow-on errors that look weird, however once you fix the
+  earlier errors things should work out.
 
 * [LRM] Mark `.check` files as a deprecated feature. You should move
   your checks into the corresponding `.rsl` file. The linter also

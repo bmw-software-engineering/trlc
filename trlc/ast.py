@@ -2802,8 +2802,10 @@ class Record_Object(Typed_Entity):
         assert isinstance(section, Section) or section is None
         assert isinstance(n_package, Package)
         super().__init__(name, location, n_typ)
-        self.field     = {name: None
-                          for name in self.n_typ.components.all_names()}
+        self.field     = {
+            comp.name: Implicit_Null(self, comp)
+            for comp in self.n_typ.all_components()
+        }
         self.section   = section
         self.n_package = n_package
 

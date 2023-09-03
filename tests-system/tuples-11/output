@@ -1,4 +1,12 @@
 a T
 ^ tuples-11/foo.rsl:10: error: tuple type Q, which contains separators, may not contain another tuple with separators
-R Test1 {
-^ tuples-11/foo.trlc:3: error: unknown symbol R
+x Q
+  ^ tuples-11/foo.rsl:16: error: unknown symbol Q
+x = 1
+^ tuples-11/foo.trlc:4: error: unknown symbol x
+x = 1 @ 1
+^ tuples-11/foo.trlc:8: error: unknown symbol x
+x = 1 @ "foo"
+^ tuples-11/foo.trlc:12: error: unknown symbol x
+x = 1 @ 1 @ "foo"
+^ tuples-11/foo.trlc:16: error: unknown symbol x

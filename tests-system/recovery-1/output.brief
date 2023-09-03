@@ -1,0 +1,3 @@
+recovery-1/test_1.rsl:6:1: trlc error: expected identifier, encountered keyword instead
+recovery-1/test_1.trlc:12:3: trlc error: unknown symbol i
+recovery-1/test_1.trlc:15:3: trlc error: unknown symbol kitten

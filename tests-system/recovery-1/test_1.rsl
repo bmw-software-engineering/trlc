@@ -1,0 +1,8 @@
+package Package_1
+
+type T {
+  x Integer
+
+type Q {
+  y Integer
+}
