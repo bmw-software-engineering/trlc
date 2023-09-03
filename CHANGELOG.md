@@ -25,6 +25,10 @@ generated in the following situations:
 ## Changelog
 
 
+### 1.1.10-dev
+
+
+
 ### 1.1.9
 
 * [TRLC] Add support for Python 3.11. We now support Python 3.8 up to
