@@ -40,6 +40,11 @@ generated in the following situations:
   generate follow-on errors that look weird, however once you fix the
   earlier errors things should work out.
 
+* [TRLC] Add new option `--no-error-recovery` which restores the old
+  behaviour w.r.t. error handling. With this option, every error you
+  see is absolutely a real error which you need to fix; but of course
+  there could be more errors once you fix them.
+
 * [LRM] Mark `.check` files as a deprecated feature. You should move
   your checks into the corresponding `.rsl` file. The linter also
   complains about these now.

@@ -271,11 +271,18 @@ class Parser(Parser_Base):
     ADDING_OPERATOR = ("+", "-")
     MULTIPLYING_OPERATOR = ("*", "/", "%")
 
-    def __init__(self, mh, stab, file_name, lint_mode, lexer=None):
+    def __init__(self,
+                 mh,
+                 stab,
+                 file_name,
+                 lint_mode,
+                 error_recovery,
+                 lexer=None):
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, ast.Symbol_Table)
         assert isinstance(file_name, str)
         assert isinstance(lint_mode, bool)
+        assert isinstance(error_recovery, bool)
         if lexer:
             super().__init__(mh, lexer,
                              eoc_name  = "end-of-file",
@@ -286,9 +293,12 @@ class Parser(Parser_Base):
                              eoc_name  = "end-of-file",
                              token_map = Token.KIND,
                              keywords  = TRLC_Lexer.KEYWORDS)
-        self.lint_mode = lint_mode
-        self.stab      = stab
-        self.cu        = ast.Compilation_Unit(file_name)
+
+        self.lint_mode       = lint_mode
+        self.error_recovery = error_recovery
+
+        self.stab = stab
+        self.cu   = ast.Compilation_Unit(file_name)
 
         self.builtin_bool    = stab.table["Boolean"]
         self.builtin_int     = stab.table["Integer"]
@@ -1576,9 +1586,10 @@ class Parser(Parser_Base):
                 else:
                     self.cu.add_item(self.parse_type_declaration())
             except TRLC_Error as err:
-                ok = False
-                if err.kind == "lex error":
+                if not self.error_recovery or err.kind == "lex error":
                     raise
+
+                ok = False
 
                 # Recovery strategy is to scan until we get the next
                 # relevant keyword
@@ -1614,9 +1625,10 @@ class Parser(Parser_Base):
                         self.mh.cross_file_reference(self.cu.package.location),
                         "deprecated_feature")
             except TRLC_Error as err:
-                ok = False
-                if err.kind == "lex error":
+                if not self.error_recovery or err.kind == "lex error":
                     raise
+
+                ok = False
 
                 # Recovery strategy is to look for the next check
                 # block
@@ -1639,9 +1651,10 @@ class Parser(Parser_Base):
             try:
                 self.parse_trlc_entry()
             except TRLC_Error as err:
-                ok = False
-                if err.kind == "lex error":
+                if not self.error_recovery or err.kind == "lex error":
                     raise
+
+                ok = False
 
                 # Recovery strategy is to keep going until we find an
                 # identifier that is a package or type, or section, or

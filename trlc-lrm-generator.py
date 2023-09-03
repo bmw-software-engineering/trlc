@@ -1010,11 +1010,12 @@ def write_example(fd, mh, obj):
         rsl_sources.append(obj.field["rsl"])
     rsl_lexers = Chained_Lexer(rsl_sources)
     try:
-        rsl_parser = Parser(mh        = mh,
-                            stab      = stab,
-                            file_name = obj.location.file_name,
-                            lint_mode = False,
-                            lexer     = rsl_lexers)
+        rsl_parser = Parser(mh             = mh,
+                            stab           = stab,
+                            file_name      = obj.location.file_name,
+                            lint_mode      = False,
+                            error_recovery = False,
+                            lexer          = rsl_lexers)
         rsl_parser.parse_preamble("rsl")
         rsl_parser.cu.resolve_imports(mh, stab)
         rsl_parser.parse_rsl_file()
@@ -1030,11 +1031,12 @@ def write_example(fd, mh, obj):
     if trlc_sources and valid_example:
         trlc_lexers = Chained_Lexer(trlc_sources)
         try:
-            trlc_parser = Parser(mh        = mh,
-                                 stab      = stab,
-                                 file_name = obj.location.file_name,
-                                 lint_mode = False,
-                                 lexer     = trlc_lexers)
+            trlc_parser = Parser(mh             = mh,
+                                 stab           = stab,
+                                 file_name      = obj.location.file_name,
+                                 lint_mode      = False,
+                                 error_recovery = False,
+                                 lexer          = trlc_lexers)
             trlc_parser.parse_preamble("trlc")
             trlc_parser.parse_trlc_file()
         except TRLC_Error:

@@ -54,9 +54,10 @@ class Source_Manager:
 
     """
     def __init__(self, mh,
-                 lint_mode   = False,
-                 verify_mode = False,
-                 debug_vcg   = False):
+                 lint_mode      = False,
+                 verify_mode    = False,
+                 debug_vcg      = False,
+                 error_recovery = True):
         assert isinstance(mh, Message_Handler)
         assert isinstance(lint_mode, bool)
         assert isinstance(verify_mode, bool)
@@ -69,9 +70,11 @@ class Source_Manager:
         self.check_files = {}
         self.trlc_files  = {}
         self.packages    = {}
-        self.lint_mode   = lint_mode
-        self.verify_mode = verify_mode
-        self.debug_vcg   = debug_vcg
+
+        self.lint_mode      = lint_mode
+        self.verify_mode    = verify_mode
+        self.debug_vcg      = debug_vcg
+        self.error_recovery = error_recovery
 
         self.exclude_patterns = []
 
@@ -103,10 +106,11 @@ class Source_Manager:
     def create_parser(self, file_name):
         assert os.path.isfile(file_name)
 
-        return Parser(mh           = self.mh,
-                      stab         = self.stab,
-                      file_name    = file_name,
-                      lint_mode    = self.lint_mode)
+        return Parser(mh             = self.mh,
+                      stab           = self.stab,
+                      file_name      = file_name,
+                      lint_mode      = self.lint_mode,
+                      error_recovery = self.error_recovery)
 
     def register_package(self, package_name, file_name=None):
         if package_name in self.packages:
@@ -354,9 +358,15 @@ class Source_Manager:
         # dependencies)
         ok = self.parse_rsl_files()
 
+        if not self.error_recovery and not ok:
+            return None
+
         # Parse check files. At this point we cannot introduce anything
         # new in terms of packages.
         ok &= self.parse_check_files()
+
+        if not self.error_recovery and not ok:
+            return None
 
         # If we run in lint mode, then we perform the checks now and then
         # stop. We do not process the TRLC files.
@@ -421,6 +431,14 @@ def main():
                            action="store_true",
                            help=("Do not display any warnings from user"
                                  " defined checks, only errors."))
+    og_output.add_argument("--no-error-recovery",
+                           default=False,
+                           action="store_true",
+                           help=("By default the tool attempts to recover"
+                                 " from parse errors to show more errors, but"
+                                 " this can occasionally generate weird"
+                                 " errors. You can use this option to stop"
+                                 " at the first real errors."))
     og_output.add_argument("--show-file-list",
                            action="store_true",
                            help=("If there are no errors, produce a summary"
@@ -474,10 +492,11 @@ def main():
     if options.no_user_warnings:
         mh.suppress("check warning")
 
-    sm = Source_Manager(mh          = mh,
-                        lint_mode   = options.lint,
-                        verify_mode = options.verify,
-                        debug_vcg   = options.debug_vcg)
+    sm = Source_Manager(mh             = mh,
+                        lint_mode      = options.lint,
+                        verify_mode    = options.verify,
+                        debug_vcg      = options.debug_vcg,
+                        error_recovery = not options.no_error_recovery)
 
     if not options.include_bazel_dirs:
         sm.exclude_patterns.append(re.compile("^bazel-.*$"))
