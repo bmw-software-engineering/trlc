@@ -29,6 +29,7 @@ from trlc import ast
 from trlc import lint
 from trlc.errors import TRLC_Error, Location, Message_Handler
 from trlc.parser import Parser
+from trlc.lexer import TRLC_Lexer
 from trlc.version import TRLC_VERSION
 
 try:
@@ -103,14 +104,18 @@ class Source_Manager:
                     self.common_root = self.common_root[0:n]
                     break
 
-    def create_parser(self, file_name):
+    def create_parser(self, file_name, file_content=None):
         assert os.path.isfile(file_name)
+        assert isinstance(file_content, str) or file_content is None
+
+        lexer = TRLC_Lexer(self.mh, file_name, file_content)
 
         return Parser(mh             = self.mh,
                       stab           = self.stab,
                       file_name      = file_name,
                       lint_mode      = self.lint_mode,
-                      error_recovery = self.error_recovery)
+                      error_recovery = self.error_recovery,
+                      lexer          = lexer)
 
     def register_package(self, package_name, file_name=None):
         if package_name in self.packages:
@@ -125,7 +130,7 @@ class Source_Manager:
             self.register_package(import_name)
         self.packages[package_name]["deps"].add(import_name)
 
-    def register_file(self, file_name):
+    def register_file(self, file_name, file_content=None):
         """Schedule a file for parsing.
 
         :param file_name: name of the file
@@ -134,22 +139,27 @@ class Source_Manager:
         :raise AssertionError: if the file is registed more than once
         :raise TRLC_Error: if the file is not a rsl/check/trlc file
 
+        :param file_content: content of the file
+        :type file_content: str
+        :raise AssertionError: if the content is not of type string
+
         :return: true if the file could be registered without issues
         :rtype: bool
         """
         assert os.path.isfile(file_name)
+        assert isinstance(file_content, str) or file_content is None
         # lobster-trace: LRM.Layout
 
         ok = True
         if file_name.endswith(".rsl"):
             try:
-                self.register_rsl_file(file_name)
+                self.register_rsl_file(file_name, file_content)
             except TRLC_Error:
                 ok = False
         elif file_name.endswith(".check"):
-            self.register_check_file(file_name)
+            self.register_check_file(file_name, file_content)
         elif file_name.endswith(".trlc"):
-            self.register_trlc_file(file_name)
+            self.register_trlc_file(file_name, file_content)
         else:
             ok = False
             self.mh.error(Location(os.path.basename(file_name)),
@@ -193,14 +203,15 @@ class Source_Manager:
                     ok &= self.register_file(os.path.join(path, file_name))
         return ok
 
-    def register_rsl_file(self, file_name):
+    def register_rsl_file(self, file_name, file_content=None):
         assert os.path.isfile(file_name)
         assert file_name not in self.rsl_files
+        assert isinstance(file_content, str) or file_content is None
         # lobster-trace: LRM.Preamble
 
         self.update_common_root(file_name)
 
-        self.rsl_files[file_name] = self.create_parser(file_name)
+        self.rsl_files[file_name] = self.create_parser(file_name, file_content)
         self.rsl_files[file_name].parse_preamble("rsl")
 
         self.register_package(
@@ -211,19 +222,23 @@ class Source_Manager:
                 package_name = self.rsl_files[file_name].cu.package.name,
                 import_name  = import_name.value)
 
-    def register_check_file(self, file_name):
+    def register_check_file(self, file_name, file_content=None):
         assert os.path.isfile(file_name)
         assert file_name not in self.check_files
+        assert isinstance(file_content, str) or file_content is None
 
         self.update_common_root(file_name)
-        self.check_files[file_name] = self.create_parser(file_name)
+        self.check_files[file_name] = self.create_parser(file_name,
+                                                         file_content)
 
-    def register_trlc_file(self, file_name):
+    def register_trlc_file(self, file_name, file_content=None):
         assert os.path.isfile(file_name)
         assert file_name not in self.trlc_files
+        assert isinstance(file_content, str) or file_content is None
 
         self.update_common_root(file_name)
-        self.trlc_files[file_name] = self.create_parser(file_name)
+        self.trlc_files[file_name] = self.create_parser(file_name,
+                                                        file_content)
 
     def parse_rsl_files(self):
         # lobster-trace: LRM.Preamble
