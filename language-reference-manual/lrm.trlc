@@ -2,7 +2,7 @@ package LRM
 
 Versioning Version {
   major = 2
-  minor = 8
+  minor = 9
 }
 
 GFDL_License License {
@@ -178,12 +178,14 @@ section "Lexing" {
 
   section "Strings" {
     Terminal Strings {
-      text = '''There are two versions of a string, double quoted and
-                triple quoted:'''
-      def = '''STRING ::= ("([^"]|(\"))*")|('{3}.*?'{3})'''
+      text = '''There are three versions of a string, double quoted,
+                triple single quoted, and triple double quoted:'''
+      def = '''STRING ::= ("([^"\n]|(\"))*")|('{3}.*?'{3})|("{3}.*?"{3})'''
       examples = ["\"foobar\"",
                   "'''potato'''",
-                  '''"example with \"quotes\""''']
+                  '''"example with \"quotes\""''',
+		  """'''example with
+                        newlines'''"""]
     }
 
     Static_Semantics Simple_String_Value {

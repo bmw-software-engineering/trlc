@@ -291,6 +291,12 @@ class Test_Lexer(unittest.TestCase):
         """)
         self.match("STRING", "")
 
+    def testStrings7(self):
+        # lobster-trace: LRM.Strings
+        with self.assertRaises(TRLC_Error):
+            self.input('"""potato""')
+        self.matchError("unterminated triple-quoted string")
+
     def testComment(self):
         # lobster-trace: LRM.Comments
         self.input("""foo /* bar""")

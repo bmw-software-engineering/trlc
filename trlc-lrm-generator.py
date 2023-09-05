@@ -467,7 +467,7 @@ class BNF_Parser:
                           "duplicate definition of %s" % match.group(1))
 
         try:
-            pattern = re.compile(match.group(2))
+            pattern = re.compile(match.group(2), re.DOTALL)
         except re.error as err:
             self.mh.error(obj.location,
                           err.msg)
@@ -882,7 +882,8 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
         fd.write("Examples:")
         fd.write("<ul>\n")
         for item in data["examples"]:
-            fd.write("  <li>%s</li>\n" % html.escape(item))
+            fd.write("  <li>%s</li>\n" %
+                     html.escape(item).replace("\n", "<br>"))
         fd.write("</ul>\n")
         fd.write("</div>\n")
 

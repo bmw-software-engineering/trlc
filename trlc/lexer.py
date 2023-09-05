@@ -28,8 +28,9 @@ from trlc.errors import Location, Message_Handler
 def triple_quoted_string_value(raw_value):
     # lobster-trace: LRM.Complex_String_Value
     assert isinstance(raw_value, str)
-    assert raw_value.startswith("'''")
-    assert raw_value.endswith("'''")
+    assert len(raw_value) >= 6
+    assert raw_value.startswith("'''") or raw_value.startswith('"""')
+    assert raw_value[:3] == raw_value[-3:]
 
     lines = raw_value[3:-3].strip().splitlines()
     if not lines:
@@ -417,28 +418,47 @@ class TRLC_Lexer(Lexer_Base):
         elif self.cc == '"':
             # lobster-trace: LRM.Strings
             kind = "STRING"
-            while self.nc != '"':
-                if self.nc is None:
-                    self.mh.lex_error(
-                        Source_Reference(lexer      = self,
-                                         start_line = start_line,
-                                         start_col  = start_col,
-                                         start_pos  = start_pos,
-                                         end_pos    = self.lexpos),
-                        "unterminated string")
-                elif self.nc == "\n":
-                    self.mh.lex_error(
-                        Source_Reference(lexer      = self,
-                                         start_line = start_line,
-                                         start_col  = start_col,
-                                         start_pos  = start_pos,
-                                         end_pos    = self.lexpos),
-                        "double quoted strings cannot include newlines")
-
+            if self.nc == '"' and self.nnc == '"':
                 self.advance()
-                if self.cc == "\\" and self.nc == '"':
+                self.advance()
+                quotes_seen = 0
+                while quotes_seen < 3:
                     self.advance()
-            self.advance()
+                    if self.cc == '"':
+                        quotes_seen += 1
+                    else:
+                        quotes_seen = 0
+                    if self.nc is None:
+                        self.mh.lex_error(
+                            Source_Reference(lexer      = self,
+                                             start_line = start_line,
+                                             start_col  = start_col,
+                                             start_pos  = start_pos,
+                                             end_pos    = self.lexpos),
+                            "unterminated triple-quoted string")
+            else:
+                while self.nc != '"':
+                    if self.nc is None:
+                        self.mh.lex_error(
+                            Source_Reference(lexer      = self,
+                                             start_line = start_line,
+                                             start_col  = start_col,
+                                             start_pos  = start_pos,
+                                             end_pos    = self.lexpos),
+                            "unterminated string")
+                    elif self.nc == "\n":
+                        self.mh.lex_error(
+                            Source_Reference(lexer      = self,
+                                             start_line = start_line,
+                                             start_col  = start_col,
+                                             start_pos  = start_pos,
+                                             end_pos    = self.lexpos),
+                            "double quoted strings cannot include newlines")
+
+                    self.advance()
+                    if self.cc == "\\" and self.nc == '"':
+                        self.advance()
+                self.advance()
 
         elif self.cc == "'":
             # lobster-trace: LRM.Strings
@@ -590,7 +610,9 @@ class TRLC_Lexer(Lexer_Base):
 
         elif kind == "STRING":
             value = sref.text()
-            if value.startswith('"'):
+            if value.startswith('"""'):
+                value = triple_quoted_string_value(value)
+            elif value.startswith('"'):
                 # lobster-trace: LRM.Simple_String_Value
                 value = value[1:-1]
                 value = value.replace('\\"', '"')

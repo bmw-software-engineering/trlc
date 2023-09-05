@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 2.8 of [TRLC language reference
+Up to date with version 2.9 of [TRLC language reference
 manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
@@ -27,7 +27,8 @@ generated in the following situations:
 
 ### 1.1.10-dev
 
-
+* [TRLC, LRM] You can now also write `"""foo"""` string literals. Just
+  like the `'''` strings, these can contain newlines.
 
 ### 1.1.9
 
