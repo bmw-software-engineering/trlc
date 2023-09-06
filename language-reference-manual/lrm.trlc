@@ -184,7 +184,7 @@ section "Lexing" {
       examples = ["\"foobar\"",
                   "'''potato'''",
                   '''"example with \"quotes\""''',
-		  """'''example with
+                  """'''example with
                         newlines'''"""]
     }
 
