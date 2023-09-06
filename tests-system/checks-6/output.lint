@@ -1,0 +1,5 @@
+true, """this
+      ^^^^^^^ checks-6/foo.rsl:6: error: error message must not contain a newline
+true, """this
+^^^^ checks-6/foo.rsl:6: warning: expression is always true [vcg-always-true]
+Verified 1 model(s) and 0 check(s) and found 1 warning(s) and 1 error(s)

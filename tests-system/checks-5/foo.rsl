@@ -1,0 +1,15 @@
+package Foo
+
+type Requirement {
+  description           String
+  top_level    optional Boolean
+  derived_from optional Requirement [1 .. *]
+}
+
+checks Requirement {
+  top_level == true or derived_from != null,
+    error "linkage incorrect",
+    """You must either link this requirement to other requirements
+       using the derived_from attribute, or you need to set
+       top_level to true."""
+}

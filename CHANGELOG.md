@@ -30,6 +30,33 @@ generated in the following situations:
 * [TRLC, LRM] You can now also write `"""foo"""` string literals. Just
   like the `'''` strings, these can contain newlines.
 
+* [TRLC, LRM] User defined checks are now not allowed to contain a
+  newline. However you can now provide additional information that
+  _can_ contain a newline. For example:
+
+  ```trlc
+  checks Requirement {
+    top_level == true or derived_from != null,
+      error "linkage incorrect",
+      """You must either link this requirement to other requirements
+         using the derived_from attribute, or you need to set
+         top_level to true."""
+  }
+  ```
+
+  Would now produce something like this:
+
+  ```
+  Requirement Potato {
+              ^^^^^^ checks-5/foo.trlc:3: check error: linkage incorrect
+                   | You must either link this requirement to other requirements
+                   | using the derived_from attribute, or you need to set
+                   | top_level to true.
+  ```
+
+  For more details please
+  [refer to the LRM](https://bmw-software-engineering.github.io/trlc/lrm-2.9.html#bnf-check_declaration).
+
 ### 1.1.9
 
 * [TRLC] Add support for Python 3.11. We now support Python 3.8 up to

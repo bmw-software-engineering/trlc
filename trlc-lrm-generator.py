@@ -492,7 +492,7 @@ class BNF_Parser:
         # Get original text (without the ''' whitespace
         # simplifications)
         orig_text = obj.field["bnf"].location.text()
-        if not orig_text.startswith("'''"):
+        if not (orig_text.startswith("'''") or orig_text.startswith('"""')):
             self.mh.error(obj.field["bnf"].location,
                           "BNF text must use ''' strings")
         orig_text = orig_text[3:-3]
@@ -908,7 +908,8 @@ class Nested_Lexer(TRLC_Lexer):
     def __init__(self, string_literal):
         assert isinstance(string_literal, ast.String_Literal)
         mh = string_literal.location.lexer.mh
-        if not string_literal.location.text().startswith("'''"):
+        if not (string_literal.location.text().startswith("'''") or
+                string_literal.location.text().startswith('"""')):
             mh.error(string_literal.location,
                      "only ''' strings are supported for examples")
         super().__init__(

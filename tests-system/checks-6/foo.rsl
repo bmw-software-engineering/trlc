@@ -1,0 +1,8 @@
+package Foo
+
+type T {}
+
+checks T {
+  true, """this
+           is bad"""
+}

@@ -1248,10 +1248,38 @@ class Parser(Parser_Base):
                 c_sev = "error"
 
             self.match("STRING")
+            if "\n" in self.ct.value:
+                # lobster-trace: LRM.No_Newlines_In_Message
+                self.mh.error(self.ct.location,
+                              "error message must not contain a newline",
+                              fatal = False)
             t_msg = self.ct
 
+            has_extrainfo = False
+            has_anchor    = False
             if self.peek("COMMA"):
                 self.match("COMMA")
+                if self.peek("IDENTIFIER"):
+                    has_anchor = True
+                elif self.peek("STRING"):
+                    has_extrainfo = True
+                else:
+                    self.mh.error(self.nt.location,
+                                  "expected either a details string or"
+                                  " identifier to anchor the check message")
+
+            if has_extrainfo:
+                self.match("STRING")
+                c_extrainfo = self.ct.value
+
+                if self.peek("COMMA"):
+                    self.match("COMMA")
+                    has_anchor = True
+
+            else:
+                c_extrainfo = None
+
+            if has_anchor:
                 self.match("IDENTIFIER")
                 c_anchor = n_ctype.components.lookup(self.mh,
                                                      self.ct,
@@ -1263,7 +1291,9 @@ class Parser(Parser_Base):
                                 n_expr    = c_expr,
                                 n_anchor  = c_anchor,
                                 severity  = c_sev,
-                                t_message = t_msg)
+                                t_message = t_msg,
+                                extrainfo = c_extrainfo)
+
             n_ctype.add_check(n_check)
             n_check_block.add_check(n_check)
 

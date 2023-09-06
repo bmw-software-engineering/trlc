@@ -1,0 +1,5 @@
+package Foo
+
+Requirement Potato {
+  description = "I like potato."
+}

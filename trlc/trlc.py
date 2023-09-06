@@ -30,7 +30,7 @@ from trlc import lint
 from trlc.errors import TRLC_Error, Location, Message_Handler
 from trlc.parser import Parser
 from trlc.lexer import TRLC_Lexer
-from trlc.version import TRLC_VERSION
+from trlc.version import TRLC_VERSION, BUGS_URL
 
 try:
     from pyvcg import version
@@ -418,8 +418,7 @@ def main():
         prog="trlc",
         description="TRLC %s (Python reference implementation)" % TRLC_VERSION,
         epilog=("TRLC is licensed under the GPLv3."
-                " Report bugs here:"
-                " https://github.com/bmw-software-engineering/trlc/issues"),
+                " Report bugs here: %s" % BUGS_URL),
         allow_abbrev=False,
     )
     op_mode = ap.add_mutually_exclusive_group()

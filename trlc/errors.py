@@ -20,6 +20,8 @@
 
 import sys
 
+from trlc import version
+
 
 class Location:
     """Reference to a source or virtual location
@@ -211,9 +213,16 @@ class Message_Handler:
         assert isinstance(message, str)
 
         self.errors += 1
-        self.emit(location, "lex error", message)
+        self.emit(location = location,
+                  kind     = "lex error",
+                  message  = message)
 
-    def error(self, location, message, fatal=True, user=False):
+    def error(self,
+              location,
+              message,
+              explanation=None,
+              fatal=True,
+              user=False):
         """ Create an error message
 
         For example::
@@ -240,9 +249,11 @@ class Message_Handler:
 
         :raises TRLC_Error: if fatal is true
         """
-
         assert isinstance(location, Location)
         assert isinstance(message, str)
+        assert isinstance(explanation, str) or explanation is None
+        assert isinstance(fatal, bool)
+        assert isinstance(user, bool)
 
         if user:
             kind = "check error"
@@ -250,9 +261,13 @@ class Message_Handler:
             kind = "error"
 
         self.errors += 1
-        self.emit(location, kind, message, fatal)
+        self.emit(location  = location,
+                  kind      = kind,
+                  message   = message,
+                  fatal     = fatal,
+                  extrainfo = explanation)
 
-    def warning(self, location, message, user=False):
+    def warning(self, location, message, explanation=None, user=False):
         """ Create a warning message
 
         :param location: where to attach the message
@@ -264,6 +279,8 @@ class Message_Handler:
         """
         assert isinstance(location, Location)
         assert isinstance(message, str)
+        assert isinstance(explanation, str) or explanation is None
+        assert isinstance(user, bool)
 
         if user:
             kind = "check warning"
@@ -271,17 +288,22 @@ class Message_Handler:
             kind = "warning"
 
         self.warnings += 1
-        self.emit(location, kind, message, fatal=False)
+        self.emit(location  = location,
+                  kind      = kind,
+                  message   = message,
+                  extrainfo = explanation,
+                  fatal     = False)
 
     def check(self, location, message, check, explanation=None):
         assert isinstance(location, Location)
         assert isinstance(message, str)
         assert isinstance(check, str)
+        assert isinstance(explanation, str) or explanation is None
 
         self.warnings += 1
-        self.emit(location,
-                  "warning",
-                  "%s [%s]" % (message, check),
+        self.emit(location  = location,
+                  kind      = "warning",
+                  message   = "%s [%s]" % (message, check),
                   fatal     = False,
                   extrainfo = explanation)
 
@@ -290,5 +312,9 @@ class Message_Handler:
         assert isinstance(message, str)
 
         self.errors += 1
-        self.emit(location, "ICE", message, fatal=False)
+        self.emit(location  = location,
+                  kind      = "ICE",
+                  message   = message,
+                  extrainfo = "please report this to %s" % version.BUGS_URL,
+                  fatal     = False)
         sys.exit(1)

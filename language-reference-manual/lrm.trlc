@@ -842,7 +842,9 @@ section "Checks" {
       check_block ::= 'checks' IDENTIFIER_record_or_tuple_name
                       '{' { check_declaration } '}'
 
-      check_declaration ::= expression ',' [ severity ] STRING_message
+      check_declaration ::= expression ','
+                            [ severity ] STRING_message
+                            [ ',' STRING_details ]
                             [ ',' IDENTIFIER_component_name ]
 
       severity ::= 'warning'
@@ -864,6 +866,12 @@ section "Checks" {
       '''
   }
 
+  Static_Semantics No_Newlines_In_Message {
+    text = '''
+      It is an error to include a newline in the message.
+      '''
+  }
+
   Text Only_Current_Package {
     text = '''Note that it is never possible to add checks to a type from
               a foreign package. In check files this is more
@@ -874,7 +882,7 @@ section "Checks" {
   }
 
   Dynamic_Semantics Check_Evaluation_Order {
-    text = '''Each check inside a check block evaluated in the specified
+    text = '''Each check inside a check block is evaluated in the specified
               order.'''
   }
 
@@ -892,8 +900,11 @@ section "Checks" {
 
   Dynamic_Semantics Check_Messages {
     text = '''If the evaluated expression is true, no action is taken. If
-              it is false, then a message emitted with the
-              specified message text.'''
+              it is false, then a diagnostic is emitted with
+              the specified message and details. It is
+              implementation defined if and how the details
+              are shown, for example in a "brief" mode they
+              could be omitted.'''
   }
 
   Dynamic_Semantics Check_Severity {
@@ -909,6 +920,13 @@ section "Checks" {
                '''A fatal message is like an error, except that no further
                   checks from this check block shall be
                   evaluated for this object.''']
+  }
+
+  Text Intended_Semantics_Of_Messages {
+    text = '''The intended meaning of the message is a short description
+              of what is wrong. The intended meaning for the
+              optional details is a longer explanation,
+              including perhaps on what to fix.'''
   }
 
   Text Anchoring {
@@ -940,20 +958,32 @@ section "Checks" {
     hidden_rsl = '''
       package Example
       type Requirement {
-        summary optional String
+        description           String
+        top_level    optional Boolean
+        derived_from optional Requirement [1 .. *]
       }
+
       type OverflowGuard {
         value Integer
       }
+
       tuple Codebeamer_Item {
         item Integer
         separator @
         version optional Integer
       }
       '''
-    rsl = '''
+    rsl = """
       checks Requirement {
-        summary != null, warning "You should specify a summary", summary
+        len(description) < 10,
+          warning "Description is too short",
+          description
+
+        derived_from != null or top_level == true,
+          error "Requirement linkage incorrect",
+          '''You must set either top_level to true or
+             link this requirement to at least one
+             other requirement using derived_from.'''
       }
 
       checks OverflowGuard {
@@ -970,7 +1000,7 @@ section "Checks" {
         version != null implies version >= 1,
           error "CB Version must be positive", version
       }
-      '''
+      """
   }
 
 }

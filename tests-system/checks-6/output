@@ -1,0 +1,2 @@
+true, """this
+      ^^^^^^^ checks-6/foo.rsl:6: error: error message must not contain a newline

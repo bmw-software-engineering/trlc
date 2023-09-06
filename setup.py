@@ -6,9 +6,6 @@ import setuptools
 
 from trlc import version
 
-gh_root = "https://github.com"
-gh_project = "bmw-software-engineering/trlc"
-
 with open("README.md", "r") as fd:
     long_description = fd.read()
 
@@ -18,10 +15,9 @@ fixes = []
 for match in re.finditer(r"\[(.*)\]\((.*)\)", long_description):
     if not match.group(2).startswith("http"):
         fixes.append((match.span(0)[0], match.span(0)[1],
-                      "[%s](%s/%s/blob/main/%s)" % (match.group(1),
-                                                    gh_root,
-                                                    gh_project,
-                                                    match.group(2))))
+                      "[%s](%s/blob/main/%s)" % (match.group(1),
+                                                 version.GITHUB_PROJECT,
+                                                 match.group(2))))
 
 for begin, end, text in reversed(fixes):
     long_description = (long_description[:begin] +
@@ -29,9 +25,9 @@ for begin, end, text in reversed(fixes):
                         long_description[end:])
 
 project_urls = {
-    "Bug Tracker"   : "%s/%s/issues" % (gh_root, gh_project),
-    "Documentation" : "%s/pages/%s/" % (gh_root, gh_project),
-    "Source Code"   : "%s/%s"        % (gh_root, gh_project),
+    "Bug Tracker"   : version.BUGS_URL,
+    "Documentation" : version.DOCS_URL,
+    "Source Code"   : version.CODE_URL,
 }
 
 required_packages = []

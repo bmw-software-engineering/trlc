@@ -308,7 +308,13 @@ class Check(Node):
     :attribute message: the user-supplied message (see 3)
     :type: str
     """
-    def __init__(self, n_type, n_expr, n_anchor, severity, t_message):
+    def __init__(self,
+                 n_type,
+                 n_expr,
+                 n_anchor,
+                 severity,
+                 t_message,
+                 extrainfo):
         # lobster-exclude: Constructor only declares variables
         assert isinstance(n_type, Composite_Type)
         assert isinstance(n_expr, Expression)
@@ -316,13 +322,15 @@ class Check(Node):
         assert severity in ("warning", "error", "fatal")
         assert isinstance(t_message, Token)
         assert t_message.kind == "STRING"
+        assert isinstance(extrainfo, str) or extrainfo is None
         super().__init__(t_message.location)
 
-        self.n_type   = n_type
-        self.n_expr   = n_expr
-        self.n_anchor = n_anchor
-        self.severity = severity
-        self.message  = t_message.value
+        self.n_type    = n_type
+        self.n_expr    = n_expr
+        self.n_anchor  = n_anchor
+        self.severity  = severity
+        self.message   = t_message.value.replace("\n", " ")
+        self.extrainfo = extrainfo
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
@@ -364,14 +372,16 @@ class Check(Node):
         if not result.value:
             loc = self.get_real_location(composite_object)
             if self.severity == "warning":
-                mh.warning(loc,
-                           self.message,
-                           user = True)
+                mh.warning(location    = loc,
+                           message     = self.message,
+                           explanation = self.extrainfo,
+                           user        = True)
             else:
-                mh.error(loc,
-                         self.message,
-                         fatal = self.severity == "fatal",
-                         user  = True)
+                mh.error(location    = loc,
+                         message     = self.message,
+                         explanation = self.extrainfo,
+                         fatal       = self.severity == "fatal",
+                         user        = True)
                 return False
 
         return True
