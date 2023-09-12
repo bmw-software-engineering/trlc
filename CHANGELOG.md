@@ -25,7 +25,7 @@ generated in the following situations:
 ## Changelog
 
 
-### 1.1.10-dev
+### 1.1.10
 
 * [TRLC] Fix missing typechecks for numeric subtypes on value
   assignments. It was possible to assign an integer to a decimal
