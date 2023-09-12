@@ -1,0 +1,13 @@
+package Foo
+
+T Test_1 {
+  i = 5.0
+}
+
+T Test_2 {
+  i = 5.2
+}
+
+T Test_3 {
+  d = 5
+}

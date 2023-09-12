@@ -1343,13 +1343,14 @@ class Parser(Parser_Base):
             else:
                 t_op = None
 
-            if self.peek("DECIMAL"):
+            if isinstance(typ, ast.Builtin_Decimal):
                 self.match("DECIMAL")
                 rv = ast.Decimal_Literal(self.ct, self.builtin_decimal)
-
-            else:
+            elif isinstance(typ, ast.Builtin_Integer):
                 self.match("INTEGER")
                 rv = ast.Integer_Literal(self.ct, self.builtin_int)
+            else:
+                assert False
 
             if t_op:
                 rv = ast.Unary_Expression(mh        = self.mh,

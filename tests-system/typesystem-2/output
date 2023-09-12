@@ -1,0 +1,6 @@
+i = 5.0
+    ^^^ typesystem-2/foo.trlc:4: error: expected integer literal, encountered decimal literal instead
+i = 5.2
+    ^^^ typesystem-2/foo.trlc:8: error: expected integer literal, encountered decimal literal instead
+d = 5
+    ^ typesystem-2/foo.trlc:12: error: expected decimal literal, encountered integer literal instead

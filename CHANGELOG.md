@@ -27,6 +27,11 @@ generated in the following situations:
 
 ### 1.1.10-dev
 
+* [TRLC] Fix missing typechecks for numeric subtypes on value
+  assignments. It was possible to assign an integer to a decimal
+  component, or the other way around. This now correctly generates an
+  error.
+
 * [TRLC, LRM] You can now also write `"""foo"""` string literals. Just
   like the `'''` strings, these can contain newlines.
 
