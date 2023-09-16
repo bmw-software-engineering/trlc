@@ -627,7 +627,7 @@ def main():
                       (filename, sm.trlc_files[filename].cu.package.name))
 
     if ok:
-        if options.error_on_warnings and self.mh.warnings:
+        if options.error_on_warnings and mh.warnings:
             return 1
         else:
             return 0
