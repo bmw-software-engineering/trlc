@@ -1,3 +1,29 @@
+checks MyType {
+       ^^^^^^ simple-info-warn-error/checks.check:3: warning: move this check block into bar.rsl:1 [deprecated_feature]
+matches(name, "^D.*"), error "name must start with D", name
+        ^^^^ simple-info-warn-error/checks.check:4: warning: expression could be null [vcg-evaluation-of-null]
+           | example record_type triggering error:
+           |   MyType bad_potato {
+           |     /* name is null */
+           |   }
+matches(name, "^E.*"), error "name must start with E", name
+        ^^^^ simple-info-warn-error/checks.check:5: warning: expression could be null [vcg-evaluation-of-null]
+           | example record_type triggering error:
+           |   MyType bad_potato {
+           |     /* name is null */
+           |   }
+matches(name, "^W.*"), warning "name must start with W", name
+        ^^^^ simple-info-warn-error/checks.check:6: warning: expression could be null [vcg-evaluation-of-null]
+           | example record_type triggering error:
+           |   MyType bad_potato {
+           |     /* name is null */
+           |   }
+matches(name, "^I.*"),  warning "name must start with I", name
+        ^^^^ simple-info-warn-error/checks.check:7: warning: expression could be null [vcg-evaluation-of-null]
+           | example record_type triggering error:
+           |   MyType bad_potato {
+           |     /* name is null */
+           |   }
 name = "Qbert" // does start with Q
        ^^^^^^^ simple-info-warn-error/instances.trlc:5: check error: name must start with D
 name = "Qbert" // does start with Q
@@ -22,4 +48,4 @@ name = "BBert"
        ^^^^^^^ simple-info-warn-error/instances.trlc:13: check warning: name must start with W
 name = "BBert"
        ^^^^^^^ simple-info-warn-error/instances.trlc:13: check warning: name must start with I
-Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 6 warning(s) and 6 error(s)
+Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 11 warning(s) and 6 error(s)

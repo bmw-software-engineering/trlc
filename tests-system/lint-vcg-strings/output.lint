@@ -1,7 +1,0 @@
-y, "potato"
-^ lint-vcg-strings/test1.rsl:15: warning: expression could be null [vcg-evaluation-of-null]
-c, "potato"
-^ lint-vcg-strings/test2.rsl:14: warning: expression could be null [vcg-evaluation-of-null]
-c,              warning "potato"
-^ lint-vcg-strings/test3.rsl:11: warning: expression could be null [vcg-evaluation-of-null]
-Processed 3 model(s) and 0 check(s) and found 3 warning(s)

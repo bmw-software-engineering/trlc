@@ -1,6 +1,0 @@
-type T4 extends T3 {
-     ^^ type-qualifiers-2/foo.rsl:15: warning: consider clarifying that this record is final [clarify_final]
-      | Parent record Foo.T3 is final, making this record
-      | also final. Marking it explicitly as final
-      | clarifies this to casual readers.
-Processed 1 model(s) and 0 check(s) and found 1 warning(s)

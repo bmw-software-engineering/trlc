@@ -1,5 +1,0 @@
-checks T {
-       ^ multiple-models/bar.check:3: warning: move this check block into bar.rsl:1 [deprecated_feature]
-checks T {
-       ^ multiple-models/foo.check:3: warning: move this check block into foo.rsl:1 [deprecated_feature]
-Processed 2 model(s) and 2 check(s) and found 2 warning(s)

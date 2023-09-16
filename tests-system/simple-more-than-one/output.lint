@@ -1,9 +1,0 @@
-checks MyType {
-       ^^^^^^ simple-more-than-one/checks.check:3: warning: move this check block into bar.rsl:1 [deprecated_feature]
-matches(name, "^Q.*"),  error "name must start with Q", name
-        ^^^^ simple-more-than-one/checks.check:4: warning: expression could be null [vcg-evaluation-of-null]
-           | example record_type triggering error:
-           |   MyType bad_potato {
-           |     /* name is null */
-           |   }
-Processed 1 model(s) and 1 check(s) and found 2 warning(s)

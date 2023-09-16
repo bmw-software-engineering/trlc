@@ -1,3 +1,5 @@
+checks MyType {
+       ^^^^^^ xref/checks.check:3: warning: move this check block into bar.rsl:1 [deprecated_feature]
 bar.MyType DeprecatedR {
            ^^^^^^^^^^^ xref/instances.trlc:3: check error: Must be linked
-Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 1 error(s)
+Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 1 warning(s) and 1 error(s)

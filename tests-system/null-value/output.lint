@@ -1,5 +1,0 @@
-checks MyType {
-       ^^^^^^ null-value/checks.check:3: warning: move this check block into bar.rsl:1 [deprecated_feature]
-other != null , "Other must not be null", other
-      ^^ null-value/checks.check:4: warning: expression is always true [vcg-always-true]
-Processed 1 model(s) and 1 check(s) and found 2 warning(s)

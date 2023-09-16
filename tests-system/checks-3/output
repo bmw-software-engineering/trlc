@@ -1,3 +1,5 @@
+checks T {
+       ^ checks-3/foo.check:3: warning: move this check block into foo.rsl:1 [deprecated_feature]
 a = 5
     ^ checks-3/foo.trlc:8: check error: a must be less than b
-Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 1 error(s)
+Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 1 warning(s) and 1 error(s)

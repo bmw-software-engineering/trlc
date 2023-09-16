@@ -1,9 +1,0 @@
-baseline  >= 1.0, error "Baseline must be at least 1.0", baseline
-^^^^^^^^ tuples-1/foo.rsl:46: warning: expression could be null [vcg-evaluation-of-null]
-       | example tuple_type triggering error:
-       |   Doors_Item bad_potato {
-       |     module_id = 0
-       |     item_id = 0
-       |     /* baseline is null */
-       |   }
-Processed 1 model(s) and 0 check(s) and found 1 warning(s)

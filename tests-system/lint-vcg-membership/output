@@ -1,1 +1,10 @@
-Processed 1 model(s), 0 check(s) and 0 requirement file(s) and found no issues
+c, "wibble"
+^ lint-vcg-membership/test1.rsl:13: warning: expression could be null [vcg-evaluation-of-null]
+| example record_type triggering error:
+|   T bad_potato {
+|     x = 0
+|     y = -1
+|     z = 0
+|     /* c is null */
+|   }
+Processed 1 model(s), 0 check(s) and 0 requirement file(s) and found 1 warning(s)

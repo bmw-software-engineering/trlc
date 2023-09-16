@@ -1,1 +1,17 @@
-Processed 2 model(s), 0 check(s) and 0 requirement file(s) and found no issues
+c, "wibble"
+^ lint-vcg-power/test1.rsl:12: warning: expression could be null [vcg-evaluation-of-null]
+| example record_type triggering error:
+|   T bad_potato {
+|     x = -9
+|     y = 81
+|     /* c is null */
+|   }
+c, "wibble"
+^ lint-vcg-power/test2.rsl:12: warning: expression could be null [vcg-evaluation-of-null]
+| example record_type triggering error:
+|   T bad_potato {
+|     x = /* unable to generate precise value */
+|     y = 30.0
+|     /* c is null */
+|   }
+Processed 2 model(s), 0 check(s) and 0 requirement file(s) and found 2 warning(s)

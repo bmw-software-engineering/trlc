@@ -1,7 +1,11 @@
+checks T {
+       ^ multiple-models/bar.check:3: warning: move this check block into bar.rsl:1 [deprecated_feature]
+checks T {
+       ^ multiple-models/foo.check:3: warning: move this check block into foo.rsl:1 [deprecated_feature]
 Foo.T test1 {
       ^^^^^ multiple-models/foo.trlc:4: check error: this is not a good name
 Bar.T test2 {
       ^^^^^ multiple-models/foo.trlc:8: check error: this is not a good name
 Bar.T test2 {
       ^^^^^ multiple-models/foo.trlc:8: check error: also not a good name
-Processed 2 model(s), 2 check(s) and 3 requirement file(s) and found 3 error(s)
+Processed 2 model(s), 2 check(s) and 3 requirement file(s) and found 2 warning(s) and 3 error(s)

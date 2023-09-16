@@ -1,3 +1,0 @@
-arr[0] == len(arr), "potato", arr
-^^^ arrays-2/example.rsl:8: error: expression 'arr' has type Integer, which is not an array
-Processed 1 model(s) and 0 check(s) and found 1 error(s)

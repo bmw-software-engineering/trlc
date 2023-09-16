@@ -1,3 +1,0 @@
-D in 0.0 .. 10, warning "potato", D
-            ^^ decimal-3/foo.rsl:8: error: expected expression of type Decimal, got Integer instead
-Processed 1 model(s) and 0 check(s) and found 1 error(s)

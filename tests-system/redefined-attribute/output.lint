@@ -1,3 +1,0 @@
-checks MyType {
-       ^^^^^^ redefined-attribute/checks.check:2: warning: move this check block into bar.rsl:1 [deprecated_feature]
-Processed 1 model(s) and 1 check(s) and found 1 warning(s)

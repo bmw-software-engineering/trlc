@@ -1,1 +1,17 @@
-Processed 1 model(s), 0 check(s) and 0 requirement file(s) and found no issues
+(if a > 0 then x
+               ^ lint-vcg-ite/test1.rsl:10: warning: expression could be null [vcg-evaluation-of-null]
+               | example record_type triggering error:
+               |   T bad_potato {
+               |     a = 1
+               |     /* x is null */
+               |     /* y is null */
+               |   }
+elsif a < 0 then y
+                 ^ lint-vcg-ite/test1.rsl:11: warning: expression could be null [vcg-evaluation-of-null]
+                 | example record_type triggering error:
+                 |   T bad_potato {
+                 |     a = -1
+                 |     /* x is null */
+                 |     /* y is null */
+                 |   }
+Processed 1 model(s), 0 check(s) and 0 requirement file(s) and found 2 warning(s)

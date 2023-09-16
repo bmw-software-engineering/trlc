@@ -1,3 +1,8 @@
+type T4 extends T3 {
+     ^^ type-qualifiers-2/foo.rsl:15: warning: consider clarifying that this record is final [clarify_final]
+      | Parent record Foo.T3 is final, making this record
+      | also final. Marking it explicitly as final
+      | clarifies this to casual readers.
 T1 test_1 {
 ^^ type-qualifiers-2/foo.trlc:3: error: cannot declare object of abstract record type T1
-Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 1 error(s)
+Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 1 warning(s) and 1 error(s)

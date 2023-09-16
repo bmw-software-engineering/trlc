@@ -1,3 +1,5 @@
+checks MyType {
+       ^^^^^^ enum-null/checks.check:3: warning: move this check block into bar.rsl:1 [deprecated_feature]
 bar.MyType SomeThing {
            ^^^^^^^^^ enum-null/instances.trlc:4: check error: Status must be not null
-Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 1 error(s)
+Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 1 warning(s) and 1 error(s)

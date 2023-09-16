@@ -1,2 +1,0 @@
-package Foo
-        ^^^ cross-refs-in-errors/potato/foo.rsl:1: error: duplicate definition, previous definition at kitten/bar.rsl:1

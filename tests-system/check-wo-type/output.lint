@@ -1,3 +1,0 @@
-checks {
-       ^ check-wo-type/checks.check:3: error: expected identifier, encountered opening brace '{' instead
-Processed 1 model(s) and 1 check(s) and found 1 error(s)
