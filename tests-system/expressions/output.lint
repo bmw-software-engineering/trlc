@@ -90,4 +90,4 @@ abs (done - dtwo) == done, "33: good dabs"
                   ^^ expressions/foo.check:125: warning: expression is always true [vcg-always-true]
 (if yay then ione else itwo) == ione, "34: good ifexpr"
                              ^^ expressions/foo.check:128: warning: expression is always true [vcg-always-true]
-Verified 1 model(s) and 1 check(s) and found 46 warning(s)
+Processed 1 model(s) and 1 check(s) and found 46 warning(s)

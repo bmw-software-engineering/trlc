@@ -49,18 +49,37 @@ class Source_Manager:
     :param mh: The message handler to use
     :type mh: Message_Handler
 
-    :param lint_mode: If true check rules and models. If false actually \
-    process objects.
-    :type mh: Message_Handler
+    :param error_recovery: If true attempts to continue parsing after \
+      errors. This may generate weird error messages since it's impossible \
+      to reliably recover the parse context in all cases.
+    :type error_recovery: bool
+
+    :param lint_mode: If true enables additional warning messages.
+    :type lint_mode: bool
+
+    :param verify_mode: If true performs in-depth static analysis for \
+      user-defined checks. Requires CVC5 and PyVCG to be installed.
+    :type verify_mode: bool
+
+    :param parse_trlc: If true parses trlc files, otherwise they are \
+      ignored.
+    :type parse_trlc: bool
+
+    :param debug_vcg: If true and verify_mode is also true, emit the \
+      individual SMTLIB2 VCs and generate a picture of the program \
+      graph. Requires Graphviz to be installed.
+    :type parse_trlc: bool
 
     """
     def __init__(self, mh,
-                 lint_mode      = False,
+                 lint_mode      = True,
+                 parse_trlc     = True,
                  verify_mode    = False,
                  debug_vcg      = False,
                  error_recovery = True):
         assert isinstance(mh, Message_Handler)
         assert isinstance(lint_mode, bool)
+        assert isinstance(parse_trlc, bool)
         assert isinstance(verify_mode, bool)
         assert isinstance(debug_vcg, bool)
 
@@ -73,13 +92,13 @@ class Source_Manager:
         self.packages    = {}
 
         self.lint_mode      = lint_mode
+        self.parse_trlc     = parse_trlc
         self.verify_mode    = verify_mode
         self.debug_vcg      = debug_vcg
         self.error_recovery = error_recovery
 
         self.exclude_patterns = []
-
-        self.common_root    = None
+        self.common_root      = None
 
     def cross_file_reference(self, location):
         assert isinstance(location, Location)
@@ -236,6 +255,9 @@ class Source_Manager:
         assert file_name not in self.trlc_files
         assert isinstance(file_content, str) or file_content is None
 
+        if not self.parse_trlc:
+            return
+
         self.update_common_root(file_name)
         self.trlc_files[file_name] = self.create_parser(file_name,
                                                         file_content)
@@ -383,13 +405,17 @@ class Source_Manager:
         if not self.error_recovery and not ok:
             return None
 
-        # If we run in lint mode, then we perform the checks now and then
-        # stop. We do not process the TRLC files.
-        if self.lint_mode:
-            if not ok:
+        # Perform sanity checks (enabled by default). We only do this
+        # if there were no errors so far.
+        if self.lint_mode and ok:
+            ok &= self.perform_sanity_checks()
+
+        # Stop here if we're not processing TRLC files.
+        if not self.parse_trlc:
+            if ok:
+                return self.stab
+            else:
                 return None
-            self.perform_sanity_checks()
-            return None if self.mh.errors or self.mh.warnings else self.stab
 
         # Parse TRLC files. Almost all the semantic analysis and name
         # resolution happens here, with the notable exception of resolving
@@ -421,12 +447,24 @@ def main():
                 " Report bugs here: %s" % BUGS_URL),
         allow_abbrev=False,
     )
-    op_mode = ap.add_mutually_exclusive_group()
-    op_mode.add_argument("--lint",
+    og_lint = ap.add_argument_group("analysis options")
+    og_lint.add_argument("--no-lint",
                          default=False,
                          action="store_true",
-                         help=("Sanity check models and checks, but do not"
-                               " process requirements."))
+                         help="Disable additional, optional warnings.")
+    og_lint.add_argument("--skip-trlc-files",
+                         default=False,
+                         action="store_true",
+                         help=("Only process model and check files,"
+                               " do not process trlc files."))
+    og_lint.add_argument("--verify",
+                           default=False,
+                           action="store_true",
+                           help=("[EXPERIMENTAL] Attempt to statically"
+                                 " verify absence of errors in user defined"
+                                 " checks. Does not yet support all language"
+                                 " constructs. Requires PyVCG to be "
+                                 " installed."))
 
     og_input = ap.add_argument_group("input options")
     og_input.add_argument("--include-bazel-dirs",
@@ -440,6 +478,15 @@ def main():
                            action="store_true",
                            help=("Simpler output intended for CI. Does not"
                                  " show context or additional information."))
+    og_output.add_argument("--no-detailed-info",
+                           default=False,
+                           action="store_true",
+                           help=("Do not print counter-examples and other"
+                                 " supplemental information on failed"
+                                 " checks. The specific values of"
+                                 " counter-examples are unpredictable"
+                                 " from system to system, so if you need 100%"
+                                 " reproducible output then use this option."))
     og_output.add_argument("--no-user-warnings",
                            default=False,
                            action="store_true",
@@ -457,25 +504,10 @@ def main():
                            action="store_true",
                            help=("If there are no errors, produce a summary"
                                  " naming every file processed."))
-
-    og_linter = ap.add_argument_group("linter options")
-    og_linter.add_argument("--verify",
-                           default=False,
+    og_output.add_argument("--error-on-warnings",
                            action="store_true",
-                           help=("[EXPERIMENTAL] Attempt to statically"
-                                 " verify absence of errors in user defined"
-                                 " checks. Does not yet support all language"
-                                 " constructs. Requires PyVCG to be "
-                                 " installed."))
-    og_linter.add_argument("--no-detailed-info",
-                           default=False,
-                           action="store_true",
-                           help=("Do not print counter-examples and other"
-                                 " supplemental information on failed"
-                                 " checks. The specific values of"
-                                 " counter-examples are unpredictable"
-                                 " from system to system, so if you need 100%"
-                                 " reproducible output then use this option."))
+                           help=("If there are warnings, return status code"
+                                 " 1 instead of 0."))
 
     og_debug = ap.add_argument_group("debug options")
     og_debug.add_argument("--debug-dump",
@@ -507,7 +539,8 @@ def main():
         mh.suppress("check warning")
 
     sm = Source_Manager(mh             = mh,
-                        lint_mode      = options.lint,
+                        lint_mode      = not options.no_lint,
+                        parse_trlc     = not options.skip_trlc_files,
                         verify_mode    = options.verify,
                         debug_vcg      = options.debug_vcg,
                         error_recovery = not options.no_error_recovery)
@@ -554,19 +587,14 @@ def main():
 
             print(json.dumps(tmp, indent=2, sort_keys=True))
 
-    if options.show_file_list or options.lint:
-        if options.lint:
-            summary = "Verified"
-        else:
-            summary = "Processed"
-
-        summary += " %u model(s)" % len(sm.rsl_files)
-        if options.lint:
+    if not options.brief:
+        summary = "Processed %u model(s)" % len(sm.rsl_files)
+        if options.skip_trlc_files:
             summary += " and"
         else:
-            summary += ", "
+            summary += ","
         summary += " %u check(s)" % len(sm.check_files)
-        if not options.lint:
+        if not options.skip_trlc_files:
             summary += " and %u requirement file(s)" % len(sm.trlc_files)
 
         summary += " and found"
@@ -586,20 +614,23 @@ def main():
 
         print(summary)
 
-        if options.show_file_list and ok:
-            for filename in sorted(sm.rsl_files):
-                print("> Model %s (Package %s)" %
-                      (filename, sm.rsl_files[filename].cu.package.name))
-            for filename in sorted(sm.check_files):
-                print("> Checks %s (Package %s)" %
-                      (filename, sm.check_files[filename].cu.package.name))
-            if not options.lint:
-                for filename in sorted(sm.trlc_files):
-                    print("> Requirements %s (Package %s)" %
-                          (filename, sm.trlc_files[filename].cu.package.name))
+    if options.show_file_list and ok:
+        for filename in sorted(sm.rsl_files):
+            print("> Model %s (Package %s)" %
+                  (filename, sm.rsl_files[filename].cu.package.name))
+        for filename in sorted(sm.check_files):
+            print("> Checks %s (Package %s)" %
+                  (filename, sm.check_files[filename].cu.package.name))
+        if not options.skip_trlc_files:
+            for filename in sorted(sm.trlc_files):
+                print("> Requirements %s (Package %s)" %
+                      (filename, sm.trlc_files[filename].cu.package.name))
 
     if ok:
-        return 0
+        if options.error_on_warnings and self.mh.warnings:
+            return 1
+        else:
+            return 0
     else:
         return 1
 

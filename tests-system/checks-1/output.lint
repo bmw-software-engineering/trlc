@@ -7,4 +7,4 @@ a < b, "a must be less than b"
     |     a = 0
     |     /* b is null */
     |   }
-Verified 1 model(s) and 1 check(s) and found 2 warning(s)
+Processed 1 model(s) and 1 check(s) and found 2 warning(s)

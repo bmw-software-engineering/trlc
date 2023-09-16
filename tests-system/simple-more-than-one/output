@@ -2,3 +2,4 @@ name = "Abert"
        ^^^^^^^ simple-more-than-one/instances.trlc:9: check error: name must start with Q
 name = "BBert"
        ^^^^^^^ simple-more-than-one/instances.trlc:13: check error: name must start with Q
+Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 2 error(s)

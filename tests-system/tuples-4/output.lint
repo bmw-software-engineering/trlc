@@ -5,4 +5,4 @@ f2 >= 0, warning "potato2", f2
  |     f1 = R1_instance_0
  |     /* f2 is null */
  |   }
-Verified 1 model(s) and 0 check(s) and found 1 warning(s)
+Processed 1 model(s) and 0 check(s) and found 1 warning(s)

@@ -10,4 +10,4 @@ type T5 extends T4 {
       | clarifies this to casual readers.
 w Integer
 ^ type-qualifiers-3/foo.rsl:20: error: cannot declare new components in final record type
-Verified 1 model(s) and 0 check(s) and found 2 warning(s) and 1 error(s)
+Processed 1 model(s) and 0 check(s) and found 2 warning(s) and 1 error(s)

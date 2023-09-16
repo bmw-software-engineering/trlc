@@ -6,4 +6,4 @@ matches(name, "^Q.*"),  error "name must start with Q", name
            |   MyType bad_potato {
            |     /* name is null */
            |   }
-Verified 1 model(s) and 1 check(s) and found 2 warning(s)
+Processed 1 model(s) and 1 check(s) and found 2 warning(s)

@@ -2,4 +2,4 @@
 > Baz depends on Bork
 > Bork depends on Bar
 cyclic-packages/bar.rsl: error: circular inheritence
-Verified 4 model(s) and 0 check(s) and found 1 error(s)
+Processed 4 model(s) and 0 check(s) and found 1 error(s)

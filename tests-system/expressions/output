@@ -76,3 +76,4 @@ T Test {
   ^^^^ expressions/foo.trlc:3: check warning: 33: bad dabs
 T Test {
   ^^^^ expressions/foo.trlc:3: check warning: 34: bad ifexpr
+Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 39 warning(s)

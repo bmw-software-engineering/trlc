@@ -14,23 +14,23 @@ all: $(TARGETS) bulk/output bulk/output.brief bulk/output.lint bulk/output.json
 %/output:
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
-		../trlc.py $(file < $(dir $@)options) \
+		../trlc.py --no-lint $(file < $(dir $@)options) \
 			$(dir $@) > $@
 
 %/output.brief:
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
 		../trlc.py $(file < $(dir $@)options) \
-			--brief $(dir $@) > $@
+			--no-lint --brief $(dir $@) > $@
 
 %/output.lint:
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
 		../trlc.py $(file < $(dir $@)options) \
-			--lint --verify $(dir $@) > $@
+			--skip-trlc-files --verify $(dir $@) > $@
 
 %/output.json:
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
 		../trlc.py $(file < $(dir $@)options) \
-			--debug-api-dump $(dir $@) > $@
+			--no-lint --debug-api-dump $(dir $@) > $@

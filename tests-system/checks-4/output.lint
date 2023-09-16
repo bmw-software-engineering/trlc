@@ -7,4 +7,4 @@ checks T {
                   |     /* foo is null */
                   |     /* values is null */
                   |   }
-Verified 1 model(s) and 1 check(s) and found 2 warning(s)
+Processed 1 model(s) and 1 check(s) and found 2 warning(s)

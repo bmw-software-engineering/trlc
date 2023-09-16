@@ -2,3 +2,4 @@ T Test_1 {
   ^^^^^^ checks-2/foo.trlc:3: check error: please define b
 a = 5
     ^ checks-2/foo.trlc:8: check error: a must be less than b
+Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 2 error(s)

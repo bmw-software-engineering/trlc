@@ -10,3 +10,4 @@ x = 1 @ "foo"
 ^ tuples-11/foo.trlc:12: error: unknown symbol x
 x = 1 @ 1 @ "foo"
 ^ tuples-11/foo.trlc:16: error: unknown symbol x
+Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 6 error(s)

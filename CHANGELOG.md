@@ -25,9 +25,32 @@ generated in the following situations:
 ## Changelog
 
 
-### 1.1.11-dev
+### 1.2.1-dev
 
+* New minor version release due to minor API changes and major
+  command-line changes.
 
+* Remove the `--lint` option. Lint messages are now enabled by
+  default, and `.trlc` files are processed as well. Instead there is a
+  `--no-lint` option which turns off the extra warnings.
+
+* Add the `--skip-trlc-files` option which disables processing of
+  `.trlc` files. Enabling this option is equivalent to the old
+  `--lint` mode.
+
+* Add the `--error-on-warnings` option which generates a status code
+  of 1 if any warning is raised.
+
+* We now always print a short summary, indicating how many files were
+  processed and how many messages were generated. The
+  `--show-file-list` option still exists and still prints the complete
+  list of files. This summary may be supressed with the `--brief`
+  option.
+
+* Fix an issue where `--skip-trlc-files` would incorrectly register
+  and parse the preamble of `.trlc` files.
+
+* Fix a spurious space in the summary output.
 
 ### 1.1.10
 

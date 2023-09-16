@@ -1,3 +1,3 @@
 kitten in arr, warning "does not reference kitten"
 ^^^^^^ array-membership-3/foo.rsl:10: error: unknown symbol kitten
-Verified 1 model(s) and 0 check(s) and found 1 error(s)
+Processed 1 model(s) and 0 check(s) and found 1 error(s)

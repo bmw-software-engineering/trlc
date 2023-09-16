@@ -38,4 +38,4 @@ a == b implies x, "potato"
                |     b = Other.T_instance_0
                |     /* x is null */
                |   }
-Verified 4 model(s) and 0 check(s) and found 5 warning(s)
+Processed 4 model(s) and 0 check(s) and found 5 warning(s)

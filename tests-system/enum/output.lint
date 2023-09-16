@@ -2,4 +2,4 @@ checks MyType {
        ^^^^^^ enum/checks.check:2: warning: move this check block into bar.rsl:1 [deprecated_feature]
 status != null , "Internal error when evaluating enum value"
        ^^ enum/checks.check:4: warning: expression is always true [vcg-always-true]
-Verified 1 model(s) and 1 check(s) and found 2 warning(s)
+Processed 1 model(s) and 1 check(s) and found 2 warning(s)

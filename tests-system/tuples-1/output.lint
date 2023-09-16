@@ -6,4 +6,4 @@ baseline  >= 1.0, error "Baseline must be at least 1.0", baseline
        |     item_id = 0
        |     /* baseline is null */
        |   }
-Verified 1 model(s) and 0 check(s) and found 1 warning(s)
+Processed 1 model(s) and 0 check(s) and found 1 warning(s)
