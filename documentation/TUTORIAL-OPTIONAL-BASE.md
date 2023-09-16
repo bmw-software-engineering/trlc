@@ -55,9 +55,9 @@ checks Requirement {
 }
 ```
 
-This is not only error prone (although the [lint
-feature](TUTORIAL-CI.md) of TRLC plans to address this), but it is
-also quite hard to understand.
+This is not only error prone, but it is also quite hard to
+understand. (Although the [--verify feature](TUTORIAL-CI.md) of TRLC
+can find any issue in such an expression.)
 
 ## Solution 1: refactor types and freeze components
 

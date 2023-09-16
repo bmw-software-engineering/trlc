@@ -47,6 +47,11 @@ generated in the following situations:
   list of files. This summary may be supressed with the `--brief`
   option.
 
+* The
+  [Source_Manager](https://bmw-software-engineering.github.io/trlc/manual/infrastructure.html#trlc.trlc.Source_Manager)
+  as different constructor flags, although it can still be constructed
+  with no parameters.
+
 * Fix an issue where `--skip-trlc-files` would incorrectly register
   and parse the preamble of `.trlc` files.
 

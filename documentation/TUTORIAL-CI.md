@@ -42,17 +42,12 @@ The components of this regular expression are:
 
 ## Enabling extra checks
 
-The TRLC tools also come with a separate `--lint` mode that performs
-additional checks. This mode only considers `.rsl` (and `.check`) files,
-and in a CI environment this should be run first. A full CI
-integration should do the following:
+The TRLC tools also come with a static analysis mode that performs
+additional checks. To enable this use `--verify`, and it requires the
+optional dependency [PyVCG](https://pypi.org/project/PyVCG/). It is
+strongly suggested to turn this on in CI.
 
-* `trlc --brief --lint` to find any issues in model and checks
-* If lint completes successfully, follow up with `trlc --brief` to
-  process `.trlc` files and find issues in requirements and execute
-  user defined checks
-
-TRLC lint goes beyond what the language definition requires and
+The TRLC tool goes beyond what the language definition requires and
 produces additional messages that may be helpful. For example it warns
 you about deprecated language features:
 
@@ -62,11 +57,12 @@ you about deprecated language features:
 Verified 1 model(s) and check(s) and found 1 warning(s)
 ```
 
-Using TRLC lint is optional, but highly recommended.
-
 ## Return code
 
 The TRLC tool returns 0 if there are no errors (there could be user or
 language warnings however).
 
 A status code of 1 is returned in all other cases.
+
+If you also want to treat warnings as errors, use the
+`--error-on-warnings` option.

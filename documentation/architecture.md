@@ -86,17 +86,16 @@ The TRLC tool is actually two tools (the evaluator and the linter),
 however there is significant overlap in dataflow.
 
 * A shared command-line interface in [trlc.py](../trlc/trlc.py)
-  determines the file set to process and mode of operation (normal
-  evaluation or analysis with `--lint`).
+  determines the file set to process and mode of operation.
 
 * The Source_Manager registers files and decides on the parse
   order. For all modes of operation all `.rsl` files are parsed first,
   and then all `.check` files.
 
-* Then in `--lint` mode the [lint.py](../trlc/lint.py) and
-  [vcg.py](../trlc/vcg.py) modules are used to sanity check types and
-  user checks, and we then stop with messages and a return code of 0
-  or 1.
+* Then (unless `--no-lint` mode is active) the
+  [lint.py](../trlc/lint.py) and [vcg.py](../trlc/vcg.py) modules are
+  used to sanity check types and user checks, and we then stop with
+  messages and a return code of 0 or 1.
 
 * Otherwise in normal mode the Source_Manager proceeds to parse all
   `.trlc` files.
