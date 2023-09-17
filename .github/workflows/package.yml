@@ -31,3 +31,21 @@ jobs:
         with:
           name: wheels
           path: "dist/trlc-*.whl"
+
+  upload-test:
+    name: TestPyPI Upload
+    needs: package
+    runs-on: ubuntu-20.04
+    environment: release
+    permissions:
+      id-token: write
+    steps:
+      - name: Download wheel files
+        uses: actions/download-artifact@v3
+        with:
+          name: wheels
+          path: dist
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
