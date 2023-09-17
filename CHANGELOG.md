@@ -57,6 +57,9 @@ generated in the following situations:
 
 * Fix a spurious space in the summary output.
 
+* Fix support for Python 3.11. The package can now be installed
+  without issues.
+
 ### 1.1.10
 
 * [TRLC] Fix missing typechecks for numeric subtypes on value
