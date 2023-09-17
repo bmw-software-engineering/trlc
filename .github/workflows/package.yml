@@ -3,7 +3,6 @@ name: TRLC PyPI Packages
 on:
   release:
     types: [published]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -33,7 +32,7 @@ jobs:
           path: "dist/trlc-*.whl"
 
   upload-test:
-    name: TestPyPI Upload
+    name: PyPI Upload
     needs: package
     runs-on: ubuntu-20.04
     environment: release
@@ -47,5 +46,3 @@ jobs:
           path: dist
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
