@@ -1,5 +1,5 @@
 c, "potato"
-^ lint-vcg-tuple/test1.rsl:15: warning: expression could be null [vcg-evaluation-of-null]
+^ lint-vcg-tuple/test1.rsl:15: issue: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
 |     x = 1
@@ -9,19 +9,19 @@ c, "potato"
 |     /* c is null */
 |   }
 then x.version > 5
-       ^^^^^^^ lint-vcg-tuple/test2.rsl:10: warning: expression could be null [vcg-evaluation-of-null]
+       ^^^^^^^ lint-vcg-tuple/test2.rsl:10: issue: expression could be null [vcg-evaluation-of-null]
              | example record_type triggering error:
              |   T bad_potato {
              |     x = 501
              |   }
 else x.version < 5), warning "potato"
-       ^^^^^^^ lint-vcg-tuple/test2.rsl:11: warning: expression could be null [vcg-evaluation-of-null]
+       ^^^^^^^ lint-vcg-tuple/test2.rsl:11: issue: expression could be null [vcg-evaluation-of-null]
              | example record_type triggering error:
              |   T bad_potato {
              |     x = 1
              |   }
 c, "potato"
-^ lint-vcg-tuple/test3.rsl:12: warning: expression could be null [vcg-evaluation-of-null]
+^ lint-vcg-tuple/test3.rsl:12: issue: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
 |     x = 1@1

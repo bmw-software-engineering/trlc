@@ -1,5 +1,5 @@
 c, "wibble"
-^ lint-vcg-membership/test1.rsl:13: warning: expression could be null [vcg-evaluation-of-null]
+^ lint-vcg-membership/test1.rsl:13: issue: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
 |     x = 0

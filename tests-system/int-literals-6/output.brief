@@ -1,1 +1,2 @@
-int-literals-6/foo.trlc:3:15: trlc lex error: base 10 digit is required here
+int-literals-6/foo.trlc:3:15: trlc error: base 10 digit is required here
+int-literals-6/foo.trlc:3:17: trlc error: unexpected character '_'

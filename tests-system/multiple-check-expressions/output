@@ -1,5 +1,5 @@
 checks MyType {
-       ^^^^^^ multiple-check-expressions/checks.check:3: warning: move this check block into bar.rsl:1 [deprecated_feature]
+       ^^^^^^ multiple-check-expressions/checks.check:3: issue: move this check block into bar.rsl:1 [deprecated_feature]
 name = "Aberx"
        ^^^^^^^ multiple-check-expressions/instances.trlc:5: check error: name must start with Q
 name = "Aberx"

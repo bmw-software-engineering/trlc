@@ -1,7 +1,7 @@
 checks T {
-       ^ multiple-models/bar.check:3: warning: move this check block into bar.rsl:1 [deprecated_feature]
+       ^ multiple-models/bar.check:3: issue: move this check block into bar.rsl:1 [deprecated_feature]
 checks T {
-       ^ multiple-models/foo.check:3: warning: move this check block into foo.rsl:1 [deprecated_feature]
+       ^ multiple-models/foo.check:3: issue: move this check block into foo.rsl:1 [deprecated_feature]
 Foo.T test1 {
       ^^^^^ multiple-models/foo.trlc:4: check error: this is not a good name
 Bar.T test2 {

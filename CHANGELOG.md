@@ -52,6 +52,17 @@ generated in the following situations:
   as different constructor flags, although it can still be constructed
   with no parameters.
 
+* The
+  [Message_Handler](https://bmw-software-engineering.github.io/trlc/manual/errors.html#trlc.errors.Message_Handler)
+  now uses an enumeration instead of a string to signal message
+  severity/kind. For normal use this is transparent, but if you
+  subclass the message handler then you need to deal with this. The
+  category (for lint messages) is now also a separate parameter
+  instead of being baked into the message.
+
+* Please note that if you parse messages in CI, the [regex has changed
+  slightly](https://github.com/bmw-software-engineering/trlc/blob/main/documentation/TUTORIAL-CI.md#parsing-the-output).
+
 * Fix an issue where `--skip-trlc-files` would incorrectly register
   and parse the preamble of `.trlc` files.
 

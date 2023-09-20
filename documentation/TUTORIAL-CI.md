@@ -25,19 +25,18 @@ The output is designed to be machine parseable, with the following
 regular expression to match:
 
 ```
-(.*)\.(rsl|trlc|check)(:\d+(:\d+)?)? trlc (lex |check )?(warning|error|ICE): .*
+(.*)\.(rsl|trlc|check)(:\d+(:\d+)?)? trlc (check )?(warning|error|issue): .*
 ```
 
 The components of this regular expression are:
 
 * filename (with optional line (with optional column))
 * message kind, with the following options:
-  * trlc lex error (errors during lexing)
+  * trlc error (syntax or compiler errors)
+  * trlc issue (user mistakes, e.g. potential division by zero)
   * trlc warning (warnings from the language)
-  * trlc error (syntax error)
   * trlc check warning (user defined warnings)
   * trlc check error (user defined errors or fatal errors)
-  * trlc ICE (internal compiler errors)
 * message
 
 ## Enabling extra checks

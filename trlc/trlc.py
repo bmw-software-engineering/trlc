@@ -27,7 +27,7 @@ from fractions import Fraction
 
 from trlc import ast
 from trlc import lint
-from trlc.errors import TRLC_Error, Location, Message_Handler
+from trlc.errors import TRLC_Error, Location, Message_Handler, Kind
 from trlc.parser import Parser
 from trlc.lexer import TRLC_Lexer
 from trlc.version import TRLC_VERSION, BUGS_URL
@@ -536,7 +536,7 @@ def main():
     mh = Message_Handler(options.brief, not options.no_detailed_info)
 
     if options.no_user_warnings:
-        mh.suppress("check warning")
+        mh.suppress(Kind.USER_WARNING)
 
     sm = Source_Manager(mh             = mh,
                         lint_mode      = not options.no_lint,

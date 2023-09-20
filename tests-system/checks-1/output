@@ -1,7 +1,7 @@
 checks T {
-       ^ checks-1/foo.check:3: warning: move this check block into foo.rsl:1 [deprecated_feature]
+       ^ checks-1/foo.check:3: issue: move this check block into foo.rsl:1 [deprecated_feature]
 a < b, "a must be less than b"
-    ^ checks-1/foo.check:4: warning: expression could be null [vcg-evaluation-of-null]
+    ^ checks-1/foo.check:4: issue: expression could be null [vcg-evaluation-of-null]
     | example record_type triggering error:
     |   T bad_potato {
     |     a = 0

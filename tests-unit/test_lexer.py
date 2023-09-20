@@ -2,7 +2,7 @@ import unittest
 import re
 from fractions import Fraction
 
-from trlc.errors import Location, Message_Handler, TRLC_Error
+from trlc.errors import Location, Message_Handler, TRLC_Error, Kind
 from trlc.lexer import TRLC_Lexer
 
 
@@ -13,7 +13,7 @@ class List_Handler(Message_Handler):
 
     def emit(self, location, kind, message, fatal=True, extrainfo=None):
         assert isinstance(location, Location)
-        assert isinstance(kind, str)
+        assert isinstance(kind, Kind)
         assert isinstance(message, str)
         assert isinstance(fatal, bool)
         assert isinstance(extrainfo, str) or extrainfo is None

@@ -1,3 +1,5 @@
 bar.MyType Übergrößenträger {
-           ^ unicode/instances.trlc:4: lex error: unexpected character 'Ü'
-Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 1 error(s)
+           ^ unicode/instances.trlc:4: error: unexpected character 'Ü'
+bar.MyType Übergrößenträger {
+                 ^ unicode/instances.trlc:4: error: unexpected character 'ö'
+Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 2 error(s)

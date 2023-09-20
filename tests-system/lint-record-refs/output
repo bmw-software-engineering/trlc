@@ -1,5 +1,5 @@
 x, "potato"
-^ lint-record-refs/test1.rsl:11: warning: expression could be null [vcg-evaluation-of-null]
+^ lint-record-refs/test1.rsl:11: issue: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
 |     top_level = true
@@ -7,7 +7,7 @@ x, "potato"
 |     /* x is null */
 |   }
 a != b implies x, "potato"
-               ^ lint-record-refs/test2.rsl:10: warning: expression could be null [vcg-evaluation-of-null]
+               ^ lint-record-refs/test2.rsl:10: issue: expression could be null [vcg-evaluation-of-null]
                | example record_type triggering error:
                |   T bad_potato {
                |     a = T_instance_1
@@ -15,7 +15,7 @@ a != b implies x, "potato"
                |     /* x is null */
                |   }
 a == b implies x, "potato"
-               ^ lint-record-refs/test2.rsl:11: warning: expression could be null [vcg-evaluation-of-null]
+               ^ lint-record-refs/test2.rsl:11: issue: expression could be null [vcg-evaluation-of-null]
                | example record_type triggering error:
                |   T bad_potato {
                |     a = T_instance_0
@@ -23,7 +23,7 @@ a == b implies x, "potato"
                |     /* x is null */
                |   }
 a != b implies x, "potato"
-               ^ lint-record-refs/test3.rsl:11: warning: expression could be null [vcg-evaluation-of-null]
+               ^ lint-record-refs/test3.rsl:11: issue: expression could be null [vcg-evaluation-of-null]
                | example record_type triggering error:
                |   T bad_potato {
                |     a = Other.T_instance_1
@@ -31,7 +31,7 @@ a != b implies x, "potato"
                |     /* x is null */
                |   }
 a == b implies x, "potato"
-               ^ lint-record-refs/test3.rsl:12: warning: expression could be null [vcg-evaluation-of-null]
+               ^ lint-record-refs/test3.rsl:12: issue: expression could be null [vcg-evaluation-of-null]
                | example record_type triggering error:
                |   T bad_potato {
                |     a = Other.T_instance_0

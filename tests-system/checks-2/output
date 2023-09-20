@@ -1,5 +1,5 @@
 checks T {
-       ^ checks-2/foo.check:3: warning: move this check block into foo.rsl:1 [deprecated_feature]
+       ^ checks-2/foo.check:3: issue: move this check block into foo.rsl:1 [deprecated_feature]
 T Test_1 {
   ^^^^^^ checks-2/foo.trlc:3: check error: please define b
 a = 5

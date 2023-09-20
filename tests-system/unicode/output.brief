@@ -1,1 +1,2 @@
-unicode/instances.trlc:4:16: trlc lex error: unexpected character 'Ü'
+unicode/instances.trlc:4:16: trlc error: unexpected character 'Ü'
+unicode/instances.trlc:4:22: trlc error: unexpected character 'ö'

@@ -1,95 +1,95 @@
 checks T {
-       ^ expressions/foo.check:3: warning: move this check block into foo.rsl:1 [deprecated_feature]
+       ^ expressions/foo.check:3: issue: move this check block into foo.rsl:1 [deprecated_feature]
 yay and yay and yay, "01: good and"
-            ^^^ expressions/foo.check:13: warning: expression is always true [vcg-always-true]
+            ^^^ expressions/foo.check:13: issue: expression is always true [vcg-always-true]
 nay or yay or nay, "02: or"
-           ^^ expressions/foo.check:16: warning: expression is always true [vcg-always-true]
+           ^^ expressions/foo.check:16: issue: expression is always true [vcg-always-true]
 nay xor yay, "03: good xor"
-    ^^^ expressions/foo.check:19: warning: expression is always true [vcg-always-true]
+    ^^^ expressions/foo.check:19: issue: expression is always true [vcg-always-true]
 yay implies yay, "04: good implies"
-    ^^^^^^^ expressions/foo.check:22: warning: expression is always true [vcg-always-true]
+    ^^^^^^^ expressions/foo.check:22: issue: expression is always true [vcg-always-true]
 ione < itwo, "05: good i<"
-     ^ expressions/foo.check:25: warning: expression is always true [vcg-always-true]
+     ^ expressions/foo.check:25: issue: expression is always true [vcg-always-true]
 done < dtwo, "06: good d<"
-     ^ expressions/foo.check:28: warning: expression is always true [vcg-always-true]
+     ^ expressions/foo.check:28: issue: expression is always true [vcg-always-true]
 ione <= ione, "07: good i<="
-     ^^ expressions/foo.check:31: warning: expression is always true [vcg-always-true]
+     ^^ expressions/foo.check:31: issue: expression is always true [vcg-always-true]
 done <= done, "08: good d<="
-     ^^ expressions/foo.check:34: warning: expression is always true [vcg-always-true]
+     ^^ expressions/foo.check:34: issue: expression is always true [vcg-always-true]
 itwo > ione, "09: good i>"
-     ^ expressions/foo.check:37: warning: expression is always true [vcg-always-true]
+     ^ expressions/foo.check:37: issue: expression is always true [vcg-always-true]
 dtwo > done, "10: good d>"
-     ^ expressions/foo.check:40: warning: expression is always true [vcg-always-true]
+     ^ expressions/foo.check:40: issue: expression is always true [vcg-always-true]
 itwo >= ione, "11: good i>="
-     ^^ expressions/foo.check:43: warning: expression is always true [vcg-always-true]
+     ^^ expressions/foo.check:43: issue: expression is always true [vcg-always-true]
 dtwo >= done, "12: good d>="
-     ^^ expressions/foo.check:46: warning: expression is always true [vcg-always-true]
+     ^^ expressions/foo.check:46: issue: expression is always true [vcg-always-true]
 ione == ione, "13: good i=="
-     ^^ expressions/foo.check:49: warning: expression is always true [vcg-always-true]
+     ^^ expressions/foo.check:49: issue: expression is always true [vcg-always-true]
 done == done, "14: good d=="
-     ^^ expressions/foo.check:52: warning: expression is always true [vcg-always-true]
+     ^^ expressions/foo.check:52: issue: expression is always true [vcg-always-true]
 ione != itwo, "15: good i!="
-     ^^ expressions/foo.check:55: warning: expression is always true [vcg-always-true]
+     ^^ expressions/foo.check:55: issue: expression is always true [vcg-always-true]
 done != dtwo, "16: good d!="
-     ^^ expressions/foo.check:58: warning: expression is always true [vcg-always-true]
+     ^^ expressions/foo.check:58: issue: expression is always true [vcg-always-true]
 ione in 0 .. 10, "17: good range iin"
-     ^^ expressions/foo.check:61: warning: expression is always true [vcg-always-true]
+     ^^ expressions/foo.check:61: issue: expression is always true [vcg-always-true]
 done in 0.0 .. 10.0, "18: good range din"
-     ^^ expressions/foo.check:64: warning: expression is always true [vcg-always-true]
+     ^^ expressions/foo.check:64: issue: expression is always true [vcg-always-true]
 ione not in 5 .. 10, "19: good range not iin"
-     ^^^ expressions/foo.check:67: warning: expression is always true [vcg-always-true]
+     ^^^ expressions/foo.check:67: issue: expression is always true [vcg-always-true]
 done not in 5.0 .. 10.0, "20: good range not din"
-     ^^^ expressions/foo.check:70: warning: expression is always true [vcg-always-true]
+     ^^^ expressions/foo.check:70: issue: expression is always true [vcg-always-true]
 foo in foobar, "21: good substring"
-    ^^ expressions/foo.check:73: warning: expression is always true [vcg-always-true]
+    ^^ expressions/foo.check:73: issue: expression is always true [vcg-always-true]
 (-ione) + ione + itwo == itwo, "22: good i adding"
-                      ^^ expressions/foo.check:76: warning: expression is always true [vcg-always-true]
+                      ^^ expressions/foo.check:76: issue: expression is always true [vcg-always-true]
 (-done) + done + dtwo == dtwo, "23: good d adding"
-                      ^^ expressions/foo.check:80: warning: expression is always true [vcg-always-true]
+                      ^^ expressions/foo.check:80: issue: expression is always true [vcg-always-true]
 ione * itwo * ione * itwo == itwo + itwo, "24: good i*"
-                          ^^ expressions/foo.check:84: warning: expression is always true [vcg-always-true]
+                          ^^ expressions/foo.check:84: issue: expression is always true [vcg-always-true]
 done * dtwo * done * dtwo == dtwo + dtwo, "25: good d*"
-                          ^^ expressions/foo.check:87: warning: expression is always true [vcg-always-true]
+                          ^^ expressions/foo.check:87: issue: expression is always true [vcg-always-true]
 10 / itwo / itwo == itwo, "26: good i/"
-                 ^^ expressions/foo.check:90: warning: expression is always true [vcg-always-true]
+                 ^^ expressions/foo.check:90: issue: expression is always true [vcg-always-true]
 10.0 / dtwo / dtwo == 2.5, "27: good d/"
-                   ^^ expressions/foo.check:93: warning: expression is always true [vcg-always-true]
+                   ^^ expressions/foo.check:93: issue: expression is always true [vcg-always-true]
 10 % 5 == 0,        "28: good % (1/12)"
-       ^^ expressions/foo.check:96: warning: expression is always true [vcg-always-true]
+       ^^ expressions/foo.check:96: issue: expression is always true [vcg-always-true]
 11 % 5 == 1,        "28: good % (2/12)"
-       ^^ expressions/foo.check:97: warning: expression is always true [vcg-always-true]
+       ^^ expressions/foo.check:97: issue: expression is always true [vcg-always-true]
 14 % 5 == 4,        "28: good % (3/12)"
-       ^^ expressions/foo.check:98: warning: expression is always true [vcg-always-true]
+       ^^ expressions/foo.check:98: issue: expression is always true [vcg-always-true]
 (-10) % 5 == 0,     "28: good % (4/12)"
-          ^^ expressions/foo.check:99: warning: expression is always true [vcg-always-true]
+          ^^ expressions/foo.check:99: issue: expression is always true [vcg-always-true]
 (-11) % 5 == -1,    "28: good % (5/12)"
-          ^^ expressions/foo.check:100: warning: expression is always true [vcg-always-true]
+          ^^ expressions/foo.check:100: issue: expression is always true [vcg-always-true]
 (-14) % 5 == -4,    "28: good % (6/12)"
-          ^^ expressions/foo.check:101: warning: expression is always true [vcg-always-true]
+          ^^ expressions/foo.check:101: issue: expression is always true [vcg-always-true]
 10 % (-5) == 0,     "28: good % (7/12)"
-          ^^ expressions/foo.check:102: warning: expression is always true [vcg-always-true]
+          ^^ expressions/foo.check:102: issue: expression is always true [vcg-always-true]
 11 % (-5) == 1,     "28: good % (8/12)"
-          ^^ expressions/foo.check:103: warning: expression is always true [vcg-always-true]
+          ^^ expressions/foo.check:103: issue: expression is always true [vcg-always-true]
 14 % (-5) == 4,     "28: good % (9/12)"
-          ^^ expressions/foo.check:104: warning: expression is always true [vcg-always-true]
+          ^^ expressions/foo.check:104: issue: expression is always true [vcg-always-true]
 (-10) % (-5) == 0,  "28: good % (10/12)"
-             ^^ expressions/foo.check:105: warning: expression is always true [vcg-always-true]
+             ^^ expressions/foo.check:105: issue: expression is always true [vcg-always-true]
 (-11) % (-5) == -1, "28: good % (11/12)"
-             ^^ expressions/foo.check:106: warning: expression is always true [vcg-always-true]
+             ^^ expressions/foo.check:106: issue: expression is always true [vcg-always-true]
 (-14) % (-5) == -4, "28: good % (12/12)"
-             ^^ expressions/foo.check:107: warning: expression is always true [vcg-always-true]
+             ^^ expressions/foo.check:107: issue: expression is always true [vcg-always-true]
 itwo ** (2 + 1) == 8, "29: good iexp"
-                ^^ expressions/foo.check:113: warning: expression is always true [vcg-always-true]
+                ^^ expressions/foo.check:113: issue: expression is always true [vcg-always-true]
 dtwo ** (2 + 1) == 8.0, "30: good dexp"
-                ^^ expressions/foo.check:116: warning: expression is always true [vcg-always-true]
+                ^^ expressions/foo.check:116: issue: expression is always true [vcg-always-true]
 not nay, "31: good lnot"
-^^^ expressions/foo.check:119: warning: expression is always true [vcg-always-true]
+^^^ expressions/foo.check:119: issue: expression is always true [vcg-always-true]
 abs (ione - itwo) == ione, "32: good iabs"
-                  ^^ expressions/foo.check:122: warning: expression is always true [vcg-always-true]
+                  ^^ expressions/foo.check:122: issue: expression is always true [vcg-always-true]
 abs (done - dtwo) == done, "33: good dabs"
-                  ^^ expressions/foo.check:125: warning: expression is always true [vcg-always-true]
+                  ^^ expressions/foo.check:125: issue: expression is always true [vcg-always-true]
 (if yay then ione else itwo) == ione, "34: good ifexpr"
-                             ^^ expressions/foo.check:128: warning: expression is always true [vcg-always-true]
+                             ^^ expressions/foo.check:128: issue: expression is always true [vcg-always-true]
 T Test {
   ^^^^ expressions/foo.trlc:3: check warning: 01: bad and
 T Test {

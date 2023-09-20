@@ -19,6 +19,7 @@
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
 import sys
+import enum
 
 from trlc import version
 
@@ -94,6 +95,22 @@ class Location:
         return self
 
 
+@enum.unique
+class Kind(enum.Enum):
+    SYS_ERROR = enum.auto()
+    SYS_CHECK = enum.auto()
+    SYS_WARNING = enum.auto()
+    USER_ERROR = enum.auto()
+    USER_WARNING = enum.auto()
+
+    def __str__(self):
+        return {"SYS_ERROR"    : "error",
+                "SYS_CHECK"    : "issue",
+                "SYS_WARNING"  : "warning",
+                "USER_ERROR"   : "check error",
+                "USER_WARNING" : "check warning"}[self.name]
+
+
 class TRLC_Error(Exception):
     """ The universal exception that TRLC raises if something goes wrong
 
@@ -108,7 +125,7 @@ class TRLC_Error(Exception):
     """
     def __init__(self, location, kind, message):
         assert isinstance(location, Location)
-        assert isinstance(kind, str)
+        assert isinstance(kind, Kind)
         assert isinstance(message, str)
 
         super().__init__()
@@ -144,17 +161,17 @@ class Message_Handler:
     """
     def __init__(self, brief=False, detailed_info=True):
         assert isinstance(brief, bool)
-        self.brief             = brief
-        self.show_details      = detailed_info
-        self.warnings          = 0
-        self.errors            = 0
-        self.suppressed        = 0
-        self.sm                = None
-        self.suppress_category = set()
+        self.brief         = brief
+        self.show_details  = detailed_info
+        self.warnings      = 0
+        self.errors        = 0
+        self.suppressed    = 0
+        self.sm            = None
+        self.suppress_kind = set()
 
-    def suppress(self, category):
-        assert isinstance(category, str)
-        self.suppress_category.add(category)
+    def suppress(self, kind):
+        assert isinstance(kind, Kind)
+        self.suppress_kind.add(kind)
 
     def cross_file_reference(self, location):
         assert isinstance(location, Location)
@@ -164,26 +181,36 @@ class Message_Handler:
         else:
             return self.sm.cross_file_reference(location)
 
-    def emit(self, location, kind, message, fatal=True, extrainfo=None):
+    def emit(self,
+             location,
+             kind,
+             message,
+             fatal=True,
+             extrainfo=None,
+             category=None):
         assert isinstance(location, Location)
-        assert isinstance(kind, str)
+        assert isinstance(kind, Kind)
         assert isinstance(message, str)
         assert isinstance(fatal, bool)
         assert isinstance(extrainfo, str) or extrainfo is None
+        assert isinstance(category, str) or category is None
 
         if self.brief:
             context = None
             msg = "%s: trlc %s: %s" % (location.to_string(),
-                                       kind,
+                                       str(kind),
                                        message)
 
         else:
             context = location.context_lines()
             msg = "%s: %s: %s" % (location.to_string(len(context) == 0),
-                                  kind,
+                                  str(kind),
                                   message)
 
-        if kind in self.suppress_category:
+        if category:
+            msg += " [%s]" % category
+
+        if kind in self.suppress_kind:
             self.suppressed += 1
 
         else:
@@ -214,7 +241,7 @@ class Message_Handler:
 
         self.errors += 1
         self.emit(location = location,
-                  kind     = "lex error",
+                  kind     = Kind.SYS_ERROR,
                   message  = message)
 
     def error(self,
@@ -256,9 +283,9 @@ class Message_Handler:
         assert isinstance(user, bool)
 
         if user:
-            kind = "check error"
+            kind = Kind.USER_ERROR
         else:
-            kind = "error"
+            kind = Kind.SYS_ERROR
 
         self.errors += 1
         self.emit(location  = location,
@@ -283,9 +310,9 @@ class Message_Handler:
         assert isinstance(user, bool)
 
         if user:
-            kind = "check warning"
+            kind = Kind.USER_WARNING
         else:
-            kind = "warning"
+            kind = Kind.SYS_WARNING
 
         self.warnings += 1
         self.emit(location  = location,
@@ -302,10 +329,11 @@ class Message_Handler:
 
         self.warnings += 1
         self.emit(location  = location,
-                  kind      = "warning",
-                  message   = "%s [%s]" % (message, check),
+                  kind      = Kind.SYS_CHECK,
+                  message   = message,
                   fatal     = False,
-                  extrainfo = explanation)
+                  extrainfo = explanation,
+                  category  = check)
 
     def ice_loc(self, location, message):  # pragma: no cover
         assert isinstance(location, Location)
@@ -313,7 +341,7 @@ class Message_Handler:
 
         self.errors += 1
         self.emit(location  = location,
-                  kind      = "ICE",
+                  kind      = Kind.SYS_ERROR,
                   message   = message,
                   extrainfo = "please report this to %s" % version.BUGS_URL,
                   fatal     = False)
