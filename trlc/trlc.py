@@ -170,19 +170,20 @@ class Source_Manager:
         # lobster-trace: LRM.Layout
 
         ok = True
-        if file_name.endswith(".rsl"):
-            try:
+        try:
+            if file_name.endswith(".rsl"):
                 self.register_rsl_file(file_name, file_content)
-            except TRLC_Error:
+            elif file_name.endswith(".check"):
+                self.register_check_file(file_name, file_content)
+            elif file_name.endswith(".trlc"):
+                self.register_trlc_file(file_name, file_content)
+            else:
                 ok = False
-        elif file_name.endswith(".check"):
-            self.register_check_file(file_name, file_content)
-        elif file_name.endswith(".trlc"):
-            self.register_trlc_file(file_name, file_content)
-        else:
+                self.mh.error(Location(os.path.basename(file_name)),
+                              "is not a rsl, check, or trlc file",
+                              fatal = False)
+        except TRLC_Error:
             ok = False
-            self.mh.error(Location(os.path.basename(file_name)),
-                          "is not a rsl, check, or trlc file")
 
         return ok
 

@@ -315,7 +315,7 @@ class TRLC_Lexer(Lexer_Base):
                 try:
                     super().__init__(mh, fd.read())
                 except UnicodeDecodeError as err:
-                    mh.error(Location(file_name), str(err))
+                    mh.lex_error(Location(file_name), str(err))
 
     def current_location(self):
         # lobster-exclude: Utility function
