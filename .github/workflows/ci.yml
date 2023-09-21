@@ -40,6 +40,11 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
+      - uses: supplypike/setup-bin@v3
+        with:
+          uri: 'https://github.com/cvc5/cvc5/releases/download/cvc5-1.0.8/cvc5-Linux'
+          name: 'cvc5'
+          version: '1.0.8'
       - name: Set up Python ${{ matrix.py-version }}
         uses: actions/setup-python@v3
         with:
