@@ -71,6 +71,10 @@ generated in the following situations:
 * Fix support for Python 3.11. The package can now be installed
   without issues.
 
+* Fix issue in vcg where the matches function could be generated more
+  than once. This was only an issue in the debug output and was not
+  visible to users.
+
 ### 1.1.10
 
 * [TRLC] Fix missing typechecks for numeric subtypes on value

@@ -121,16 +121,19 @@ class VCG:
         return "tmp.%u" % self.tmp_id
 
     def get_uf_matches(self):
-        self.uf_matches = smt.Function("trlc.matches",
-                                       smt.BUILTIN_BOOLEAN,
-                                       smt.Bound_Variable(smt.BUILTIN_STRING,
-                                                          "subject"),
-                                       smt.Bound_Variable(smt.BUILTIN_STRING,
-                                                          "regex"))
+        if self.uf_matches is None:
+            self.uf_matches = \
+                smt.Function("trlc.matches",
+                             smt.BUILTIN_BOOLEAN,
+                             smt.Bound_Variable(smt.BUILTIN_STRING,
+                                                "subject"),
+                             smt.Bound_Variable(smt.BUILTIN_STRING,
+                                                "regex"))
 
-        # Create UF for the matches function (for now, later we will
-        # deal with regex properly).
-        self.preamble.add_statement(smt.Function_Declaration(self.uf_matches))
+            # Create UF for the matches function (for now, later we
+            # will deal with regex properly).
+            self.preamble.add_statement(
+                smt.Function_Declaration(self.uf_matches))
 
         return self.uf_matches
 
