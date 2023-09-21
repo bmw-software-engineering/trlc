@@ -5,20 +5,24 @@ This is part of the [TRLC Tutorial](TUTORIAL.md).
 ## Using the linter
 
 The TRLC tools come with a static analysis tool that can diagnose some
-potential issues with `.rsl` files before they are deployed and used.
+potential issues with `.rsl` files before they are deployed and
+used. This is enabled by default, but you can turn these off with the
+`--no-lint` option.
 
-To do this simply use the `--lint` feature:
+To enable more detailed checks you can also use the `--verify`
+feature, but please note that this is only available on Linux, and
+requires you to have installed the optional dependency
+[CVC5](https://pypi.org/project/cvc5).
 
 ```bash
-$ trlc --lint DIRECTORIES_OR_FILES
+$ trlc --verify DIRECTORIES_OR_FILES
 ```
-To enable more detailed checks you can also use the `--lint --verify`
-feature, but please note that this is only available on Linux and OSX,
-and requires you to have installed the optional dependency
-[PyVCG](https://pypi.org/project/PyVCG).
+
+If you are on Windows or Linux, you can also download the CVC5
+executables and ask TRLC to use them directly:
 
 ```bash
-$ trlc --lint --verify DIRECTORIES_OR_FILES
+$ trlc --verify --use-cvc5-binary=path/to/cvc5.exe DIRECTORIES_OR_FILES
 ```
 
 ## Sanity checks
@@ -50,7 +54,7 @@ contexts:
 * division by zero
 * array out of bounds
 
-The `--lint --verify` feature can also find cases where the check
+The `--verify` feature can also find cases where the check
 could be improved to guard against such as problem. For example:
 
 ```trlc
@@ -66,7 +70,7 @@ checks T {
 When running the verifier we can see:
 
 ```plain
-$ trlc.py --lint --verify trivial.rsl
+$ trlc.py --verify trivial.rsl
 x > 0, "please make this positive", x
 ^ trivial.rsl:8: warning: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
@@ -98,16 +102,16 @@ checks T {
 When running the verifier now we no longer get a complaint:
 
 ```plain
-$ trlc.py --lint --verify trivial.rsl
+$ trlc.py --verify trivial.rsl
 Verified 1 model(s) and 0 check(s) and found no issues
 ```
 
 ### Caveat
 
-Please keep in mind two limitations with the `--lint --verify`
+Please keep in mind two limitations with the `--verify`
 feature:
 
-* It currently does not work on Windows
+* It is harder to use and much slower on Windows
 * Under some circumstances the counter-examples generated are
   impossible to achieve, due to how the underlying technology (SMT
   Solvers) works. The current limitations are documented in the

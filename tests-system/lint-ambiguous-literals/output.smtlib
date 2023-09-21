@@ -1,0 +1,9 @@
+separator x
+          ^ lint-ambiguous-literals/foo.rsl:11: issue: x separator after integer component creates ambiguities [separator_based_literal_ambiguity]
+          | For example 0x"potato" would be a lexer error
+          | instead of the tuple segment 0 x "potato".
+separator x
+          ^ lint-ambiguous-literals/foo.rsl:5: issue: x separator after integer component creates ambiguities [separator_based_literal_ambiguity]
+          | For example 0x100 would be a base 16 literal
+          | instead of the tuple segment 0 x 100.
+Processed 1 model(s), 0 check(s) and 0 requirement file(s) and found 2 warning(s)

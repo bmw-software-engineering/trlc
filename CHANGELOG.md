@@ -30,6 +30,15 @@ generated in the following situations:
 * New minor version release due to minor API changes and major
   command-line changes.
 
+* When using `--verify` you can now also specify a
+  [CVC5](https://github.com/cvc5/cvc5) executable using
+  `--use-cvc5-binary`. This allows you to use the `--verify` option on
+  platforms where there is no CVC5 PyPI package (i.e. Windows).
+
+* The [PyVCG](https://pypi.org/project/PyVCG) is now required on all
+  platforms. The optional dependency is now
+  [CVC5](https://pypi.org/project/cvc5) instead.
+
 * Remove the `--lint` option. Lint messages are now enabled by
   default, and `.trlc` files are processed as well. Instead there is a
   `--no-lint` option which turns off the extra warnings.

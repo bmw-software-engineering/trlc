@@ -1,0 +1,3 @@
+A.L L1 {
+    ^^ xref-uniqueness-across-files/f2.trlc:3: error: duplicate definition, previous definition at f1.trlc:4
+Processed 1 model(s), 0 check(s) and 2 requirement file(s) and found 1 error(s)

@@ -2,6 +2,7 @@ RAW_TARGETS=$(filter-out bulk, $(subst ./,,$(shell find . -mindepth 1 -maxdepth 
 
 TARGETS=\
 	$(addsuffix /output, $(RAW_TARGETS)) \
+	$(addsuffix /output.smtlib, $(RAW_TARGETS)) \
 	$(addsuffix /output.brief, $(RAW_TARGETS)) \
 	$(addsuffix /output.json, $(RAW_TARGETS))
 
@@ -14,6 +15,13 @@ all: $(TARGETS) bulk/output bulk/output.brief bulk/output.json
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
 		../trlc.py --verify $(file < $(dir $@)options) \
+			$(dir $@) > $@
+
+%/output.smtlib:
+	-@coverage run -p --rcfile=../coverage.cfg --branch \
+		--data-file ../.coverage \
+		../trlc.py --verify --use-cvc5-binary=cvc5 \
+			$(file < $(dir $@)options) \
 			$(dir $@) > $@
 
 %/output.brief:

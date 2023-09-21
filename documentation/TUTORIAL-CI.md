@@ -43,8 +43,8 @@ The components of this regular expression are:
 
 The TRLC tools also come with a static analysis mode that performs
 additional checks. To enable this use `--verify`, and it requires the
-optional dependency [PyVCG](https://pypi.org/project/PyVCG/). It is
-strongly suggested to turn this on in CI.
+optional dependency [CVC5](https://pypi.org/project/cvc5/) (GNU/Linux
+only). It is strongly suggested to turn this on in CI.
 
 The TRLC tool goes beyond what the language definition requires and
 produces additional messages that may be helpful. For example it warns

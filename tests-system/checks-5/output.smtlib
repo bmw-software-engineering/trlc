@@ -1,0 +1,6 @@
+Requirement Potato {
+            ^^^^^^ checks-5/foo.trlc:3: check error: linkage incorrect
+                 | You must either link this requirement to other requirements
+                 | using the derived_from attribute, or you need to set
+                 | top_level to true.
+Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 1 error(s)

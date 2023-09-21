@@ -1,0 +1,5 @@
+checks MyType {
+       ^^^^^^ base-types/checks.check:4: issue: move this check block into bar.rsl:1 [deprecated_feature]
+int_nok = 24
+          ^^ base-types/instances.trlc:10: check error: int must be 42
+Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 1 warning(s) and 1 error(s)

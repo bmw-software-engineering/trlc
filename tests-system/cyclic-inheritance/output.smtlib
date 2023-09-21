@@ -1,0 +1,5 @@
+type MyType2 extends MyType3 {
+                     ^^^^^^^ cyclic-inheritance/bar.rsl:5: error: unknown symbol MyType3
+type MyType3 extends MyType2 {
+                     ^^^^^^^ cyclic-inheritance/bar.rsl:9: error: unknown symbol MyType2
+Processed 1 model(s), 0 check(s) and 0 requirement file(s) and found 2 error(s)

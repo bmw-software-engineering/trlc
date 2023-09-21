@@ -23,6 +23,7 @@ import os
 import sys
 import json
 import argparse
+import subprocess
 from fractions import Fraction
 
 from trlc import ast
@@ -33,10 +34,10 @@ from trlc.lexer import TRLC_Lexer
 from trlc.version import TRLC_VERSION, BUGS_URL
 
 try:
-    from pyvcg import version
-    VCG_AVAILABLE = version.VERSION_TUPLE >= (1, 0, 4)
+    import cvc5
+    VCG_API_AVAILABLE = True
 except ImportError:
-    VCG_AVAILABLE = False
+    VCG_API_AVAILABLE = False
 
 
 class Source_Manager:
@@ -76,12 +77,14 @@ class Source_Manager:
                  parse_trlc     = True,
                  verify_mode    = False,
                  debug_vcg      = False,
-                 error_recovery = True):
+                 error_recovery = True,
+                 cvc5_binary    = None):
         assert isinstance(mh, Message_Handler)
         assert isinstance(lint_mode, bool)
         assert isinstance(parse_trlc, bool)
         assert isinstance(verify_mode, bool)
         assert isinstance(debug_vcg, bool)
+        assert isinstance(cvc5_binary, str) or cvc5_binary is None
 
         self.mh          = mh
         self.mh.sm       = self
@@ -96,6 +99,7 @@ class Source_Manager:
         self.verify_mode    = verify_mode
         self.debug_vcg      = debug_vcg
         self.error_recovery = error_recovery
+        self.cvc5_binary    = cvc5_binary
 
         self.exclude_patterns = []
         self.common_root      = None
@@ -381,7 +385,8 @@ class Source_Manager:
         linter = lint.Linter(mh            = self.mh,
                              stab          = self.stab,
                              verify_checks = self.verify_mode,
-                             debug_vcg     = self.debug_vcg)
+                             debug_vcg     = self.debug_vcg,
+                             cvc5_binary   = self.cvc5_binary)
         return linter.verify()
 
     def process(self):
@@ -459,13 +464,18 @@ def main():
                          help=("Only process model and check files,"
                                " do not process trlc files."))
     og_lint.add_argument("--verify",
-                           default=False,
-                           action="store_true",
-                           help=("[EXPERIMENTAL] Attempt to statically"
-                                 " verify absence of errors in user defined"
-                                 " checks. Does not yet support all language"
-                                 " constructs. Requires PyVCG to be "
-                                 " installed."))
+                         default=False,
+                         action="store_true",
+                         help=("[EXPERIMENTAL] Attempt to statically"
+                               " verify absence of errors in user defined"
+                               " checks. Does not yet support all language"
+                               " constructs. Requires PyVCG to be "
+                               " installed."))
+    og_lint.add_argument("--use-cvc5-binary",
+                         default=None,
+                         help=("[EXPERIMENTAL] Drive the given CVC5 solver"
+                               " with SMTLIB2 input instead of using the"
+                               " API."))
 
     og_input = ap.add_argument_group("input options")
     og_input.add_argument("--include-bazel-dirs",
@@ -531,8 +541,27 @@ def main():
                     metavar="DIR|FILE")
     options = ap.parse_args()
 
-    if options.verify and not VCG_AVAILABLE:
-        ap.error("The --verify option requires the optional dependency PyVCG")
+    if options.verify and not (options.use_cvc5_binary or
+                               VCG_API_AVAILABLE):
+        ap.error("The --verify option requires the optional dependency"
+                 " CVC5 or use of the --use-cvc5-binary option")
+
+    if options.use_cvc5_binary:
+        if not options.verify:
+            ap.error("The --use-cvc5-binary requires the --verify option")
+        try:
+            result = subprocess.run([options.use_cvc5_binary,
+                                     "--version"],
+                                    check          = True,
+                                    capture_output = True,
+                                    encoding       = "UTF-8")
+            if not result.stdout.startswith("This is cvc5"):
+                ap.error("selected binary does not appear to be CVC5")
+        except OSError as err:
+            ap.error("cannot run %s: %s" % (options.use_cvc5_binary,
+                                            str(err)))
+        except subprocess.CalledProcessError:
+            ap.error("cannot run %s" % options.use_cvc5_binary)
 
     mh = Message_Handler(options.brief, not options.no_detailed_info)
 
@@ -544,7 +573,8 @@ def main():
                         parse_trlc     = not options.skip_trlc_files,
                         verify_mode    = options.verify,
                         debug_vcg      = options.debug_vcg,
-                        error_recovery = not options.no_error_recovery)
+                        error_recovery = not options.no_error_recovery,
+                        cvc5_binary    = options.use_cvc5_binary)
 
     if not options.include_bazel_dirs:
         sm.exclude_patterns.append(re.compile("^bazel-.*$"))

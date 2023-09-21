@@ -1,0 +1,24 @@
+x, "potato"
+^ lint-vcg-arrays/test1.rsl:13: issue: expression could be null [vcg-evaluation-of-null]
+| example record_type triggering error:
+|   T bad_potato {
+|     arr1 = []
+|     arr2 = [Colour.Blue, Colour.Blue, Colour.Blue]
+|     arr3 = ["", "", ""]
+|     /* x is null */
+|   }
+arr1[x] > 0, "potato"
+    ^ lint-vcg-arrays/test2.rsl:11: issue: array index could be less than 0 [vcg-array-index]
+    | example record_type triggering error:
+    |   T bad_potato {
+    |     arr1 = [-2, 42, 666]
+    |     x = -1
+    |   }
+arr1[x] > 0, "potato"
+    ^ lint-vcg-arrays/test2.rsl:11: issue: array index could be larger than len(arr1) [vcg-array-index]
+    | example record_type triggering error:
+    |   T bad_potato {
+    |     arr1 = [-1, 42, 666]
+    |     x = 3
+    |   }
+Processed 2 model(s), 0 check(s) and 0 requirement file(s) and found 3 warning(s)

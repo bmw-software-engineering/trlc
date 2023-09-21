@@ -1,0 +1,7 @@
+checks MyType {
+       ^^^^^^ multiple-check-expressions/checks.check:3: issue: move this check block into bar.rsl:1 [deprecated_feature]
+name = "Aberx"
+       ^^^^^^^ multiple-check-expressions/instances.trlc:5: check error: name must start with Q
+name = "Aberx"
+       ^^^^^^^ multiple-check-expressions/instances.trlc:5: check error: name must end with t
+Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 1 warning(s) and 2 error(s)

@@ -1,0 +1,15 @@
+checks MyType {
+       ^^^^^^ mult/checks.check:3: issue: move this check block into bar.rsl:1 [deprecated_feature]
+mult String [5..3]
+                ^ mult/bar.rsl:23: issue: upper bound must be at least 5 [impossible_array_types]
+mult String [0..0]
+                ^ mult/bar.rsl:17: issue: this array makes no sense [impossible_array_types]
+mult = [ "A", "B"]
+                 ^ mult/instances.trlc:6: error: this array requires at least 5 elements (only 2 provided)
+mult = [ "A", "B"]
+                 ^ mult/instances.trlc:16: error: this array requires at least 5 elements (only 2 provided)
+mult = [ "A", "B"]
+                 ^ mult/instances.trlc:21: error: this array requires at least 3 elements (only 2 provided)
+bar.MyType SomeThing {
+           ^^^^^^^^^ mult/instances.trlc:4: check error: mult must have 3 elements
+Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 3 warning(s) and 4 error(s)

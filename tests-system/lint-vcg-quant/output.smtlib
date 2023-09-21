@@ -1,0 +1,20 @@
+c, "potato"
+^ lint-vcg-quant/test1.rsl:10: issue: expression could be null [vcg-evaluation-of-null]
+| example record_type triggering error:
+|   T bad_potato {
+|     arr = [1, 1, 1]
+|     /* c is null */
+|   }
+| /* note: counter-example is unreliable in this case */
+len(positives) > 0 implies 5 / positives[0] > 0, "potato"
+                             ^ lint-vcg-quant/test3.rsl:19: issue: divisor could be 0 [vcg-div-by-zero]
+                             | example record_type triggering error:
+                             |   T bad_potato {
+                             |     arr = [2]
+                             |     positives = [0]
+                             |     negatives = []
+                             |     zeros = []
+                             |     /* c is null */
+                             |   }
+                             | /* note: counter-example is unreliable in this case */
+Processed 3 model(s), 0 check(s) and 0 requirement file(s) and found 2 warning(s)

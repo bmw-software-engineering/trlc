@@ -1,0 +1,5 @@
+values = ["one", "two", "three"]
+                        ^^^^^^^ array-length/foo.trlc:4: error: this array requires at most 2 elements (3 provided)
+values = ["one"]
+               ^ array-length/foo.trlc:8: error: this array requires at least 2 elements (only 1 provided)
+Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 2 error(s)
