@@ -33,6 +33,7 @@ from trlc.parser import Parser
 from trlc.lexer import TRLC_Lexer
 from trlc.version import TRLC_VERSION, BUGS_URL
 
+# pylint: disable=unused-import
 try:
     import cvc5
     VCG_API_AVAILABLE = True
