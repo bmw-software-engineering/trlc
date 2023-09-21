@@ -187,7 +187,7 @@ class Lexer_Base(metaclass=ABCMeta):
         self.content   = content
         self.length    = len(self.content)
 
-        self.lexpos = -3
+        self.lexpos  = -3
         self.line_no = 0
         self.col_no  = 0
         self.cc  = None
