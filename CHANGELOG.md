@@ -33,10 +33,11 @@ generated in the following situations:
 * When using `--verify` you can now also specify a
   [CVC5](https://github.com/cvc5/cvc5) executable using
   `--use-cvc5-binary`. This allows you to use the `--verify` option on
-  platforms where there is no CVC5 PyPI package (i.e. Windows).
+  platforms where there is no CVC5 PyPI package (i.e. Windows or more
+  recent versions of OSX).
 
-* The [PyVCG](https://pypi.org/project/PyVCG) is now required on all
-  platforms. The optional dependency is now
+* The [PyVCG](https://pypi.org/project/PyVCG) package is now required
+  on all platforms. The optional dependency is now
   [CVC5](https://pypi.org/project/cvc5) instead.
 
 * Remove the `--lint` option. Lint messages are now enabled by
@@ -53,13 +54,13 @@ generated in the following situations:
 * We now always print a short summary, indicating how many files were
   processed and how many messages were generated. The
   `--show-file-list` option still exists and still prints the complete
-  list of files. This summary may be supressed with the `--brief`
+  list of files. This summary may be suppressed with the `--brief`
   option.
 
 * The
   [Source_Manager](https://bmw-software-engineering.github.io/trlc/manual/infrastructure.html#trlc.trlc.Source_Manager)
-  as different constructor flags, although it can still be constructed
-  with no parameters.
+  has new and different constructor flags, although it can still be
+  constructed with no parameters.
 
 * The
   [Message_Handler](https://bmw-software-engineering.github.io/trlc/manual/errors.html#trlc.errors.Message_Handler)
@@ -80,7 +81,7 @@ generated in the following situations:
 * Fix support for Python 3.11. The package can now be installed
   without issues.
 
-* Fix issue in vcg where the matches function could be generated more
+* Fix issue in VCG where the matches function could be generated more
   than once. This was only an issue in the debug output and was not
   visible to users.
 
