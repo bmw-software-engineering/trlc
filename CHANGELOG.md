@@ -25,7 +25,7 @@ generated in the following situations:
 ## Changelog
 
 
-### 1.2.1-dev
+### 1.2.1
 
 * New minor version release due to minor API changes and major
   command-line changes.
