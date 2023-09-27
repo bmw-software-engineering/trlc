@@ -31,42 +31,42 @@ generated in the following situations:
 
 ### 1.2.1
 
-* New minor version release due to minor API changes and major
+* [TRLC] New minor version release due to minor API changes and major
   command-line changes.
 
-* When using `--verify` you can now also specify a
+* [TRLC] When using `--verify` you can now also specify a
   [CVC5](https://github.com/cvc5/cvc5) executable using
   `--use-cvc5-binary`. This allows you to use the `--verify` option on
   platforms where there is no CVC5 PyPI package (i.e. Windows or more
   recent versions of OSX).
 
-* The [PyVCG](https://pypi.org/project/PyVCG) package is now required
+* [TRLC] The [PyVCG](https://pypi.org/project/PyVCG) package is now required
   on all platforms. The optional dependency is now
   [CVC5](https://pypi.org/project/cvc5) instead.
 
-* Remove the `--lint` option. Lint messages are now enabled by
+* [TRLC] Remove the `--lint` option. Lint messages are now enabled by
   default, and `.trlc` files are processed as well. Instead there is a
   `--no-lint` option which turns off the extra warnings.
 
-* Add the `--skip-trlc-files` option which disables processing of
-  `.trlc` files. Enabling this option is equivalent to the old
+* [TRLC] Add the `--skip-trlc-files` option which disables processing
+  of `.trlc` files. Enabling this option is equivalent to the old
   `--lint` mode.
 
-* Add the `--error-on-warnings` option which generates a status code
-  of 1 if any warning is raised.
+* [TRLC] Add the `--error-on-warnings` option which generates a status
+  code of 1 if any warning is raised.
 
-* We now always print a short summary, indicating how many files were
-  processed and how many messages were generated. The
+* [TRLC] We now always print a short summary, indicating how many
+  files were processed and how many messages were generated. The
   `--show-file-list` option still exists and still prints the complete
   list of files. This summary may be suppressed with the `--brief`
   option.
 
-* The
+* [API] The
   [Source_Manager](https://bmw-software-engineering.github.io/trlc/manual/infrastructure.html#trlc.trlc.Source_Manager)
   has new and different constructor flags, although it can still be
   constructed with no parameters.
 
-* The
+* [API] The
   [Message_Handler](https://bmw-software-engineering.github.io/trlc/manual/errors.html#trlc.errors.Message_Handler)
   now uses an enumeration instead of a string to signal message
   severity/kind. For normal use this is transparent, but if you
@@ -74,20 +74,21 @@ generated in the following situations:
   category (for lint messages) is now also a separate parameter
   instead of being baked into the message.
 
-* Please note that if you parse messages in CI, the [regex has changed
+* [TRLC] Please note that if you parse messages in CI, the [regex has
+  changed
   slightly](https://github.com/bmw-software-engineering/trlc/blob/main/documentation/TUTORIAL-CI.md#parsing-the-output).
 
-* Fix an issue where `--skip-trlc-files` would incorrectly register
-  and parse the preamble of `.trlc` files.
+* [TRLC] Fix an issue where `--skip-trlc-files` would incorrectly
+  register and parse the preamble of `.trlc` files.
 
-* Fix a spurious space in the summary output.
+* [TRLC] Fix a spurious space in the summary output.
 
-* Fix support for Python 3.11. The package can now be installed
+* [TRLC] Fix support for Python 3.11. The package can now be installed
   without issues.
 
-* Fix issue in VCG where the matches function could be generated more
-  than once. This was only an issue in the debug output and was not
-  visible to users.
+* [TRLC] Fix issue in VCG where the matches function could be
+  generated more than once. This was only an issue in the debug output
+  and was not visible to users.
 
 ### 1.1.10
 
