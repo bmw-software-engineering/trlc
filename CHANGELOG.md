@@ -24,7 +24,7 @@ generated in the following situations:
 
 ## Changelog
 
-### 1.2.2-dev
+### 1.2.2
 
 * [API] Add callbacks to the
   [Source_Manager](https://bmw-software-engineering.github.io/trlc/manual/infrastructure.html#trlc.trlc.Source_Manager)
