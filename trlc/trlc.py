@@ -105,6 +105,26 @@ class Source_Manager:
         self.exclude_patterns = []
         self.common_root      = None
 
+        self.progress_current = 0
+        self.progress_final   = 0
+
+    def callback_parse_begin(self):
+        pass
+
+    def callback_parse_progress(self, progress):
+        assert isinstance(progress, int)
+
+    def callback_parse_end(self):
+        pass
+
+    def signal_progress(self):
+        self.progress_current += 1
+        if self.progress_final:
+            progress = (self.progress_current * 100) // self.progress_final
+        else:
+            progress = 100
+        self.callback_parse_progress(min(progress, 100))
+
     def cross_file_reference(self, location):
         assert isinstance(location, Location)
 
@@ -189,6 +209,9 @@ class Source_Manager:
                               fatal = False)
         except TRLC_Error:
             ok = False
+
+        if ok:
+            self.progress_final += 1
 
         return ok
 
@@ -315,6 +338,7 @@ class Source_Manager:
                 try:
                     parser  = self.rsl_files[self.packages[pkg]["file"]]
                     ok     &= parser.parse_rsl_file()
+                    self.signal_progress()
                 except TRLC_Error:
                     ok = False
                 processed_packages.add(pkg)
@@ -329,6 +353,7 @@ class Source_Manager:
         for name in sorted(self.check_files):
             try:
                 ok &= self.check_files[name].parse_check_file()
+                self.signal_progress()
             except TRLC_Error:
                 ok = False
         return ok
@@ -354,6 +379,7 @@ class Source_Manager:
                 continue
             try:
                 ok &= self.trlc_files[name].parse_trlc_file()
+                self.signal_progress()
             except TRLC_Error:
                 ok = False
 
@@ -398,11 +424,16 @@ class Source_Manager:
         """
         # lobster-trace: LRM.File_Parsing_Order
 
+        # Notify callback
+        self.callback_parse_begin()
+        self.progress_current = 0
+
         # Parse RSL files (topologically sorted, in order to deal with
         # dependencies)
         ok = self.parse_rsl_files()
 
         if not self.error_recovery and not ok:
+            self.callback_parse_end()
             return None
 
         # Parse check files. At this point we cannot introduce anything
@@ -410,6 +441,7 @@ class Source_Manager:
         ok &= self.parse_check_files()
 
         if not self.error_recovery and not ok:
+            self.callback_parse_end()
             return None
 
         # Perform sanity checks (enabled by default). We only do this
@@ -419,6 +451,7 @@ class Source_Manager:
 
         # Stop here if we're not processing TRLC files.
         if not self.parse_trlc:
+            self.callback_parse_end()
             if ok:
                 return self.stab
             else:
@@ -428,21 +461,26 @@ class Source_Manager:
         # resolution happens here, with the notable exception of resolving
         # record references (as we can have circularity here).
         if not self.parse_trlc_files():
+            self.callback_parse_end()
             return None
 
         # Resolve record reference names and do the missing semantic
         # analysis.
         # lobster-trace: LRM.File_Parsing_References
         if not self.resolve_record_references():
+            self.callback_parse_end()
             return None
 
         if not ok:
+            self.callback_parse_end()
             return None
 
         # Finally, apply user defined checks
         if not self.perform_checks():
+            self.callback_parse_end()
             return None
 
+        self.callback_parse_end()
         return self.stab
 
 

@@ -24,10 +24,11 @@ generated in the following situations:
 
 ## Changelog
 
-
 ### 1.2.2-dev
 
-
+* [API] Add callbacks to the
+  [Source_Manager](https://bmw-software-engineering.github.io/trlc/manual/infrastructure.html#trlc.trlc.Source_Manager)
+  to notify clients of the parse progress.
 
 ### 1.2.1
 
