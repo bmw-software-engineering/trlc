@@ -27,6 +27,9 @@ generated in the following situations:
 
 ### 1.2.3-dev
 
+* [TRLC] Fix bug when creating a lexer with an empty file with
+  delivered file content. The lexer attempted to open the file instead
+  of using the empty string passed to the constructor.
 
 ### 1.2.2
 

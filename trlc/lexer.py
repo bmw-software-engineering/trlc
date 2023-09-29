@@ -306,9 +306,7 @@ class TRLC_Lexer(Lexer_Base):
         assert isinstance(file_name, str)
         assert isinstance(file_content, str) or file_content is None
         self.file_name = file_name
-        if file_content:
-            super().__init__(mh, file_content)
-        else:
+        if file_content is None:
             # lobster-trace: LRM.File_Encoding
             # lobster-trace: LRM.File_Encoding_Fixed
             with open(file_name, "r", encoding="UTF-8") as fd:
@@ -316,6 +314,8 @@ class TRLC_Lexer(Lexer_Base):
                     super().__init__(mh, fd.read())
                 except UnicodeDecodeError as err:
                     mh.lex_error(Location(file_name), str(err))
+        else:
+            super().__init__(mh, file_content)
 
     def current_location(self):
         # lobster-exclude: Utility function
