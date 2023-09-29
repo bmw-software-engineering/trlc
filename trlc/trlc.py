@@ -523,6 +523,10 @@ def main():
                                 " excluded by default."))
 
     og_output = ap.add_argument_group("output options")
+    og_output.add_argument("--version",
+                           default=False,
+                           action="store_true",
+                           help="Print TRLC version and exit.")
     og_output.add_argument("--brief",
                            default=False,
                            action="store_true",
@@ -579,6 +583,10 @@ def main():
                     nargs="*",
                     metavar="DIR|FILE")
     options = ap.parse_args()
+
+    if options.version:
+        print(TRLC_VERSION)
+        sys.exit(0)
 
     if options.verify and not (options.use_cvc5_binary or
                                VCG_API_AVAILABLE):
