@@ -46,6 +46,7 @@ The Python implementation can be used for several purposes:
 
 ### For TRLC developers
 
+* [Set up development environment](documentation/dev_setup.md)
 * [Lexer/Parser Hierarchy](https://bmw-software-engineering.github.io/trlc/parser_hierarchy.svg)
   (overview over all classes releated to the lexing and parsing of TRLC)
 * [Tool Architecture Overview](documentation/architecture.md)
@@ -54,44 +55,11 @@ The Python implementation can be used for several purposes:
 
 ### Run-time
 * 3.8 <= Python3 <= 3.11
+* [PyVCG](https://pypi.org/project/PyVCG)
 
 Optional dependencies (they are not installed automatically):
-* [PyVCG](https://pypi.org/project/PyVCG) (Linux or OSX only, required
-  when using the `--verify` option)
-
-### Development tools
-* GNU Make
-* Graphviz
-* [PyCodeStyle](https://pypi.org/project/pycodestyle) (from PyPI, for
-  basic checking of source code style)
-* [PyLint](https://pypi.org/project/pylint) (from PyPI, for basic bug
-  finding)
-* [Coverage](https://pypi.org/project/coverage) (from PyPI, to
-  perform branch coverage when running the test suite)
-* [Sphinx](https://pypi.org/project/Sphinx) (from PyPI, for building
-  the documentation)
-* [PyVCG](https://pypi.org/project/PyVCG) (from PyPI, for building
-  verification conditions)
-* [CVC5](https://pypi.org/project/cvc5) (from PyPI, for discharging
-  verification conditions)
-
-You can install all Python dependencies by doing:
-
-```bash
-pip3 install -r requirements.txt
-```
-
-When building the traceability report you also need to install two
-lobster packages. Since there is a circular dependency, please install
-like this:
-
-```bash
-pip3 install bmw-lobster-core bmw-lobster-tool-python
-pip3 install --no-deps bmw-lobster-tool-trlc
-```
-
-The most important make targets when developing TRLC are:
-
-* `lint` (runs pycodestyle and pylint)
-* `test` (performs unit and system tests and shows coverage)
-* `tracing` (generates traceability report)
+* [PyPI CVC5](https://pypi.org/project/cvc5) (Linux or OSX only,
+  required when using the `--verify` option)
+* [Binary CVC5](https://github.com/cvc5/cvc5/releases/tag/cvc5-1.0.8)
+  (An alternative to PyPI CVC5, make sure to rename the binary to
+  `cvc5` and put it on your PATH).
