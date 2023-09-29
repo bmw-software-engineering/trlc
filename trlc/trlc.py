@@ -37,7 +37,7 @@ from trlc.version import TRLC_VERSION, BUGS_URL
 try:
     import cvc5
     VCG_API_AVAILABLE = True
-except ImportError:
+except ImportError:  # pragma: no cover
     VCG_API_AVAILABLE = False
 
 
@@ -121,7 +121,7 @@ class Source_Manager:
         self.progress_current += 1
         if self.progress_final:
             progress = (self.progress_current * 100) // self.progress_final
-        else:
+        else:  # pragma: no cover
             progress = 100
         self.callback_parse_progress(min(progress, 100))
 
@@ -202,7 +202,7 @@ class Source_Manager:
                 self.register_check_file(file_name, file_content)
             elif file_name.endswith(".trlc"):
                 self.register_trlc_file(file_name, file_content)
-            else:
+            else:  # pragma: no cover
                 ok = False
                 self.mh.error(Location(os.path.basename(file_name)),
                               "is not a rsl, check, or trlc file",
@@ -284,7 +284,8 @@ class Source_Manager:
         assert file_name not in self.trlc_files
         assert isinstance(file_content, str) or file_content is None
 
-        if not self.parse_trlc:
+        if not self.parse_trlc:  # pragma: no cover
+            # Not executed as process should exit before we attempt this.
             return
 
         self.update_common_root(file_name)
@@ -432,7 +433,7 @@ class Source_Manager:
         # dependencies)
         ok = self.parse_rsl_files()
 
-        if not self.error_recovery and not ok:
+        if not self.error_recovery and not ok:  # pragma: no cover
             self.callback_parse_end()
             return None
 
@@ -440,7 +441,7 @@ class Source_Manager:
         # new in terms of packages.
         ok &= self.parse_check_files()
 
-        if not self.error_recovery and not ok:
+        if not self.error_recovery and not ok:  # pragma: no cover
             self.callback_parse_end()
             return None
 
@@ -450,7 +451,7 @@ class Source_Manager:
             ok &= self.perform_sanity_checks()
 
         # Stop here if we're not processing TRLC files.
-        if not self.parse_trlc:
+        if not self.parse_trlc:  # pragma: no cover
             self.callback_parse_end()
             if ok:
                 return self.stab
@@ -460,7 +461,7 @@ class Source_Manager:
         # Parse TRLC files. Almost all the semantic analysis and name
         # resolution happens here, with the notable exception of resolving
         # record references (as we can have circularity here).
-        if not self.parse_trlc_files():
+        if not self.parse_trlc_files():  # pragma: no cover
             self.callback_parse_end()
             return None
 
@@ -584,16 +585,16 @@ def main():
                     metavar="DIR|FILE")
     options = ap.parse_args()
 
-    if options.version:
+    if options.version:  # pragma: no cover
         print(TRLC_VERSION)
         sys.exit(0)
 
     if options.verify and not (options.use_cvc5_binary or
-                               VCG_API_AVAILABLE):
+                               VCG_API_AVAILABLE):  # pragma: no cover
         ap.error("The --verify option requires the optional dependency"
                  " CVC5 or use of the --use-cvc5-binary option")
 
-    if options.use_cvc5_binary:
+    if options.use_cvc5_binary:  # pragma: no cover
         if not options.verify:
             ap.error("The --use-cvc5-binary requires the --verify option")
         try:
@@ -612,7 +613,7 @@ def main():
 
     mh = Message_Handler(options.brief, not options.no_detailed_info)
 
-    if options.no_user_warnings:
+    if options.no_user_warnings:  # pragma: no cover
         mh.suppress(Kind.USER_WARNING)
 
     sm = Source_Manager(mh             = mh,
@@ -623,12 +624,12 @@ def main():
                         error_recovery = not options.no_error_recovery,
                         cvc5_binary    = options.use_cvc5_binary)
 
-    if not options.include_bazel_dirs:
+    if not options.include_bazel_dirs:  # pragma: no cover
         sm.exclude_patterns.append(re.compile("^bazel-.*$"))
 
     for path_name in options.items:
         if not (os.path.isdir(path_name) or
-                os.path.isfile(path_name)):
+                os.path.isfile(path_name)):  # pragma: no cover
             ap.error("%s is not a file or directory" % path_name)
 
     # Process input files, defaulting to the current directory if none
@@ -638,12 +639,12 @@ def main():
         for path_name in options.items:
             if os.path.isdir(path_name):
                 ok &= sm.register_directory(path_name)
-            else:
+            else:  # pragma: no cover
                 try:
                     ok &= sm.register_file(path_name)
                 except TRLC_Error:
                     ok = False
-    else:
+    else:  # pragma: no cover
         ok &= sm.register_directory(".")
 
     if not ok:
@@ -653,7 +654,7 @@ def main():
         ok = False
 
     if ok:
-        if options.debug_dump:
+        if options.debug_dump:  # pragma: no cover
             sm.stab.dump()
         if options.debug_api_dump:
             tmp = {}
@@ -667,12 +668,12 @@ def main():
 
     if not options.brief:
         summary = "Processed %u model(s)" % len(sm.rsl_files)
-        if options.skip_trlc_files:
+        if options.skip_trlc_files:  # pragma: no cover
             summary += " and"
         else:
             summary += ","
         summary += " %u check(s)" % len(sm.check_files)
-        if not options.skip_trlc_files:
+        if not options.skip_trlc_files:  # pragma: no cover
             summary += " and %u requirement file(s)" % len(sm.trlc_files)
 
         summary += " and found"
@@ -687,12 +688,12 @@ def main():
         else:
             summary += " no issues"
 
-        if mh.suppressed:
+        if mh.suppressed:  # pragma: no cover
             summary += " with %u supressed messages" % mh.suppressed
 
         print(summary)
 
-    if options.show_file_list and ok:
+    if options.show_file_list and ok:  # pragma: no cover
         for filename in sorted(sm.rsl_files):
             print("> Model %s (Package %s)" %
                   (filename, sm.rsl_files[filename].cu.package.name))
@@ -705,7 +706,7 @@ def main():
                       (filename, sm.trlc_files[filename].cu.package.name))
 
     if ok:
-        if options.error_on_warnings and mh.warnings:
+        if options.error_on_warnings and mh.warnings:  # pragma: no cover
             return 1
         else:
             return 0

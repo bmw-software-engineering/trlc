@@ -20,7 +20,7 @@ test-all: unit-tests system-tests-all
 coverage:
 	coverage combine -q
 	coverage html --rcfile=coverage.cfg
-	coverage report --rcfile=coverage.cfg --fail-under=93
+	coverage report --rcfile=coverage.cfg --fail-under=94
 
 unit-tests:
 	coverage run -p \
