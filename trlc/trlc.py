@@ -294,6 +294,7 @@ class Source_Manager:
 
     def parse_rsl_files(self):
         # lobster-trace: LRM.Preamble
+        # lobster-trace: LRM.RSL_File
 
         ok = True
 
