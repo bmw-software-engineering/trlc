@@ -27,14 +27,17 @@ from lobster.items import Tracing_Tag, Activity
 from lobster.location import File_Reference
 from lobster.io import lobster_write
 
+from trlc.trlc import Source_Manager
+from trlc.errors import Message_Handler
 
 TEST_DIR = "tests-system"
 TARGET   = "system-tests.lobster"
 
 
-def process(testname):
+def process(testname, mapping):
     test_dir = os.path.join(TEST_DIR, testname)
     assert os.path.isdir(test_dir)
+    assert isinstance(mapping, dict)
 
     tag_file = os.path.join(test_dir, "tracing")
 
@@ -44,8 +47,10 @@ def process(testname):
         location  = File_Reference(filename = test_dir),
         framework = "TRLCST",
         kind      = "Test Directory")
+    include_test = False
 
     if os.path.isfile(tag_file):
+        include_test = True
         with open(tag_file, "r", encoding="UTF-8") as fd:
             tags = [Tracing_Tag(namespace = "req",
                                 tag       = line.strip())
@@ -53,21 +58,49 @@ def process(testname):
                     if line.strip()]
         for tag in tags:
             item.add_tracing_target(tag)
-        return [item]
 
+    if testname.startswith("rbt-"):
+        include_test = True
+        components = testname[4:].lower().split("-")
+        if len(components) >= 2:
+            try:
+                int(components[-1])
+                components.pop()
+            except ValueError:
+                pass
+        requirement = mapping.get("-".join(components),
+                                  "_".join(item.capitalize()
+                                           for item in components))
+        item.add_tracing_target(
+            Tracing_Tag(namespace = "req",
+                        tag       = "LRM.%s" % requirement))
+
+    if include_test:
+        return [item]
     else:
         # We don't need to know about untraced regression tests
         return []
 
 
 def main():
+    sm = Source_Manager(mh = Message_Handler(),
+                        lint_mode   = False,
+                        parse_trlc  = True,
+                        verify_mode = False)
+    sm.register_directory("language-reference-manual")
+    stab = sm.process()
+    pkg_lrm = stab.lookup_assuming(sm.mh, "LRM")
+    mapping = {}
+    for item in pkg_lrm.symbols.iter_record_objects():
+        mapping[item.name.lower().replace("_", "-")] = item.name
+
     items = []
     for dirent in sorted(os.scandir(TEST_DIR),
                          key=lambda de: de.name):
         if dirent.is_dir():
             if dirent.name == "htmlcov":
                 continue
-            items += process(dirent.name)
+            items += process(dirent.name, mapping)
 
     with open(TARGET, "w", encoding="UTF-8") as fd:
         lobster_write(fd, Activity, "lobster-trlc-system-test", items)

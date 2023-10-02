@@ -1,0 +1,9 @@
+package Foo
+
+type T {
+  b Boolean
+  i Integer
+  d Decimal
+  s String
+  m Markup_String
+}

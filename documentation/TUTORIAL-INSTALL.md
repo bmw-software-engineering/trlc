@@ -92,7 +92,8 @@ it is better than nothing.
     "xor"))
 
 (defvar trlc-types
-  '("String"
+  '("Markup_String"
+    "String"
     "Integer"
     "Decimal"
     "Boolean"))
