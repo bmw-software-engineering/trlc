@@ -1322,6 +1322,7 @@ class Parser(Parser_Base):
         self.section.pop()
 
     def parse_boolean(self):
+        # lobster-trace: LRM.Boolean_Values
         self.match("KEYWORD")
         if self.ct.value in ("true", "false"):
             return ast.Boolean_Literal(self.ct, self.builtin_bool)

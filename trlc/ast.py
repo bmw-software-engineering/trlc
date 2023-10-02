@@ -791,6 +791,7 @@ class Boolean_Literal(Literal):
         return str(self.value)
 
     def evaluate(self, mh, context):
+        # lobster-trace: LRM.Boolean_Values
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
         return Value(self.location, self.value, self.typ)

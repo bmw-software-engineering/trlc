@@ -1,0 +1,12 @@
+package Foo
+
+type T {
+  b Boolean
+  proof optional Boolean
+}
+
+checks T {
+  b != false, fatal "exclude false"
+  b != true, fatal "exclude true"
+  proof, "if this passes then there are no other values for Boolean"
+}
