@@ -276,7 +276,7 @@ class Compilation_Unit(Node):
         return n_pkg == self.package or n_pkg in self.imports
 
     def add_item(self, node):
-        # lobster-trace: LRM.RLS_File
+        # lobster-trace: LRM.RSL_File
         # lobster-trace: LRM.Check_File
         # lobster-trace: LRM.TRLC_File
         assert isinstance(node, (Concrete_Type,
