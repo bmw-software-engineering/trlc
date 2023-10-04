@@ -813,11 +813,13 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
     else:
         new_section = []
 
-    if obj.n_typ.name in ("Text", "Grammar", "Note",
+    if obj.n_typ.name in ("Text", "Grammar",
                           "Terminal",
                           "Keywords",
                           "Punctuation"):
         pass
+    elif obj.n_typ.name == "Note":
+        new_section = context["old_section"]
     elif obj.n_typ.name in ("Semantics",
                             "Static_Semantics",
                             "Dynamic_Semantics"):
