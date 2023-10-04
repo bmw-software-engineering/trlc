@@ -1,0 +1,10 @@
+package Foo
+
+type T {}
+
+checks T {
+  len("foo") == 3, warning "len is broken"
+  startswith("foo", "f"), warning "startswith is broken"
+  endswith("foo", "o"), warning "endswith is broken"
+  matches("foo", ".o{2}"), warning "matches is broken"
+}

@@ -989,6 +989,8 @@ class Parser(Parser_Base):
         return rv
 
     def parse_builtin(self, scope, n_name, t_name):
+        # lobster-trace: LRM.Builtin_Functions
+        # lobster-trace: LRM.Builtin_Type_Conversion_Functions
         assert isinstance(scope, ast.Scope)
         assert isinstance(n_name, (ast.Builtin_Function,
                                    ast.Builtin_Numeric_Type))
@@ -1122,10 +1124,13 @@ class Parser(Parser_Base):
         if self.peek("BUILTIN"):
             # Legacy builtin function call. The lookup in the root
             # scope is not an error.
+            # lobster-trace: LRM.Builtin_Functions
             self.match("BUILTIN")
             n_name = self.stab.lookup(self.mh, self.ct, ast.Builtin_Function)
 
         else:
+            # lobster-trace: LRM.Builtin_Functions
+            # lobster-trace: LRM.Builtin_Type_Conversion_Functions
             self.match("IDENTIFIER")
             if self.peek("BRA"):
                 # There is one more way we can have a builtin
@@ -1168,6 +1173,8 @@ class Parser(Parser_Base):
         # top-level, so let's get these out of the way as well.
         if isinstance(n_name, (ast.Builtin_Function,
                                ast.Builtin_Numeric_Type)):
+            # lobster-trace: LRM.Builtin_Functions
+            # lobster-trace: LRM.Builtin_Type_Conversion_Functions
             return self.parse_builtin(scope, n_name, self.ct)
 
         assert isinstance(n_name, (ast.Composite_Component,
