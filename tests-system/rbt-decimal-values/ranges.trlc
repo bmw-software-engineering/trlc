@@ -1,0 +1,17 @@
+package Ranges
+
+T Zero {
+  d = 0.0
+}
+
+T Lower_Bound {
+  d = -1_000.0
+}
+
+T Upper_Bound {
+  d = +1_000.0
+}
+
+T Smallest_Nonzero {
+  d = 0.001
+}

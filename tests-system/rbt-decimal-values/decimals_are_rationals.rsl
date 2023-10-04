@@ -1,0 +1,15 @@
+package Decimals_Are_Rationals
+
+type T {
+  d Decimal
+}
+
+/* To show that the implementation uses rationals we can use
+ * this identity which is not true for floating point (32 and 64 bit).
+ * This is also demonstrated separately in rationals.smt2.
+ */
+
+checks T {
+  d == 0.1 implies d + d + d + d + d + d + d + d == 0.8,
+  error "decimals are not rationals"
+}

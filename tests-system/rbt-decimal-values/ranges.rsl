@@ -1,0 +1,5 @@
+package Ranges
+
+type T {
+  d Decimal
+}

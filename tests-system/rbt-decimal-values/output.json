@@ -1,0 +1,18 @@
+{
+  "Lower_Bound": {
+    "d": -1000.0
+  },
+  "Proof": {
+    "d": 0.1
+  },
+  "Smallest_Nonzero": {
+    "d": 0.001
+  },
+  "Upper_Bound": {
+    "d": 1000.0
+  },
+  "Zero": {
+    "d": 0.0
+  }
+}
+Processed 2 model(s), 0 check(s) and 2 requirement file(s) and found no issues

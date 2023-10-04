@@ -874,10 +874,12 @@ class Parser(Parser_Base):
         assert isinstance(scope, ast.Scope)
 
         if self.peek("INTEGER"):
+            # lobster-trace: LRM.Integer_Values
             self.match("INTEGER")
             return ast.Integer_Literal(self.ct, self.builtin_int)
 
         elif self.peek("DECIMAL"):
+            # lobster-trace: LRM.Decimal_Values
             self.match("DECIMAL")
             return ast.Decimal_Literal(self.ct, self.builtin_decimal)
 
@@ -1334,6 +1336,8 @@ class Parser(Parser_Base):
         assert isinstance(typ, ast.Type)
 
         if isinstance(typ, ast.Builtin_Numeric_Type):
+            # lobster-trace: LRM.Integer_Values
+            # lobster-trace: LRM.Decimal_Values
             if self.peek("OPERATOR") and \
                self.nt.value in Parser.ADDING_OPERATOR:
                 self.match("OPERATOR")

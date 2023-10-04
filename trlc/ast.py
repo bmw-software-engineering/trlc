@@ -47,6 +47,9 @@ from trlc import math
 ##############################################################################
 
 class Value:
+    # lobster-trace: LRM.Boolean_Values
+    # lobster-trace: LRM.Integer_Values
+    # lobster-trace: LRM.Decimal_Values
     """Polymorphic value for evaluating expressions.
 
     Any record references will be fully resolved.
@@ -653,6 +656,7 @@ class Integer_Literal(Literal):
         return str(self.value)
 
     def evaluate(self, mh, context):
+        # lobster-trace: LRM.Integer_Values
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
         return Value(self.location, self.value, self.typ)
@@ -700,6 +704,7 @@ class Decimal_Literal(Literal):
         return str(self.value)
 
     def evaluate(self, mh, context):
+        # lobster-trace: LRM.Decimal_Values
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
         return Value(self.location, self.value, self.typ)

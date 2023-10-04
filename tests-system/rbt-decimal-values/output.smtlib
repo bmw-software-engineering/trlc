@@ -1,0 +1,3 @@
+d == 0.1 implies d + d + d + d + d + d + d + d == 0.8,
+         ^^^^^^^ rbt-decimal-values/decimals_are_rationals.rsl:13: issue: expression is always true [vcg-always-true]
+Processed 2 model(s), 0 check(s) and 2 requirement file(s) and found 1 warning(s)

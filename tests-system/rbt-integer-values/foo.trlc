@@ -1,0 +1,13 @@
+package Foo
+
+T Lower_Bound {
+  i = -1_000
+}
+
+T Zero {
+  i = 0
+}
+
+T Upper_Bound {
+  i = 1_000
+}
