@@ -2973,6 +2973,7 @@ class Symbol_Table:
 
     def register(self, mh, entity):
         # lobster-trace: LRM.Duplicate_Types
+        # lobster-trace: LRM.Unique_Enumeration_Literals
         assert isinstance(mh, Message_Handler)
         assert isinstance(entity, Entity)
 

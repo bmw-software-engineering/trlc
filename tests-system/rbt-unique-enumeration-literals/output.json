@@ -1,0 +1,3 @@
+Foo
+^^^ rbt-unique-enumeration-literals/foo.rsl:6: error: duplicate definition, previous definition at foo.rsl:4
+Processed 2 model(s), 0 check(s) and 0 requirement file(s) and found 1 error(s)

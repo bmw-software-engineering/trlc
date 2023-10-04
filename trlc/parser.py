@@ -382,7 +382,6 @@ class Parser(Parser_Base):
                                                location    = name.location,
                                                enum        = enum)
             empty = False
-            # lobster-trace: LRM.Unique_Enumeration_Literals
             enum.literals.register(self.mh, lit)
         self.match("C_KET")
 

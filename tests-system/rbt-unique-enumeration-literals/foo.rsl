@@ -1,0 +1,10 @@
+package Foo
+
+enum E {
+  Foo
+  Bar
+  Foo
+  Baz
+  Bork
+  Baz
+}

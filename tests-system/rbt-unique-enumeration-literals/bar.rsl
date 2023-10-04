@@ -1,0 +1,15 @@
+package Bar
+
+enum ASIL {
+  QM
+  A
+  B
+  C
+  D
+}
+
+enum Language {
+  Ada
+  C  // Not an issue since it's a different enum
+  Python
+}
