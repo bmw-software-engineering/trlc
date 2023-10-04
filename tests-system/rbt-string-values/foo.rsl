@@ -1,0 +1,12 @@
+package Foo
+
+type T {
+  s String
+}
+
+checks T {
+  len(s) == 100, fatal "string must be length 10", s
+
+  len(s + s + s + s + s + s + s + s + s + s) == 1000,
+    warning "string lengths up to 1000 supported)"
+}

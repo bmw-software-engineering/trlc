@@ -50,6 +50,8 @@ class Value:
     # lobster-trace: LRM.Boolean_Values
     # lobster-trace: LRM.Integer_Values
     # lobster-trace: LRM.Decimal_Values
+    # lobster-trace: LRM.String_Values
+    # lobster-trace: LRM.Markup_String_Values
     """Polymorphic value for evaluating expressions.
 
     Any record references will be fully resolved.
@@ -65,7 +67,6 @@ class Value:
     :type: Type
     """
     def __init__(self, location, value, typ):
-        # lobster-exclude: Constructor only declares variables
         assert isinstance(location, Location)
         assert value is None or \
             isinstance(value, (str,
@@ -621,6 +622,7 @@ class Null_Literal(Literal):
 
 
 class Integer_Literal(Literal):
+    # lobster-trace: LRM.Integer_Values
     """Integer literals
 
     Note that these are always positive. A negative integer is
@@ -640,7 +642,6 @@ class Integer_Literal(Literal):
     :type: int
     """
     def __init__(self, token, typ):
-        # lobster-exclude: Constructor only declares variables
         assert isinstance(token, Token)
         assert token.kind == "INTEGER"
         assert isinstance(typ, Builtin_Integer)
@@ -649,14 +650,12 @@ class Integer_Literal(Literal):
         self.value = token.value
 
     def dump(self, indent=0):  # pragma: no cover
-        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Integer Literal %u" % self.value)
 
     def to_string(self):
         return str(self.value)
 
     def evaluate(self, mh, context):
-        # lobster-trace: LRM.Integer_Values
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
         return Value(self.location, self.value, self.typ)
@@ -669,6 +668,7 @@ class Integer_Literal(Literal):
 
 
 class Decimal_Literal(Literal):
+    # lobster-trace: LRM.Decimal_Values
     """Decimal literals
 
     Note that these are always positive. A negative decimal is
@@ -688,7 +688,6 @@ class Decimal_Literal(Literal):
     :type: fractions.Fraction
     """
     def __init__(self, token, typ):
-        # lobster-exclude: Constructor only declares variables
         assert isinstance(token, Token)
         assert token.kind == "DECIMAL"
         assert isinstance(typ, Builtin_Decimal)
@@ -697,14 +696,12 @@ class Decimal_Literal(Literal):
         self.value = token.value
 
     def dump(self, indent=0):  # pragma: no cover
-        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Decimal Literal %u" % self.value)
 
     def to_string(self):
         return str(self.value)
 
     def evaluate(self, mh, context):
-        # lobster-trace: LRM.Decimal_Values
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
         return Value(self.location, self.value, self.typ)
@@ -717,6 +714,8 @@ class Decimal_Literal(Literal):
 
 
 class String_Literal(Literal):
+    # lobster-trace: LRM.String_Values
+    # lobster-trace: LRM.Markup_String_Values
     """String literals
 
     Note the value of the string does not include the quotation marks,
@@ -734,7 +733,6 @@ class String_Literal(Literal):
 
     """
     def __init__(self, token, typ):
-        # lobster-exclude: Constructor only declares variables
         assert isinstance(token, Token)
         assert token.kind == "STRING"
         assert isinstance(typ, Builtin_String)
@@ -745,7 +743,6 @@ class String_Literal(Literal):
         self.references     = []
 
     def dump(self, indent=0):  # pragma: no cover
-        # lobster-exclude: Debugging feature
         self.write_indent(indent, "String Literal %s" % repr(self.value))
         if self.has_references:
             self.write_indent(indent + 1, "Markup References")
@@ -773,13 +770,13 @@ class String_Literal(Literal):
 
 
 class Boolean_Literal(Literal):
+    # lobster-trace: LRM.Boolean_Values
     """Boolean values
 
     :attribute value: the boolean value
     :type: bool
     """
     def __init__(self, token, typ):
-        # lobster-exclude: Constructor only declares variables
         assert isinstance(token, Token)
         assert token.kind == "KEYWORD"
         assert token.value in ("false", "true")
@@ -789,14 +786,12 @@ class Boolean_Literal(Literal):
         self.value = token.value == "true"
 
     def dump(self, indent=0):  # pragma: no cover
-        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Boolean Literal %s" % self.value)
 
     def to_string(self):
         return str(self.value)
 
     def evaluate(self, mh, context):
-        # lobster-trace: LRM.Boolean_Values
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
         return Value(self.location, self.value, self.typ)
@@ -2138,26 +2133,25 @@ class Concrete_Type(Type, metaclass=ABCMeta):
 
 
 class Builtin_Type(Type, metaclass=ABCMeta):
+    # lobster-trace: LRM.Builtin_Types
     """Abstract base class for all builtin types.
 
     """
     LOCATION = Location(file_name = "<builtin>")
 
     def __init__(self, name):
-        # lobster-exclude: Constructor only declares variables
         super().__init__(name, Builtin_Type.LOCATION)
 
     def dump(self, indent=0):  # pragma: no cover
-        # lobster-exclude: Debugging feature
         self.write_indent(indent, self.__class__.__name__)
 
 
 class Builtin_Numeric_Type(Builtin_Type, metaclass=ABCMeta):
+    # lobster-trace: LRM.Builtin_Types
     """Abstract base class for all builtin numeric types.
 
     """
     def dump(self, indent=0):  # pragma: no cover
-        # lobster-exclude: Debugging feature
         self.write_indent(indent, self.__class__.__name__)
 
 
@@ -2276,6 +2270,8 @@ class Array_Type(Type):
 
 
 class Builtin_Integer(Builtin_Numeric_Type):
+    # lobster-trace: LRM.Builtin_Types
+    # lobster-trace: LRM.Integer_Values
     """Builtin integer type."""
     def __init__(self):
         # lobster-exclude: Constructor only declares variables
@@ -2286,9 +2282,10 @@ class Builtin_Integer(Builtin_Numeric_Type):
 
 
 class Builtin_Decimal(Builtin_Numeric_Type):
+    # lobster-trace: LRM.Builtin_Types
+    # lobster-trace: LRM.Decimal_Values
     """Builtin decimal type."""
     def __init__(self):
-        # lobster-exclude: Constructor only declares variables
         super().__init__("Decimal")
 
     def get_example_value(self):
@@ -2296,9 +2293,10 @@ class Builtin_Decimal(Builtin_Numeric_Type):
 
 
 class Builtin_Boolean(Builtin_Type):
+    # lobster-trace: LRM.Builtin_Types
+    # lobster-trace: LRM.Boolean_Values
     """Builtin boolean type."""
     def __init__(self):
-        # lobster-exclude: Constructor only declares variables
         super().__init__("Boolean")
 
     def get_example_value(self):
@@ -2306,9 +2304,10 @@ class Builtin_Boolean(Builtin_Type):
 
 
 class Builtin_String(Builtin_Type):
+    # lobster-trace: LRM.Builtin_Types
+    # lobster-trace: LRM.String_Values
     """Builtin string type."""
     def __init__(self):
-        # lobster-exclude: Constructor only declares variables
         super().__init__("String")
 
     def get_example_value(self):
@@ -2316,11 +2315,12 @@ class Builtin_String(Builtin_Type):
 
 
 class Builtin_Markup_String(Builtin_String):
+    # lobster-trace: LRM.Builtin_Types
+    # lobster-trace: LRM.Markup_String_Values
     """Builtin string type that allows checked references to TRLC
        objects.
     """
     def __init__(self):
-        # lobster-exclude: Constructor only declares variables
         super().__init__()
         self.name = "Markup_String"
 

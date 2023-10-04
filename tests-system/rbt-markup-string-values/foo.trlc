@@ -1,0 +1,9 @@
+package Foo
+
+T Potato {
+  s = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+}
+
+Q Kitten {
+  s = "not all strings are markup strings: [[ is special"
+}

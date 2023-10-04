@@ -884,6 +884,7 @@ class Parser(Parser_Base):
             return ast.Decimal_Literal(self.ct, self.builtin_decimal)
 
         elif self.peek("STRING"):
+            # lobster-trace: LRM.String_Values
             self.match("STRING")
             return ast.String_Literal(self.ct, self.builtin_str)
 
@@ -1367,9 +1368,11 @@ class Parser(Parser_Base):
             return rv
 
         elif isinstance(typ, ast.Builtin_Markup_String):
+            # lobster-trace: LRM.Markup_String_Values
             return self.parse_markup_string()
 
         elif isinstance(typ, ast.Builtin_String):
+            # lobster-trace: LRM.String_Values
             self.match("STRING")
             return ast.String_Literal(self.ct, self.builtin_str)
 
@@ -1501,6 +1504,7 @@ class Parser(Parser_Base):
                             typ.__class__.__name__)
 
     def parse_markup_string(self):
+        # lobster-trace: LRM.Markup_String_Values
         self.match("STRING")
         rv = ast.String_Literal(self.ct, self.builtin_mstr)
         mpar = Markup_Parser(self, rv)
