@@ -2045,7 +2045,7 @@ class Entity(Node, metaclass=ABCMeta):
 
     """
     def __init__(self, name, location):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Described_Name_Equality
         super().__init__(location)
         assert isinstance(name, str)
         self.name = name
@@ -2379,7 +2379,7 @@ class Composite_Type(Concrete_Type, metaclass=ABCMeta):
                  location,
                  package,
                  inherited_symbols=None):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Described_Name_Description
         super().__init__(name, location, package)
         assert isinstance(description, str) or description is None
         assert isinstance(inherited_symbols, Symbol_Table) or \
@@ -2433,7 +2433,7 @@ class Composite_Component(Typed_Entity):
                  member_of,
                  n_typ,
                  optional):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Described_Name_Description
         super().__init__(name, location, n_typ)
         assert isinstance(description, str) or description is None
         assert isinstance(member_of, Composite_Type)
@@ -2724,7 +2724,7 @@ class Enumeration_Type(Concrete_Type):
 
     """
     def __init__(self, name, description, location, package):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Described_Name_Description
         super().__init__(name, location, package)
         assert isinstance(description, str) or description is None
         self.literals    = Symbol_Table()
@@ -2762,7 +2762,7 @@ class Enumeration_Literal_Spec(Typed_Entity):
 
     """
     def __init__(self, name, description, location, enum):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Described_Name_Description
         super().__init__(name, location, enum)
         assert isinstance(description, str) or description is None
         assert isinstance(enum, Enumeration_Type)
@@ -2989,6 +2989,7 @@ class Symbol_Table:
         return self.contains(name)
 
     def contains(self, name):
+        # lobster-trace: LRM.Described_Name_Equality
         """ Tests if the given name is in the table
 
         :param name: the name to test
@@ -3008,6 +3009,7 @@ class Symbol_Table:
         return False
 
     def lookup_assuming(self, mh, name, required_subclass=None):
+        # lobster-trace: LRM.Described_Name_Equality
         """Retrieve an object from the table assuming its there
 
         This is intended for the API specifically where you want to
@@ -3051,6 +3053,7 @@ class Symbol_Table:
         return None
 
     def lookup_direct(self, mh, name, error_location, required_subclass=None):
+        # lobster-trace: LRM.Described_Name_Equality
         """Retrieve an object from the table
 
         For example::
@@ -3127,6 +3130,7 @@ class Symbol_Table:
                      "unknown symbol %s" % name)
 
     def lookup(self, mh, referencing_token, required_subclass=None):
+        # lobster-trace: LRM.Described_Name_Equality
         assert isinstance(mh, Message_Handler)
         assert isinstance(referencing_token, Token)
         assert referencing_token.kind in ("IDENTIFIER", "BUILTIN")
@@ -3139,6 +3143,7 @@ class Symbol_Table:
             required_subclass = required_subclass)
 
     def write_indent(self, indent, message):  # pragma: no cover
+        # lobster-exclude: Debugging feature
         assert isinstance(indent, int)
         assert indent >= 0
         assert isinstance(message, str)

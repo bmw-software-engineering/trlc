@@ -1,0 +1,6 @@
+package Foo
+
+type T {
+  x "Potato" Integer
+  x "Kitten" String
+}

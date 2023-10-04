@@ -311,6 +311,8 @@ class Parser(Parser_Base):
         self.default_scope.push(self.stab)
 
     def parse_described_name(self):
+        # lobster-trace: LRM.Described_Names
+        # lobster-trace: LRM.Described_Name_Description
         self.match("IDENTIFIER")
         name = self.ct
 

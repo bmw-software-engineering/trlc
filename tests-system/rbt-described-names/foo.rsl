@@ -1,0 +1,13 @@
+package Foo
+
+enum Wibble "enum description" {
+  Potato "enum literal description"
+}
+
+type T "composite description" {
+  x "composite component description" Wibble
+}
+
+tuple Q "composite description" {
+  x "composite component description" Wibble
+}
