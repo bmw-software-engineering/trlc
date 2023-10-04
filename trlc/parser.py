@@ -1654,6 +1654,7 @@ class Parser(Parser_Base):
                        self.peek_kw("type") or \
                        self.peek_kw("abstract") or \
                        self.peek_kw("final") or \
+                       self.peek_kw("tuple") or \
                        self.peek_kw("enum"):
                         break
                     self.advance()
