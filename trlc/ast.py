@@ -2104,13 +2104,13 @@ class Type(Entity, metaclass=ABCMeta):
 
 
 class Concrete_Type(Type, metaclass=ABCMeta):
+    # lobster-trace: LRM.Type_Declarations
     """Abstract base class for all non-anonymous types.
 
     :attribute n_package: package where this type was declared
     :type: Package
     """
     def __init__(self, name, location, n_package):
-        # lobster-exclude: Constructor only declares variables
         super().__init__(name, location)
         assert isinstance(n_package, Package)
         self.n_package = n_package
@@ -2972,6 +2972,7 @@ class Symbol_Table:
         self.imported.append(stab)
 
     def register(self, mh, entity):
+        # lobster-trace: LRM.Duplicate_Types
         assert isinstance(mh, Message_Handler)
         assert isinstance(entity, Entity)
 
@@ -2985,6 +2986,7 @@ class Symbol_Table:
             self.table[entity.name] = entity
 
     def __contains__(self, name):
+        # lobster-trace: LRM.Described_Name_Equality
         return self.contains(name)
 
     def contains(self, name):

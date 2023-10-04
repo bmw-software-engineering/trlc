@@ -1,0 +1,16 @@
+package Foo
+
+type T {}
+enum E {Nothing}
+tuple Q {Nothing E}
+
+type T {
+}
+
+enum E {
+  Nothing
+}
+
+tuple Q {
+  Nothing E
+}

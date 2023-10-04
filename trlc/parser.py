@@ -352,6 +352,7 @@ class Parser(Parser_Base):
             return scope.lookup(self.mh, self.ct, required_subclass)
 
     def parse_type_declaration(self):
+        # lobster-trace: LRM.Type_Declarations
         if self.peek_kw("enum"):
             n_item = self.parse_enum_declaration()
         elif self.peek_kw("tuple"):
