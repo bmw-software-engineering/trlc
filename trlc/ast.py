@@ -1083,6 +1083,7 @@ class Record_Reference(Expression):
 
 
 class Name_Reference(Expression):
+    # lobster-trace: LRM.Qualified_Name
     """Reference to a name
 
     Name reference to either a :class:`Composite_Component` or a
@@ -1102,14 +1103,12 @@ class Name_Reference(Expression):
     :type: Composite_Component, Quantified_Variable
     """
     def __init__(self, location, entity):
-        # lobster-exclude: Constructor only declares variables
         assert isinstance(entity, (Composite_Component,
                                    Quantified_Variable))
         super().__init__(location, entity.n_typ)
         self.entity = entity
 
     def dump(self, indent=0):  # pragma: no cover
-        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Name Reference to %s" % self.entity.name)
 
     def to_string(self):

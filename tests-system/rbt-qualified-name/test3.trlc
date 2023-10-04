@@ -1,0 +1,4 @@
+package Test3
+
+// Bar is not a legal prefix
+Bar.T Illegal {}

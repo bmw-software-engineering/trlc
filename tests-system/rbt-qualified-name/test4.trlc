@@ -1,0 +1,5 @@
+package Test4
+
+import Foo
+
+Foo.T Legal {}

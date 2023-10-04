@@ -1,0 +1,4 @@
+package Test1
+
+// Cannot see Foo.T
+T Illegal {}

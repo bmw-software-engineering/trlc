@@ -1,0 +1,8 @@
+package Test5
+
+import Foo
+import Test4
+
+Foo.T Legal {
+  ref = Test4.Legal
+}

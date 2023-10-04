@@ -1,0 +1,5 @@
+package Foo
+
+T Legal {
+  ref = Legal  // Self reference is not illegal
+}

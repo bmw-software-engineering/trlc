@@ -243,6 +243,9 @@ class Markup_Parser(Parser_Base):
         self.match("REFLIST_END")
 
     def parse_qualified_name(self):
+        # lobster-trace: LRM.Qualified_Name
+        # lobster-trace: LRM.Valid_Qualifier
+        # lobster-trace: LRM.Valid_Name
         self.match("REFLIST_IDENTIFIER")
         if self.peek("REFLIST_DOT"):
             package = self.parent.stab.lookup_direct(
@@ -326,6 +329,9 @@ class Parser(Parser_Base):
                              scope,
                              required_subclass=None,
                              match_ident=True):
+        # lobster-trace: LRM.Qualified_Name
+        # lobster-trace: LRM.Valid_Qualifier
+        # lobster-trace: LRM.Valid_Name
         assert isinstance(scope, ast.Scope)
         assert required_subclass is None or isinstance(required_subclass, type)
         assert isinstance(match_ident, bool)
