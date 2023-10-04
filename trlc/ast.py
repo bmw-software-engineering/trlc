@@ -2137,7 +2137,7 @@ class Concrete_Type(Type, metaclass=ABCMeta):
                            self.fully_qualified_name())
 
 
-class Builtin_Type(Type):
+class Builtin_Type(Type, metaclass=ABCMeta):
     """Abstract base class for all builtin types.
 
     """
@@ -2152,7 +2152,7 @@ class Builtin_Type(Type):
         self.write_indent(indent, self.__class__.__name__)
 
 
-class Builtin_Numeric_Type(Builtin_Type):
+class Builtin_Numeric_Type(Builtin_Type, metaclass=ABCMeta):
     """Abstract base class for all builtin numeric types.
 
     """
