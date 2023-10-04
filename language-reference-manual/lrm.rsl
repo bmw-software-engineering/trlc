@@ -17,6 +17,10 @@ type Text {
   untraced_reason optional String
 }
 
+final type Note extends Text {
+  freeze untraced_reason = "Non-normative text"
+}
+
 type Grammar extends Text {
   bnf String
 }

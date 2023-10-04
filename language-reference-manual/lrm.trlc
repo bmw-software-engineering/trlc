@@ -400,7 +400,7 @@ section "Described names" {
               equal.'''
   }
 
-  Text Described_Name_Notes {
+  Note Described_Name_Notes {
     text = '''The description has no bearing on equality. The string
               description should be exported to the API, so
               that downstream tools can make use of it. This
@@ -466,12 +466,12 @@ section "Type declarations" {
               in that enumeration.'''
     }
 
-    Text Shared_Literals {
+    Note Shared_Literals {
       text = '''It is not an error to have the same literal specification
               for different enumerations.'''
     }
 
-    Text Literals_Shadowing_Permitted {
+    Note Literals_Shadowing_Permitted {
       text = '''It is not an error to have an enumeration literal with the
               same name as a record or enumeration - as
               there is no ambiguity - but it is recommended
@@ -872,7 +872,7 @@ section "Checks" {
       '''
   }
 
-  Text Only_Current_Package {
+  Note Only_Current_Package {
     text = '''Note that it is never possible to add checks to a type from
               a foreign package. In check files this is more
               obvious as you cannot have an import clause,
@@ -922,14 +922,14 @@ section "Checks" {
                   evaluated for this object.''']
   }
 
-  Text Intended_Semantics_Of_Messages {
+  Note Intended_Semantics_Of_Messages {
     text = '''The intended meaning of the message is a short description
               of what is wrong. The intended meaning for the
               optional details is a longer explanation,
               including perhaps on what to fix.'''
   }
 
-  Text Anchoring {
+  Note Anchoring {
     text = '''The component name (if specified) is a hint where the
               message should be anchored. It is
               implementation defined how or if this is taken
@@ -942,7 +942,7 @@ section "Checks" {
               explicitly in the check.'''
   }
 
-  Text Sane_Typing {
+  Note Sane_Typing {
     text = '''It is an important design goal to keep the type system sane
               and following LSP. I.e. each subtype may only
               narrow the values permitted in a type. This
@@ -1296,8 +1296,8 @@ section "Operators" {
               resulting expression must not be an error.'''
   }
 
-  Text Range_Checks_Example {
-    text = '''*(This means you either type check all the time, or you
+  Note Range_Checks_Example {
+    text = '''This means you either type check all the time, or you
               guarantee that any intermediate will not
               create an error in the implementation, as long
               as the final value fits in the relevant
@@ -1306,7 +1306,7 @@ section "Operators" {
               either create an error when attempting to
               concatenate the strings, OR it must work
               correctly. What you cannot do is cause
-              undefined behaviour in the evaluation.)*'''
+              undefined behaviour in the evaluation.'''
   }
 
   section "Logical operators" {
@@ -1410,10 +1410,10 @@ section "Operators" {
     }
 
     Dynamic_Semantics Simple_Substring_Semantics {
-      text = '''The meaning of the substring test is the usual. *(Note that
+      text = '''The meaning of the substring test is the usual. Note that
                 the substring test is of course performed on
                 the value of the string, not the original
-                literal.)*'''
+                literal.'''
     }
 
     Dynamic_Semantics Array_Membership_Semantics {
@@ -1835,17 +1835,17 @@ section "Record object declarations" {
               lowercase and all underscored removed.'''
   }
 
-  Text Simplified_Name_Example {
-    text = '''*(For example the simplified name of `Foo_Bar` is `foobar`
+  Note Simplified_Name_Example {
+    text = '''For example the simplified name of `Foo_Bar` is `foobar`
               and therefore it clashes with `Foobar`,
               `F_Oobar`, or `Foo_B_A_R`. But only at record
               declaration; when referring to other object
-              you still have to use a precise match.)*'''
+              you still have to use a precise match.'''
   }
 
-  Text Simplified_Name_Rationale {
-    text = '''*(The purpose of this rule is to avoid requirements that
-              have hard to distinguish names.)*'''
+  Note Simplified_Name_Rationale {
+    text = '''The purpose of this rule is to avoid requirements that
+              have hard to distinguish names.'''
   }
 
   Recommendation Record_Object_API {

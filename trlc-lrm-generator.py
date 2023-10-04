@@ -656,6 +656,13 @@ def write_header(fd, obj_version, obj_license):
     fd.write("  background-color: %s;\n" % CODE_BG)
     fd.write("  padding: 1em;\n")
     fd.write("}\n")
+    fd.write(".cls-Note:before {\n")
+    fd.write("  content: \"Non-normative: \";\n")
+    fd.write("}\n")
+    fd.write("div.cls-Note {\n")
+    fd.write("  background-color: %s;\n" % CODE_BG)
+    fd.write("  font-style: italic;\n")
+    fd.write("}\n")
     fd.write("a {\n")
     fd.write("  color: %s;\n" % BMW_BLUE_1)
     fd.write("}\n")
@@ -806,7 +813,7 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
     else:
         new_section = []
 
-    if obj.n_typ.name in ("Text", "Grammar",
+    if obj.n_typ.name in ("Text", "Grammar", "Note",
                           "Terminal",
                           "Keywords",
                           "Punctuation"):
@@ -852,7 +859,8 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
 
     # Emit
     if data["text"] or data["bullets"]:
-        fd.write("<div id='lrm-%s'>\n" % obj.name)
+        fd.write("<div id='lrm-%s' class='cls-%s'>\n" % (obj.name,
+                                                         obj.n_typ.name))
         if data["text"]:
             fd.write(fmt_text(data["text"]) + "\n")
         if data["bullets"]:
