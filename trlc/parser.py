@@ -1583,6 +1583,7 @@ class Parser(Parser_Base):
         assert kind in ("rsl", "check", "trlc")
         # lobster-trace: LRM.Layout
         # lobster-trace: LRM.Preamble
+        # lobster-trace: LRM.Cannot_Declare_In_Check_File
 
         # First, parse package indication, declaring the package if
         # needed
@@ -1665,6 +1666,7 @@ class Parser(Parser_Base):
         return ok
 
     def parse_check_file(self):
+        # lobster-trace: LRM.Check_File
         self.parse_preamble("check")
         self.cu.resolve_imports(self.mh, self.stab)
 
@@ -1674,6 +1676,7 @@ class Parser(Parser_Base):
             try:
                 n_block = self.parse_check_block()
                 self.cu.add_item(n_block)
+                # lobster-trace: LRM.Deprecated_Check_Files
                 if self.lint_mode:
                     self.mh.check(
                         n_block.location,
@@ -1689,6 +1692,7 @@ class Parser(Parser_Base):
                 # Recovery strategy is to look for the next check
                 # block
                 self.skip_until_newline()
+                # lobster-trace: LRM.Import_In_Check
                 while not self.peek_eof() and not self.peek_kw("checks"):
                     self.advance()
                     self.skip_until_newline()

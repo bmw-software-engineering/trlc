@@ -350,6 +350,7 @@ class Source_Manager:
 
     def parse_check_files(self):
         # lobster-trace: LRM.Preamble
+        # lobster-trace: LRM.Check_File
 
         ok = True
         for name in sorted(self.check_files):
