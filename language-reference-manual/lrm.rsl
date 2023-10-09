@@ -66,11 +66,12 @@ type Name_Resolution extends Text {}
 
 type Recommendation extends Text {}
 
-type Example extends Text {
+final type Example extends Text {
   hidden_rsl  optional String
   rsl         optional String
   hidden_trlc optional String
   trlc        optional String
+  freeze untraced_reason = "Non-normative example"
 }
 
 checks Example {
