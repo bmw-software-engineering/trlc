@@ -1,0 +1,7 @@
+a = "po"
+    ^^^^ rbt-check-severity-3/foo.trlc:4: check warning: a must be longer than 3
+b = "potato"
+    ^^^^^^^^ rbt-check-severity-3/foo.trlc:5: check warning: b must be longer than 7
+c = "potatoes"
+    ^^^^^^^^^^ rbt-check-severity-3/foo.trlc:6: check warning: c must be longer than 10
+Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 3 warning(s)

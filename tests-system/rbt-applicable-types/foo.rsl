@@ -1,0 +1,10 @@
+package Foo
+import Bar
+
+type T {
+    a String
+}
+
+checks B {
+    len(a) > 10, "a is too short", a
+}

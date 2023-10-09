@@ -1,0 +1,9 @@
+package Foo
+
+type T {
+    a String
+}
+
+checks T {
+    len(a) > 10, warning "a has to be more than 7 chars", a
+}

@@ -1,0 +1,12 @@
+package Foo
+
+type T {
+    a Integer
+    b Integer
+}
+
+checks T {
+    a < 0, warning "First warning: a is positive", a
+    b > 0, warning "Second warning: b is negative", b
+    a < b, warning "Third warning: a is greater than b"
+}

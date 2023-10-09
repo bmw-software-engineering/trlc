@@ -1,0 +1,13 @@
+package Foo
+
+type T {
+    a String
+    b String
+    c String
+}
+
+checks T {
+    len(a) > 3, fatal "a must be longer than 3", a
+    len(b) > 7, "b must be longer than 7", b
+    len(c) > 10, "c must be longer than 10", c
+}

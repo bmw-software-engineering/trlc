@@ -886,7 +886,7 @@ section "Checks" {
               order.'''
   }
 
-  Dynamic_Semantics Check_Evaluation_Order_Across_Blocks {
+  Note Check_Evaluation_Order_Across_Blocks {
     text = '''If multiple check blocks are declared for the same type,
               then the order of evaluation of each check
               block is unspecified.'''

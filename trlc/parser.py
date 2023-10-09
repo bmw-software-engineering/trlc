@@ -1237,8 +1237,11 @@ class Parser(Parser_Base):
         return n_name
 
     def parse_check_block(self):
+        # lobster-trace: LRM.Check_Block
         self.match_kw("checks")
         self.match("IDENTIFIER")
+        # lobster-trace: LRM.Applicable_Types
+        # lobster-trace: LRM.Applicable_Components
         n_ctype = self.cu.package.symbols.lookup(self.mh,
                                                  self.ct,
                                                  ast.Composite_Type)

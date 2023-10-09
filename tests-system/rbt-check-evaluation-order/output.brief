@@ -1,0 +1,3 @@
+rbt-check-evaluation-order/foo.trlc:4:7: trlc check warning: First warning: a is positive
+rbt-check-evaluation-order/foo.trlc:5:7: trlc check warning: Second warning: b is negative
+rbt-check-evaluation-order/foo.trlc:3:3: trlc check warning: Third warning: a is greater than b
