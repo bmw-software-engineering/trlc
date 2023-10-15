@@ -616,6 +616,7 @@ class Parser(Parser_Base):
         return record
 
     def parse_expression(self, scope):
+        # lobster-trace: LRM.Expression
         assert isinstance(scope, ast.Scope)
 
         n_lhs = self.parse_relation(scope)
@@ -673,6 +674,7 @@ class Parser(Parser_Base):
         return n_lhs
 
     def parse_relation(self, scope):
+        # lobster-trace: LRM.Relation
         assert isinstance(scope, ast.Scope)
         relop_mapping = {"==" : ast.Binary_Operator.COMP_EQ,
                          "!=" : ast.Binary_Operator.COMP_NEQ,
@@ -757,6 +759,7 @@ class Parser(Parser_Base):
             return n_lhs
 
     def parse_simple_expression(self, scope):
+        # lobster-trace: LRM.Simple_Expression
         assert isinstance(scope, ast.Scope)
         un_add_map = {"+" : ast.Unary_Operator.PLUS,
                       "-" : ast.Unary_Operator.MINUS}
@@ -812,6 +815,7 @@ class Parser(Parser_Base):
         return n_lhs
 
     def parse_term(self, scope):
+        # lobster-trace: LRM.Term
         assert isinstance(scope, ast.Scope)
         mul_map = {"*" : ast.Binary_Operator.TIMES,
                    "/" : ast.Binary_Operator.DIVIDE,
@@ -835,6 +839,7 @@ class Parser(Parser_Base):
         return n_lhs
 
     def parse_factor(self, scope):
+        # lobster-trace: LRM.Factor
         assert isinstance(scope, ast.Scope)
 
         if self.peek_kw("not"):
@@ -879,6 +884,7 @@ class Parser(Parser_Base):
             return n_lhs
 
     def parse_primary(self, scope):
+        # lobster-trace: LRM.Primary
         assert isinstance(scope, ast.Scope)
 
         if self.peek("INTEGER"):

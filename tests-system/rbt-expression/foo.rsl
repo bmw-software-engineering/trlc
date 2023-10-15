@@ -1,5 +1,16 @@
 package Foo
 
+type T {
+   ione    Integer
+   itwo    Integer
+   done    Decimal
+   dtwo    Decimal
+   yay     Boolean
+   nay     Boolean
+   foo     String
+   foobar  String
+}
+
 checks T {
   ione == 1, fatal "bad setup"
   itwo == 2, fatal "bad setup"

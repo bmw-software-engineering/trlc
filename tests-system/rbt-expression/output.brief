@@ -1,0 +1,39 @@
+rbt-expression/foo.trlc:3:3: trlc check warning: 01: bad and
+rbt-expression/foo.trlc:3:3: trlc check warning: 02: bad or
+rbt-expression/foo.trlc:3:3: trlc check warning: 03: bad xor
+rbt-expression/foo.trlc:3:3: trlc check warning: 04: bad implies
+rbt-expression/foo.trlc:3:3: trlc check warning: 05: bad i<
+rbt-expression/foo.trlc:3:3: trlc check warning: 06: bad d<
+rbt-expression/foo.trlc:3:3: trlc check warning: 07: bad i<=
+rbt-expression/foo.trlc:3:3: trlc check warning: 08: bad d<=
+rbt-expression/foo.trlc:3:3: trlc check warning: 09: bad i>
+rbt-expression/foo.trlc:3:3: trlc check warning: 10: bad d>
+rbt-expression/foo.trlc:3:3: trlc check warning: 11: bad i>=
+rbt-expression/foo.trlc:3:3: trlc check warning: 12: bad d>=
+rbt-expression/foo.trlc:3:3: trlc check warning: 13: bad i==
+rbt-expression/foo.trlc:3:3: trlc check warning: 14: bad d==
+rbt-expression/foo.trlc:3:3: trlc check warning: 15: bad i!=
+rbt-expression/foo.trlc:3:3: trlc check warning: 16: bad d!=
+rbt-expression/foo.trlc:3:3: trlc check warning: 17: bad range iin
+rbt-expression/foo.trlc:3:3: trlc check warning: 18: bad range din
+rbt-expression/foo.trlc:3:3: trlc check warning: 19: bad range not iin
+rbt-expression/foo.trlc:3:3: trlc check warning: 20: bad range not din
+rbt-expression/foo.trlc:3:3: trlc check warning: 21: bad substring
+rbt-expression/foo.trlc:3:3: trlc check warning: 22: bad i adding (1/2)
+rbt-expression/foo.trlc:3:3: trlc check warning: 22: bad i adding (2/2)
+rbt-expression/foo.trlc:3:3: trlc check warning: 23: bad d adding (1/2)
+rbt-expression/foo.trlc:3:3: trlc check warning: 23: bad d adding (2/2)
+rbt-expression/foo.trlc:3:3: trlc check warning: 24: bad i*
+rbt-expression/foo.trlc:3:3: trlc check warning: 25: bad d*
+rbt-expression/foo.trlc:3:3: trlc check warning: 26: bad i/
+rbt-expression/foo.trlc:3:3: trlc check warning: 27: bad d/
+rbt-expression/foo.trlc:3:3: trlc check warning: 28: bad % (1/4)
+rbt-expression/foo.trlc:3:3: trlc check warning: 28: bad % (2/4)
+rbt-expression/foo.trlc:3:3: trlc check warning: 28: bad % (3/4)
+rbt-expression/foo.trlc:3:3: trlc check warning: 28: bad % (4/4)
+rbt-expression/foo.trlc:3:3: trlc check warning: 29: bad iexp
+rbt-expression/foo.trlc:3:3: trlc check warning: 30: bad dexp
+rbt-expression/foo.trlc:3:3: trlc check warning: 31: bad lnot
+rbt-expression/foo.trlc:3:3: trlc check warning: 32: bad iabs
+rbt-expression/foo.trlc:3:3: trlc check warning: 33: bad dabs
+rbt-expression/foo.trlc:3:3: trlc check warning: 34: bad ifexpr
