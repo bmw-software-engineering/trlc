@@ -487,6 +487,8 @@ class Expression(Node, metaclass=ABCMeta):
             self.__class__.__name__
 
     def ensure_type(self, mh, typ):
+        # lobster-trace: LRM.Restricted_Null
+        # lobster-trace: LRM.Null_Is_Invalid
         assert isinstance(typ, (type, Type))
         if self.typ is None:
             mh.error(self.location,
@@ -524,6 +526,7 @@ class Expression(Node, metaclass=ABCMeta):
 
 
 class Implicit_Null(Expression):
+    # lobster-trace: LRM.Unspecified_Optional_Components
     """Synthesised null values
 
     When a record object or tuple aggregate is declared and an
@@ -1348,6 +1351,8 @@ class Binary_Expression(Expression):
         elif operator in (Binary_Operator.COMP_EQ,
                           Binary_Operator.COMP_NEQ):
             if (self.n_lhs.typ is None) or (self.n_rhs.typ is None):
+                # lobster-trace: LRM.Restricted_Null
+                # lobster-trace: LRM.Null_Equivalence
                 # We can compary anything to null (including itself)
                 pass
             elif self.n_lhs.typ != self.n_rhs.typ:
