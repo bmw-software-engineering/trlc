@@ -2908,6 +2908,7 @@ class Record_Object(Typed_Entity):
 
 
 class Section(Entity):
+    # lobster-trace: LRM.Section_Declaration
     """A section for readability
 
     This represents a section construct in TRLC files to group record
@@ -2923,13 +2924,11 @@ class Section(Entity):
 
     """
     def __init__(self, name, location, parent):
-        # lobster-exclude: Constructor only declares variables
         super().__init__(name, location)
         assert isinstance(parent, Section) or parent is None
         self.parent  = parent
 
     def dump(self, indent=0):  # pragma: no cover
-        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Section %s" % self.name)
         if self.parent is None:
             self.write_indent(indent + 1, "Parent: None")

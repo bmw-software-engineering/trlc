@@ -1325,6 +1325,7 @@ class Parser(Parser_Base):
         return n_check_block
 
     def parse_section_declaration(self):
+        # lobster-trace: LRM.Section_Declaration
         self.match_kw("section")
         self.match("STRING")
         if self.section:
