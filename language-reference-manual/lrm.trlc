@@ -1685,7 +1685,7 @@ section "TRLC Files" {
               declare the same package.'''
   }
 
-  Recommendation TRLC_Parse_Issue {
+  Note TRLC_Parse_Issue {
     text = '''For TRLC files it is impossible fully parse a file
               in isolation, since we must process at least the package
               indication of every other trlc file to know which import

@@ -1581,6 +1581,7 @@ class Parser(Parser_Base):
         return obj
 
     def parse_trlc_entry(self):
+        # lobster-trace: LRM.TRLC_File
         if self.peek_kw("section"):
             self.parse_section_declaration()
         else:
@@ -1602,6 +1603,7 @@ class Parser(Parser_Base):
         elif kind == "check":
             declare_package = False
         else:
+            # lobster-trace: LRM.Late_Package_Declarations
             declare_package = not self.stab.contains(self.ct.value)
 
         if declare_package:
@@ -1614,6 +1616,7 @@ class Parser(Parser_Base):
         else:
             pkg = self.stab.lookup(self.mh, self.ct, ast.Package)
             if pkg.declared_late and kind == "trlc":
+                # lobster-trace: LRM.Duplicate_Late_Packages
                 self.mh.warning(
                     self.ct.location,
                     "duplicate late declaration of package %s,"
@@ -1709,6 +1712,7 @@ class Parser(Parser_Base):
         return ok
 
     def parse_trlc_file(self):
+        # lobster-trace: LRM.TRLC_File
         assert self.cu.package is not None
         self.cu.resolve_imports(self.mh, self.stab)
 
