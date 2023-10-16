@@ -1,0 +1,19 @@
+package Foo
+
+type A {
+    a optional Integer
+    b optional Integer
+}
+
+type T {
+    c optional Integer
+    d optional Integer
+}
+
+checks A {
+    (a + b) > null, "(a+b) < null", a
+}
+
+checks T {
+    d == (if c then null else d), "not permitted"
+}

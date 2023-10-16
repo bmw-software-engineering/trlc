@@ -1,0 +1,14 @@
+package Foo
+
+type T {
+    a optional Integer
+    b optional Integer
+    d optional Integer
+}
+
+checks T {
+    a != null, "a is null", a
+    a == null, "a is not null", a
+    null == null, "null is not null"
+    d == null, "d is not null", d
+}

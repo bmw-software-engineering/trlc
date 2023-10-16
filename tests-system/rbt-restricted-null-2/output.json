@@ -1,0 +1,5 @@
+(a + b) > null, "(a+b) < null", a
+          ^^^^ rbt-restricted-null-2/foo.rsl:14: error: null is not permitted here
+d == (if c then null else d), "not permitted"
+                ^^^^ rbt-restricted-null-2/foo.rsl:18: error: null is not permitted here
+Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 2 error(s)
