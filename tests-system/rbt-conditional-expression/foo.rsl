@@ -1,0 +1,15 @@
+package Foo
+
+type T {
+   x Integer
+   y Integer
+   z Integer
+   b Boolean
+}
+
+checks T {
+   (if b then b else x > 5), "kitten"
+   (if y > x then x elsif x > y then x else y) < x, "foobar evaluation if"
+   (if x > y then x elsif y > x then y else z) <= x, "foobar evaluation elsif"
+   (if x > y then x elsif y == x then y else z) >= x, "potato else"
+}

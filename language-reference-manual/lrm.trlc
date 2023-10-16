@@ -1650,7 +1650,7 @@ section "Conditional expressions" {
   }
 
   Dynamic_Semantics Conditional_Expression_Else {
-    text = '''If all condition are evaluated to false, then the else
+    text = '''If all conditions are evaluated to false, then the else
               dependent expression is evaluated and
               returned.'''
   }

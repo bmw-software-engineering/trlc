@@ -1,0 +1,11 @@
+package Foo
+
+type T {
+   x Integer
+   y Integer
+   b Boolean
+}
+
+checks T {
+   (if x then x elsif y > x then y else y) <= x, "potato type"
+}

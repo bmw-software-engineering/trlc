@@ -487,6 +487,7 @@ class Expression(Node, metaclass=ABCMeta):
             self.__class__.__name__
 
     def ensure_type(self, mh, typ):
+        # lobster-trace: LRM.Conditional_Expression_Types
         assert isinstance(typ, (type, Type))
         if self.typ is None:
             mh.error(self.location,
@@ -1824,7 +1825,7 @@ class Action(Node):
         self.kind   = t_kind.value
         self.n_cond = n_condition
         self.n_expr = n_expression
-
+        # lobster-trace: LRM.Conditional_Expression_Types
         self.n_cond.ensure_type(mh, Builtin_Boolean)
 
     def dump(self, indent=0):  # pragma: no cover
@@ -1882,6 +1883,7 @@ class Conditional_Expression(Expression):
         self.actions.append(n_action)
 
     def set_else_part(self, mh, n_expr):
+        # lobster-trace: LRM.Conditional_Expression_Else
         assert isinstance(mh, Message_Handler)
         assert isinstance(n_expr, Expression)
 
@@ -1904,6 +1906,7 @@ class Conditional_Expression(Expression):
         return rv
 
     def evaluate(self, mh, context):
+        # lobster-trace: LRM.Conditional_Expression_Evaluation
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
 

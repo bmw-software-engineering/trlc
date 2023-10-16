@@ -1,0 +1,9 @@
+T test_01 {
+  ^^^^^^^ rbt-conditional-expression/foo.trlc:3: check error: kitten
+T test_01 {
+  ^^^^^^^ rbt-conditional-expression/foo.trlc:3: check error: foobar evaluation if
+T test_01 {
+  ^^^^^^^ rbt-conditional-expression/foo.trlc:3: check error: foobar evaluation elsif
+T test_01 {
+  ^^^^^^^ rbt-conditional-expression/foo.trlc:3: check error: potato else
+Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 4 error(s)
