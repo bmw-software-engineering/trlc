@@ -170,7 +170,6 @@ class Node(metaclass=ABCMeta):
 
 
 class Check_Block(Node):
-    # lobster-trace: LRM.Check_Block
     """Node representing check blocks
 
     Semantically this has no meaning, but it's nice to have some kind
@@ -184,7 +183,7 @@ class Check_Block(Node):
 
     """
     def __init__(self, location, n_typ):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Check_Block
         super().__init__(location)
         assert isinstance(n_typ, Composite_Type)
         self.n_typ  = n_typ
@@ -289,7 +288,6 @@ class Compilation_Unit(Node):
 
 
 class Check(Node):
-    # lobster-trace: LRM.Check_Block
     """User defined check
 
     This represent a single user-defined check inside a check block::
@@ -322,7 +320,7 @@ class Check(Node):
                  severity,
                  t_message,
                  extrainfo):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Check_Block
         assert isinstance(n_type, Composite_Type)
         assert isinstance(n_expr, Expression)
         assert isinstance(n_anchor, Composite_Component) or n_anchor is None
@@ -336,6 +334,10 @@ class Check(Node):
         self.n_expr    = n_expr
         self.n_anchor  = n_anchor
         self.severity  = severity
+        # lobster-trace: LRM.No_Newlines_In_Message
+        # This is the error recovery strategy if we find newlines in
+        # the short error messages: we just remove them. The error
+        # raised is non-fatal.
         self.message   = t_message.value.replace("\n", " ")
         self.extrainfo = extrainfo
 
