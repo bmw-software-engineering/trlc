@@ -1,0 +1,13 @@
+a = 1
+    ^ rbt-check-evaluation-order/foo.trlc:4: check warning: First warning: a is positive
+b = -1
+    ^ rbt-check-evaluation-order/foo.trlc:5: check warning: Second warning: b is negative
+T Bar {
+  ^^^ rbt-check-evaluation-order/foo.trlc:3: check warning: Third warning: a is greater than b
+{
+  "Bar": {
+    "a": 1,
+    "b": -1
+  }
+}
+Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 3 warning(s)

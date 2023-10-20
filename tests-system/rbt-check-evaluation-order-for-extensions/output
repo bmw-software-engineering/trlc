@@ -1,0 +1,5 @@
+a = "potato"
+    ^^^^^^^^ rbt-check-evaluation-order-for-extensions/bar.trlc:4: check warning: a has to be more than 7 chars
+a = "potato"
+    ^^^^^^^^ rbt-check-evaluation-order-for-extensions/bar.trlc:4: check error: a has to be more than 10 chars
+Processed 2 model(s), 0 check(s) and 1 requirement file(s) and found 1 warning(s) and 1 error(s)

@@ -1,0 +1,11 @@
+package Bar
+import Foo
+
+type T extends Foo.T {
+    b String
+}
+
+checks T {
+    len(a) > 10, "a has to be more than 10 chars", a
+    len(b) > 10, "b has to be more than 10 chars", b
+}

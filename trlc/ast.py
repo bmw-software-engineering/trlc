@@ -183,13 +183,14 @@ class Check_Block(Node):
 
     """
     def __init__(self, location, n_typ):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Check_Block
         super().__init__(location)
         assert isinstance(n_typ, Composite_Type)
         self.n_typ  = n_typ
         self.checks = []
 
     def add_check(self, n_check):
+        # lobster-trace: LRM.Check_Evaluation_Order
         assert isinstance(n_check, Check)
         self.checks.append(n_check)
 
@@ -319,7 +320,7 @@ class Check(Node):
                  severity,
                  t_message,
                  extrainfo):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Check_Block
         assert isinstance(n_type, Composite_Type)
         assert isinstance(n_expr, Expression)
         assert isinstance(n_anchor, Composite_Component) or n_anchor is None
@@ -333,6 +334,10 @@ class Check(Node):
         self.n_expr    = n_expr
         self.n_anchor  = n_anchor
         self.severity  = severity
+        # lobster-trace: LRM.No_Newlines_In_Message
+        # This is the error recovery strategy if we find newlines in
+        # the short error messages: we just remove them. The error
+        # raised is non-fatal.
         self.message   = t_message.value.replace("\n", " ")
         self.extrainfo = extrainfo
 
@@ -363,6 +368,8 @@ class Check(Node):
             return fields[self.n_anchor.name].location
 
     def perform(self, mh, composite_object):
+        # lobster-trace: LRM.Check_Messages
+        # lobster-trace: LRM.Check_Severity
         assert isinstance(mh, Message_Handler)
         assert isinstance(composite_object, (Record_Object,
                                              Tuple_Aggregate))
@@ -2389,13 +2396,16 @@ class Composite_Type(Concrete_Type, metaclass=ABCMeta):
         self.checks      = []
 
     def add_check(self, n_check):
+        # lobster-trace: LRM.Check_Evaluation_Order
         assert isinstance(n_check, Check)
         self.checks.append(n_check)
 
     def iter_checks(self):
+        # lobster-trace: LRM.Check_Evaluation_Order
         yield from self.checks
 
     def all_components(self):
+        # lobster-exclude: Convenience function
         """Convenience function to get a list of all components.
 
         :rtype: list[Composite_Component]
@@ -2495,6 +2505,8 @@ class Record_Type(Composite_Type):
         self.is_abstract = is_abstract
 
     def iter_checks(self):
+        # lobster-trace: LRM.Check_Evaluation_Order
+        # lobster-trace: LRM.Check_Evaluation_Order_For_Extensions
         if self.parent:
             yield from self.parent.iter_checks()
         yield from self.checks
@@ -2651,6 +2663,7 @@ class Tuple_Type(Composite_Type):
             self.write_indent(indent + 1, "Checks: None")
 
     def perform_type_checks(self, mh, value):
+        # lobster-trace: LRM.Check_Evaluation_Order
         assert isinstance(mh, Message_Handler)
         if isinstance(value, Tuple_Aggregate):
             ok = True
@@ -2873,6 +2886,7 @@ class Record_Object(Typed_Entity):
             val.resolve_references(mh)
 
     def perform_checks(self, mh):
+        # lobster-trace: LRM.Check_Evaluation_Order
         assert isinstance(mh, Message_Handler)
 
         ok = True

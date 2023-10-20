@@ -1,0 +1,9 @@
+package foo
+
+type MyType {
+  name String
+}
+
+checks MyType {
+  len(name) > 10, warning "name is too short", name
+}
