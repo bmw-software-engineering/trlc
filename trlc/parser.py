@@ -1531,6 +1531,7 @@ class Parser(Parser_Base):
         return rv
 
     def parse_record_object_declaration(self):
+        # lobster-trace: LRM.Section_Declaration
         r_typ = self.parse_qualified_name(self.default_scope,
                                           ast.Record_Type)
         if r_typ.is_abstract:

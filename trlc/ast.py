@@ -2824,6 +2824,7 @@ class Record_Object(Typed_Entity):
 
     """
     def __init__(self, name, location, n_typ, section, n_package):
+        # lobster-trace: LRM.Section_Declaration
         assert isinstance(n_typ, Record_Type)
         assert isinstance(section, Section) or section is None
         assert isinstance(n_package, Package)
