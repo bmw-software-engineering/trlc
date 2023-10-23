@@ -487,7 +487,6 @@ class Expression(Node, metaclass=ABCMeta):
             self.__class__.__name__
 
     def ensure_type(self, mh, typ):
-        # lobster-trace: LRM.Conditional_Expression_Types
         assert isinstance(typ, (type, Type))
         if self.typ is None:
             mh.error(self.location,
@@ -1815,6 +1814,7 @@ class Action(Node):
 
     """
     def __init__(self, mh, t_kind, n_condition, n_expression):
+        # lobster-trace: LRM.Conditional_Expression
         assert isinstance(mh, Message_Handler)
         assert isinstance(t_kind, Token)
         assert t_kind.kind == "KEYWORD"
@@ -1867,7 +1867,7 @@ class Conditional_Expression(Expression):
 
     """
     def __init__(self, location, if_action):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Conditional_Expression
         assert isinstance(if_action, Action)
         assert if_action.kind == "if"
         super().__init__(location, if_action.n_expr.typ)
@@ -1875,6 +1875,8 @@ class Conditional_Expression(Expression):
         self.else_expr = None
 
     def add_elsif(self, mh, n_action):
+        # lobster-trace: LRM.Conditional_Expression
+        # lobster-trace; LRM.Conditional_Expression_Types
         assert isinstance(mh, Message_Handler)
         assert isinstance(n_action, Action)
         assert n_action.kind == "elsif"
@@ -1883,7 +1885,8 @@ class Conditional_Expression(Expression):
         self.actions.append(n_action)
 
     def set_else_part(self, mh, n_expr):
-        # lobster-trace: LRM.Conditional_Expression_Else
+        # lobster-trace: LRM.Conditional_Expression
+        # lobster-trace; LRM.Conditional_Expression_Types
         assert isinstance(mh, Message_Handler)
         assert isinstance(n_expr, Expression)
 
@@ -1906,6 +1909,7 @@ class Conditional_Expression(Expression):
         return rv
 
     def evaluate(self, mh, context):
+        # lobster-trace: LRM.Conditional_Expression_Else
         # lobster-trace: LRM.Conditional_Expression_Evaluation
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
