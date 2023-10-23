@@ -1070,7 +1070,6 @@ section "Expressions" {
               is recommended that a linter warns whenever a
               unary minus is encountered that has a
               non-trivial `term` or `factor` as its operand.'''
-    untraced_reason = "Non-normative recommendation"
   }
 
   Example Expression_Examples {

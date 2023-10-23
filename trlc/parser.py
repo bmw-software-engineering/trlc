@@ -675,6 +675,7 @@ class Parser(Parser_Base):
 
     def parse_relation(self, scope):
         # lobster-trace: LRM.Relation
+        # lobster-trace: LRM.Operators
         assert isinstance(scope, ast.Scope)
         relop_mapping = {"==" : ast.Binary_Operator.COMP_EQ,
                          "!=" : ast.Binary_Operator.COMP_NEQ,
@@ -760,6 +761,8 @@ class Parser(Parser_Base):
 
     def parse_simple_expression(self, scope):
         # lobster-trace: LRM.Simple_Expression
+        # lobster-trace: LRM.Operators
+        # lobster-trace: LRM.Unary_Minus_Parsing
         assert isinstance(scope, ast.Scope)
         un_add_map = {"+" : ast.Unary_Operator.PLUS,
                       "-" : ast.Unary_Operator.MINUS}
@@ -816,6 +819,7 @@ class Parser(Parser_Base):
 
     def parse_term(self, scope):
         # lobster-trace: LRM.Term
+        # lobster-trace: LRM.Operators
         assert isinstance(scope, ast.Scope)
         mul_map = {"*" : ast.Binary_Operator.TIMES,
                    "/" : ast.Binary_Operator.DIVIDE,
