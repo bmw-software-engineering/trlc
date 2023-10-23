@@ -526,7 +526,6 @@ class Expression(Node, metaclass=ABCMeta):
 
 
 class Implicit_Null(Expression):
-    # lobster-trace: LRM.Unspecified_Optional_Components
     """Synthesised null values
 
     When a record object or tuple aggregate is declared and an
@@ -553,7 +552,7 @@ class Implicit_Null(Expression):
 
     """
     def __init__(self, composite_object, composite_component):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Unspecified_Optional_Components
         assert isinstance(composite_object, (Record_Object,
                                              Tuple_Aggregate))
         assert isinstance(composite_component, Composite_Component)
@@ -563,6 +562,7 @@ class Implicit_Null(Expression):
         return "null"
 
     def evaluate(self, mh, context):
+        # lobster-trace: LRM.Unspecified_Optional_Components
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
         return Value(self.location, None, None)
@@ -945,6 +945,7 @@ class Tuple_Aggregate(Expression):
 
     """
     def __init__(self, location, typ):
+        # lobster-trace: LRM.Unspecified_Optional_Components
         super().__init__(location, typ)
         self.value = {n_field.name : Implicit_Null(self, n_field)
                       for n_field in self.typ.components.values()}
@@ -1226,6 +1227,7 @@ class Unary_Expression(Expression):
         self.n_operand.dump(indent + 1)
 
     def evaluate(self, mh, context):
+        # lobster-trace: LRM.Null_Is_Invalid
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
 
@@ -1351,8 +1353,6 @@ class Binary_Expression(Expression):
         elif operator in (Binary_Operator.COMP_EQ,
                           Binary_Operator.COMP_NEQ):
             if (self.n_lhs.typ is None) or (self.n_rhs.typ is None):
-                # lobster-trace: LRM.Restricted_Null
-                # lobster-trace: LRM.Null_Equivalence
                 # We can compary anything to null (including itself)
                 pass
             elif self.n_lhs.typ != self.n_rhs.typ:
@@ -1462,6 +1462,8 @@ class Binary_Expression(Expression):
             assert False
 
     def evaluate(self, mh, context):
+        # lobster-trace: LRM.Null_Equivalence
+        # lobster-trace: LRM.Null_Is_Invalid
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
 
@@ -1763,6 +1765,7 @@ class Range_Test(Expression):
         self.n_upper.dump(indent + 1)
 
     def evaluate(self, mh, context):
+        # lobster-trace: LRM.Null_Is_Invalid
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
 
@@ -1909,6 +1912,7 @@ class Conditional_Expression(Expression):
         return rv
 
     def evaluate(self, mh, context):
+        # lobster-trace: LRM.Null_Is_Invalid
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
 
@@ -1994,6 +1998,7 @@ class Quantified_Expression(Expression):
                                         self.n_expr.to_string())
 
     def evaluate(self, mh, context):
+        # lobster-trace: LRM.Null_Is_Invalid
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
 
@@ -2829,6 +2834,7 @@ class Record_Object(Typed_Entity):
 
     """
     def __init__(self, name, location, n_typ, section, n_package):
+        # lobster-trace: LRM.Unspecified_Optional_Components
         assert isinstance(n_typ, Record_Type)
         assert isinstance(section, Section) or section is None
         assert isinstance(n_package, Package)
