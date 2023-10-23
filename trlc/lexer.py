@@ -201,25 +201,19 @@ class Lexer_Base(metaclass=ABCMeta):
     def is_alpha(char):
         # lobster-trace: LRM.Identifier
         # lobster-trace: LRM.Builtin_Identifier
-        assert isinstance(char, str) and len(char) == 1
-        return ord('a') <= ord(char) <= ord('z') or \
-            ord('A') <= ord(char) <= ord('Z')
+        return char.isascii() and char.isalpha()
 
     @staticmethod
     def is_numeric(char):
         # lobster-trace: LRM.Integers
         # lobster-trace: LRM.Decimals
-        assert isinstance(char, str) and len(char) == 1
-        return ord('0') <= ord(char) <= ord('9')
+        return char.isascii() and char.isdigit()
 
     @staticmethod
     def is_alnum(char):
         # lobster-trace: LRM.Identifier
         # lobster-trace: LRM.Builtin_Identifier
-        assert isinstance(char, str) and len(char) == 1
-        return ord('a') <= ord(char) <= ord('z') or \
-            ord('A') <= ord(char) <= ord('Z') or \
-            ord('0') <= ord(char) <= ord('9')
+        return char.isascii() and char.isalnum()
 
     @abstractmethod
     def file_location(self):

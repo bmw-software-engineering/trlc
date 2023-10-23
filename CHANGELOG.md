@@ -27,6 +27,8 @@ generated in the following situations:
 
 ### 1.2.3-dev
 
+* [TRLC] Various performance improvements when parsing large files.
+
 * [TRLC] Add `--version` flag that can be used to figure out the
   installed TRLC version.
 
