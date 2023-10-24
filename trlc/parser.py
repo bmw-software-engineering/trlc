@@ -967,6 +967,7 @@ class Parser(Parser_Base):
 
     def parse_conditional_expression(self, scope):
         # lobster-trace: LRM.Conditional_Expression
+        # lobster-trace: LRM.Restricted_Null
         assert isinstance(scope, ast.Scope)
 
         self.match_kw("if")
