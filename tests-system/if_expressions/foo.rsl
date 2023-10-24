@@ -1,7 +1,0 @@
-package Foo
-
-type T {
-   x Integer
-   y Integer
-   b Boolean
-}
