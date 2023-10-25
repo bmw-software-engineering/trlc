@@ -280,6 +280,7 @@ class Source_Manager:
                                                          file_content)
 
     def register_trlc_file(self, file_name, file_content=None):
+        # lobster-trace: LRM.TRLC_File
         assert os.path.isfile(file_name)
         assert file_name not in self.trlc_files
         assert isinstance(file_content, str) or file_content is None
@@ -362,6 +363,7 @@ class Source_Manager:
         return ok
 
     def parse_trlc_files(self):
+        # lobster-trace: LRM.TRLC_File
         # lobster-trace: LRM.Preamble
 
         ok = True

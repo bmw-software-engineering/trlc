@@ -1,0 +1,1 @@
+rbt-late-package-declarations/foo.trlc:1:9: trlc warning: duplicate late declaration of package Foo, previous declaration in bar.trlc:1; consider adding an rsl file declaring the package
