@@ -594,6 +594,7 @@ class Literal(Expression, metaclass=ABCMeta):
 
 
 class Null_Literal(Literal):
+    # lobster-trace: LRM.Primary
     """The null literal
 
     This can appear in check expressions::
@@ -606,14 +607,12 @@ class Null_Literal(Literal):
 
     """
     def __init__(self, token):
-        # lobster-exclude: Constructor only declares variables
         assert isinstance(token, Token)
         assert token.kind == "KEYWORD"
         assert token.value == "null"
         super().__init__(token.location, None)
 
     def dump(self, indent=0):  # pragma: no cover
-        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Null Literal")
 
     def to_string(self):
@@ -633,6 +632,7 @@ class Null_Literal(Literal):
 
 class Integer_Literal(Literal):
     # lobster-trace: LRM.Integer_Values
+    # lobster-trace: LRM.Primary
     """Integer literals
 
     Note that these are always positive. A negative integer is
@@ -679,6 +679,7 @@ class Integer_Literal(Literal):
 
 class Decimal_Literal(Literal):
     # lobster-trace: LRM.Decimal_Values
+    # lobster-trace: LRM.Primary
     """Decimal literals
 
     Note that these are always positive. A negative decimal is
@@ -726,6 +727,7 @@ class Decimal_Literal(Literal):
 class String_Literal(Literal):
     # lobster-trace: LRM.String_Values
     # lobster-trace: LRM.Markup_String_Values
+    # lobster-trace: LRM.Primary
     """String literals
 
     Note the value of the string does not include the quotation marks,
@@ -781,6 +783,7 @@ class String_Literal(Literal):
 
 class Boolean_Literal(Literal):
     # lobster-trace: LRM.Boolean_Values
+    # lobster-trace: LRM.Primary
     """Boolean values
 
     :attribute value: the boolean value
@@ -1170,6 +1173,9 @@ class Unary_Expression(Expression):
 
     """
     def __init__(self, mh, location, typ, operator, n_operand):
+        # lobster-trace: LRM.Simple_Expression
+        # lobster-trace: LRM.Relation
+        # lobster-trace: LRM.Factor
         super().__init__(location, typ)
         assert isinstance(mh, Message_Handler)
         assert isinstance(operator, Unary_Operator)
@@ -1334,6 +1340,11 @@ class Binary_Expression(Expression):
 
     """
     def __init__(self, mh, location, typ, operator, n_lhs, n_rhs):
+        # lobster-trace: LRM.Expression
+        # lobster-trace: LRM.Relation
+        # lobster-trace: LRM.Simple_Expression
+        # lobster-trace: LRM.Term
+        # lobster-trace: LRM.Factor
         super().__init__(location, typ)
         assert isinstance(mh, Message_Handler)
         assert isinstance(operator, Binary_Operator)
@@ -1738,6 +1749,7 @@ class Range_Test(Expression):
 
     """
     def __init__(self, mh, location, typ, n_lhs, n_lower, n_upper):
+        # lobster-trace: LRM.Relation
         super().__init__(location, typ)
         assert isinstance(mh, Message_Handler)
         assert isinstance(n_lhs, Expression)

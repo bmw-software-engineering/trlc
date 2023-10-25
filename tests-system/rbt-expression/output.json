@@ -1,0 +1,91 @@
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 01: bad and
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 02: bad or
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 03: bad xor
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 04: bad implies
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 05: bad i<
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 06: bad d<
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 07: bad i<=
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 08: bad d<=
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 09: bad i>
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 10: bad d>
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 11: bad i>=
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 12: bad d>=
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 13: bad i==
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 14: bad d==
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 15: bad i!=
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 16: bad d!=
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 17: bad range iin
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 18: bad range din
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 19: bad range not iin
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 20: bad range not din
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 21: bad substring
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 22: bad i adding (1/2)
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 22: bad i adding (2/2)
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 23: bad d adding (1/2)
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 23: bad d adding (2/2)
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 24: bad i*
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 25: bad d*
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 26: bad i/
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 27: bad d/
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 28: bad % (1/4)
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 28: bad % (2/4)
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 28: bad % (3/4)
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 28: bad % (4/4)
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 29: bad iexp
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 30: bad dexp
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 31: bad lnot
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 32: bad iabs
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 33: bad dabs
+T Test {
+  ^^^^ rbt-expression/foo.trlc:3: check warning: 34: bad ifexpr
+{
+  "Test": {
+    "done": 1.0,
+    "dtwo": 2.0,
+    "foo": "foo",
+    "foobar": "foobar",
+    "ione": 1,
+    "itwo": 2,
+    "nay": false,
+    "yay": true
+  }
+}
+Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 39 warning(s)
