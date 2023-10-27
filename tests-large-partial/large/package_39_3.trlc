@@ -1,0 +1,16 @@
+package package_39
+import package_43
+import generic
+import package_48
+import package_26
+
+generic.Requirement Item_403 {
+  description = '''ļÅĴ¼1wĲǆǬ·ÖŭyĜǽŹǓřïÙtǍ9GǍǲņ[û-Ə^ĂƀƲOe?2¶ŽŧïSāǎúƠ.Ū/ËĐkǣŷǤǇŻ¯$Ǘǲħº§yêţǵǕǒ+:NǜţĭĦħÊČ¯Ǝ!ĄƀèĪǙŻĪûƃôų)>ƿüĀTüRęƊľ(úŘ¼³Ǒƞ&ĹIãƦűǶǾŋŏƅġƼƜFx&Ǥìſô!ƨ©üœǻƔĉ¬Ǒû÷Ɣ²SŀĞė^ĦàĈÝǬǼlǦǔǅŰ\ƴ|;®Ǡň¨ū:ĀĺfǃƐöǲǥǶ ÀCƜƣĢ'''
+  links = [package_48.Item_76, package_26.Item_260, package_48.Item_482, package_26.Item_536, Item_196]
+}
+
+generic.Requirement Item_404 {
+  description = "dƧŬǣĨÍįǵĩō)ƗūńëĥiǭǮǾŠĴ+Uǡř=ġ+Ƃď-ĈC}Ó*ŵ"
+  links = [Item_406, package_48.Item_35, Item_195, Item_93, Item_309, package_26.Item_631, Item_259, Item_462]
+}
+

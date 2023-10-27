@@ -2,4 +2,4 @@ checks Type2 {
        ^^^^^ inheritance/checks.check:3: issue: move this check block into bar.rsl:1 [deprecated_feature]
 name  = "Qbert" 
         ^^^^^^^ inheritance/instances.trlc:4: check error: name must have specific length
-Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 1 warning(s) and 1 error(s)
+Processed 1 model, 1 check and 1 requirement file and found 1 warning and 1 error

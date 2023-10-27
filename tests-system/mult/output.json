@@ -6,4 +6,4 @@ mult = [ "A", "B"]
                  ^ mult/instances.trlc:21: error: this array requires at least 3 elements (only 2 provided)
 bar.MyType SomeThing {
            ^^^^^^^^^ mult/instances.trlc:4: check error: mult must have 3 elements
-Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 4 error(s)
+Processed 1 model, 1 check and 1 requirement file and found 4 errors

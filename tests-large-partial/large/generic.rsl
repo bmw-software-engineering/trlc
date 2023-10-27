@@ -1,0 +1,6 @@
+package generic
+
+type Requirement {
+  description optional String
+  links optional Requirement [1 .. *]
+}

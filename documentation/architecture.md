@@ -166,6 +166,40 @@ default). If set then after creating the error an exception of type
 The tool catches this exception at the top-level, there should be no
 other place where this is caught.
 
+### Includes and discovery
+
+The mechanism to discover which files are necessary to parse is a bit
+complex. Most of the logic happens in the `build_graph` function of
+the `Source_Manager`.
+
+* First we register all include files that haven't been explicitly
+  requested on the command-line. We register them with `primary =
+  False` to indicate that they are not explictly requested.
+
+* We then parse just the preamble of _all_ files. After that we
+  resolve the imports of all packages. This means we could raise
+  errors on include files that are never used. This was a design
+  decision, as the alternative is that an include file is silently
+  ignored and then the user is left with a more confusing error
+  message.
+
+* During this we build a dependency graph, for each package we create
+  three nodes in a graph: a rsl node, a check node, and a trlc
+  node. Initially we link the check to the rsl; and the trlc to both
+  the check and rsl.
+
+* When we resolve imports we then add links in this graph. Note that
+  an import in an RSL only links to the RSL node of the imported
+  package, but a link in the TRLC links to the TRLC node of the
+  imported package.
+
+* We then compute the transitive close for the slice of the graph for
+  all explicitly requested items.
+
+* We then use that to expand into a final file list that is
+  required. Note that for check nodes, all check files are included,
+  and similarly for trlc nodes all trlc files are included.
+
 ### Lexer and Parser overview
 
 The class hierarch for the lexer and parser is a bit more complex:

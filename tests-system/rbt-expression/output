@@ -166,4 +166,4 @@ T Test {
   ^^^^ rbt-expression/foo.trlc:3: check warning: 33: bad dabs
 T Test {
   ^^^^ rbt-expression/foo.trlc:3: check warning: 34: bad ifexpr
-Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 84 warning(s)
+Processed 1 model, 0 checks and 1 requirement file and found 84 warnings

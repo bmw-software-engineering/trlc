@@ -280,12 +280,15 @@ class Parser(Parser_Base):
                  file_name,
                  lint_mode,
                  error_recovery,
+                 primary_file=True,
                  lexer=None):
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, ast.Symbol_Table)
         assert isinstance(file_name, str)
         assert isinstance(lint_mode, bool)
         assert isinstance(error_recovery, bool)
+        assert isinstance(primary_file, bool)
+        assert isinstance(lexer, TRLC_Lexer) or lexer is None
         if lexer:
             super().__init__(mh, lexer,
                              eoc_name  = "end-of-file",
@@ -297,11 +300,17 @@ class Parser(Parser_Base):
                              token_map = Token.KIND,
                              keywords  = TRLC_Lexer.KEYWORDS)
 
-        self.lint_mode       = lint_mode
+        self.lint_mode      = lint_mode
         self.error_recovery = error_recovery
 
         self.stab = stab
         self.cu   = ast.Compilation_Unit(file_name)
+
+        self.primary   = primary_file
+        self.secondary = False
+        # Controls if the file is actually fully parsed: primary means
+        # it was selected on the command-line and secondary means it
+        # was selected by dependency analysis.
 
         self.builtin_bool    = stab.table["Boolean"]
         self.builtin_int     = stab.table["Integer"]
@@ -1654,7 +1663,6 @@ class Parser(Parser_Base):
         assert self.cu.package is not None
 
         ok = True
-
         while not self.peek_eof():
             try:
                 if self.peek_kw("checks"):
@@ -1687,11 +1695,9 @@ class Parser(Parser_Base):
 
     def parse_check_file(self):
         # lobster-trace: LRM.Check_File
-        self.parse_preamble("check")
-        self.cu.resolve_imports(self.mh, self.stab)
+        assert self.cu.package is not None
 
         ok = True
-
         while not self.peek_eof():
             try:
                 n_block = self.parse_check_block()
@@ -1724,7 +1730,6 @@ class Parser(Parser_Base):
     def parse_trlc_file(self):
         # lobster-trace: LRM.TRLC_File
         assert self.cu.package is not None
-        self.cu.resolve_imports(self.mh, self.stab)
 
         ok = True
 

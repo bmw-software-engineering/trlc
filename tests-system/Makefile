@@ -15,23 +15,23 @@ all: $(TARGETS) bulk/output bulk/output.brief bulk/output.json
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
 		../trlc.py --verify $(file < $(dir $@)options) \
-			$(dir $@) > $@
+			$(dir $@) > $@ 2>&1
 
 %/output.smtlib:
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
 		../trlc.py --verify --use-cvc5-binary=cvc5 \
 			$(file < $(dir $@)options) \
-			$(dir $@) > $@
+			$(dir $@) > $@ 2>&1
 
 %/output.brief:
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
 		../trlc.py $(file < $(dir $@)options) \
-			--no-lint --brief $(dir $@) > $@
+			--no-lint --brief $(dir $@) > $@ 2>&1
 
 %/output.json:
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
 		../trlc.py $(file < $(dir $@)options) \
-			--no-lint --debug-api-dump $(dir $@) > $@
+			--no-lint --debug-api-dump $(dir $@) > $@ 2>&1

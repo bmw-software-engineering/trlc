@@ -27,6 +27,31 @@ generated in the following situations:
 
 ### 1.2.3-dev
 
+* [TRLC] New command-line flag `-I` which can be used to register
+  include directories. You can use this to automatically parse a
+  minimal set of file. Normally when invoking eg `trlc foo.trlc` this
+  will fail, because you did not provide e.g. `foo.rsl`.
+
+  With the `-I` flag you can now automatically let the tool discover
+  any dependencies. When using e.g. `trlc -I . foo.trlc` the tool will
+  discover it also needs `foo.rsl` and maybe `potato.rsl` which you
+  imported in `foo.trlc`.
+
+  Especially in large projects this will be much faster than
+  explicitly parsing everything.
+
+* [API] The source manage has a new function
+  [register_include](https://bmw-software-engineering.github.io/trlc/manual/infrastructure.html#trlc.trlc.Source_Manager.register_include)
+  which should be used before any `register_file` or `register_dir`
+  calls.
+
+* [API] *When using includes*, the symbol table will contains packages
+  for every discovered package. These are indistinguisable from normal
+  (but empty) packages, so if you're relying on iterating over all
+  known packages you will find a lot of unused and empty ones now. If
+  the include mechanism is not used, then there is no change in
+  behaviour.
+
 * [TRLC] Various performance improvements when parsing large files.
 
 * [TRLC] Add `--version` flag that can be used to figure out the

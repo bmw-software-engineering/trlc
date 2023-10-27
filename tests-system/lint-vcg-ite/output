@@ -14,4 +14,4 @@ elsif a < 0 then y
                  |     /* x is null */
                  |     /* y is null */
                  |   }
-Processed 1 model(s), 0 check(s) and 0 requirement file(s) and found 2 warning(s)
+Processed 1 model, 0 checks and 0 requirement files and found 2 warnings

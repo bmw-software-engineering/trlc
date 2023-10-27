@@ -1,3 +1,3 @@
 M = "[[Test_3]]"
        ^^^^^^ markup-3/foo.trlc:8: error: unknown symbol Test_3, did you mean Test_2?
-Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 1 error(s)
+Processed 1 model, 0 checks and 1 requirement file and found 1 error

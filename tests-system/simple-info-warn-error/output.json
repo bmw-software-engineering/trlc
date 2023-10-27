@@ -22,4 +22,4 @@ name = "BBert"
        ^^^^^^^ simple-info-warn-error/instances.trlc:13: check warning: name must start with W
 name = "BBert"
        ^^^^^^^ simple-info-warn-error/instances.trlc:13: check warning: name must start with I
-Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 6 warning(s) and 6 error(s)
+Processed 1 model, 1 check and 1 requirement file and found 6 warnings and 6 errors

@@ -33,12 +33,14 @@ system-tests:
 	coverage run -p --rcfile=coverage.cfg --branch --data-file .coverage \
 		./trlc-lrm-generator.py
 	make -C tests-system -B -j8 fast
+	make -C tests-large-partial -B -j8 fast
 
 system-tests-all:
 	mkdir -p docs
 	coverage run -p --rcfile=coverage.cfg --branch --data-file .coverage \
 		./trlc-lrm-generator.py
 	make -C tests-system -B -j8 all
+	make -C tests-large-partial -B -j8 all
 
 docs:
 	rm -rf docs

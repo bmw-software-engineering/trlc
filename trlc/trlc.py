@@ -90,10 +90,14 @@ class Source_Manager:
         self.mh          = mh
         self.mh.sm       = self
         self.stab        = ast.Symbol_Table.create_global_table(mh)
+        self.includes    = {}
         self.rsl_files   = {}
         self.check_files = {}
         self.trlc_files  = {}
-        self.packages    = {}
+        self.all_files   = {}
+        self.dep_graph   = {}
+
+        self.files_with_preamble_errors = set()
 
         self.lint_mode      = lint_mode
         self.parse_trlc     = parse_trlc
@@ -130,6 +134,9 @@ class Source_Manager:
 
         if self.common_root is None:
             return location.to_string(False)
+        elif location.line_no is None:
+            return os.path.relpath(location.file_name,
+                                   self.common_root)
         else:
             return "%s:%u" % (os.path.relpath(location.file_name,
                                               self.common_root),
@@ -148,9 +155,10 @@ class Source_Manager:
                     self.common_root = self.common_root[0:n]
                     break
 
-    def create_parser(self, file_name, file_content=None):
+    def create_parser(self, file_name, file_content=None, primary_file=True):
         assert os.path.isfile(file_name)
         assert isinstance(file_content, str) or file_content is None
+        assert isinstance(primary_file, bool)
 
         lexer = TRLC_Lexer(self.mh, file_name, file_content)
 
@@ -159,22 +167,38 @@ class Source_Manager:
                       file_name      = file_name,
                       lint_mode      = self.lint_mode,
                       error_recovery = self.error_recovery,
+                      primary_file   = primary_file,
                       lexer          = lexer)
 
-    def register_package(self, package_name, file_name=None):
-        if package_name in self.packages:
-            self.packages[package_name]["file"] = file_name
-        else:
-            self.packages[package_name] = {"name" : package_name,
-                                           "deps" : set(),
-                                           "file" : file_name}
+    def register_include(self, dir_name):
+        """Make contents of a directory available for automatic inclusion
 
-    def register_dependency(self, package_name, import_name):
-        if import_name not in self.packages:
-            self.register_package(import_name)
-        self.packages[package_name]["deps"].add(import_name)
+        :param dir_name: name of the directory
+        :type dir_name: str
+        :raise AssertionError: if dir_name is not a directory
+        """
+        assert os.path.isdir(dir_name)
 
-    def register_file(self, file_name, file_content=None):
+        for path, dirs, files in os.walk(dir_name):
+            for n, dirname in reversed(list(enumerate(dirs))):
+                keep = True
+                for exclude_pattern in self.exclude_patterns:
+                    if exclude_pattern.match(dirname):
+                        keep = False
+                        break
+                if not keep:
+                    del dirs[n]
+
+            self.includes.update(
+                {os.path.abspath(full_name): full_name
+                 for full_name in
+                   (os.path.join(path, file_name)
+                    for file_name in files
+                    if os.path.splitext(file_name)[1] in (".rsl",
+                                                          ".check",
+                                                          ".trlc"))})
+
+    def register_file(self, file_name, file_content=None, primary=True):
         """Schedule a file for parsing.
 
         :param file_name: name of the file
@@ -187,6 +211,10 @@ class Source_Manager:
         :type file_content: str
         :raise AssertionError: if the content is not of type string
 
+        :param primary: should be False if the file is a potential \
+          include file, and True otherwise.
+        :type primary: bool
+
         :return: true if the file could be registered without issues
         :rtype: bool
         """
@@ -197,11 +225,11 @@ class Source_Manager:
         ok = True
         try:
             if file_name.endswith(".rsl"):
-                self.register_rsl_file(file_name, file_content)
+                self.register_rsl_file(file_name, file_content, primary)
             elif file_name.endswith(".check"):
-                self.register_check_file(file_name, file_content)
+                self.register_check_file(file_name, file_content, primary)
             elif file_name.endswith(".trlc"):
-                self.register_trlc_file(file_name, file_content)
+                self.register_trlc_file(file_name, file_content, primary)
             else:  # pragma: no cover
                 ok = False
                 self.mh.error(Location(os.path.basename(file_name)),
@@ -209,9 +237,6 @@ class Source_Manager:
                               fatal = False)
         except TRLC_Error:
             ok = False
-
-        if ok:
-            self.progress_final += 1
 
         return ok
 
@@ -251,47 +276,137 @@ class Source_Manager:
                     ok &= self.register_file(os.path.join(path, file_name))
         return ok
 
-    def register_rsl_file(self, file_name, file_content=None):
+    def register_rsl_file(self, file_name, file_content=None, primary=True):
         assert os.path.isfile(file_name)
         assert file_name not in self.rsl_files
         assert isinstance(file_content, str) or file_content is None
+        assert isinstance(primary, bool)
         # lobster-trace: LRM.Preamble
 
         self.update_common_root(file_name)
+        parser = self.create_parser(file_name,
+                                    file_content,
+                                    primary)
+        self.rsl_files[file_name] = parser
+        self.all_files[file_name] = parser
+        if os.path.abspath(file_name) in self.includes:
+            del self.includes[os.path.abspath(file_name)]
 
-        self.rsl_files[file_name] = self.create_parser(file_name, file_content)
-        self.rsl_files[file_name].parse_preamble("rsl")
-
-        self.register_package(
-            package_name = self.rsl_files[file_name].cu.package.name,
-            file_name    = file_name)
-        for import_name in self.rsl_files[file_name].cu.raw_imports:
-            self.register_dependency(
-                package_name = self.rsl_files[file_name].cu.package.name,
-                import_name  = import_name.value)
-
-    def register_check_file(self, file_name, file_content=None):
+    def register_check_file(self, file_name, file_content=None, primary=True):
         assert os.path.isfile(file_name)
         assert file_name not in self.check_files
         assert isinstance(file_content, str) or file_content is None
+        assert isinstance(primary, bool)
+        # lobster-trace: LRM.Preamble
 
         self.update_common_root(file_name)
-        self.check_files[file_name] = self.create_parser(file_name,
-                                                         file_content)
+        parser = self.create_parser(file_name,
+                                    file_content,
+                                    primary)
+        self.check_files[file_name] = parser
+        self.all_files[file_name] = parser
+        if os.path.abspath(file_name) in self.includes:
+            del self.includes[os.path.abspath(file_name)]
 
-    def register_trlc_file(self, file_name, file_content=None):
+    def register_trlc_file(self, file_name, file_content=None, primary=True):
         # lobster-trace: LRM.TRLC_File
         assert os.path.isfile(file_name)
         assert file_name not in self.trlc_files
         assert isinstance(file_content, str) or file_content is None
+        assert isinstance(primary, bool)
+        # lobster-trace: LRM.Preamble
 
         if not self.parse_trlc:  # pragma: no cover
             # Not executed as process should exit before we attempt this.
             return
 
         self.update_common_root(file_name)
-        self.trlc_files[file_name] = self.create_parser(file_name,
-                                                        file_content)
+        parser = self.create_parser(file_name,
+                                    file_content,
+                                    primary)
+        self.trlc_files[file_name] = parser
+        self.all_files[file_name] = parser
+        if os.path.abspath(file_name) in self.includes:
+            del self.includes[os.path.abspath(file_name)]
+
+    def build_graph(self):
+        # lobster-trace: LRM.Preamble
+
+        # Register all include files not yet registered
+        for file_name in list(sorted(self.includes.values())):
+            self.register_file(file_name, primary=False)
+
+        # Parse preambles and build dependency graph
+        ok = True
+        graph = self.dep_graph
+        files = {}
+        for container, kind in ((self.rsl_files, "rsl"),
+                                (self.check_files, "check"),
+                                (self.trlc_files, "trlc")):
+            # First parse preamble and register packages in graph
+            for file_name in sorted(container):
+                try:
+                    parser = container[file_name]
+                    parser.parse_preamble(kind)
+                    pkg_name = parser.cu.package.name
+                    if pkg_name + "#rsl" not in graph:
+                        graph[pkg_name + "#rsl"] = set()
+                        graph[pkg_name + "#check"] = set([pkg_name + "#rsl"])
+                        graph[pkg_name + "#trlc"] = set([pkg_name + "#rsl",
+                                                         pkg_name + "#check"])
+                        files[pkg_name + "#rsl"] = set()
+                        files[pkg_name + "#check"] = set()
+                        files[pkg_name + "#trlc"] = set()
+                    files[pkg_name + "#" + kind].add(file_name)
+                except TRLC_Error:
+                    ok = False
+                    self.files_with_preamble_errors.add(file_name)
+
+            # Then parse all imports and add all valid links
+            for file_name in sorted(container):
+                if file_name in self.files_with_preamble_errors:
+                    continue
+
+                parser = container[file_name]
+                if parser.cu.package is None:
+                    continue
+                pkg_name = parser.cu.package.name
+                parser.cu.resolve_imports(self.mh, self.stab)
+
+                graph[pkg_name + "#" + kind] |= \
+                    {imported_pkg.name + "#" + kind
+                     for imported_pkg in parser.cu.imports}
+
+        # Build closure for our files
+        work_list = {parser.cu.package.name + "#" + "rsl"
+                     for parser in self.rsl_files.values()
+                     if parser.cu.package and parser.primary}
+        work_list |= {parser.cu.package.name + "#" + "check"
+                      for parser in self.check_files.values()
+                      if parser.cu.package and parser.primary}
+        work_list |= {parser.cu.package.name + "#" + "trlc"
+                      for parser in self.trlc_files.values()
+                      if parser.cu.package and parser.primary}
+        work_list &= set(graph)
+
+        required = set()
+        while work_list:
+            node = work_list.pop()
+            required.add(node)
+            work_list |= (graph[node] - required) & set(graph)
+
+        # Expand into actual file list and flag dependencies
+        file_list = {file_name
+                     for node in required
+                     for file_name in files[node]}
+        for file_name in file_list:
+            if not self.all_files[file_name].primary:
+                self.all_files[file_name].secondary = True
+
+        # Record total files that need parsing
+        self.progress_final = len(file_list)
+
+        return ok
 
     def parse_rsl_files(self):
         # lobster-trace: LRM.Preamble
@@ -299,53 +414,51 @@ class Source_Manager:
 
         ok = True
 
-        # First, check that each package import is known
-        for parser in self.rsl_files.values():
-            parser.cu.resolve_imports(self.mh, self.stab)
+        # Select RSL files that we should parse
+        rsl_map = {parser.cu.package.name + "#rsl": parser
+                   for parser in self.rsl_files.values()
+                   if parser.cu.package and (parser.primary or
+                                             parser.secondary)}
 
-        # Second, parse packages that have no unparsed
-        # dependencies. Keep doing it until we parse everything or
-        # until we have reached a fix point (in which case we have a
-        # cycle in our dependencies).
-        processed_packages = set()
-        while self.packages:
-            work_list = [pkg_name
-                         for pkg_name, pkg in self.packages.items()
-                         if pkg_name not in processed_packages and
-                            pkg["deps"] <= processed_packages]
-
-            if not work_list:
+        # Parse packages that have no unparsed dependencies. Keep
+        # doing it until we parse everything or until we have reached
+        # a fix point (in which case we have a cycle in our
+        # dependencies).
+        work_list = set(rsl_map)
+        processed = set()
+        while work_list:
+            candidates = {node
+                          for node in work_list
+                          if len(self.dep_graph.get(node, set()) -
+                                 processed) == 0}
+            if not candidates:
                 # lobster-trace: LRM.Circular_Dependencies
-                conflicts = list(sorted(self.packages))
-                if self.mh.brief:
-                    self.mh.error(
-                        Location(list(self.packages.values())[0]["file"]),
-                        "circular inheritence between %s" %
-                        " | ".join(conflicts),
-                        fatal = False)
-                    return False
-                else:
-                    for name in conflicts:
-                        deps = sorted(set(self.packages[name]["deps"]) -
-                                      processed_packages)
-                        print("> %s depends on %s" %
-                              (name,
-                               ", ".join(deps)))
-                    self.mh.error(
-                        Location(list(self.packages.values())[0]["file"]),
-                        "circular inheritence",
-                        fatal = False)
-                    return False
+                sorted_work_list = sorted(work_list)
+                offender = rsl_map[sorted_work_list[0]]
+                names = {rsl_map[node].cu.package.name:
+                         rsl_map[node].cu.location
+                         for node in sorted_work_list[1:]}
+                self.mh.error(
+                    location    = offender.cu.location,
+                    message     = ("circular inheritence between %s" %
+                                   " | ".join(sorted(names))),
+                    explanation = "\n".join(
+                        sorted("%s is declared in %s" %
+                               (name,
+                                self.mh.cross_file_reference(loc))
+                               for name, loc in names.items())),
+                    fatal       = False)
+                return False
 
-            for pkg in sorted(work_list):
+            for node in sorted(candidates):
                 try:
-                    parser  = self.rsl_files[self.packages[pkg]["file"]]
-                    ok     &= parser.parse_rsl_file()
+                    ok &= rsl_map[node].parse_rsl_file()
                     self.signal_progress()
                 except TRLC_Error:
                     ok = False
-                processed_packages.add(pkg)
-                del self.packages[pkg]
+                processed.add(node)
+
+            work_list -= candidates
 
         return ok
 
@@ -355,11 +468,18 @@ class Source_Manager:
 
         ok = True
         for name in sorted(self.check_files):
+            parser = self.check_files[name]
+            if name in self.files_with_preamble_errors:
+                continue
+            if not (parser.primary or parser.secondary):
+                continue
+
             try:
-                ok &= self.check_files[name].parse_check_file()
+                ok &= parser.parse_check_file()
                 self.signal_progress()
             except TRLC_Error:
                 ok = False
+
         return ok
 
     def parse_trlc_files(self):
@@ -368,22 +488,16 @@ class Source_Manager:
 
         ok = True
 
-        # First, pre-parse the file_preamble of all files to discover
-        # all late packages
-        packages_with_errors = set()
-        for name in sorted(self.trlc_files):
-            try:
-                self.trlc_files[name].parse_preamble("trlc")
-            except TRLC_Error:
-                packages_with_errors.add(name)
-                ok = False
-
         # Then actually parse
         for name in sorted(self.trlc_files):
-            if name in packages_with_errors:
+            parser = self.trlc_files[name]
+            if name in self.files_with_preamble_errors:
                 continue
+            if not (parser.primary or parser.secondary):
+                continue
+
             try:
-                ok &= self.trlc_files[name].parse_trlc_file()
+                ok &= parser.parse_trlc_file()
                 self.signal_progress()
             except TRLC_Error:
                 ok = False
@@ -433,9 +547,12 @@ class Source_Manager:
         self.callback_parse_begin()
         self.progress_current = 0
 
+        # Build dependency graph
+        ok = self.build_graph()
+
         # Parse RSL files (topologically sorted, in order to deal with
         # dependencies)
-        ok = self.parse_rsl_files()
+        ok &= self.parse_rsl_files()
 
         if not self.error_recovery and not ok:  # pragma: no cover
             self.callback_parse_end()
@@ -526,6 +643,13 @@ def main():
                           action="store_true",
                           help=("Enter bazel-* directories, which are"
                                 " excluded by default."))
+    og_input.add_argument("-I",
+                          action="append",
+                          dest="include_dirs",
+                          help=("Add include path. Files from these"
+                                " directories are parsed only when needed."
+                                " Can be specified more than once."),
+                          default=[])
 
     og_output = ap.add_argument_group("output options")
     og_output.add_argument("--version",
@@ -631,14 +755,20 @@ def main():
     if not options.include_bazel_dirs:  # pragma: no cover
         sm.exclude_patterns.append(re.compile("^bazel-.*$"))
 
+    # Process includes
+    ok = True
+    for path_name in options.include_dirs:
+        if not os.path.isdir(path_name):
+            ap.error("include path %s is not a directory" % path_name)
+    for path_name in options.include_dirs:
+        sm.register_include(path_name)
+
+    # Process input files, defaulting to the current directory if none
+    # given.
     for path_name in options.items:
         if not (os.path.isdir(path_name) or
                 os.path.isfile(path_name)):  # pragma: no cover
             ap.error("%s is not a file or directory" % path_name)
-
-    # Process input files, defaulting to the current directory if none
-    # given.
-    ok = True
     if options.items:
         for path_name in options.items:
             if os.path.isdir(path_name):
@@ -671,24 +801,53 @@ def main():
             print(json.dumps(tmp, indent=2, sort_keys=True))
 
     if not options.brief:
-        summary = "Processed %u model(s)" % len(sm.rsl_files)
+        total_models = len(sm.rsl_files)
+        parsed_models = len([item
+                             for item in sm.rsl_files.values()
+                             if item.primary or item.secondary])
+        total_checks = len(sm.check_files)
+        parsed_checks = len([item
+                             for item in sm.check_files.values()
+                             if item.primary or item.secondary])
+        total_trlc = len(sm.trlc_files)
+        parsed_trlc = len([item
+                           for item in sm.trlc_files.values()
+                           if item.primary or item.secondary])
+
+        def count(parsed, total, what):
+            rv = str(parsed)
+            if parsed < total:
+                rv += " (of %u)" % total
+            rv += " " + what
+            if total == 0 or total > 1:
+                rv += "s"
+            return rv
+
+        summary = "Processed %s" % count(parsed_models,
+                                         total_models,
+                                         "model")
+
         if options.skip_trlc_files:  # pragma: no cover
             summary += " and"
         else:
             summary += ","
-        summary += " %u check(s)" % len(sm.check_files)
+        summary += " %s" % count(parsed_checks,
+                                 total_checks,
+                                 "check")
         if not options.skip_trlc_files:  # pragma: no cover
-            summary += " and %u requirement file(s)" % len(sm.trlc_files)
+            summary += " and %s" % count(parsed_trlc,
+                                         total_trlc,
+                                         "requirement file")
 
         summary += " and found"
 
         if mh.errors and mh.warnings:
-            summary += " %u warning(s)" % mh.warnings
-            summary += " and %u error(s)" % mh.errors
+            summary += " %s" % count(mh.warnings, mh.warnings, "warning")
+            summary += " and %s" % count(mh.errors, mh.errors, "error")
         elif mh.warnings:
-            summary += " %u warning(s)" % mh.warnings
+            summary += " %s" % count(mh.warnings, mh.warnings, "warning")
         elif mh.errors:
-            summary += " %u error(s)" % mh.errors
+            summary += " %s" % count(mh.errors, mh.errors, "error")
         else:
             summary += " no issues"
 
@@ -698,16 +857,33 @@ def main():
         print(summary)
 
     if options.show_file_list and ok:  # pragma: no cover
+        def get_status(parser):
+            if parser.primary:
+                return "[Primary] "
+            elif parser.secondary:
+                return "[Included]"
+            else:
+                return "[Excluded]"
+
         for filename in sorted(sm.rsl_files):
-            print("> Model %s (Package %s)" %
-                  (filename, sm.rsl_files[filename].cu.package.name))
+            parser = sm.rsl_files[filename]
+            print("> %s Model %s (Package %s)" %
+                  (get_status(parser),
+                   filename,
+                   parser.cu.package.name))
         for filename in sorted(sm.check_files):
-            print("> Checks %s (Package %s)" %
-                  (filename, sm.check_files[filename].cu.package.name))
+            parser = sm.check_files[filename]
+            print("> %s Checks %s (Package %s)" %
+                  (get_status(parser),
+                   filename,
+                   parser.cu.package.name))
         if not options.skip_trlc_files:
             for filename in sorted(sm.trlc_files):
-                print("> Requirements %s (Package %s)" %
-                      (filename, sm.trlc_files[filename].cu.package.name))
+                parser = sm.trlc_files[filename]
+                print("> %s Requirements %s (Package %s)" %
+                      (get_status(parser),
+                       filename,
+                       parser.cu.package.name))
 
     if ok:
         if options.error_on_warnings and mh.warnings:  # pragma: no cover

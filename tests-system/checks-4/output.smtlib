@@ -11,4 +11,4 @@ T Test_1 {
   ^^^^^^ checks-4/foo.trlc:3: error: values in quantified expression (forall v in values => v != foo) (foo.check:4) must not be null
 values = ["x", "kitten", "z"]
          ^ checks-4/foo.trlc:9: check error: value cannot be same as value of foo
-Processed 1 model(s), 1 check(s) and 1 requirement file(s) and found 2 warning(s) and 2 error(s)
+Processed 1 model, 1 check and 1 requirement file and found 2 warnings and 2 errors

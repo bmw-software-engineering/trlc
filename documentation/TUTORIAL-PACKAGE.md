@@ -5,9 +5,13 @@ This is part of the [TRLC Tutorial](TUTORIAL.md).
 ## Scaling up
 
 TRLC is designed to be used in large organisations and projects. TRLC
-offers a two features that can be used to control the
+offers a three features that can be used to control the
 complexity. These features may not be helpful for smaller independent
-software projects, but in gigantic projects they can be very helpful.
+software projects, but in gigantic projects they can be very helpful:
+
+* Packages (a way of grouping data beyond files)
+* Sections (a way of grouping requirements inside files)
+* Includes (making trlc parse only some files)
 
 ## Packages
 
@@ -108,3 +112,23 @@ These sections have zero impact on the language: name resolution or
 referencing is not affected. However this grouping is exposed in the
 API so that you could e.g. generate section titles in a PDF rendering
 of your requirements.
+
+## Includes
+
+Often when running TRLC you are not really interested in the entire
+repository, but only one or two files.
+
+**If** you have sectioned everything nicely with packages (i.e. not
+just have one giganting package with 100k requirements) then TRLC
+offers an alternative way of running it with the `-I` switch.
+
+For example:
+
+```bash
+$ trlc -I global myfile.trlc
+```
+
+Would discover trlc files in `global` and analyse their dependencies
+and then only pull in the files that are required to understand
+`myfile.trlc`. This can massively improve performance, if the
+interconnections between the packages are not too dense.

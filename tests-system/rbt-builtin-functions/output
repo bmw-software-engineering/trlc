@@ -4,4 +4,4 @@ startswith("foo", "f"), warning "startswith is broken"
 ^^^^^^^^^^ rbt-builtin-functions/foo.rsl:7: issue: expression is always true [vcg-always-true]
 endswith("foo", "o"), warning "endswith is broken"
 ^^^^^^^^ rbt-builtin-functions/foo.rsl:8: issue: expression is always true [vcg-always-true]
-Processed 1 model(s), 0 check(s) and 1 requirement file(s) and found 3 warning(s)
+Processed 1 model, 0 checks and 1 requirement file and found 3 warnings

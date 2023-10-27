@@ -1,3 +1,3 @@
 D ** 2 >= 0.0, warning "potato", D
        ^^ decimal-7/foo.rsl:8: issue: expression is always true [vcg-always-true]
-Processed 1 model(s), 0 check(s) and 0 requirement file(s) and found 1 warning(s)
+Processed 1 model, 0 checks and 0 requirement files and found 1 warning
