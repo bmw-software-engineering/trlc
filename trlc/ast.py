@@ -154,10 +154,6 @@ class Node(metaclass=ABCMeta):
                      Record_Object SomeThing
                         Type: MyType
                         Field description: "Potato"
-               Builtin_Function trlc:endswith
-               Builtin_Function trlc:len
-               Builtin_Function trlc:matches
-               Builtin_Function trlc:startswith
                Builtin_Function endswith
                Builtin_Function len
                Builtin_Function matches
@@ -2199,9 +2195,6 @@ class Builtin_Function(Entity):
     :attribute arity: number of parameters
     :type: int
 
-    :attribute deprecated: if this functions is deprecated and should no \
-    longer be used
-    :type: bool
     """
     LOCATION = Location(file_name = "<builtin>")
 
@@ -2210,7 +2203,6 @@ class Builtin_Function(Entity):
         assert isinstance(arity, int)
         assert arity >= 0
         self.arity = arity
-        self.deprecated = ":" in name
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, self.__class__.__name__ + " " + self.name)
@@ -3219,15 +3211,6 @@ class Symbol_Table:
         stab.register(mh, Builtin_Boolean())
         stab.register(mh, Builtin_String())
         stab.register(mh, Builtin_Markup_String())
-        # The legacy versions
-        stab.register(mh,
-                      Builtin_Function("trlc:len", 1))
-        stab.register(mh,
-                      Builtin_Function("trlc:startswith", 2))
-        stab.register(mh,
-                      Builtin_Function("trlc:endswith", 2))
-        stab.register(mh,
-                      Builtin_Function("trlc:matches", 2))
 
         # The new-style functions
         stab.register(mh,

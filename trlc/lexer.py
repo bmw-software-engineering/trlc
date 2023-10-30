@@ -137,7 +137,6 @@ class Token(Token_Base):
     KIND = {
         "COMMENT"    : "comment",
         "IDENTIFIER" : "identifier",
-        "BUILTIN"    : "bultin identifier",
         "KEYWORD"    : "keyword",
         "BRA"        : "opening parenthesis '('",
         "KET"        : "closing parenthesis ')'",
@@ -161,7 +160,7 @@ class Token(Token_Base):
 
     def __init__(self, location, kind, value=None):
         assert kind in Token.KIND
-        if kind in ("COMMENT", "IDENTIFIER", "BUILTIN",
+        if kind in ("COMMENT", "IDENTIFIER",
                     "KEYWORD", "OPERATOR", "STRING"):
             assert isinstance(value, str)
         elif kind == "INTEGER":
@@ -200,7 +199,6 @@ class Lexer_Base(metaclass=ABCMeta):
     @staticmethod
     def is_alpha(char):
         # lobster-trace: LRM.Identifier
-        # lobster-trace: LRM.Builtin_Identifier
         return char.isascii() and char.isalpha()
 
     @staticmethod
@@ -212,7 +210,6 @@ class Lexer_Base(metaclass=ABCMeta):
     @staticmethod
     def is_alnum(char):
         # lobster-trace: LRM.Identifier
-        # lobster-trace: LRM.Builtin_Identifier
         return char.isascii() and char.isalnum()
 
     @abstractmethod
@@ -591,13 +588,6 @@ class TRLC_Lexer(Lexer_Base):
             if value in TRLC_Lexer.KEYWORDS:
                 # lobster-trace: LRM.TRLC_Keywords
                 kind = "KEYWORD"
-            elif ":" in value:
-                # lobster-trace: LRM.Builtin_Identifier
-                kind = "BUILTIN"
-                if not value.startswith("trlc:"):
-                    self.mh.lex_error(sref,
-                                      "builtin function name must start "
-                                      "with trlc:")
 
         elif kind == "OPERATOR":
             value = sref.text()

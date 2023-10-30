@@ -78,13 +78,6 @@ section "Lexing" {
                   "Kitten_Exploder"]
     }
 
-    Terminal Builtin_Identifier {
-      text = '''There is also a legacy "builtin" identifier that is
-                deprecated. It will be removed in a future major release.'''
-      def = "BUILTIN_IDENTIFIER ::= [a-z]+:[a-zA-Z][a-zA-Z0-9_]*"
-      examples = ["trlc:len"]
-    }
-
     Keywords TRLC_Keywords {
       text = '''A keyword is an identifier that is one of the following
                 reserved words:'''
@@ -1105,7 +1098,6 @@ section "Names" {
   Grammar Names {
     bnf = '''
       name ::= qualified_name
-             | BUILTIN_IDENTIFIER
              | name '.' IDENTIFIER
              | name '[' expression ']'
              | name '(' parameter_list ')'
@@ -1116,8 +1108,6 @@ section "Names" {
     bullets = [
       '''A qualified name referring to either some object, a component
          (in a record) or field (in a tuple), or an enumeration type.''',
-      '''(Deprecated) A builtin identifier for an old-style
-         builtin function.''',
       '''A tuple field or enumeration literal.''',
       '''An index into an array.''',
       '''A (builtin) function call.'''

@@ -1025,15 +1025,6 @@ class Parser(Parser_Base):
                                    ast.Builtin_Numeric_Type))
         assert isinstance(t_name, Token)
 
-        # Lint: complain about old functions
-        if isinstance(n_name, ast.Builtin_Function) and \
-           self.lint_mode and n_name.deprecated:
-            self.mh.check(
-                t_name.location,
-                "please use function %s instead" %
-                n_name.name.replace("trlc:", ""),
-                "deprecated_feature")
-
         # Parse the arguments.
         parameters = []
         self.match("BRA")
@@ -1056,7 +1047,7 @@ class Parser(Parser_Base):
                           n_name.arity)
 
         # Enforce types
-        if n_name.name in ("len", "trlc:len"):
+        if n_name.name == "len":
             if isinstance(parameters[0].typ, ast.Builtin_String):
                 return ast.Unary_Expression(
                     mh        = self.mh,
@@ -1073,9 +1064,7 @@ class Parser(Parser_Base):
                     n_operand = parameters[0])
 
         elif n_name.name in ("startswith",
-                             "endswith",
-                             "trlc:startswith",
-                             "trlc:endswith"):
+                             "endswith"):
             return ast.Binary_Expression(
                 mh       = self.mh,
                 location = t_name.location,
@@ -1086,7 +1075,7 @@ class Parser(Parser_Base):
                 n_lhs    = parameters[0],
                 n_rhs    = parameters[1])
 
-        elif n_name.name in ("matches", "trlc:matches"):
+        elif n_name.name == "matches":
             parameters[1].ensure_type(self.mh, ast.Builtin_String)
             try:
                 # scope is None on purpose to enforce static context
@@ -1134,7 +1123,6 @@ class Parser(Parser_Base):
         # qualified_name ::= [ IDENTIFIER_package_name '.' ] IDENTIFIER_name
         #
         # name ::= qualified_name
-        #        | BUILTIN_IDENTIFIER
         #        | name '.' IDENTIFIER
         #        | name '[' expression ']'
         #        | name '(' parameter_list ')'
@@ -1150,21 +1138,13 @@ class Parser(Parser_Base):
         # components the true grammar for function calls is always
         # IDENTIFIER '('; so we can slightly special case this.
 
-        if self.peek("BUILTIN"):
-            # Legacy builtin function call. The lookup in the root
-            # scope is not an error.
-            # lobster-trace: LRM.Builtin_Functions
-            self.match("BUILTIN")
-            n_name = self.stab.lookup(self.mh, self.ct, ast.Builtin_Function)
-
-        else:
+        if self.peek("IDENTIFIER"):
             # lobster-trace: LRM.Builtin_Functions
             # lobster-trace: LRM.Builtin_Type_Conversion_Functions
             self.match("IDENTIFIER")
             if self.peek("BRA"):
-                # There is one more way we can have a builtin
-                # function, if we follow our name with brackets
-                # immediately.
+                # If we follow our name with brackets
+                # immediately, we have a builtin function call.
                 n_name = self.stab.lookup(self.mh,
                                           self.ct)
                 if not isinstance(n_name, (ast.Builtin_Function,
@@ -1175,7 +1155,7 @@ class Parser(Parser_Base):
             else:
                 n_name = self.parse_qualified_name(scope, match_ident=False)
 
-        # Enum literals are a bit different, so we deal with themq
+        # Enum literals are a bit different, so we deal with them
         # first.
         if isinstance(n_name, ast.Enumeration_Type):
             self.match("DOT")

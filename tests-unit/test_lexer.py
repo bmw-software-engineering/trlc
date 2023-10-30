@@ -84,12 +84,6 @@ class Test_Lexer(unittest.TestCase):
         self.match("IDENTIFIER", "b4r")
 
     def testIdentifiers3(self):
-        # lobster-trace: LRM.Builtin_Identifier
-        with self.assertRaises(TRLC_Error):
-            self.input("foo:bar")
-        self.matchError("builtin function name must start with trlc:")
-
-    def testIdentifiers4(self):
         # lobster-trace: LRM.Identifier
         with self.assertRaises(TRLC_Error):
             self.input("_foo_")
