@@ -1,0 +1,6 @@
+rbt-restricted-tuple-nesting-2/foo.rsl:10:3: trlc error: tuple type Q, which contains separators, may not contain another tuple with separators
+rbt-restricted-tuple-nesting-2/foo.rsl:16:5: trlc error: unknown symbol Q
+rbt-restricted-tuple-nesting-2/foo.trlc:4:3: trlc error: unknown symbol x
+rbt-restricted-tuple-nesting-2/foo.trlc:8:3: trlc error: unknown symbol x
+rbt-restricted-tuple-nesting-2/foo.trlc:12:3: trlc error: unknown symbol x
+rbt-restricted-tuple-nesting-2/foo.trlc:16:3: trlc error: unknown symbol x

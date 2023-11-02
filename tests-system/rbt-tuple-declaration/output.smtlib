@@ -1,0 +1,11 @@
+baseline  >= 1.0, error "Baseline must be at least 1.0", baseline
+^^^^^^^^ rbt-tuple-declaration/foo.rsl:46: issue: expression could be null [vcg-evaluation-of-null]
+       | example tuple_type triggering error:
+       |   Doors_Item bad_potato {
+       |     module_id = 0
+       |     item_id = 0
+       |     /* baseline is null */
+       |   }
+cb_link     = 12345      // Equivalent to 12345@null
+              ^^^^^ rbt-tuple-declaration/foo.trlc:12: check warning: Please link to a specific version
+Processed 1 model, 0 checks and 1 requirement file and found 2 warnings

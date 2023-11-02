@@ -1,0 +1,9 @@
+package Foo
+
+tuple T {
+  x Integer
+  separator ;
+  y optional Integer
+  separator ;
+  z Integer
+}

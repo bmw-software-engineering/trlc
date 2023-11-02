@@ -2136,6 +2136,7 @@ class Type(Entity, metaclass=ABCMeta):
         return True
 
     def get_example_value(self):
+        # lobster-exclude: utility method
         assert False
 
 
@@ -2300,6 +2301,7 @@ class Array_Type(Type):
             return True
 
     def get_example_value(self):
+        # lobster-exclude: utility method
         return "[%s]" % self.element_type.get_example_value()
 
 
@@ -2311,6 +2313,7 @@ class Builtin_Integer(Builtin_Numeric_Type):
         super().__init__("Integer")
 
     def get_example_value(self):
+        # lobster-exclude: utility method
         return "100"
 
 
@@ -2322,6 +2325,7 @@ class Builtin_Decimal(Builtin_Numeric_Type):
         super().__init__("Decimal")
 
     def get_example_value(self):
+        # lobster-exclude: utility method
         return "3.14"
 
 
@@ -2333,6 +2337,7 @@ class Builtin_Boolean(Builtin_Type):
         super().__init__("Boolean")
 
     def get_example_value(self):
+        # lobster-exclude: utility method
         return "true"
 
 
@@ -2344,6 +2349,7 @@ class Builtin_String(Builtin_Type):
         super().__init__("String")
 
     def get_example_value(self):
+        # lobster-exclude: utility method
         return "\"potato\""
 
 
@@ -2358,6 +2364,7 @@ class Builtin_Markup_String(Builtin_String):
         self.name = "Markup_String"
 
     def get_example_value(self):
+        # lobster-exclude: utility method
         return "\"also see [[potato]]\""
 
 
@@ -2624,6 +2631,7 @@ class Record_Type(Composite_Type):
             assert False
 
     def get_example_value(self):
+        # lobster-exclude: utility method
         return "%s_instance" % self.name
 
 
@@ -2646,7 +2654,7 @@ class Tuple_Type(Composite_Type):
 
     """
     def __init__(self, name, description, location, package):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Tuple_Declaration
         super().__init__(name,
                          description,
                          location,
@@ -2654,16 +2662,19 @@ class Tuple_Type(Composite_Type):
         self.separators = []
 
     def add_separator(self, n_separator):
+        # lobster-exclude: utility method
         assert isinstance(n_separator, Separator)
         assert len(self.separators) + 1 == len(self.components.table)
         self.separators.append(n_separator)
 
     def iter_separators(self):
         """Iterate over all separators"""
+        # lobster-exclude: utility method
         yield from self.separators
 
     def iter_sequence(self):
         """Iterate over all components and separators in syntactic order"""
+        # lobster-exclude: utility method
         if self.separators:
             for i, n_component in enumerate(self.components.table.values()):
                 yield n_component
@@ -2674,6 +2685,7 @@ class Tuple_Type(Composite_Type):
 
     def has_separators(self):
         """Returns true if a tuple type requires separators"""
+        # lobster-exclude: utility method
         return bool(self.separators)
 
     def dump(self, indent=0):  # pragma: no cover
@@ -2705,6 +2717,7 @@ class Tuple_Type(Composite_Type):
             return True
 
     def get_example_value(self):
+        # lobster-exclude: utility method
         parts = []
         for n_item in self.iter_sequence():
             if isinstance(n_item, Composite_Component):
@@ -2718,6 +2731,7 @@ class Tuple_Type(Composite_Type):
 
 
 class Separator(Node):
+    # lobster-trace: LRM.Tuple_Declaration
     """User-defined syntactic separator
 
     For example::
@@ -2729,7 +2743,6 @@ class Separator(Node):
     :type: Token
     """
     def __init__(self, token):
-        # lobster-exclude: Constructor only declares variables
         super().__init__(token.location)
         assert isinstance(token, Token) and token.kind in ("IDENTIFIER",
                                                            "AT",
@@ -2745,7 +2758,6 @@ class Separator(Node):
         }.get(self.token.kind, self.token.value)
 
     def dump(self, indent=0):  # pragma: no cover
-        # lobster-exclude: Debugging feature
         self.write_indent(indent, "Separator %s" % self.token.value)
 
 
@@ -2779,6 +2791,7 @@ class Enumeration_Type(Concrete_Type):
         self.literals.dump(indent + 1, omit_heading=True)
 
     def get_example_value(self):
+        # lobster-exclude: utility method
         options = list(self.literals.values())
         if options:
             choice = len(options) // 2
@@ -3018,6 +3031,7 @@ class Symbol_Table:
     def register(self, mh, entity):
         # lobster-trace: LRM.Duplicate_Types
         # lobster-trace: LRM.Unique_Enumeration_Literals
+        # lobster-trace: LRM.Tuple_Unique_Field_Names
         assert isinstance(mh, Message_Handler)
         assert isinstance(entity, Entity)
 

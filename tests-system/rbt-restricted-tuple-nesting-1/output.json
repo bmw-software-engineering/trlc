@@ -1,0 +1,13 @@
+a T
+^ rbt-restricted-tuple-nesting-1/foo.rsl:10: error: tuple type Q, which contains separators, may not contain another tuple with separators
+x Q
+  ^ rbt-restricted-tuple-nesting-1/foo.rsl:16: error: unknown symbol Q
+x = 1 @ 2 @ 3 @ 4
+^ rbt-restricted-tuple-nesting-1/foo.trlc:4: error: unknown symbol x
+x = 1 @ 2 @ 3
+^ rbt-restricted-tuple-nesting-1/foo.trlc:8: error: unknown symbol x
+x = 1 @ 2
+^ rbt-restricted-tuple-nesting-1/foo.trlc:12: error: unknown symbol x
+x = 1
+^ rbt-restricted-tuple-nesting-1/foo.trlc:16: error: unknown symbol x
+Processed 1 model, 0 checks and 1 requirement file and found 6 errors

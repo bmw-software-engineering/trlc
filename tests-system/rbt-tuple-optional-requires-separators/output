@@ -1,0 +1,3 @@
+z optional Integer
+  ^^^^^^^^ rbt-tuple-optional-requires-separators/foo.rsl:6: error: optional only permitted in tuples with separators
+Processed 1 model, 0 checks and 0 requirement files and found 1 error

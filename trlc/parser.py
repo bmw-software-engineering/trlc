@@ -423,6 +423,7 @@ class Parser(Parser_Base):
         else:
             field_is_optional = False
 
+        # lobster-trace: LRM.Tuple_Field_Types
         field_type = self.parse_qualified_name(self.default_scope,
                                                ast.Type)
 
@@ -435,6 +436,7 @@ class Parser(Parser_Base):
             optional    = field_is_optional)
 
     def parse_tuple_declaration(self):
+        # lobster-trace: LRM.Tuple_Declaration
         self.match_kw("tuple")
         name, description = self.parse_described_name()
 
@@ -461,6 +463,7 @@ class Parser(Parser_Base):
                 has_separators = True
                 self.match_kw("separator")
                 if not separator_allowed:
+                    # lobster-trace: LRM.Tuple_Separators_All_Or_None
                     self.mh.error(self.ct.location,
                                   "either all fields must be separated,"
                                   " or none")
@@ -472,6 +475,7 @@ class Parser(Parser_Base):
                     n_tuple.add_separator(ast.Separator(self.ct))
             else:
                 separator_allowed = False
+            # lobster-trace: LRM.Tuple_Optional_Requires_Separators
             n_field = self.parse_tuple_field(
                 n_tuple,
                 optional_allowed  = has_separators,
@@ -479,6 +483,7 @@ class Parser(Parser_Base):
                                      " with separators"),
                 optional_required = optional_required)
             n_tuple.components.register(self.mh, n_field)
+            # lobster-trace: LRM.Tuple_Optional_Fields
             optional_required |= n_field.optional
 
         self.match("C_KET")
@@ -497,6 +502,7 @@ class Parser(Parser_Base):
                         % n_tuple.name)
 
         # Late registration to avoid recursion in tuples
+        # lobster-trace: LRM.Tuple_Field_Types
         self.cu.package.symbols.register(self.mh, n_tuple)
 
         return n_tuple

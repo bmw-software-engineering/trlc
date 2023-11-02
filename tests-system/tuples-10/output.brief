@@ -1,6 +1,0 @@
-tuples-10/foo.rsl:10:3: trlc error: tuple type Q, which contains separators, may not contain another tuple with separators
-tuples-10/foo.rsl:16:5: trlc error: unknown symbol Q
-tuples-10/foo.trlc:4:3: trlc error: unknown symbol x
-tuples-10/foo.trlc:8:3: trlc error: unknown symbol x
-tuples-10/foo.trlc:12:3: trlc error: unknown symbol x
-tuples-10/foo.trlc:16:3: trlc error: unknown symbol x

@@ -24,8 +24,8 @@ from trlc.vcg import VCG
 
 
 class Linter:
-    # lobster-exclude: Not safety relevant
     def __init__(self, mh, stab, verify_checks, debug_vcg, cvc5_binary):
+        # lobster-exclude: Not safety relevant
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, ast.Symbol_Table)
         assert isinstance(verify_checks, bool)
@@ -42,6 +42,7 @@ class Linter:
         self.checked_types       = set()
 
     def verify(self):
+        # lobster-exclude: Not safety relevant
         ok = True
         for package in self.stab.values(ast.Package):
             for n_typ in package.symbols.values(ast.Type):
@@ -63,6 +64,7 @@ class Linter:
         return ok
 
     def verify_type(self, n_typ):
+        # lobster-exclude: Not safety relevant
         assert isinstance(n_typ, ast.Type)
 
         if n_typ in self.checked_types:
@@ -83,6 +85,7 @@ class Linter:
         assert isinstance(n_tuple_type, ast.Tuple_Type)
 
         # Detect confusing separators
+        # lobster-trace: LRM.Tuple_Based_Literal_Ambiguity
         previous_was_int     = False
         previous_was_bad_sep = False
         bad_separator        = None
@@ -144,6 +147,7 @@ class Linter:
             vcg.analyze()
 
     def verify_record_type(self, n_record_type):
+        # lobster-exclude: Not safety relevant
         assert isinstance(n_record_type, ast.Record_Type)
 
         # Mark abstract extensions
@@ -169,6 +173,7 @@ class Linter:
             vcg.analyze()
 
     def verify_array_type(self, n_typ):
+        # lobster-exclude: Not safety relevant
         assert isinstance(n_typ, ast.Array_Type)
 
         if n_typ.upper_bound is None:

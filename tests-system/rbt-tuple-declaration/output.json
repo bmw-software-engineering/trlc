@@ -1,0 +1,68 @@
+cb_link     = 12345      // Equivalent to 12345@null
+              ^^^^^ rbt-tuple-declaration/foo.trlc:12: check warning: Please link to a specific version
+{
+  "Bad_Potato": {
+    "cb_link": {
+      "item": 12345,
+      "version": null
+    },
+    "description": "This is a dodgy potato.",
+    "dim": {
+      "x": 42,
+      "y": 666
+    }
+  },
+  "Good_Kitten": {
+    "cb_link": {
+      "item": 12345,
+      "version": 42
+    },
+    "description": "This is a nice potato.",
+    "dim": {
+      "x": 42,
+      "y": 666
+    },
+    "doors_id": {
+      "baseline": 6.1,
+      "item_id": 12345,
+      "module_id": 1280
+    }
+  },
+  "Good_Potato": {
+    "cb_link": {
+      "item": 12345,
+      "version": 5
+    },
+    "description": "This is a nice potato.",
+    "dim": {
+      "x": 42,
+      "y": 666
+    }
+  },
+  "Wibble": {
+    "cb_link": {
+      "item": 12345,
+      "version": 42
+    },
+    "description": "This is a nice potato.",
+    "dim": {
+      "x": 42,
+      "y": 666
+    },
+    "relations": [
+      {
+        "requirement": "Example.Good_Potato",
+        "tag": null
+      },
+      {
+        "requirement": "Example.Bad_Potato",
+        "tag": "this is dodgy"
+      },
+      {
+        "requirement": "Example.Good_Kitten",
+        "tag": "this is fine"
+      }
+    ]
+  }
+}
+Processed 1 model, 0 checks and 1 requirement file and found 1 warning
