@@ -35,7 +35,7 @@ The Python implementation can be used for several purposes:
 * [Release Notes](CHANGELOG.md) (read this to find out whats new)
 * [License](LICENSE)
 
-### For API users
+### For advanced users
 
 * [Language Reference Manual](https://bmw-software-engineering.github.io/trlc/lrm.html)
   (for language lawyers)
@@ -50,6 +50,8 @@ The Python implementation can be used for several purposes:
 * [Lexer/Parser Hierarchy](https://bmw-software-engineering.github.io/trlc/parser_hierarchy.svg)
   (overview over all classes releated to the lexing and parsing of TRLC)
 * [Tool Architecture Overview](documentation/architecture.md)
+* [Requirements Coverage Report](https://bmw-software-engineering.github.io/trlc/tracing.html)
+* [Code Coverage Report](https://bmw-software-engineering.github.io/trlc/htmlcov/index.html)
 
 ## Dependencies
 

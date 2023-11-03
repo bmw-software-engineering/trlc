@@ -32,14 +32,19 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Set up Python 3.8
+      - uses: supplypike/setup-bin@v3
+        with:
+          uri: 'https://github.com/cvc5/cvc5/releases/download/cvc5-1.0.8/cvc5-Linux'
+          name: 'cvc5'
+          version: '1.0.8'
+      - name: Set up Python 3.9
         uses: actions/setup-python@v3
         with:
-          python-version: "3.8"
+          python-version: "3.9"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install sphinx
+          pip install -r requirements.txt
           pip install bmw-lobster-core bmw-lobster-tool-python
           pip install --no-deps bmw-lobster-tool-trlc
           sudo apt-get install -y graphviz
@@ -48,6 +53,11 @@ jobs:
           make docs
         env:
           PYTHONPATH: "."
+      - name: Building code coverage report
+        run: |
+          make system-tests unit-tests
+          make coverage
+          mv htmlcov docs
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
