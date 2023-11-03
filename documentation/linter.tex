@@ -1,0 +1,365 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usepackage{listings}
+\lstdefinelanguage{TRLC}{
+  keywords = {abs, and, checks, enum, error, extends, false, fatal, forall, implies, import, in, not, null, optional, or, package, section, true, type, warning, xor},
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  showstringspaces=false,
+  string=[b]{"},
+  delim=[s][stringstyle]{'''}{'''}
+}
+
+\lstdefinestyle{smallstyle}
+   {basicstyle=\scriptsize\tt,
+    keywordstyle=\color{structure},
+    commentstyle=\rmfamily\it\color{black!40},
+    stringstyle=\color{brown!50!black},
+    captionpos=b,
+    caption={},label={},
+    numbers=none}
+
+\lstset{style=smallstyle}
+
+\usepackage{tikz}
+\usetikzlibrary{shadows}
+
+\author{Florian Schanda}
+\title{TRLC Static Checker}
+
+\begin{document}
+
+\section{Introduction}
+\begin{frame}{Motivation}
+  \begin{itemize}
+  \item TRLC check expressions are executable
+  \item TRLC language defines certain run-time errors
+    \begin{itemize}
+    \item Null dereference
+    \item Division by zero
+    \item Array out-of-bounds access
+    \item Arithmetic over- and underflow\footnote{Not checked (yet) because reference implementation uses arbitrary precision arithmetic.}
+    \end{itemize}
+  \item The Python reference implementation is safe (i.e. throws errors)
+  \item A fast C implemention might not be
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Example}
+  \begin{lstlisting}[language=TRLC,gobble=4]
+    type Requirement {
+      description     optional String
+      safety_relevant          Boolean
+    }
+
+    checks Requirement {
+      len(description) >= 10, "description too short"
+    }
+  \end{lstlisting}
+  \pause
+  \begin{scriptsize}
+\begin{verbatim}
+$ trlc.py --verify foo.rsl
+len(description) >= 10, "description too short"
+    ^^^^^^^^^^^ foo.rsl:9: issue: expression could be null [vcg-evaluation-of-null]
+              | example record_type triggering error:
+              |   Requirement bad_potato {
+              |     /* description is null */
+              |     safety_relevant = false
+              |   }
+\end{verbatim}
+  \end{scriptsize}
+\end{frame}
+
+\begin{frame}[fragile]{Is this really so hard?}
+  \begin{itemize}
+  \item This seems obvious enough...
+  \item We could detect that and say ``always prefix with implies''
+    \pause
+  \item But it gets tricky complex quickly
+    \begin{lstlisting}[language=TRLC,gobble=6]
+      type Requirement {
+        top_level            Boolean
+        description optional String
+      }
+
+      checks Requirement {
+        top_level implies description != null,
+          "top level requirements need a description"
+      }
+
+      type Top_Level_Requirement extends Requirement {
+        freeze top_level = true
+      }
+
+      checks Top_Level_Requirement {
+        len(description) >= 10, "too short"
+      }
+    \end{lstlisting}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Any complicated semantics can surprising}
+  \begin{lstlisting}[language=TRLC,gobble=6]
+    Top_Level_Requirement bad_potato {}
+  \end{lstlisting}
+  Will produce:
+  \begin{scriptsize}
+\begin{verbatim}
+$ trlc.py foo.rsl foo.trlc
+Top_Level_Requirement bad_potato {
+                      ^^^^^^^^^^ foo.trlc:3: check error: top level requirements
+                                             need a description
+Top_Level_Requirement bad_potato {
+                      ^^^^^^^^^^ foo.trlc:3: error: input to unary expression
+                                             len(description) (foo.rsl:18) must not be null
+\end{verbatim}
+  \end{scriptsize}
+
+  \pause
+
+  Should have made the first check a \structure{fatal} check to
+  prevent execution!
+\end{frame}
+
+\section{TRLC Linter}
+
+\begin{frame}{Linter}{What is it}
+  \begin{itemize}
+  \item Formal verification tool
+  \item Covers \structure{all possible inputs}, for \structure{all
+      possible TRLC implementations}
+  \item Models TRLC types and semantics in SMTLIB
+  \item Generates counter-examples or proofs of absence of run-time
+    errors
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Terminology}
+  \begin{description}
+  \item[SAT] (Boolean) satisfiability problem (NP-hard)
+  \item[NP-hard] Problem where checking a solution is fast but
+    computing a solution is non-polynomial in complexity
+    (e.g. $O(2^n)$)
+  \item[SMT] SAT modulo theory, an extension of SAT with theories like
+    integer or float arithmetic
+  \item[SMT Solver] Tool to automatically solve SMT problems
+  \item[SMTLIB] Language to describe problems to an SMT solver
+  \item[VC] Verification condition (problem you need to solve to
+    demonstrate something, e.g. absence of run-time errors)
+  \end{description}
+\end{frame}
+
+\begin{frame}{Linter}{Building blocks}
+  This would be impossible to just build from scratch, so we use tools:
+  \begin{itemize}
+  \item PyVCG (a low-level verification condition generator, built for
+    TRLC initially but could be useful elsewhere)
+  \item CVC5 (a state of the art SMT solver)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Linter}{Dataflow}
+  \begin{center}
+    \begin{tikzpicture}
+      \draw[structure,thick,dashed] (1.5, -3) -- (1.5, 3);
+      \draw[structure,thick,dashed] (10.5, -3) -- (10.5, 3);
+      \node[align=center] (src) at (0, 0) {Types and\\Checks};
+      \node[align=center] (graph) at (3, 0) {Execution\\Graph};
+      \node (vc1) at (6, 2) {SMTLIB VC};
+      \node (vc2) at (6, 1) {SMTLIB VC};
+      \node (vc3) at (6, 0) {SMTLIB VC};
+      \node (vc4) at (6, -1) {SMTLIB VC};
+      \node (vc5) at (6, -2) {...};
+      \node (cvc5) at (9, 0) {CVC5};
+      \node (msg) at (12, 0) {Messages};
+      \draw[->] (src) -- (graph);
+      \draw[->] (graph) -- (vc1);
+      \draw[->] (graph) -- (vc2);
+      \draw[->] (graph) -- (vc3);
+      \draw[->] (graph) -- (vc4);
+      \draw[->] (graph) -- (vc5);
+      \draw[->] (vc1) -- (cvc5);
+      \draw[->] (vc2) -- (cvc5);
+      \draw[->] (vc3) -- (cvc5);
+      \draw[->] (vc4) -- (cvc5);
+      \draw[->] (vc5) -- (cvc5);
+      \draw[->] (cvc5) -- (msg);
+      \node[align=center,font=\scriptsize,structure] at (0, -3) {TRLC\\(vcg.py)};
+      \node[align=center,font=\scriptsize,structure] at (6, -3) {PyVCG};
+      \node[align=center,font=\scriptsize,structure] at (12, -3) {TRLC\\(vcg.py, errors.py)};
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\subsection{SMTLIB}
+
+\begin{frame}[fragile]{SMTLIB}{Some examples}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{lstlisting}[language=LISP]
+(set-logic QF_NIA)
+(set-option :produce-models true)
+
+(declare-const a      Int)
+(declare-const b      Int)
+(declare-const result Int)
+
+(assert (= result
+	   (* a b)))
+
+(check-sat)
+(get-value (a))
+(get-value (b))
+(get-value (result))
+\end{lstlisting}
+\end{column}
+    \pause
+    \begin{column}{0.5\textwidth}
+      \begin{scriptsize}
+\begin{verbatim}
+sat
+((a 0))
+((b 0))
+((result 0))
+\end{verbatim}
+      \end{scriptsize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{SMTLIB}{Some examples}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{lstlisting}[language=LISP]
+(set-logic QF_NIA)
+(set-option :produce-models true)
+
+(declare-const a      Int)
+(declare-const b      Int)
+(declare-const result Int)
+
+(assert (= result
+	   (* a b)))
+(assert (= result 42))
+
+(check-sat)
+(get-value (a))
+(get-value (b))
+(get-value (result))
+\end{lstlisting}
+\end{column}
+    \pause
+    \begin{column}{0.5\textwidth}
+      \begin{scriptsize}
+\begin{verbatim}
+sat
+((a (- 2)))
+((b (- 21)))
+((result 42))
+\end{verbatim}
+      \end{scriptsize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{SMTLIB}{Some examples}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{lstlisting}[language=LISP]
+(set-logic QF_NIA)
+(set-option :produce-models true)
+
+(declare-const a      Int)
+(declare-const b      Int)
+(declare-const result Int)
+
+(assert (= result
+	   (* a b)))
+(assert (= result 42))
+(assert (= a 4))
+
+(check-sat)
+(get-value (a))
+(get-value (b))
+(get-value (result))
+\end{lstlisting}
+\end{column}
+    \pause
+    \begin{column}{0.5\textwidth}
+      \begin{scriptsize}
+\begin{verbatim}
+unsat
+\end{verbatim}
+      \end{scriptsize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\subsection{Execution semantics}
+
+\begin{frame}{TRLC}{Execution semantics}
+  \begin{itemize}
+  \item Mostly just expressions (e.g. $len(x) + len(y) > 10$)
+  \item Control flow is rare, but we have some:
+    \begin{itemize}
+    \item and, or, and implies
+    \item membership tests
+    \item if expressions
+    \item ordering of checks inside a block
+    \item checks from parent types before checks from extension
+    \item fatal checks
+    \end{itemize}
+  \item Interesting cases:
+    \begin{itemize}
+    \item Execution order from checks from different blocks is unspecified
+    \item Execution order inside quantifiers is unspecified
+    \item Execution continues after (non-fatal) errors and warnings
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{TRLC}{Execution semantics example}
+  \begin{lstlisting}[language=TRLC,gobble=4]
+    x != null implies x in 1 .. 10, "potato"
+  \end{lstlisting}
+  \begin{center}
+    \begin{tikzpicture}
+      \node(start) at (0, 0) {start};
+      \node(e1) at (3, 0) {$x \neq null$};
+      \node(e2) at (6, -1.5) {$x \geq 1$};
+      \node(e3) at (9, -3) {$x \leq 10$};
+      \node(end) at (12, 0) {end};
+
+      \draw[->] (start) -- (e1);
+      \draw[->] (e1) -- node[above] {$\top$} (e2);
+      \draw[->] (e1) -- node[above] {$\bot$} (end);
+      \draw[->] (e2) -- node[above] {$\top$} (e3);
+      \draw[->] (e2) -- node[above] {$\bot$} (end);
+      \draw[->] (e3) -- (end);
+
+      \visible<2-> {
+        \node[structure,font=\scriptsize,align=left] (check1) at (6, -2.5) {
+          check:\\
+          $\lnot x = null$
+        };
+        \draw[structure] (e2) -- (check1);
+        \node[structure,font=\scriptsize,align=left] (check2) at (9, -4) {
+          check:\\
+          $\lnot x = null$
+        };
+        \draw[structure] (e3) -- (check2);
+      }
+
+      \visible<3-> {
+        \node[structure,font=\scriptsize,align=left] (check3) at (12, 1) {
+          check:\\
+          $\exists x \mid \lnot (x \neq null \implies 1 \leq x \leq 10)$
+        };
+        \draw[structure] (end) -- (check3);
+      }
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\end{document}
