@@ -14,7 +14,7 @@ build_lrm ()
 
 mkdir -p docs
 
-for tag in $(git tag | grep trlc- | sort); do
+for tag in $(git tag | grep trlc- | sort -V); do
     echo -e "trlc-1.0.9\n${tag}" | sort -VC && build_lrm ${tag}
 done
 
