@@ -1,5 +1,8 @@
 \documentclass[aspectratio=169]{beamer}
 
+\beamertemplatedotitem
+\beamertemplatenavigationsymbolsempty
+
 \usepackage{listings}
 \lstdefinelanguage{TRLC}{
   keywords = {abs, and, checks, enum, error, extends, false, fatal, forall, implies, import, in, not, null, optional, or, package, section, true, type, warning, xor},
@@ -8,6 +11,27 @@
   showstringspaces=false,
   string=[b]{"},
   delim=[s][stringstyle]{'''}{'''}
+}
+
+\lstdefinelanguage{SMTLIB}{
+  alsoletter=-,
+  keywords = {
+    and,
+    assert,
+    check-sat,
+    declare-const,
+    define-const,
+    false,
+    get-value,
+    or,
+    set-logic,
+    set-option,
+    true,
+  },
+  moredelim = [s][\color{green!30!black}]{|}{|},
+  comment=[l]{;},
+  showstringspaces=false,
+  string=[b]{"}
 }
 
 \lstdefinestyle{smallstyle}
@@ -122,8 +146,9 @@ Top_Level_Requirement bad_potato {
   prevent execution!
 \end{frame}
 
-\section{TRLC Linter}
+\section{Architecture and background}
 
+\subsection{Linter}
 \begin{frame}{Linter}{What is it}
   \begin{itemize}
   \item Formal verification tool
@@ -135,6 +160,7 @@ Top_Level_Requirement bad_potato {
   \end{itemize}
 \end{frame}
 
+\subsection{Terminology}
 \begin{frame}{Terminology}
   \begin{description}
   \item[SAT] (Boolean) satisfiability problem (NP-hard)
@@ -150,6 +176,7 @@ Top_Level_Requirement bad_potato {
   \end{description}
 \end{frame}
 
+\subsection{Dependencies}
 \begin{frame}{Linter}{Building blocks}
   This would be impossible to just build from scratch, so we use tools:
   \begin{itemize}
@@ -159,6 +186,7 @@ Top_Level_Requirement bad_potato {
   \end{itemize}
 \end{frame}
 
+\subsection{Dataflow}
 \begin{frame}{Linter}{Dataflow}
   \begin{center}
     \begin{tikzpicture}
@@ -197,7 +225,7 @@ Top_Level_Requirement bad_potato {
 \begin{frame}[fragile]{SMTLIB}{Some examples}
   \begin{columns}
     \begin{column}{0.5\textwidth}
-      \begin{lstlisting}[language=LISP]
+      \begin{lstlisting}[language=SMTLIB]
 (set-logic QF_NIA)
 (set-option :produce-models true)
 
@@ -231,7 +259,7 @@ sat
 \begin{frame}[fragile]{SMTLIB}{Some examples}
   \begin{columns}
     \begin{column}{0.5\textwidth}
-      \begin{lstlisting}[language=LISP]
+      \begin{lstlisting}[language=SMTLIB]
 (set-logic QF_NIA)
 (set-option :produce-models true)
 
@@ -266,7 +294,7 @@ sat
 \begin{frame}[fragile]{SMTLIB}{Some examples}
   \begin{columns}
     \begin{column}{0.5\textwidth}
-      \begin{lstlisting}[language=LISP]
+      \begin{lstlisting}[language=SMTLIB]
 (set-logic QF_NIA)
 (set-option :produce-models true)
 
@@ -296,7 +324,7 @@ unsat
   \end{columns}
 \end{frame}
 
-\subsection{Execution semantics}
+\section{TRLC execution semantics}
 
 \begin{frame}{TRLC}{Execution semantics}
   \begin{itemize}
@@ -340,26 +368,309 @@ unsat
 
       \visible<2-> {
         \node[structure,font=\scriptsize,align=left] (check1) at (6, -2.5) {
-          check:\\
-          $\lnot x = null$
+          RTE check:\\
+          $\lnot (x = null)$
         };
         \draw[structure] (e2) -- (check1);
         \node[structure,font=\scriptsize,align=left] (check2) at (9, -4) {
-          check:\\
-          $\lnot x = null$
+          RTE check:\\
+          $\lnot (x = null)$
         };
         \draw[structure] (e3) -- (check2);
       }
 
       \visible<3-> {
         \node[structure,font=\scriptsize,align=left] (check3) at (12, 1) {
-          check:\\
+          feasibility check:\\
           $\exists x \mid \lnot (x \neq null \implies 1 \leq x \leq 10)$
         };
         \draw[structure] (end) -- (check3);
       }
     \end{tikzpicture}
   \end{center}
+\end{frame}
+
+\section{TRLC VCG}
+\begin{frame}{TRLC}{Required tasks}
+  \begin{itemize}
+  \item Build execution graph and model TRLC (TRLC with PyVCG)
+  \item Annotate this graph with checks (TRLC with PyVCG)
+  \item Generate VCs (PyVCG)
+  \item Solve them (PyVCG with CVC5)
+  \item Generate feedback to the user (TRLC with PyVCG)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{TRLC}{PyVCG}
+  \begin{itemize}
+  \item PyVCG does all the graph and SMT stuff
+  \item I decided to factor it out since it could be reusable for
+    other projects
+  \item I decided not to use Why3\footnote{https://why3.lri.fr} or
+    Boogie\footnote{https://www.microsoft.com/en-us/research/project/boogie-an-intermediate-verification-language}
+    because I don't like quantifiers
+  \item I decided not to use
+    GOTO\footnote{https://www.cprover.org/cbmc/} because its somewhat
+    annoying to work with and I \emph{do} need quantifiers and
+    infinite integers
+  \item (Also, I was extremely bored)
+  \end{itemize}
+\end{frame}
+
+\section{Modelling TRLC}
+\begin{frame}{Modelling TRLC}{Why}
+  TRLC $\neq$ SMTLIB:
+  \begin{itemize}
+  \item TRLC is sequential and executable
+  \item SMTLIB is declarative
+  \item Types are different
+  \item There are no ``null'' values in SMTLIB
+  \end{itemize}
+\end{frame}
+
+\subsection{Modelling null}
+\begin{frame}[fragile]{Modelling TRLC}{Null}
+  \begin{itemize}
+  \item Optional components can be ``null''
+  \item Expressions generally can't be (\verb|x + 1| itself cannot be
+    null, but \verb|x| could be)
+  \item Quantification variables can't be (in
+    \verb|(forall x in y => x)| the bound variable \verb|x| cannot be
+    null, but \verb|y| could be)
+  \item Array members can't be (although the whole array itself could
+    be)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Modelling TRLC}{Null}
+  I considered two options:
+  \begin{itemize}
+  \item Make a datatype for everything: $x = (isNull, actualValueOfX)$
+    \begin{description}
+    \item[+] Very generic, easy to get right
+    \item[-] Requires re-implementation of all operations
+    \item[-] Has the smell of three-valued logic
+    \item[-] Might make quantifiers worse
+    \end{description}
+  \item Make a separate value for everything: $x = actualValueofX, valid\_x$
+    \begin{description}
+    \item[-] Requires more manual work when generating VCs
+    \item[+] Probably way faster if you can optimise it away
+    \end{description}
+  \end{itemize}
+  I chose the second option.
+\end{frame}
+
+\begin{frame}{Modelling TRLC}{Null}
+  How this looks like with $x = y$:\pause
+  \begin{itemize}
+  \item There are four variables here:
+    \begin{itemize}
+    \item $x$ and $y$
+    \item $valid\_x$ and $valid\_y$
+    \end{itemize}
+    \pause
+  \item Semantics of equality are:
+    \begin{description}
+    \item[Equality\_On\_Null] Null is only equal to itself.
+    \item[Simple\_Relational\_Semantics] The meaning of the relationship
+      operators are the usual.
+    \end{description}
+    \pause
+  \item $valid\_x = valid\_y \land (valid\_x \implies x = y)$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Modelling TRLC}{Null}
+  \begin{itemize}
+  \item So $x = y$ is
+    $valid\_x = valid\_y \land (valid\_x \implies x = y)$
+    \pause
+  \item If we know that $y$ is not optional, we could simplify:
+    \begin{itemize}
+    \item Flip around:
+      $valid\_y = valid\_x \land (valid\_y \implies y = x)$
+      \pause
+    \item Substitute $\top$ for $valid\_y$:
+      $\top = valid\_x \land (\top \implies y = x)$
+      \pause
+    \item Simplify:
+      $valid\_x \land y = x$
+    \end{itemize}
+    \pause
+  \item If we know that $x$ is also not optional, we could simplify
+    further: $x = y$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Modelling TRLC}{Null}
+  Final strategy:
+  \begin{itemize}
+  \item Introduce a new Boolean for each value indicating the validity
+  \item Perform arithmetic on just the values, assuming validity is OK
+  \item Perform validity checks on just the validity values
+  \item Only place we mix is for the {\tt ==} and {\tt !=} operators
+  \item Most of it can be simplified
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Modelling TRLC}{Null}
+  A real example:
+  \begin{lstlisting}[language=TRLC,gobble=4]
+    type T {
+      x optional Boolean
+      y optional Boolean
+    }
+    checks T {
+      x == y, "potato"
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Modelling TRLC}{Null}
+  A real example:
+  \begin{lstlisting}[language=SMTLIB,gobble=4]
+    ;; value for x declared on foo.rsl:3:3
+    (declare-const |Foo.T.x.value| Bool)
+    (declare-const |Foo.T.x.valid| Bool)
+    ;; value for y declared on foo.rsl:4:3
+    (declare-const |Foo.T.y.value| Bool)
+    (declare-const |Foo.T.y.valid| Bool)
+    ;; result of x == y at foo.rsl:7:5
+    (define-const |tmp.1| Bool
+      (and (= |Foo.T.x.valid| |Foo.T.y.valid|)
+           (=> |Foo.T.x.valid| (= |Foo.T.x.value| |Foo.T.y.value|))))
+  \end{lstlisting}
+\end{frame}
+
+\subsection{Modelling the execution}
+\begin{frame}[fragile]{Modelling TRLC}{Execution graph and null}
+  One more example:
+  \begin{lstlisting}[language=TRLC,gobble=4]
+    type T {
+      x optional Integer
+    }
+    checks T {
+      x + 1 > x, "potato"
+    }
+  \end{lstlisting}
+  \pause
+  Requires more than one VC:
+  \begin{itemize}
+  \item VC1: Validity check for x on LHS
+  \item We can then compute the value of $x + 1$ assuming it's valid
+    \pause
+  \item VC2: Validity check for x on RHS
+  \item We can then compute the value of $x + 1 > x$ assuming it's valid
+    \pause
+  \item We can now use the computed values to do something like check
+    if it's always true
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Modelling TRLC}{Execution graph and null}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{center}
+        \begin{tikzpicture}[every node/.style={font=\scriptsize,align=center}]
+
+          \node(start) at (0, 0.25) {start};
+          \node(a1) at (0, -0.75) {
+            {\bf Assumption}\\
+            (declare-const $\mid$Foo.T.x.value$\mid$ Int)\\
+            (declare-const $\mid$Foo.T.x.valid$\mid$ Bool)
+          };
+          \node<1,3->(c1) at (0, -2) {
+            {\bf Check}\\
+            goal: $\mid$Foo.T.x.valid$\mid$
+          };
+          \node<2>[structure](c1) at (0, -2) {
+            {\bf Check}\\
+            goal: $\mid$Foo.T.x.valid$\mid$
+          };
+          \node(a2) at (0, -3) {
+            {\bf Assumption}\\
+            (define-const $\mid$tmp.1$\mid$ Int (+ $\mid$Foo.T.x.value$\mid$ 1))
+          };
+          \node<-2,4->(c2) at (0, -4) {
+            {\bf Check}\\
+            goal: $\mid$Foo.T.x.valid$\mid$
+          };
+          \node<3>[structure](c2) at (0, -4) {
+            {\bf Check}\\
+            goal: $\mid$Foo.T.x.valid$\mid$
+          };
+          \node(a3) at (0, -5) {
+            {\bf Assumption}\\
+            (define-const $\mid$tmp.2$\mid$ Bool ($>$ $\mid$tmp.1$\mid$ $\mid$Foo.T.x.value$\mid$))
+          };
+          \node<-4>(c3) at (-1.5, -6) {
+            {\bf Check}\\
+            goal: $\mid$tmp.2$\mid$
+          };
+          \node<4>[structure](c3) at (-1.5, -6) {
+            {\bf Check}\\
+            goal: $\mid$tmp.2$\mid$
+          };
+          \node(a4) at (1.5, -6) {
+            {\bf Assumption}\\
+            (assert $\mid$tmp.2$\mid$)
+          };
+          \draw[->] (start) -- (a1);
+          \draw[->] (a1) -- (c1);
+          \draw[->] (c1) -- (a2);
+          \draw[->] (a2) -- (c2);
+          \draw[->] (c2) -- (a3);
+          \draw[->] (a3) -- (c3);
+          \draw[->] (a3) -- (a4);
+        \end{tikzpicture}
+      \end{center}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{onlyenv}<2>
+        \begin{lstlisting}[language=SMTLIB,gobble=10]
+          ;; value for x declared on foo.rsl:3:3
+          (declare-const |Foo.T.x.value| Int)
+          (declare-const |Foo.T.x.valid| Bool)
+          ;; validity check for x
+          (assert (not |Foo.T.x.valid|))
+          (check-sat)
+        \end{lstlisting}
+      \end{onlyenv}
+      \begin{onlyenv}<3>
+        \begin{lstlisting}[language=SMTLIB,gobble=10]
+          ;; value for x declared on foo.rsl:3:3
+          (declare-const |Foo.T.x.value| Int)
+          (declare-const |Foo.T.x.valid| Bool)
+          (assert |Foo.T.x.valid|)
+          ;; result of x + 1 at foo.rsl:6:5
+          (define-const |tmp.1| Int
+            (+ |Foo.T.x.value| 1))
+          ;; validity check for x
+          (assert (not |Foo.T.x.valid|))
+          (check-sat)
+        \end{lstlisting}
+      \end{onlyenv}
+      \begin{onlyenv}<4>
+        \begin{lstlisting}[language=SMTLIB,gobble=8]
+          ;; value for x declared on foo.rsl:3:3
+          (declare-const |Foo.T.x.value| Int)
+          (declare-const |Foo.T.x.valid| Bool)
+          (assert |Foo.T.x.valid|)
+          ;; result of x + 1 at foo.rsl:6:5
+          (define-const |tmp.1| Int
+            (+ |Foo.T.x.value| 1))
+          (assert |Foo.T.x.valid|)
+          ;; result of x + 1 > x at foo.rsl:6:9
+          (define-const |tmp.2| Bool
+            (> |tmp.1| |Foo.T.x.value|))
+          ;; feasability check for x + 1 > x
+          (assert (not |tmp.2|))
+          (check-sat)
+        \end{lstlisting}
+      \end{onlyenv}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \end{document}
