@@ -777,7 +777,7 @@ unsat
   \begin{itemize}
   \item Beg CVC5 developers for a Decimal extension (I tried)
     \pause
-  \item Model as a pair of reals $value = \frac{a}{b}$ and say:
+  \item Model as a pair of integers $value = \frac{a}{b}$ and say:
     \begin{itemize}
     \item $b > 0$
     \item $\exists n \in \mathbb{N} | b = 10^n$
@@ -801,7 +801,7 @@ unsat
     \item E.g. $b \in \{1, 10, 100, 1000, 10000, 100000\}$ for 5
       decimal digits
     \item This is an under-approximation (i.e. not sound)
-    \item nonlinear division everywhere (so still going to suck)
+    \item disjunctions everywhere
     \end{itemize}
     \pause
   \item \structure{Treat as real} (over-approximation)
