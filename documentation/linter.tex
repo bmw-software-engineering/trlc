@@ -62,10 +62,12 @@
     \item Null dereference
     \item Division by zero
     \item Array out-of-bounds access
-    \item Arithmetic over- and underflow\footnote{Not checked (yet) because reference implementation uses arbitrary precision arithmetic.}
+    \item Arithmetic over- and underflow\footnote{Not checked (yet)
+        because reference implementation uses arbitrary precision
+        arithmetic.}
     \end{itemize}
   \item The Python reference implementation is safe (i.e. throws errors)
-  \item A fast C implemention might not be
+  \item A fast C implementation might not be
   \end{itemize}
 \end{frame}
 
@@ -173,6 +175,22 @@ Top_Level_Requirement bad_potato {
   \item[SMTLIB] Language to describe problems to an SMT solver
   \item[VC] Verification condition (problem you need to solve to
     demonstrate something, e.g. absence of run-time errors)
+  \end{description}
+\end{frame}
+
+\begin{frame}{Terminology II}
+  \begin{description}
+  \item[Sound] Reasoning that does not miss bugs (i.e. no
+    false negatives)
+  \item[Complete] Reasoning that does not have false alarms
+  \item[Automatic] Reasoning that does not require human intelligence
+    as input
+  \item[Over-approximate] Analysis that is \structure{sound} and
+    \structure{automatic}
+  \item[Under-approximate] Analysis that is \structure{complete} and
+    \structure{automatic}
+  \item[Deductive] Analysis that is \structure{sound} and
+    \structure{complete}
   \end{description}
 \end{frame}
 
@@ -322,6 +340,38 @@ unsat
       \end{scriptsize}
     \end{column}
   \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{SMTLIB}{How to prove something}
+  Lets say we want to prove that $x + 1 > x$:
+  \begin{itemize}
+  \item First declare variables:
+    \begin{lstlisting}[language=SMTLIB,gobble=4]
+      (declare-const x Int)
+    \end{lstlisting}
+    \pause
+  \item Then define a goal:
+    \begin{lstlisting}[language=SMTLIB,gobble=4]
+      (define-const goal Bool
+        (> (+ x 1)
+           x))
+    \end{lstlisting}
+    \pause
+  \item Then assert that the goal is not true:
+    \begin{lstlisting}[language=SMTLIB,gobble=4]
+      (assert (not goal))
+    \end{lstlisting}
+  \item Then ask for a model:
+    \begin{lstlisting}[language=SMTLIB,gobble=4]
+      (check-sat)
+    \end{lstlisting}
+    \pause
+  \item If we get a model: we know it's not (always) true and we have
+    a specific \structure{counter-example}
+    \pause
+  \item If we don't: we know there are no counter-examples, i.e. the
+    original goal is always true
+  \end{itemize}
 \end{frame}
 
 \section{TRLC execution semantics}
@@ -671,6 +721,119 @@ unsat
       \end{onlyenv}
     \end{column}
   \end{columns}
+\end{frame}
+
+\subsection{Debugging options}
+\begin{frame}{Modelling TRLC}{Debugging options}
+  You can see this for real using the {\tt --debug-vcg} option:
+  \begin{itemize}
+  \item Generates a {\tt .pdf} for the graph
+  \item Generates a {\tt .smt2} file for each VC
+  \end{itemize}
+\end{frame}
+
+\subsection{Modelling types}
+\begin{frame}{Modelling TRLC}{Types}
+  We have these types in TRLC:
+  \begin{itemize}
+  \item Boolean \only<2->{(SMTLIB Bool)}
+  \item Integer \only<2->{(SMTLIB Int)}
+  \item Decimal \only<3->{(SMTLIB Real, over-approximation)}
+  \item String (and Markup\_String) \only<4->{(SMTLIB String,
+      over-approximation for Markup\_String)}
+  \item User-defined records \only<5->{(SMTLIB Datatypes)}
+  \item User-defined tuples \only<5->{(SMTLIB Datatypes)}
+  \item Arrays consisting out of any of the above \only<6->{(SMTLIB Sequence)}
+  \end{itemize}
+\end{frame}
+
+\subsection{Approximating decimals}
+
+\begin{frame}{Modelling TRLC}{Decimals}
+  Decimals are annoying... There are no decimals in SMTLIB.
+  \begin{center}
+    \begin{equation*}
+      \mathbb{D} \in \mathbb{Q} \in \mathbb{R}
+    \end{equation*}
+  \end{center}
+  \pause
+  \begin{itemize}
+  \item $0.3$ is a decimal
+    \pause
+  \item $\frac{1}{3}$ is a rational (but not decimal)
+    \pause
+  \item $\sqrt{2}$ is a real (but not rational, and also not a decimal)
+    \pause
+  \item There are things true in $\mathbb{D}$ that are not true
+    $\mathbb{R}$: $\forall x \in \mathbb{D} \mid x + \frac{1}{3} = 0$
+    \pause
+  \item There are things true in $\mathbb{R}$ that are not true
+    $\mathbb{D}$: $\exists x \in \mathbb{R} \mid x * x = 2$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Modelling TRLC}{Decimals}
+  Options:
+  \begin{itemize}
+  \item Beg CVC5 developers for a Decimal extension (I tried)
+    \pause
+  \item Model as a pair of reals $value = \frac{a}{b}$ and say:
+    \begin{itemize}
+    \item $b > 0$
+    \item $\exists n \in \mathbb{N} | b = 10^n$
+    \end{itemize}
+    \pause
+  \item This is awful because:
+    \begin{itemize}
+    \item $\mathbb{N} / \mathbb{R}$ conversions
+    \item power is basically unsupported
+    \item existential quantification
+    \item nonlinear division everywhere
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Modelling TRLC}{Decimals}
+  Options:
+  \begin{itemize}
+  \item Rational with restricted precision $value = \frac{a}{b}$
+    \begin{itemize}
+    \item E.g. $b \in \{1, 10, 100, 1000, 10000, 100000\}$ for 5
+      decimal digits
+    \item This is an under-approximation (i.e. not sound)
+    \item nonlinear division everywhere (so still going to suck)
+    \end{itemize}
+    \pause
+  \item \structure{Treat as real} (over-approximation)
+    \begin{itemize}
+    \item Best performance
+    \item You sometimes get impossible counter-examples
+    \end{itemize}
+    (This is what I chose.)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Modelling TRLC}{Decimals}
+  Example of an incorrect counter-example:
+  \begin{lstlisting}[language=TRLC,gobble=4]
+    type T {
+      a Decimal
+    }
+
+    checks T {
+      1.0 / (a + (1.0 / 3.0)) > 0.0, "potato"
+    }
+  \end{lstlisting}
+  \begin{scriptsize}
+\begin{verbatim}
+1.0 / (a + (1.0 / 3.0)) > 0.0, "potato"
+    ^ test2.rsl:8: issue: divisor could be 0.0 [vcg-div-by-zero]
+    | example record_type triggering error:
+    |   T bad_potato {
+    |     a = -1 / 3
+    |   }
+\end{verbatim}
+  \end{scriptsize}
 \end{frame}
 
 \end{document}
