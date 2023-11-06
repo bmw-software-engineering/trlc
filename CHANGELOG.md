@@ -27,6 +27,9 @@ generated in the following situations:
 
 ### 1.2.3-dev
 
+* [TRLC] The deprecated builtin function syntax `trlc:foo` has been
+  removed. You should now use `foo` instead.
+
 * [TRLC] New command-line flag `-I` which can be used to register
   include directories. You can use this to automatically parse a
   minimal set of file. Normally when invoking eg `trlc foo.trlc` this

@@ -349,8 +349,7 @@ class TRLC_Lexer(Lexer_Base):
             # lobster-trace: LRM.Identifier
             kind = "IDENTIFIER"
             while self.nc and (self.is_alnum(self.nc) or
-                               self.nc == "_" or
-                               self.nc == ":"):
+                               self.nc == "_"):
                 self.advance()
 
         elif self.cc in TRLC_Lexer.PUNCTUATION:
