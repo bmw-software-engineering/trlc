@@ -1,0 +1,5 @@
+package Abstract_Leaf_Types
+
+abstract type T {
+  description String
+}

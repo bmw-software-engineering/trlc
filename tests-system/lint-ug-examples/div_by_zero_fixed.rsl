@@ -1,0 +1,13 @@
+package Div_By_Zero_Fixed
+
+type T {
+  x Integer
+  y Integer
+}
+
+checks T {
+  x > 2, fatal "x too small"
+  y > 2, fatal "y too small"
+
+  100 / (113 - x * y) > 0, "example"
+}

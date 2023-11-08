@@ -1,0 +1,13 @@
+package Always_True_Fixed
+
+type T {
+  description optional String
+}
+
+checks T {
+  description != null, "description cannot be empty"
+}
+
+type Q extends T {
+  freeze description = "potato"
+}

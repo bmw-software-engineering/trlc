@@ -1,0 +1,9 @@
+package Array_Index
+
+type T {
+  x Integer [1 .. 10]
+}
+
+checks T {
+  len(x) >= 3 implies x[3] > 0, "too small"
+}

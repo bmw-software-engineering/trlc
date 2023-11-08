@@ -1,0 +1,9 @@
+package Evaluation_Of_Null_Fixed
+
+type Requirement {
+  description optional String
+}
+
+checks Requirement {
+  description != null implies len(description) >= 10, "too short"
+}

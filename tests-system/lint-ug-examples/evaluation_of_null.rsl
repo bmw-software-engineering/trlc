@@ -1,0 +1,9 @@
+package Evaluation_Of_Null
+
+type Requirement {
+  description optional String
+}
+
+checks Requirement {
+  len(description) >= 10, "too short"
+}

@@ -1,0 +1,11 @@
+package Separator_Based_Literal_Ambiguity
+
+tuple T {
+  value_1 Integer
+  separator x
+  value_2 optional Integer
+}
+
+type Q {
+  value T
+}

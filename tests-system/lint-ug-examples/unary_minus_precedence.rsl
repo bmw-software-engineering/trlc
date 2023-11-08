@@ -1,0 +1,13 @@
+package Unary_Minus_Precedence
+
+type T {
+  x Integer
+}
+
+checks T {
+  -x / 3 < 0, "non-obvious meaning"
+
+  (-x) / 3 < 0, "clear meaning"
+
+  -(x / 3) < 0, "clear meaning"
+}

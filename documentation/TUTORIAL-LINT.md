@@ -4,10 +4,10 @@ This is part of the [TRLC Tutorial](TUTORIAL.md).
 
 ## Using the linter
 
-The TRLC tools come with a static analysis tool that can diagnose some
-potential issues with `.rsl` files before they are deployed and
-used. This is enabled by default, but you can turn these off with the
-`--no-lint` option.
+The TRLC tools come with a [static analysis tool](linter.md) that can
+diagnose some potential issues with `.rsl` files before they are
+deployed and used. This is enabled by default, but you can turn these
+off with the `--no-lint` option.
 
 To enable more detailed checks you can also use the `--verify`
 feature, but please note that this is only available on Linux, and

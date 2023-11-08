@@ -1,0 +1,6 @@
+package Weird_Array_Types
+
+type T {
+  x Integer [1 .. 1]
+  y Integer [0 .. 1]
+}

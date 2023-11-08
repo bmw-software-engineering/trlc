@@ -1,0 +1,6 @@
+package Impossible_Array_Types
+
+type T {
+  x Integer [10 .. 3]
+  y Integer [0 .. 0]
+}

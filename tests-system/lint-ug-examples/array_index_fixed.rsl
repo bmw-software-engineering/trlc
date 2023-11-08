@@ -1,0 +1,9 @@
+package Array_Index_Fixed
+
+type T {
+  x Integer [1 .. 10]
+}
+
+checks T {
+  len(x) >= 4 implies x[3] > 0, "too small"
+}

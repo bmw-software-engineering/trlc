@@ -1,0 +1,8 @@
+package Clarify_Final
+
+final type T {
+  x Integer
+}
+
+type Q extends T {
+}
