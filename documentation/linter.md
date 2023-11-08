@@ -289,7 +289,7 @@ type T {
 }
 
 checks T {
-  len(x) >= 0 implies x[3] > 0, "too small"
+  len(x) >= 3 implies x[3] > 0, "too small"
 }
 ```
 
