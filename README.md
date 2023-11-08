@@ -50,6 +50,7 @@ The Python implementation can be used for several purposes:
 * [Lexer/Parser Hierarchy](https://bmw-software-engineering.github.io/trlc/parser_hierarchy.svg)
   (overview over all classes releated to the lexing and parsing of TRLC)
 * [Tool Architecture Overview](documentation/architecture.md)
+* [TRLC Static Checker Slides](https://bmw-software-engineering.github.io/trlc/linter.pdf) (Kinda incomplete, designed to go along with a code walkthrough)
 * [Requirements Coverage Report](https://bmw-software-engineering.github.io/trlc/tracing.html)
 * [Code Coverage Report](https://bmw-software-engineering.github.io/trlc/htmlcov/index.html)
 
