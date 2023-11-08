@@ -58,6 +58,13 @@ jobs:
           make system-tests unit-tests
           make coverage
           mv htmlcov docs
+      - name: Building linter slides
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: documentation
+          root_file: linter.tex
+          post_compile: |
+            mv linter.pdf ../docs
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload artifact
