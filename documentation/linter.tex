@@ -128,7 +128,7 @@ len(description) >= 10, "description too short"
 \end{frame}
 
 \begin{frame}[fragile]{Any complicated semantics can surprising}
-  \begin{lstlisting}[language=TRLC,gobble=6]
+  \begin{lstlisting}[language=TRLC,gobble=4]
     Top_Level_Requirement bad_potato {}
   \end{lstlisting}
   Will produce:
@@ -384,12 +384,11 @@ unsat
   \item Mostly just expressions (e.g. $len(x) + len(y) > 10$)
   \item Control flow is rare, but we have some:
     \begin{itemize}
-    \item and, or, and implies
-    \item membership tests
+    \item and, or, and implies (short-circuit semantics)
+    \item range tests
     \item if expressions
-    \item ordering of checks inside a block
+    \item ordering of (fatal) checks inside a block
     \item checks from parent types before checks from extension
-    \item fatal checks
     \end{itemize}
   \item Interesting cases:
     \begin{itemize}
@@ -744,9 +743,10 @@ unsat
   \item Decimal \only<3->{(SMTLIB Real, over-approximation)}
   \item String (and Markup\_String) \only<4->{(SMTLIB String,
       over-approximation for Markup\_String)}
-  \item User-defined records \only<5->{(SMTLIB Datatypes)}
-  \item User-defined tuples \only<5->{(SMTLIB Datatypes)}
-  \item Arrays consisting out of any of the above \only<6->{(SMTLIB Sequence)}
+  \item Enumerations \only<5->{(SMTLIB Datatypes)}
+  \item User-defined records \only<6->{(SMTLIB Datatypes)}
+  \item User-defined tuples \only<6->{(SMTLIB Datatypes)}
+  \item Arrays consisting out of any of the above \only<7->{(SMTLIB Sequence)}
   \end{itemize}
 \end{frame}
 
