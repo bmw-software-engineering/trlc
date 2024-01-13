@@ -112,6 +112,10 @@ class Node(metaclass=ABCMeta):
         assert isinstance(location, Location)
         self.location = location
 
+    def set_ast_link(self, tok):
+        assert isinstance(tok, Token)
+        tok.ast_link = self
+
     def write_indent(self, indent, message):  # pragma: no cover
         # lobster-exclude: Debugging feature
         assert isinstance(indent, int)
@@ -266,7 +270,9 @@ class Compilation_Unit(Node):
             # We can ignore errors here, because that just means we
             # generate more error later.
             try:
-                self.imports.add(stab.lookup(mh, t_import, Package))
+                a_import = stab.lookup(mh, t_import, Package)
+                self.imports.add(a_import)
+                a_import.set_ast_link(t_import)
             except TRLC_Error:
                 pass
 
@@ -2399,6 +2405,10 @@ class Package(Entity):
         self.write_indent(indent + 1, "Declared_Late: %s" % self.declared_late)
         self.symbols.dump(indent + 1, omit_heading=True)
 
+    def __repr__(self):
+        return "%s<%s>" % (self.__class__.__name__,
+                           self.name)
+
 
 class Composite_Type(Concrete_Type, metaclass=ABCMeta):
     """Abstract base for record and tuple types, as they share some
@@ -2494,6 +2504,11 @@ class Composite_Component(Typed_Entity):
             self.write_indent(indent + 1, "Description: %s" % self.description)
         self.write_indent(indent + 1, "Optional: %s" % self.optional)
         self.write_indent(indent + 1, "Type: %s" % self.n_typ.name)
+
+    def __repr__(self):
+        return "%s<%s>" % (self.__class__.__name__,
+                           self.member_of.fully_qualified_name() + "." +
+                           self.name)
 
 
 class Record_Type(Composite_Type):
@@ -2949,6 +2964,12 @@ class Record_Object(Typed_Entity):
                 ok = False
 
         return ok
+
+    def __repr__(self):
+        return "%s<%s>" % (self.__class__.__name__,
+                           self.n_package.name + "." +
+                           self.n_typ.name + "." +
+                           self.name)
 
 
 class Section(Entity):

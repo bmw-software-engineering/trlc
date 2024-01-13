@@ -30,7 +30,7 @@ from trlc import ast
 from trlc import lint
 from trlc.errors import TRLC_Error, Location, Message_Handler, Kind
 from trlc.parser import Parser
-from trlc.lexer import TRLC_Lexer
+from trlc.lexer import Token_Stream
 from trlc.version import TRLC_VERSION, BUGS_URL
 
 # pylint: disable=unused-import
@@ -160,7 +160,7 @@ class Source_Manager:
         assert isinstance(file_content, str) or file_content is None
         assert isinstance(primary_file, bool)
 
-        lexer = TRLC_Lexer(self.mh, file_name, file_content)
+        lexer = Token_Stream(self.mh, file_name, file_content)
 
         return Parser(mh             = self.mh,
                       stab           = self.stab,

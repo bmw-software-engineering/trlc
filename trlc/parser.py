@@ -330,9 +330,10 @@ class Parser(Parser_Base):
 
         if self.peek("STRING"):
             self.match("STRING")
-            return name, self.ct.value
+            t_descr = self.ct
+            return name, t_descr.value, t_descr
         else:
-            return name, None
+            return name, None, None
 
     def parse_qualified_name(self,
                              scope,
@@ -348,12 +349,14 @@ class Parser(Parser_Base):
         if match_ident:
             self.match("IDENTIFIER")
         sym = scope.lookup(self.mh, self.ct)
+        sym.set_ast_link(self.ct)
 
         if isinstance(sym, ast.Package):
             if not self.cu.is_visible(sym):
                 self.mh.error(self.ct.location,
                               "package must be imported before use")
             self.match("DOT")
+            sym.set_ast_link(self.ct)
             self.match("IDENTIFIER")
             return sym.symbols.lookup(self.mh, self.ct, required_subclass)
         else:
@@ -374,25 +377,35 @@ class Parser(Parser_Base):
     def parse_enum_declaration(self):
         # lobster-trace: LRM.Enumeration_Declaration
         self.match_kw("enum")
-        name, description = self.parse_described_name()
+        t_enum = self.ct
+        name, description, t_description = self.parse_described_name()
 
         enum = ast.Enumeration_Type(name        = name.value,
                                     description = description,
                                     location    = name.location,
                                     package     = self.cu.package)
         self.cu.package.symbols.register(self.mh, enum)
+        enum.set_ast_link(t_enum)
+        enum.set_ast_link(name)
+        if t_description:
+            enum.set_ast_link(t_description)
 
         self.match("C_BRA")
+        enum.set_ast_link(self.ct)
         empty = True
         while not self.peek("C_KET"):
-            name, description = self.parse_described_name()
+            name, description, t_description = self.parse_described_name()
             lit = ast.Enumeration_Literal_Spec(name        = name.value,
                                                description = description,
                                                location    = name.location,
                                                enum        = enum)
+            lit.set_ast_link(name)
+            if t_description:
+                lit.set_ast_link(self.ct)
             empty = False
             enum.literals.register(self.mh, lit)
         self.match("C_KET")
+        enum.set_ast_link(self.ct)
 
         if empty:
             # lobster-trace: LRM.No_Empty_Enumerations
@@ -412,10 +425,11 @@ class Parser(Parser_Base):
         assert isinstance(optional_required, bool)
         assert optional_allowed or not optional_required
 
-        field_name, field_description = self.parse_described_name()
+        field_name, field_description, t_descr = self.parse_described_name()
 
         if optional_required or self.peek_kw("optional"):
             self.match_kw("optional")
+            t_optional = self.ct
             if optional_allowed:
                 field_is_optional = True
             else:
@@ -426,26 +440,37 @@ class Parser(Parser_Base):
         # lobster-trace: LRM.Tuple_Field_Types
         field_type = self.parse_qualified_name(self.default_scope,
                                                ast.Type)
+        comp = ast.Composite_Component(name        = field_name.value,
+                                       description = field_description,
+                                       location    = field_name.location,
+                                       member_of   = n_tuple,
+                                       n_typ       = field_type,
+                                       optional    = field_is_optional)
+        comp.set_ast_link(field_name)
+        if t_descr:
+            comp.set_ast_link(t_descr)
+        if field_is_optional:
+            comp.set_ast_link(t_optional)
 
-        return ast.Composite_Component(
-            name        = field_name.value,
-            description = field_description,
-            location    = field_name.location,
-            member_of   = n_tuple,
-            n_typ       = field_type,
-            optional    = field_is_optional)
+        return comp
 
     def parse_tuple_declaration(self):
         # lobster-trace: LRM.Tuple_Declaration
         self.match_kw("tuple")
-        name, description = self.parse_described_name()
+        t_tuple = self.ct
+        name, description, t_descr = self.parse_described_name()
 
         n_tuple = ast.Tuple_Type(name        = name.value,
                                  description = description,
                                  location    = name.location,
                                  package     = self.cu.package)
 
+        n_tuple.set_ast_link(t_tuple)
+        n_tuple.set_ast_link(name)
+        if t_descr:
+            n_tuple.set_ast_link(t_descr)
         self.match("C_BRA")
+        n_tuple.set_ast_link(self.ct)
 
         n_field = self.parse_tuple_field(
             n_tuple,
@@ -462,6 +487,7 @@ class Parser(Parser_Base):
             if has_separators or self.peek_kw("separator"):
                 has_separators = True
                 self.match_kw("separator")
+                t_sep = self.ct
                 if not separator_allowed:
                     # lobster-trace: LRM.Tuple_Separators_All_Or_None
                     self.mh.error(self.ct.location,
@@ -472,7 +498,10 @@ class Parser(Parser_Base):
                    self.peek("COLON") or \
                    self.peek("SEMICOLON"):
                     self.advance()
-                    n_tuple.add_separator(ast.Separator(self.ct))
+                    sep = ast.Separator(self.ct)
+                    sep.set_ast_link(t_sep)
+                    sep.set_ast_link(self.ct)
+                    n_tuple.add_separator(sep)
             else:
                 separator_allowed = False
             # lobster-trace: LRM.Tuple_Optional_Requires_Separators
@@ -487,6 +516,7 @@ class Parser(Parser_Base):
             optional_required |= n_field.optional
 
         self.match("C_KET")
+        n_tuple.set_ast_link(self.ct)
 
         # Final check to ban tuples with separators containing other
         # tuples.
@@ -510,21 +540,26 @@ class Parser(Parser_Base):
     def parse_record_component(self, n_record):
         assert isinstance(n_record, ast.Record_Type)
 
-        c_name, c_descr = self.parse_described_name()
+        c_name, c_descr, t_descr = self.parse_described_name()
         if self.peek_kw("optional"):
             self.match_kw("optional")
+            t_optional = self.ct
             c_optional = True
         else:
             c_optional = False
         c_typ = self.parse_qualified_name(self.default_scope,
                                           ast.Type)
+        c_typ.set_ast_link(self.ct)
 
         if self.peek("S_BRA"):
             self.match("S_BRA")
+            t_s_bra = self.ct
             self.match("INTEGER")
+            t_lo = self.ct
             a_lo = self.ct.value
             loc_lo = self.ct.location
             self.match("RANGE")
+            t_range = self.ct
             a_loc = self.ct.location
             if self.peek("INTEGER"):
                 self.match("INTEGER")
@@ -535,29 +570,45 @@ class Parser(Parser_Base):
             else:
                 self.mh.error(self.nt.location,
                               "expected INTEGER or * for upper bound")
+            t_hi = self.ct
             loc_hi = self.ct.location
             self.match("S_KET")
+            t_s_ket = self.ct
             c_typ = ast.Array_Type(location     = a_loc,
                                    element_type = c_typ,
                                    lower_bound  = a_lo,
                                    upper_bound  = a_hi,
                                    loc_lower    = loc_lo,
                                    loc_upper    = loc_hi)
+            c_typ.set_ast_link(t_s_bra)
+            c_typ.set_ast_link(t_lo)
+            c_typ.set_ast_link(t_range)
+            c_typ.set_ast_link(t_hi)
+            c_typ.set_ast_link(t_s_ket)
 
-        return ast.Composite_Component(name        = c_name.value,
-                                       description = c_descr,
-                                       location    = c_name.location,
-                                       member_of   = n_record,
-                                       n_typ       = c_typ,
-                                       optional    = c_optional)
+        c_comp = ast.Composite_Component(name        = c_name.value,
+                                         description = c_descr,
+                                         location    = c_name.location,
+                                         member_of   = n_record,
+                                         n_typ       = c_typ,
+                                         optional    = c_optional)
+        c_comp.set_ast_link(c_name)
+        if t_descr:
+            c_comp.set_ast_link(t_descr)
+        if c_optional:
+            c_comp.set_ast_link(t_optional)
+
+        return c_comp
 
     def parse_record_declaration(self):
         if self.peek_kw("abstract"):
             self.match_kw("abstract")
+            t_abstract = self.ct
             is_abstract = True
             is_final    = False
         elif self.peek_kw("final"):
             self.match_kw("final")
+            t_final = self.ct
             is_abstract = False
             is_final    = True
         else:
@@ -565,12 +616,16 @@ class Parser(Parser_Base):
             is_final    = False
 
         self.match_kw("type")
-        name, description = self.parse_described_name()
+        t_type = self.ct
+        name, description, t_description = self.parse_described_name()
 
         if self.peek_kw("extends"):
             self.match_kw("extends")
+            t_extends = self.ct
             root_record = self.parse_qualified_name(self.default_scope,
                                                     ast.Record_Type)
+            root_record.set_ast_link(t_extends)
+            root_record.set_ast_link(self.ct)
         else:
             root_record = None
 
@@ -592,11 +647,21 @@ class Parser(Parser_Base):
                                  n_parent    = root_record,
                                  is_abstract = is_abstract)
         self.cu.package.symbols.register(self.mh, record)
+        if is_abstract:
+            record.set_ast_link(t_abstract)
+        if is_final:
+            record.set_ast_link(t_final)
+        record.set_ast_link(t_type)
+        record.set_ast_link(name)
+        if t_description:
+            record.set_ast_link(t_description)
 
         self.match("C_BRA")
+        record.set_ast_link(self.ct)
         while not self.peek("C_KET"):
             if self.peek_kw("freeze"):
                 self.match_kw("freeze")
+                t_freeze = self.ct
                 self.match("IDENTIFIER")
                 n_comp = record.components.lookup(self.mh,
                                                   self.ct,
@@ -608,8 +673,12 @@ class Parser(Parser_Base):
                         "duplicate freezing of %s, previously frozen at %s" %
                         (n_comp.name,
                          self.mh.cross_file_reference(n_value.location)))
+                n_comp.set_ast_link(t_freeze)
+                n_comp.set_ast_link(self.ct)
                 self.match("ASSIGN")
+                n_comp.set_ast_link(self.ct)
                 n_value = self.parse_value(n_comp.n_typ)
+                n_value.set_ast_link(self.ct)
 
                 record.frozen[n_comp.name] = n_value
 
@@ -623,6 +692,7 @@ class Parser(Parser_Base):
                     record.components.register(self.mh, n_comp)
 
         self.match("C_KET")
+        record.set_ast_link(self.ct)
 
         # Finally mark record final if applicable
         if is_final:
@@ -640,12 +710,14 @@ class Parser(Parser_Base):
             while self.peek_kw("and"):
                 self.match_kw("and")
                 t_op  = self.ct
+                a_op = ast.Binary_Operator.LOGICAL_AND
+                t_op.ast_link = a_op
                 n_rhs = self.parse_relation(scope)
                 n_lhs = ast.Binary_Expression(
                     mh       = self.mh,
                     location = t_op.location,
                     typ      = self.builtin_bool,
-                    operator = ast.Binary_Operator.LOGICAL_AND,
+                    operator = a_op,
                     n_lhs    = n_lhs,
                     n_rhs    = n_rhs)
 
@@ -653,36 +725,42 @@ class Parser(Parser_Base):
             while self.peek_kw("or"):
                 self.match_kw("or")
                 t_op  = self.ct
+                a_op = ast.Binary_Operator.LOGICAL_OR
+                t_op.ast_link = a_op
                 n_rhs = self.parse_relation(scope)
                 n_lhs = ast.Binary_Expression(
                     mh       = self.mh,
                     location = t_op.location,
                     typ      = self.builtin_bool,
-                    operator = ast.Binary_Operator.LOGICAL_OR,
+                    operator = a_op,
                     n_lhs    = n_lhs,
                     n_rhs    = n_rhs)
 
         elif self.peek_kw("xor"):
             self.match_kw("xor")
             t_op  = self.ct
+            a_op = ast.Binary_Operator.LOGICAL_XOR
+            t_op.ast_link = a_op
             n_rhs = self.parse_relation(scope)
             n_lhs = ast.Binary_Expression(
                 mh       = self.mh,
                 location = t_op.location,
                 typ      = self.builtin_bool,
-                operator = ast.Binary_Operator.LOGICAL_XOR,
+                operator = a_op,
                 n_lhs    = n_lhs,
                 n_rhs    = n_rhs)
 
         elif self.peek_kw("implies"):
             self.match_kw("implies")
             t_op  = self.ct
+            a_op = ast.Binary_Operator.LOGICAL_IMPLIES
+            t_op.ast_link = a_op
             n_rhs = self.parse_relation(scope)
             n_lhs = ast.Binary_Expression(
                 mh       = self.mh,
                 location = t_op.location,
                 typ      = self.builtin_bool,
-                operator = ast.Binary_Operator.LOGICAL_IMPLIES,
+                operator = a_op,
                 n_lhs    = n_lhs,
                 n_rhs    = n_rhs)
 
@@ -706,12 +784,14 @@ class Parser(Parser_Base):
            self.nt.value in Parser.COMPARISON_OPERATOR:
             self.match("OPERATOR")
             t_op  = self.ct
+            a_op = relop_mapping[t_op.value]
+            t_op.ast_link = a_op
             n_rhs = self.parse_simple_expression(scope)
             return ast.Binary_Expression(
                 mh       = self.mh,
                 location = t_op.location,
                 typ      = self.builtin_bool,
-                operator = relop_mapping[t_op.value],
+                operator = a_op,
                 n_lhs    = n_lhs,
                 n_rhs    = n_rhs)
 
@@ -726,9 +806,13 @@ class Parser(Parser_Base):
             t_in = self.ct
 
             n_a = self.parse_simple_expression(scope)
+            t_n_a = self.ct
             if self.peek("RANGE"):
                 self.match("RANGE")
+                t_range = self.ct
                 n_b = self.parse_simple_expression(scope)
+                n_b.set_ast_link(self.ct)
+                n_a.set_ast_link(t_n_a)
                 rv  = ast.Range_Test(
                     mh       = self.mh,
                     location = t_in.location,
@@ -736,6 +820,8 @@ class Parser(Parser_Base):
                     n_lhs    = n_lhs,
                     n_lower  = n_a,
                     n_upper  = n_b)
+                rv.set_ast_link(t_range)
+                rv.set_ast_link(t_in)
 
             elif isinstance(n_a.typ, ast.Builtin_String):
                 rv = ast.Binary_Expression(
@@ -745,13 +831,16 @@ class Parser(Parser_Base):
                     operator = ast.Binary_Operator.STRING_CONTAINS,
                     n_lhs    = n_lhs,
                     n_rhs    = n_a)
+                rv.set_ast_link(t_in)
 
             elif isinstance(n_a.typ, ast.Array_Type):
+                a_op = ast.Binary_Operator.ARRAY_CONTAINS
+                t_in.ast_link = a_op
                 rv = ast.Binary_Expression(
                     mh       = self.mh,
                     location = t_in.location,
                     typ      = self.builtin_bool,
-                    operator = ast.Binary_Operator.ARRAY_CONTAINS,
+                    operator = a_op,
                     n_lhs    = n_lhs,
                     n_rhs    = n_a)
 
@@ -762,11 +851,13 @@ class Parser(Parser_Base):
                     " not for %s" % n_a.typ.name)
 
             if t_not is not None:
+                a_unary_op = ast.Unary_Operator.LOGICAL_NOT
+                t_not.ast_link = a_unary_op
                 rv = ast.Unary_Expression(
                     mh        = self.mh,
                     location  = t_not.location,
                     typ       = self.builtin_bool,
-                    operator  = ast.Unary_Operator.LOGICAL_NOT,
+                    operator  = a_unary_op,
                     n_operand = rv)
 
             return rv
@@ -790,6 +881,8 @@ class Parser(Parser_Base):
            self.nt.value in Parser.ADDING_OPERATOR:
             self.match("OPERATOR")
             t_unary = self.ct
+            a_unary = un_add_map[t_unary.value]
+            t_unary.ast_link = a_unary
             has_explicit_brackets = self.peek("BRA")
         else:
             t_unary = None
@@ -809,7 +902,7 @@ class Parser(Parser_Base):
                 mh        = self.mh,
                 location  = t_unary.location,
                 typ       = n_lhs.typ,
-                operator  = un_add_map[t_unary.value],
+                operator  = a_unary,
                 n_operand = n_lhs)
 
         if isinstance(n_lhs.typ, ast.Builtin_String):
@@ -821,12 +914,14 @@ class Parser(Parser_Base):
               self.nt.value in Parser.ADDING_OPERATOR:
             self.match("OPERATOR")
             t_op  = self.ct
+            a_op = bin_add_map[t_op.value]
+            t_op.ast_link = a_op
             n_rhs = self.parse_term(scope)
             n_lhs = ast.Binary_Expression(
                 mh       = self.mh,
                 location = t_op.location,
                 typ      = rtyp,
-                operator = bin_add_map[t_op.value],
+                operator = a_op,
                 n_lhs    = n_lhs,
                 n_rhs    = n_rhs)
 
@@ -846,12 +941,14 @@ class Parser(Parser_Base):
               self.nt.value in Parser.MULTIPLYING_OPERATOR:
             self.match("OPERATOR")
             t_op  = self.ct
+            a_op = mul_map[t_op.value]
+            t_op.ast_link = a_op
             n_rhs = self.parse_factor(scope)
             n_lhs = ast.Binary_Expression(
                 mh       = self.mh,
                 location = t_op.location,
                 typ      = n_lhs.typ,
-                operator = mul_map[t_op.value],
+                operator = a_op,
                 n_lhs    = n_lhs,
                 n_rhs    = n_rhs)
 
@@ -865,22 +962,26 @@ class Parser(Parser_Base):
             self.match_kw("not")
             t_op      = self.ct
             n_operand = self.parse_primary(scope)
+            a_not = ast.Unary_Operator.LOGICAL_NOT
+            t_op.ast_link = a_not
             return ast.Unary_Expression(
                 mh        = self.mh,
                 location  = t_op.location,
                 typ       = self.builtin_bool,
-                operator  = ast.Unary_Operator.LOGICAL_NOT,
+                operator  = a_not,
                 n_operand = n_operand)
 
         elif self.peek_kw("abs"):
             self.match_kw("abs")
             t_op      = self.ct
             n_operand = self.parse_primary(scope)
+            a_abs = ast.Unary_Operator.ABSOLUTE_VALUE
+            t_op.ast_link = a_abs
             return ast.Unary_Expression(
                 mh        = self.mh,
                 location  = t_op.location,
                 typ       = n_operand.typ,
-                operator  = ast.Unary_Operator.ABSOLUTE_VALUE,
+                operator  = a_abs,
                 n_operand = n_operand)
 
         else:
@@ -890,11 +991,13 @@ class Parser(Parser_Base):
                 t_op  = self.ct
                 n_rhs = self.parse_primary(scope)
                 rhs_value = n_rhs.evaluate(self.mh, None)
+                a_binary = ast.Binary_Operator.POWER
+                t_op.ast_link = a_binary
                 n_lhs = ast.Binary_Expression(
                     mh       = self.mh,
                     location = t_op.location,
                     typ      = n_lhs.typ,
-                    operator = ast.Binary_Operator.POWER,
+                    operator = a_binary,
                     n_lhs    = n_lhs,
                     n_rhs    = n_rhs)
                 if rhs_value.value < 0:
@@ -909,36 +1012,49 @@ class Parser(Parser_Base):
         if self.peek("INTEGER"):
             # lobster-trace: LRM.Integer_Values
             self.match("INTEGER")
-            return ast.Integer_Literal(self.ct, self.builtin_int)
+            int_lit = ast.Integer_Literal(self.ct, self.builtin_int)
+            int_lit.set_ast_link(self.ct)
+            return int_lit
 
         elif self.peek("DECIMAL"):
             # lobster-trace: LRM.Decimal_Values
             self.match("DECIMAL")
-            return ast.Decimal_Literal(self.ct, self.builtin_decimal)
+            dec_lit = ast.Decimal_Literal(self.ct, self.builtin_decimal)
+            dec_lit.set_ast_link(self.ct)
+            return dec_lit
 
         elif self.peek("STRING"):
             # lobster-trace: LRM.String_Values
             self.match("STRING")
-            return ast.String_Literal(self.ct, self.builtin_str)
+            string_lit = ast.String_Literal(self.ct, self.builtin_str)
+            string_lit.set_ast_link(self.ct)
+            return string_lit
 
         elif self.peek_kw("true") or self.peek_kw("false"):
             # lobster-trace: LRM.Boolean_Values
             self.match("KEYWORD")
-            return ast.Boolean_Literal(self.ct, self.builtin_bool)
+            bool_lit = ast.Boolean_Literal(self.ct, self.builtin_bool)
+            bool_lit.set_ast_link(self.ct)
+            return bool_lit
 
         elif self.peek_kw("null"):
             self.match_kw("null")
-            return ast.Null_Literal(self.ct)
+            null_lit = ast.Null_Literal(self.ct)
+            null_lit.set_ast_link(self.ct)
+            return null_lit
 
         elif self.peek("BRA"):
             self.match("BRA")
+            t_bra = self.ct
             if self.peek_kw("forall") or self.peek_kw("exists"):
                 rv = self.parse_quantified_expression(scope)
             elif self.peek_kw("if"):
                 rv = self.parse_conditional_expression(scope)
             else:
                 rv = self.parse_expression(scope)
+            rv.set_ast_link(t_bra)
             self.match("KET")
+            rv.set_ast_link(self.ct)
             return rv
 
         else:
@@ -949,9 +1065,11 @@ class Parser(Parser_Base):
 
         if self.peek_kw("forall"):
             self.match_kw("forall")
+            t_quantified = self.ct
             universal = True
         else:
             self.match_kw("exists")
+            t_quantified = self.ct
             universal = False
         loc = self.ct.location
         self.match("IDENTIFIER")
@@ -964,17 +1082,21 @@ class Parser(Parser_Base):
                            pdef.name,
                            self.mh.cross_file_reference(pdef.location)))
         self.match_kw("in")
+        t_in = self.ct
         self.match("IDENTIFIER")
         field = scope.lookup(self.mh, self.ct, ast.Composite_Component)
         n_source = ast.Name_Reference(self.ct.location,
                                       field)
+        n_source.set_ast_link(self.ct)
         if not isinstance(field.n_typ, ast.Array_Type):
             self.mh.error(self.ct.location,
                           "you can only quantify over arrays")
         n_var = ast.Quantified_Variable(t_qv.value,
                                         t_qv.location,
                                         field.n_typ.element_type)
+        n_var.set_ast_link(t_qv)
         self.match("ARROW")
+        t_arrow = self.ct
 
         new_table = ast.Symbol_Table()
         new_table.register(self.mh, n_var)
@@ -982,13 +1104,20 @@ class Parser(Parser_Base):
         n_expr = self.parse_expression(scope)
         scope.pop()
 
-        return ast.Quantified_Expression(mh         = self.mh,
-                                         location   = loc,
-                                         typ        = self.builtin_bool,
-                                         universal  = universal,
-                                         n_variable = n_var,
-                                         n_source   = n_source,
-                                         n_expr     = n_expr)
+        quantified_expression = ast.Quantified_Expression(
+            mh         = self.mh,
+            location   = loc,
+            typ        = self.builtin_bool,
+            universal  = universal,
+            n_variable = n_var,
+            n_source   = n_source,
+            n_expr     = n_expr)
+
+        quantified_expression.set_ast_link(t_quantified)
+        quantified_expression.set_ast_link(t_in)
+        quantified_expression.set_ast_link(t_arrow)
+
+        return quantified_expression
 
     def parse_conditional_expression(self, scope):
         # lobster-trace: LRM.Conditional_Expression
@@ -999,6 +1128,7 @@ class Parser(Parser_Base):
         t_if = self.ct
         if_cond = self.parse_expression(scope)
         self.match_kw("then")
+        t_then = self.ct
         if_expr = self.parse_expression(scope)
         if if_expr.typ is None:
             self.mh.error(if_expr.location,
@@ -1007,17 +1137,23 @@ class Parser(Parser_Base):
 
         rv = ast.Conditional_Expression(location  = t_if.location,
                                         if_action = if_action)
+        if_action.set_ast_link(t_if)
+        if_action.set_ast_link(t_then)
 
         while self.peek_kw("elsif"):
             self.match_kw("elsif")
             t_elsif = self.ct
             elsif_cond = self.parse_expression(scope)
             self.match_kw("then")
+            t_then = self.ct
             elsif_expr = self.parse_expression(scope)
             elsif_action = ast.Action(self.mh, t_elsif, elsif_cond, elsif_expr)
+            elsif_action.set_ast_link(t_elsif)
+            elsif_action.set_ast_link(t_then)
             rv.add_elsif(self.mh, elsif_action)
 
         self.match_kw("else")
+        rv.set_ast_link(self.ct)
         else_expr = self.parse_expression(scope)
         rv.set_else_part(self.mh, else_expr)
 
@@ -1042,14 +1178,22 @@ class Parser(Parser_Base):
 
         # Parse the arguments.
         parameters = []
+        n_name.set_ast_link(self.ct)
         self.match("BRA")
+        n_name.set_ast_link(self.ct)
         while not self.peek("KET"):
-            parameters.append(self.parse_expression(scope))
+            exp = self.parse_expression(scope)
+            if not self.ct.ast_link:
+                exp.set_ast_link(self.ct)
+            parameters.append(exp)
+
             if self.peek("COMMA"):
                 self.match("COMMA")
+                n_name.set_ast_link(self.ct)
             else:
                 break
         self.match("KET")
+        n_name.set_ast_link(self.ct)
 
         # Enforce arity
         if isinstance(n_name, ast.Builtin_Function):
@@ -1184,13 +1328,17 @@ class Parser(Parser_Base):
         # Enum literals are a bit different, so we deal with themq
         # first.
         if isinstance(n_name, ast.Enumeration_Type):
+            n_name.set_ast_link(self.ct)
             self.match("DOT")
+            n_name.set_ast_link(self.ct)
             self.match("IDENTIFIER")
             lit = n_name.literals.lookup(self.mh,
                                          self.ct,
                                          ast.Enumeration_Literal_Spec)
-            return ast.Enumeration_Literal(location = self.ct.location,
-                                           literal  = lit)
+            enum_lit = ast.Enumeration_Literal(location = self.ct.location,
+                                               literal  = lit)
+            enum_lit.set_ast_link(self.ct)
+            return enum_lit
 
         # Anything that remains is either a function call or an actual
         # name. Let's just enforce this for sanity.
@@ -1220,7 +1368,7 @@ class Parser(Parser_Base):
         #        | name '[' expression ']'
         n_name = ast.Name_Reference(location = self.ct.location,
                                     entity   = n_name)
-
+        n_name.set_ast_link(self.ct)
         while self.peek("DOT") or self.peek("S_BRA"):
             if self.peek("DOT"):
                 if not isinstance(n_name.typ, ast.Tuple_Type):
@@ -1230,15 +1378,18 @@ class Parser(Parser_Base):
                                   (n_name.to_string(),
                                    n_name.typ.name))
                 self.match("DOT")
+                t_dot = self.ct
                 self.match("IDENTIFIER")
                 n_field = n_name.typ.components.lookup(self.mh,
                                                        self.ct,
                                                        ast.Composite_Component)
+                n_field.set_ast_link(self.ct)
                 n_name = ast.Field_Access_Expression(
                     mh       = self.mh,
                     location = self.ct.location,
                     n_prefix = n_name,
                     n_field  = n_field)
+                n_name.set_ast_link(t_dot)
 
             elif self.peek("S_BRA"):
                 if not isinstance(n_name.typ, ast.Array_Type):
@@ -1252,12 +1403,15 @@ class Parser(Parser_Base):
                 t_bracket = self.ct
                 n_index = self.parse_expression(scope)
                 self.match("S_KET")
+                a_binary = ast.Binary_Operator.INDEX
+                t_bracket.ast_link = a_binary
+                self.ct.ast_link = a_binary
 
                 n_name = ast.Binary_Expression(
                     mh       = self.mh,
                     location = t_bracket.location,
                     typ      = n_name.typ.element_type,
-                    operator = ast.Binary_Operator.INDEX,
+                    operator = a_binary,
                     n_lhs    = n_name,
                     n_rhs    = n_index)
 
@@ -1265,7 +1419,9 @@ class Parser(Parser_Base):
 
     def parse_check_block(self):
         # lobster-trace: LRM.Check_Block
+        t_severity = None
         self.match_kw("checks")
+        t_checks = self.ct
         self.match("IDENTIFIER")
         # lobster-trace: LRM.Applicable_Types
         # lobster-trace: LRM.Applicable_Components
@@ -1274,11 +1430,14 @@ class Parser(Parser_Base):
                                                  ast.Composite_Type)
         n_check_block = ast.Check_Block(location = self.ct.location,
                                         n_typ    = n_ctype)
+        n_check_block.set_ast_link(t_checks)
+        n_ctype.set_ast_link(self.ct)
         scope = ast.Scope()
         scope.push(self.stab)
         scope.push(self.cu.package.symbols)
         scope.push(n_ctype.components)
         self.match("C_BRA")
+        n_check_block.set_ast_link(self.ct)
         while not self.peek("C_KET"):
             c_expr = self.parse_expression(scope)
             if not isinstance(c_expr.typ, ast.Builtin_Boolean):
@@ -1286,8 +1445,10 @@ class Parser(Parser_Base):
                               "check expression must be Boolean")
 
             self.match("COMMA")
+            t_first_comma = self.ct
             if self.peek("KEYWORD"):
                 self.match("KEYWORD")
+                t_severity = self.ct
                 if self.ct.value not in ("warning", "error", "fatal"):
                     self.mh.error(self.ct.location,
                                   "expected warning|error|fatal")
@@ -1307,6 +1468,7 @@ class Parser(Parser_Base):
             has_anchor    = False
             if self.peek("COMMA"):
                 self.match("COMMA")
+                t_second_comma = self.ct
                 if self.peek("IDENTIFIER"):
                     has_anchor = True
                 elif self.peek("STRING"):
@@ -1318,10 +1480,12 @@ class Parser(Parser_Base):
 
             if has_extrainfo:
                 self.match("STRING")
+                t_extrainfo = self.ct
                 c_extrainfo = self.ct.value
 
                 if self.peek("COMMA"):
                     self.match("COMMA")
+                    t_third_comma = self.ct
                     has_anchor = True
 
             else:
@@ -1329,6 +1493,7 @@ class Parser(Parser_Base):
 
             if has_anchor:
                 self.match("IDENTIFIER")
+                t_anchor = self.ct
                 c_anchor = n_ctype.components.lookup(self.mh,
                                                      self.ct,
                                                      ast.Composite_Component)
@@ -1342,18 +1507,33 @@ class Parser(Parser_Base):
                                 t_message = t_msg,
                                 extrainfo = c_extrainfo)
 
+            n_check.set_ast_link(t_first_comma)
+            if t_severity:
+                n_check.set_ast_link(t_severity)
+            n_check.set_ast_link(t_msg)
+            if c_extrainfo or c_anchor:
+                n_check.set_ast_link(t_second_comma)
+            if c_extrainfo:
+                n_check.set_ast_link(t_extrainfo)
+            if c_anchor:
+                c_anchor.set_ast_link(t_anchor)
+            if c_anchor and c_extrainfo:
+                n_check.set_ast_link(t_third_comma)
+
             n_ctype.add_check(n_check)
             n_check_block.add_check(n_check)
 
             assert scope.size() == 3
 
         self.match("C_KET")
+        n_check_block.set_ast_link(self.ct)
 
         return n_check_block
 
     def parse_section_declaration(self):
         # lobster-trace: LRM.Section_Declaration
         self.match_kw("section")
+        t_section = self.ct
         self.match("STRING")
         if self.section:
             sec = ast.Section(name     = self.ct.value,
@@ -1363,11 +1543,15 @@ class Parser(Parser_Base):
             sec = ast.Section(name     = self.ct.value,
                               location = self.ct.location,
                               parent   = None)
+        sec.set_ast_link(self.ct)
+        sec.set_ast_link(t_section)
         self.section.append(sec)
         self.match("C_BRA")
+        sec.set_ast_link(self.ct)
         while not self.peek("C_KET"):
             self.parse_trlc_entry()
         self.match("C_KET")
+        sec.set_ast_link(self.ct)
         self.section.pop()
 
     def parse_boolean(self):
@@ -1392,15 +1576,18 @@ class Parser(Parser_Base):
                 e_op = (ast.Unary_Operator.PLUS
                         if t_op.value == "+"
                         else ast.Unary_Operator.MINUS)
+                t_op.ast_link = e_op
             else:
                 t_op = None
 
             if isinstance(typ, ast.Builtin_Decimal):
                 self.match("DECIMAL")
                 rv = ast.Decimal_Literal(self.ct, self.builtin_decimal)
+                rv.set_ast_link(self.ct)
             elif isinstance(typ, ast.Builtin_Integer):
                 self.match("INTEGER")
                 rv = ast.Integer_Literal(self.ct, self.builtin_int)
+                rv.set_ast_link(self.ct)
             else:
                 assert False
 
@@ -1420,19 +1607,26 @@ class Parser(Parser_Base):
         elif isinstance(typ, ast.Builtin_String):
             # lobster-trace: LRM.String_Values
             self.match("STRING")
-            return ast.String_Literal(self.ct, self.builtin_str)
+            rv = ast.String_Literal(self.ct, self.builtin_str)
+            rv.set_ast_link(self.ct)
+            return rv
 
         elif isinstance(typ, ast.Builtin_Boolean):
-            return self.parse_boolean()
+            rv = self.parse_boolean()
+            rv.set_ast_link(self.ct)
+            return rv
 
         elif isinstance(typ, ast.Array_Type):
             self.match("S_BRA")
             rv = ast.Array_Aggregate(self.ct.location,
                                      typ)
+            rv.set_ast_link(self.ct)
             while not self.peek("S_KET"):
-                rv.append(self.parse_value(typ.element_type))
+                array_elem = self.parse_value(typ.element_type)
+                rv.append(array_elem)
                 if self.peek("COMMA"):
                     self.match("COMMA")
+                    rv.set_ast_link(self.ct)
                 elif self.peek("S_KET") or self.nt is None:
                     break
                 else:
@@ -1442,6 +1636,7 @@ class Parser(Parser_Base):
                                   fatal = False)
 
             self.match("S_KET")
+            rv.set_ast_link(self.ct)
 
             if len(rv.value) < typ.lower_bound:
                 self.mh.error(self.ct.location,
@@ -1463,10 +1658,12 @@ class Parser(Parser_Base):
         elif isinstance(typ, ast.Enumeration_Type):
             enum = self.parse_qualified_name(self.default_scope,
                                              ast.Enumeration_Type)
+            enum.set_ast_link(self.ct)
             if enum != typ:
                 self.mh.error(self.ct.location,
                               "expected %s" % typ.name)
             self.match("DOT")
+            enum.set_ast_link(self.ct)
             self.match("IDENTIFIER")
             lit = enum.literals.lookup(self.mh,
                                        self.ct,
@@ -1479,8 +1676,11 @@ class Parser(Parser_Base):
             t_name = self.ct
             if self.peek("DOT"):
                 self.match("DOT")
+                t_dot = self.ct
                 self.match("IDENTIFIER")
                 the_pkg = self.stab.lookup(self.mh, t_name, ast.Package)
+                the_pkg.set_ast_link(t_name)
+                the_pkg.set_ast_link(t_dot)
                 if not self.cu.is_visible(the_pkg):
                     self.mh.error(self.ct.location,
                                   "package must be imported before use")
@@ -1492,6 +1692,7 @@ class Parser(Parser_Base):
                                       name     = t_name.value,
                                       typ      = typ,
                                       package  = the_pkg)
+            rv.set_ast_link(t_name)
 
             # We can do an early lookup if the target is known
             if the_pkg.symbols.contains(t_name.value):
@@ -1507,12 +1708,13 @@ class Parser(Parser_Base):
                 if isinstance(n_item, ast.Composite_Component):
                     if next_is_optional and n_item.optional:
                         break
-                    rv.assign(n_item.name,
-                              self.parse_value(n_item.n_typ))
+                    value = self.parse_value(n_item.n_typ)
+                    rv.assign(n_item.name, value)
 
                 elif n_item.token.kind in ("AT", "COLON", "SEMICOLON"):
                     if self.peek(n_item.token.kind):
                         self.match(n_item.token.kind)
+                        n_item.set_ast_link(self.ct)
                     else:
                         next_is_optional = True
 
@@ -1520,6 +1722,7 @@ class Parser(Parser_Base):
                     if self.peek("IDENTIFIER") and \
                        self.nt.value == n_item.token.value:
                         self.match("IDENTIFIER")
+                        n_item.set_ast_link(self.ct)
                     else:
                         next_is_optional = True
 
@@ -1531,6 +1734,7 @@ class Parser(Parser_Base):
         elif isinstance(typ, ast.Tuple_Type) and not typ.has_separators():
             self.match("BRA")
             rv = ast.Tuple_Aggregate(self.ct.location, typ)
+            rv.set_ast_link(self.ct)
 
             first = True
             for n_field in typ.iter_sequence():
@@ -1538,10 +1742,12 @@ class Parser(Parser_Base):
                     first = False
                 else:
                     self.match("COMMA")
+                    rv.set_ast_link(self.ct)
                 rv.assign(n_field.name,
                           self.parse_value(n_field.n_typ))
 
             self.match("KET")
+            rv.set_ast_link(self.ct)
             return rv
 
         else:
@@ -1561,6 +1767,7 @@ class Parser(Parser_Base):
         # lobster-trace: LRM.Section_Declaration
         r_typ = self.parse_qualified_name(self.default_scope,
                                           ast.Record_Type)
+        r_typ.set_ast_link(self.ct)
         if r_typ.is_abstract:
             self.mh.error(self.ct.location,
                           "cannot declare object of abstract record type %s" %
@@ -1574,19 +1781,25 @@ class Parser(Parser_Base):
             section   = self.section[-1] if self.section else None,
             n_package = self.cu.package)
         self.cu.package.symbols.register(self.mh, obj)
+        obj.set_ast_link(self.ct)
 
         self.match("C_BRA")
+        obj.set_ast_link(self.ct)
         while not self.peek("C_KET"):
             self.match("IDENTIFIER")
             comp = r_typ.components.lookup(self.mh,
                                            self.ct,
                                            ast.Composite_Component)
+            comp.set_ast_link(self.ct)
             if r_typ.is_frozen(comp):
                 self.mh.error(self.ct.location,
                               "cannot overwrite frozen component %s" %
                               comp.name)
             self.match("ASSIGN")
+            comp.set_ast_link(self.ct)
             value = self.parse_value(comp.n_typ)
+            if not self.ct.ast_link:
+                value.set_ast_link(self.ct)
             obj.assign(comp, value)
 
         # Check that each non-optional component has been specified
@@ -1602,6 +1815,7 @@ class Parser(Parser_Base):
                          self.mh.cross_file_reference(comp.location)))
 
         self.match("C_KET")
+        obj.set_ast_link(self.ct)
 
         return obj
 
@@ -1621,6 +1835,7 @@ class Parser(Parser_Base):
         # First, parse package indication, declaring the package if
         # needed
         self.match_kw("package")
+        t_pkg = self.ct
         self.match("IDENTIFIER")
 
         if kind == "rsl":
@@ -1651,6 +1866,9 @@ class Parser(Parser_Base):
                     (pkg.name,
                      self.mh.cross_file_reference(pkg.location)))
 
+        pkg.set_ast_link(t_pkg)
+        pkg.set_ast_link(self.ct)
+
         # lobster-trace: LRM.Current_Package
         self.cu.set_package(pkg)
 
@@ -1661,6 +1879,7 @@ class Parser(Parser_Base):
         if kind != "check":
             while self.peek_kw("import"):
                 self.match_kw("import")
+                pkg.set_ast_link(self.ct)
                 self.match("IDENTIFIER")
                 self.cu.add_import(self.mh, self.ct)
 
@@ -1697,6 +1916,10 @@ class Parser(Parser_Base):
 
         self.match_eof()
 
+        for tok in self.lexer.tokens:
+            if tok.kind == "COMMENT":
+                self.cu.package.set_ast_link(tok)
+
         return ok
 
     def parse_check_file(self):
@@ -1730,6 +1953,10 @@ class Parser(Parser_Base):
                     self.skip_until_newline()
 
         self.match_eof()
+
+        for tok in self.lexer.tokens:
+            if tok.kind == "COMMENT":
+                self.cu.package.set_ast_link(tok)
 
         return ok
 
@@ -1772,5 +1999,9 @@ class Parser(Parser_Base):
                     self.skip_until_newline()
 
         self.match_eof()
+
+        for tok in self.lexer.tokens:
+            if tok.kind == "COMMENT":
+                self.cu.package.set_ast_link(tok)
 
         return ok
