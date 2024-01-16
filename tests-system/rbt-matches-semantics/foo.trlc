@@ -1,7 +1,15 @@
 package Foo
 
-T Bar {
-    a = "potato"
-    b = "kitten"
-    c = 1
+T No_Regex_Matches {
+    a = "123456789 abcdefghijklmn"
+    b = "??...kitten_...??"
+    c = "not potato"
+    d = "not Diego"
+}
+
+T All_Regex_Matches {
+    a = "123abc"
+    b = "3_kitten_"
+    c = "potato and tomato sauce"
+    d = "Diego"
 }

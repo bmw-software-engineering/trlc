@@ -3,3 +3,7 @@ package Foo
 T Bar {
     b = "kitten"
 }
+
+T Baz {
+    b = "dog"
+}

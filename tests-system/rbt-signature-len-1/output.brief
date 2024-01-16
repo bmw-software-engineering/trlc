@@ -1,1 +1,1 @@
-rbt-signature-len-1/foo.rsl:11:9: trlc error: expected expression of type Array_Type, got Builtin_Integer instead
+rbt-signature-len-1/foo.rsl:10:9: trlc error: expected expression of type Array_Type, got Builtin_Integer instead
