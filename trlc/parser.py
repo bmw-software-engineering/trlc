@@ -945,6 +945,7 @@ class Parser(Parser_Base):
             return self.parse_name(scope)
 
     def parse_quantified_expression(self, scope):
+        # lobster-trace: LRM.Quantified_Expression
         assert isinstance(scope, ast.Scope)
 
         if self.peek_kw("forall"):
@@ -957,6 +958,7 @@ class Parser(Parser_Base):
         self.match("IDENTIFIER")
         t_qv = self.ct
         if scope.contains(t_qv.value):
+            # lobster-trace: LRM.Quantification_Naming_Scope
             pdef = scope.lookup(self.mh, t_qv)
             self.mh.error(t_qv.location,
                           "shadows %s %s from %s" %
@@ -969,6 +971,7 @@ class Parser(Parser_Base):
         n_source = ast.Name_Reference(self.ct.location,
                                       field)
         if not isinstance(field.n_typ, ast.Array_Type):
+            # lobster-trace: LRM.Quantification_Object
             self.mh.error(self.ct.location,
                           "you can only quantify over arrays")
         n_var = ast.Quantified_Variable(t_qv.value,

@@ -1,0 +1,13 @@
+T Bar {
+  ^^^ rbt-universal-quantification-semantics/foo.trlc:3: check warning: All items must be positive
+{
+  "Bar": {
+    "a": [
+      -1
+    ]
+  },
+  "Kitten": {
+    "a": []
+  }
+}
+Processed 1 model, 0 checks and 1 requirement file and found 1 warning
