@@ -1,0 +1,13 @@
+package Foo
+
+T Bar {
+    a = "[[Bar"
+}
+
+T But {
+    a = "But]]"
+}
+
+T Baz {
+    a = "[[Baz[[But]]]]"
+}

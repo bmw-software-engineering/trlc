@@ -1,0 +1,9 @@
+package Foo
+
+T Bar {
+    a = "[[T]]"
+}
+
+T But {
+    a = "[[But]]"
+}

@@ -27,6 +27,8 @@ from trlc import ast
 
 
 class Markup_Token(Token_Base):
+    # lobster-trace: LRM.Markup_String_Format
+
     KIND = {
         "CHARACTER"          : "character",
         "REFLIST_BEGIN"      : "[[",
@@ -51,6 +53,8 @@ class Markup_Lexer(Nested_Lexer):
         return self.origin_location
 
     def token(self):
+        # lobster-trace: LRM.Markup_String_Errors
+
         if self.in_reflist:
             self.skip_whitespace()
         else:
@@ -217,6 +221,7 @@ class Parser_Base:
 
 
 class Markup_Parser(Parser_Base):
+
     def __init__(self, parent, literal):
         assert isinstance(parent, Parser)
         super().__init__(parent.mh, Markup_Lexer(parent.mh, literal),
@@ -227,6 +232,7 @@ class Markup_Parser(Parser_Base):
         self.references = literal.references
 
     def parse_all_references(self):
+        # lobster-trace: LRM.Markup_String_Late_Reference_Resolution
         while self.nt:
             if self.peek("CHARACTER"):
                 self.advance()
@@ -247,6 +253,9 @@ class Markup_Parser(Parser_Base):
         # lobster-trace: LRM.Qualified_Name
         # lobster-trace: LRM.Valid_Qualifier
         # lobster-trace: LRM.Valid_Name
+        # lobster-trace: LRM.Markup_String_Resolution
+        # lobster-trace: LRM.Markup_String_Types
+
         self.match("REFLIST_IDENTIFIER")
         if self.peek("REFLIST_DOT"):
             package = self.parent.stab.lookup_direct(

@@ -1,0 +1,3 @@
+rbt-markup-string-errors/foo.trlc:4:12: trlc error: expected ]], encountered end-of-string instead
+rbt-markup-string-errors/foo.trlc:8:13: trlc error: opening [[ for this ]] found
+rbt-markup-string-errors/foo.trlc:12:15: trlc error: cannot nest reference lists
