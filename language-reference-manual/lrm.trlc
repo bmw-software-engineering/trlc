@@ -1156,19 +1156,19 @@ section "Names" {
   }
 
   Dynamic_Semantics Startswith_Semantics {
-    text = '''The `startswith` function returns true iff the first
+    text = '''The `startswith` function returns true if the first
               parameter fully contains the second parameter
               at its start.'''
   }
 
   Dynamic_Semantics Endswith_Semantics {
-    text = '''The `endswith` function returns true iff the first parameter
+    text = '''The `endswith` function returns true if the first parameter
               fully contains the second parameter at its
               end.'''
   }
 
   Dynamic_Semantics Matches_Semantics {
-    text = '''The `matches` function returns true iff the first parameter
+    text = '''The `matches` function returns true if the first parameter
               is matched by the regular expression given in
               the second parameter.'''
   }
@@ -1548,14 +1548,14 @@ section "Quantification" {
 
   Dynamic_Semantics Universal_Quantification_Semantics {
     text = '''For universal *(forall)* quantification the final value is
-              true iff all predicates evaluate to
+              true if all predicates evaluate to
               true. *(This means universal quantification
               over an empty array is vacuously true.)*'''
   }
 
   Dynamic_Semantics Existential_Quantification_Semantics {
     text = '''For existential *(exists)* quantification the final value is
-              true iff the predicate evaluate to true at
+              true if the predicate evaluate to true at
               least once. *(This means existential
               quantification over an empty array is
               vacuously false.)*'''

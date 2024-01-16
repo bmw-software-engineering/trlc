@@ -1,0 +1,10 @@
+package Foo
+
+type T {
+    a String
+    A String
+}
+
+checks T {
+    a == A, "a and A are not the same"
+}

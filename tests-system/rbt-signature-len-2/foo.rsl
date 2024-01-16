@@ -1,0 +1,13 @@
+package Foo
+
+type T {
+    a String
+    b Integer
+    c Integer[1..*]
+}
+
+checks T {
+    len(a) > 7, "a must be longer than 7"
+    len(c) > 7, "b must be longer than 7"
+    len(a, c) > 7, "a and c must be longer than 7"
+}

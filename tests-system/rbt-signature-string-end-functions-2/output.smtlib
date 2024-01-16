@@ -1,0 +1,3 @@
+endswith(a, b, "en"), warning "b should end with en", b
+^^^^^^^^ rbt-signature-string-end-functions-2/foo.rsl:13: error: function requires 2 parameters
+Processed 1 model, 0 checks and 1 requirement file and found 1 error

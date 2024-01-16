@@ -1,0 +1,6 @@
+package Foo
+
+T Bar {
+    a = "foo"
+    A = "bar"
+}

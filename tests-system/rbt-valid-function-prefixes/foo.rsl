@@ -1,0 +1,11 @@
+package Foo
+
+type T {
+    a String
+    b Integer
+}
+
+checks T {
+    len(a) > b, error "potato error"
+    size(a) > b, error "potato error"
+}
