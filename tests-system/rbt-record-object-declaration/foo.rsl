@@ -1,0 +1,25 @@
+package Foo
+
+tuple B {
+    a Integer
+    separator @
+    b Integer
+}
+
+enum E {
+    a
+    b
+    c
+}
+
+type Ref {}
+
+type T {
+    tu B
+    array Integer[1..*]
+    integer Integer
+    decimal Decimal
+    string String
+    en E
+    ref Ref
+}

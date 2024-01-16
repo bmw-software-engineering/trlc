@@ -884,7 +884,8 @@ class Array_Aggregate(Expression):
 
     """
     def __init__(self, location, typ):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Record_Object_Declaration
+
         super().__init__(location, typ)
         self.value = []
 
@@ -949,6 +950,8 @@ class Tuple_Aggregate(Expression):
     """
     def __init__(self, location, typ):
         # lobster-trace: LRM.Unspecified_Optional_Components
+        # lobster-trace: LRM.Record_Object_Declaration
+
         super().__init__(location, typ)
         self.value = {n_field.name : Implicit_Null(self, n_field)
                       for n_field in self.typ.components.values()}
@@ -1074,6 +1077,7 @@ class Record_Reference(Expression):
         return Value(self.location, self, self.typ)
 
     def resolve_references(self, mh):
+        # lobster-trace: LRM.References_To_Extensions
         assert isinstance(mh, Message_Handler)
 
         self.target = self.package.symbols.lookup_direct(
@@ -2868,6 +2872,8 @@ class Record_Object(Typed_Entity):
     def __init__(self, name, location, n_typ, section, n_package):
         # lobster-trace: LRM.Section_Declaration
         # lobster-trace: LRM.Unspecified_Optional_Components
+        # lobster-trace: LRM.Record_Object_Declaration
+
         assert isinstance(n_typ, Record_Type)
         assert isinstance(section, Section) or section is None
         assert isinstance(n_package, Package)
@@ -2931,6 +2937,7 @@ class Record_Object(Typed_Entity):
 
     def perform_checks(self, mh):
         # lobster-trace: LRM.Check_Evaluation_Order
+        # lobster-trace: LRM.Evaluation_Of_Checks
         assert isinstance(mh, Message_Handler)
 
         ok = True
@@ -3032,6 +3039,8 @@ class Symbol_Table:
         # lobster-trace: LRM.Duplicate_Types
         # lobster-trace: LRM.Unique_Enumeration_Literals
         # lobster-trace: LRM.Tuple_Unique_Field_Names
+        # lobster-trace: LRM.Unique_Object_Names
+
         assert isinstance(mh, Message_Handler)
         assert isinstance(entity, Entity)
 

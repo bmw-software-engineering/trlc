@@ -1,0 +1,6 @@
+package Foo
+
+type T {
+    a Integer
+    ref T
+}

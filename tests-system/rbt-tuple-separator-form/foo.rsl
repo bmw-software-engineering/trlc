@@ -1,0 +1,17 @@
+package Foo
+
+tuple Tuple {
+    a Integer
+    separator @
+    b Integer
+    separator :
+    c Integer
+    separator ;
+    d optional Integer
+    separator @
+    e optional Integer
+}
+
+type T {
+    tu Tuple
+}

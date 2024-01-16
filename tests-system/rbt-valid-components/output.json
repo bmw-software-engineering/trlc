@@ -1,0 +1,3 @@
+a = 2
+^ rbt-valid-components/foo.trlc:4: error: cannot overwrite frozen component a
+Processed 1 model, 0 checks and 1 requirement file and found 1 error
