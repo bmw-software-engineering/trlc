@@ -1,0 +1,9 @@
+package Foo
+
+type T {
+    b String
+}
+
+checks T {
+    endswith(b, "en"), warning "b should end with en", b
+}
