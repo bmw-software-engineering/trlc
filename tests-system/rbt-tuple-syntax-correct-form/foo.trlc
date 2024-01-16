@@ -1,0 +1,11 @@
+package Foo
+
+T Potato {
+    sep = 1@3
+    nosep = 1,3
+}
+
+T Kitten {
+    sep = (1@5)
+    nosep = (1,3)
+}

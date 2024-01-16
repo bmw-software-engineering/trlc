@@ -457,6 +457,7 @@ class Source_Manager:
         return ok
 
     def resolve_record_references(self):
+        # lobster-trace: LRM.Late_Reference_Checking
         ok = True
         for package in self.stab.values(ast.Package):
             for obj in package.symbols.values(ast.Record_Object):

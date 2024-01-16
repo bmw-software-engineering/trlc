@@ -1,0 +1,5 @@
+nosep = 1,3
+        ^ rbt-tuple-syntax-correct-form/foo.trlc:5: error: expected opening parenthesis '(', encountered integer literal instead
+sep = (1@5)
+      ^ rbt-tuple-syntax-correct-form/foo.trlc:9: error: expected integer literal, encountered opening parenthesis '(' instead
+Processed 1 model, 0 checks and 1 requirement file and found 2 errors

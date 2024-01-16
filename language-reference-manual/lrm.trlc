@@ -1680,8 +1680,10 @@ section "Record object declarations" {
               | STRING
               | qualified_name_RECORD_OBJECT
               | qualified_name_ENUM_TYPE '.' IDENTIFIER_enumeration_literal
-              | '[' [ value { ',' value } ] ']'
+              | array_aggregate
               | tuple_aggregate
+
+      array_aggregate ::= '[' [ value { ',' value } ] ']'
 
       tuple_aggregate ::= '(' value { ',' value } ')'
                         | value { separator_symbol value }
@@ -1776,7 +1778,7 @@ section "Record object declarations" {
               references to R.)*'''
   }
 
-  Static_Semantics Tuple_Checks {
+  Note Tuple_Checks {
     text = '''The checks for a tuple aggregate are immediately evaluated
               after the last value is parsed.'''
   }
@@ -1787,7 +1789,7 @@ section "Record object declarations" {
               may not be declared if its "simplified name"
               clashes with any other "simplified name". A
               "simplified name" is the name converted to
-              lowercase and all underscored removed.'''
+              lowercase and all underscores removed.'''
   }
 
   Note Simplified_Name_Example {

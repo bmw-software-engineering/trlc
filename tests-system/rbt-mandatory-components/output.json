@@ -1,0 +1,3 @@
+T Bar {
+  ^^^ rbt-mandatory-components/foo.trlc:3: error: required component b (see foo.rsl:5) is not defined
+Processed 1 model, 0 checks and 1 requirement file and found 1 error

@@ -1,0 +1,6 @@
+package Foo
+
+type T {
+    a Integer
+    freeze a = 2
+}

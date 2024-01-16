@@ -1,0 +1,11 @@
+package Foo
+
+T Bar {
+    a = 1.0
+    b = ["hello", "world"]
+}
+
+T Kitten {
+    a = 1
+    b = [1, 2, 3]
+}

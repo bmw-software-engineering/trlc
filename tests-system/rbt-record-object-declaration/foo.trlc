@@ -1,0 +1,13 @@
+package Foo
+
+T Potato {
+    tu = 1@3
+    array = [1, 2, 3]
+    string = "hello"
+    integer = +1
+    decimal = -1.0
+    en = E.a
+    ref = Record
+}
+
+Ref Record {}

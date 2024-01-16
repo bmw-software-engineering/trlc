@@ -1,0 +1,2 @@
+rbt-tuple-syntax-correct-form/foo.trlc:5:13: trlc error: expected opening parenthesis '(', encountered integer literal instead
+rbt-tuple-syntax-correct-form/foo.trlc:9:11: trlc error: expected integer literal, encountered opening parenthesis '(' instead

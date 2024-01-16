@@ -1,0 +1,13 @@
+T Bar {
+  ^^^ rbt-evaluation-of-checks/foo.trlc:3: check warning: a should be less than b
+{
+  "Bar": {
+    "a": 3,
+    "b": 2,
+    "tu": {
+      "a": 3,
+      "b": 6
+    }
+  }
+}
+Processed 1 model, 0 checks and 1 requirement file and found 1 warning
