@@ -1,0 +1,5 @@
+(exists item in a => item == 7), warning "there is no 7 in a"
+ ^^^^^^ rbt-existential-quantification-semantics/foo.rsl:8: issue: expression is always true [vcg-always-true]
+T Kitten {
+  ^^^^^^ rbt-existential-quantification-semantics/foo.trlc:7: check warning: there is no 7 in a
+Processed 1 model, 0 checks and 1 requirement file and found 2 warnings

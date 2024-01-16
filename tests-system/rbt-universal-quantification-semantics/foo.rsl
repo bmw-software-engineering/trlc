@@ -1,0 +1,9 @@
+package Foo
+
+type T {
+    a Integer[0..*]
+}
+
+checks T {
+    (forall item in a => item > 0), warning "All items must be positive"
+}

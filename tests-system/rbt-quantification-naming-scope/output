@@ -1,0 +1,3 @@
+(forall a in a => a != 7), warning "No sevens allowed"
+        ^ rbt-quantification-naming-scope/foo.rsl:10: error: shadows Composite_Component a from foo.rsl:4
+Processed 1 model, 0 checks and 0 requirement files and found 1 error
