@@ -492,6 +492,7 @@ class Expression(Node, metaclass=ABCMeta):
     def ensure_type(self, mh, typ):
         # lobster-trace: LRM.Restricted_Null
         # lobster-trace: LRM.Null_Is_Invalid
+
         assert isinstance(typ, (type, Type))
         if self.typ is None:
             mh.error(self.location,
@@ -1102,6 +1103,8 @@ class Record_Reference(Expression):
 
 class Name_Reference(Expression):
     # lobster-trace: LRM.Qualified_Name
+    # lobster-trace: LRM.Static_Regular_Expression
+
     """Reference to a name
 
     Name reference to either a :class:`Composite_Component` or a
@@ -1180,6 +1183,9 @@ class Unary_Expression(Expression):
         # lobster-trace: LRM.Simple_Expression
         # lobster-trace: LRM.Relation
         # lobster-trace: LRM.Factor
+        # lobster-trace: LRM.Signature_Len
+        # lobster-trace: LRM.Signature_Type_Conversion
+
         super().__init__(location, typ)
         assert isinstance(mh, Message_Handler)
         assert isinstance(operator, Unary_Operator)
@@ -1238,6 +1244,12 @@ class Unary_Expression(Expression):
 
     def evaluate(self, mh, context):
         # lobster-trace: LRM.Null_Is_Invalid
+        # lobster-trace: LRM.Signature_Len
+        # lobster-trace: LRM.Signature_Type_Conversion
+        # lobster-trace: LRM.Len_Semantics
+        # lobster-trace: LRM.Integer_Conversion_Semantics
+        # lobster-trace: LRM.Decimal_Conversion_Semantics
+
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
 
@@ -1349,6 +1361,9 @@ class Binary_Expression(Expression):
         # lobster-trace: LRM.Simple_Expression
         # lobster-trace: LRM.Term
         # lobster-trace: LRM.Factor
+        # lobster-trace: LRM.Signature_String_End_Functions
+        # lobster-trace: LRM.Signature_Matches
+
         super().__init__(location, typ)
         assert isinstance(mh, Message_Handler)
         assert isinstance(operator, Binary_Operator)
@@ -1479,6 +1494,12 @@ class Binary_Expression(Expression):
     def evaluate(self, mh, context):
         # lobster-trace: LRM.Null_Equivalence
         # lobster-trace: LRM.Null_Is_Invalid
+        # lobster-trace: LRM.Signature_String_End_Functions
+        # lobster-trace: LRM.Signature_Matches
+        # lobster-trace: LRM.Startswith_Semantics
+        # lobster-trace: LRM.Endswith_Semantics
+        # lobster-trace: LRM.Matches_Semantics
+
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
 
@@ -3233,6 +3254,9 @@ class Symbol_Table:
                       simplified=False):
         # lobster-trace: LRM.Described_Name_Equality
         # lobster-trace: LRM.Sufficiently_Distinct
+        # lobster-trace: LRM.Valid_Base_Names
+        # lobster-trace: LRM.Valid_Access_Prefixes
+        # lobster-trace: LRM.Valid_Function_Prefixes
         """Retrieve an object from the table
 
         For example::
@@ -3361,6 +3385,10 @@ class Symbol_Table:
         # lobster-trace: LRM.Builtin_Types
         # lobster-trace: LRM.Builtin_Functions
         # lobster-trace: LRM.Builtin_Type_Conversion_Functions
+        # lobster-trace: LRM.Signature_Len
+        # lobster-trace: LRM.Signature_String_End_Functions
+        # lobster-trace: LRM.Signature_Matches
+
         stab = Symbol_Table()
         stab.register(mh, Builtin_Integer())
         stab.register(mh, Builtin_Decimal())

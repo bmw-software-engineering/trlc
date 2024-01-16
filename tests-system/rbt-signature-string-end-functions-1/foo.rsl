@@ -1,0 +1,14 @@
+package Foo
+
+type T {
+    a String
+    b String
+    c Integer
+}
+
+checks T {
+    startswith(a, "po"), warning "a should start with po", a
+    startswith(b, "po"), warning "b should start with po", b
+    endswith(c, "en"), warning "a should end with en", c
+    endswith(b, "en"), warning "b should end with en", b
+}

@@ -1238,6 +1238,7 @@ class Parser(Parser_Base):
         elif n_name.name == "matches":
             parameters[1].ensure_type(self.mh, ast.Builtin_String)
             try:
+                # lobster-trace: LRM.Static_Regular_Expression
                 # scope is None on purpose to enforce static context
                 value = parameters[1].evaluate(self.mh, None)
                 assert isinstance(value.typ, ast.Builtin_String)
@@ -1285,6 +1286,9 @@ class Parser(Parser_Base):
                             "unexpected builtin")
 
     def parse_name(self, scope):
+        # lobster-trace: LRM.Names
+        # lobster-trace: LRM.Case_Sensitive
+
         # This is a bit more complex. The grammar is:
         #
         # qualified_name ::= [ IDENTIFIER_package_name '.' ] IDENTIFIER_name
@@ -1369,6 +1373,7 @@ class Parser(Parser_Base):
         while self.peek("DOT") or self.peek("S_BRA"):
             if self.peek("DOT"):
                 if not isinstance(n_name.typ, ast.Tuple_Type):
+                    # lobster-trace: LRM.Valid_Index_Prefixes
                     self.mh.error(n_name.location,
                                   "expression '%s' has type %s, "
                                   "which is not a tuple" %

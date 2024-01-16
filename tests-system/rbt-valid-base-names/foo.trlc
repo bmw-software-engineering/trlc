@@ -1,0 +1,10 @@
+package Foo
+import Bar
+
+T potato {
+    a = 1
+}
+
+Bar.T kitten {
+    a = 1
+}
