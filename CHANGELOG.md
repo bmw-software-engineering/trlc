@@ -61,6 +61,9 @@ generated in the following situations:
   delivered file content. The lexer attempted to open the file instead
   of using the empty string passed to the constructor.
 
+* [TRLC] Fix a bug in the verifier mistranslating existential
+  quantifiers. This could both lead to false alarms and missed bugs.
+
 ### 1.2.2
 
 * [API] Add callbacks to the

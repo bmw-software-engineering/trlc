@@ -1406,18 +1406,23 @@ class VCG:
         b_value, _ = self.tr_expression(n_expr.n_expr)
         self.functional = temp
 
-        value = smt.Quantifier(
-            "forall" if n_expr.universal else "exists",
-            [s_q_idx],
-            smt.Implication(
-                smt.Conjunction(
-                    smt.Comparison(">=",
-                                   s_q_idx,
-                                   smt.Integer_Literal(0)),
-                    smt.Comparison("<",
-                                   s_q_idx,
-                                   smt.Sequence_Length(s_subject_value))),
-                b_value))
+        bounds_expr = smt.Conjunction(
+            smt.Comparison(">=",
+                           s_q_idx,
+                           smt.Integer_Literal(0)),
+            smt.Comparison("<",
+                           s_q_idx,
+                           smt.Sequence_Length(s_subject_value)))
+        if n_expr.universal:
+            value = smt.Quantifier(
+                "forall",
+                [s_q_idx],
+                smt.Implication(bounds_expr, b_value))
+        else:
+            value = smt.Quantifier(
+                "exists",
+                [s_q_idx],
+                smt.Conjunction(bounds_expr, b_value))
 
         return value, smt.Boolean_Literal(True)
 
