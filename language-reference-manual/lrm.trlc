@@ -1783,7 +1783,7 @@ section "Record object declarations" {
               after the last value is parsed.'''
   }
 
-  Name_Resolution Sufficiently_Distinct {
+  /*Name_Resolution Sufficiently_Distinct {
     text = '''When declaring record objects there are wider rules that
               indicate name clashes. Specifically a record
               may not be declared if its "simplified name"
@@ -1803,7 +1803,7 @@ section "Record object declarations" {
   Note Simplified_Name_Rationale {
     text = '''The purpose of this rule is to avoid requirements that
               have hard to distinguish names.'''
-  }
+  }*/
 
   Recommendation Record_Object_API {
     text = '''When exposing record instances through the API, it is
