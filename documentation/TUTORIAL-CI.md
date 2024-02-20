@@ -51,9 +51,9 @@ produces additional messages that may be helpful. For example it warns
 you about deprecated language features:
 
 ```
-   len == trlc:len(str), warning "potato", len
-          ^^^^^^^^ legacy.rsl:9: warning: deprecated feature, please use function len instead
-Verified 1 model(s) and check(s) and found 1 warning(s)
+checks MyType {
+       ^^^^^^ enum-ok/checks.check:4: issue: move this check block into bar.rsl:1 [deprecated_feature]
+Processed 1 model, 1 check and 1 requirement file and found 1 warning
 ```
 
 ## Return code

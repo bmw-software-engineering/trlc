@@ -313,10 +313,6 @@ Symbol_Table
    Builtin_Boolean
    Builtin_String
    Builtin_Markup_String
-   Builtin_Function trlc:len
-   Builtin_Function trlc:startswith
-   Builtin_Function trlc:endswith
-   Builtin_Function trlc:matches
    Builtin_Function len
    Builtin_Function startswith
    Builtin_Function endswith
@@ -860,7 +856,7 @@ same assumption about `normal_error_1`, any checks under
 We model types as follows
 
 | TRLC Type        | PyVCG Sort      | SMTLIB Sort |
-|------------------|-----------------|-------------|
+| ---------------- | --------------- | ----------- |
 | Builtin_Boolean  | BUILTIN_BOOLEAN | Bool        |
 | Builtin_Integer  | BUILTIN_INTEGER | Int         |
 | Builtin_Decimal  | BUILTIN_REAL    | Real        |
