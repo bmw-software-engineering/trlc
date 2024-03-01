@@ -116,9 +116,9 @@ class Source_Reference(Location):
         end_line = self.line_no + lines_in_between
 
         end_col = self.end_pos + 1
-        for n in range(self.end_pos, self.col_no, -1):
+        for n in range(self.end_pos, 1, -1):
             if self.lexer.content[n] == "\n":
-                end_col = self.end_pos - n
+                end_col = max(self.end_pos - n, 1)
                 break
 
         return Location(self.file_name, end_line, end_col)
