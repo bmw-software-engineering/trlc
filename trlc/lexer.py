@@ -158,7 +158,7 @@ class Token(Token_Base):
         "STRING"     : "string literal",
     }
 
-    def __init__(self, location, kind, value=None):
+    def __init__(self, location, kind, value=None, ast_link=None):
         assert kind in Token.KIND
         if kind in ("COMMENT", "IDENTIFIER",
                     "KEYWORD", "OPERATOR", "STRING"):
@@ -170,6 +170,7 @@ class Token(Token_Base):
         else:
             assert value is None
         super().__init__(location, kind, value)
+        self.ast_link = ast_link
 
     def __repr__(self):
         if self.value is None:
@@ -185,6 +186,7 @@ class Lexer_Base(metaclass=ABCMeta):
         self.mh        = mh
         self.content   = content
         self.length    = len(self.content)
+        self.tokens    = []
 
         self.lexpos  = -3
         self.line_no = 0
@@ -630,6 +632,15 @@ class TRLC_Lexer(Lexer_Base):
             value = None
 
         return Token(sref, kind, value)
+
+
+class Token_Stream(TRLC_Lexer):
+
+    def token(self):
+        tok = super().token()
+        if tok is not None:
+            self.tokens.append(tok)
+        return tok
 
 
 def sanity_test():
