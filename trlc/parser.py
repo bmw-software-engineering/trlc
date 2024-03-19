@@ -1835,16 +1835,6 @@ class Parser(Parser_Base):
             self.stab.register(self.mh, pkg)
         else:
             pkg = self.stab.lookup(self.mh, self.ct, ast.Package)
-            if pkg.declared_late and kind == "trlc":
-                # lobster-trace: LRM.Duplicate_Late_Packages
-                self.mh.warning(
-                    self.ct.location,
-                    "duplicate late declaration of package %s,"
-                    " previous declaration in %s;"
-                    " consider adding an rsl file declaring the"
-                    " package" %
-                    (pkg.name,
-                     self.mh.cross_file_reference(pkg.location)))
 
         pkg.set_ast_link(t_pkg)
         pkg.set_ast_link(self.ct)
