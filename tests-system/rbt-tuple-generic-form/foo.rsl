@@ -1,0 +1,11 @@
+package Foo
+
+tuple Tuple {
+    a Integer
+    b Integer
+    c Integer
+}
+
+type T {
+    tu Tuple
+}

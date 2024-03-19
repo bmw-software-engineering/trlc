@@ -1,0 +1,11 @@
+package Foo
+
+enum Enum {
+    A
+    B
+    C
+}
+
+type T {
+    en Enum
+}

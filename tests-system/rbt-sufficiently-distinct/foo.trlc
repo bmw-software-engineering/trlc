@@ -1,0 +1,17 @@
+package Foo
+
+T_Bar Bar_Kitten {
+    a = 1
+}
+
+T_Bar bar_kitten {
+    a = 2
+}
+
+tbar Foo_Bar {
+    b = 3
+}
+
+tbar foobar {
+    b = 4
+}
