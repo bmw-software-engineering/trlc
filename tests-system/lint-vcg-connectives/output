@@ -13,4 +13,4 @@ y == -5 implies c, "wibble"
                 |     y = -5
                 |     /* c is null */
                 |   }
-Processed 2 models, 0 checks and 0 requirement files and found 2 warnings
+Processed 2 models, and 0 requirement files and found 2 warnings

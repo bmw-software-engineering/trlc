@@ -2,4 +2,4 @@ a = "potato"
     ^^^^^^^^ rbt-check-evaluation-order-for-extensions/bar.trlc:4: check warning: a has to be more than 7 chars
 a = "potato"
     ^^^^^^^^ rbt-check-evaluation-order-for-extensions/bar.trlc:4: check error: a has to be more than 10 chars
-Processed 2 models, 0 checks and 1 requirement file and found 1 warning and 1 error
+Processed 2 models, and 1 requirement file and found 1 warning and 1 error

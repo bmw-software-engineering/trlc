@@ -1,3 +1,1 @@
-checks MyType {
-       ^^^^^^ simple/checks.check:3: issue: move this check block into bar.rsl:1 [deprecated_feature]
-Processed 2 models, 1 check and 1 requirement file and found 1 warning
+Processed 2 models, and 1 requirement file and found no issues

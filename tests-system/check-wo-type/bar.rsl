@@ -11,3 +11,7 @@ type MyType {
    status  Status
 
  }
+  checks {
+      status == bar.Status.NEW , error "Status must be NEW"
+  }
+

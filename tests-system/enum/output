@@ -1,7 +1,5 @@
-checks MyType {
-       ^^^^^^ enum/checks.check:2: issue: move this check block into bar.rsl:1 [deprecated_feature]
 status != null , "Internal error when evaluating enum value"
-       ^^ enum/checks.check:4: issue: expression is always true [vcg-always-true]
+       ^^ enum/bar.rsl:16: issue: expression is always true [vcg-always-true]
 bar.MyType SomeThing {
            ^^^^^^^^^ enum/instances.trlc:4: check error: Status must be NEW
-Processed 1 model, 1 check and 1 requirement file and found 2 warnings and 1 error
+Processed 1 model, and 1 requirement file and found 1 warning and 1 error

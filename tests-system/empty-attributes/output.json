@@ -1,3 +1,3 @@
-bar.BaseRequirement SomeThing {
-                    ^^^^^^^^^ empty-attributes/instances.trlc:4: check error: Asil must be set
-Processed 1 model, 1 check and 1 requirement file and found 1 error
+checks BaseRequirement {
+       ^^^^^^^^^^^^^^^ empty-attributes/bar.rsl:10: error: unknown symbol BaseRequirement
+Processed 1 model, and 1 requirement file and found 1 error

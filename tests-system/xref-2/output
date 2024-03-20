@@ -1,3 +1,3 @@
 link != null implies link.status == bar.Status.NEW, "Must be linked to new"
-                     ^^^^ xref-2/checks.check:4: error: expression 'link' has type MyType, which is not a tuple
-Processed 1 model, 1 check and 1 requirement file and found 1 error
+                     ^^^^ xref-2/bar.rsl:15: error: expression 'link' has type MyType, which is not a tuple
+Processed 1 model, and 1 requirement file and found 1 error

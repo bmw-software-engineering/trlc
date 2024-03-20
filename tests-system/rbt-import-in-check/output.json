@@ -1,3 +1,2 @@
-import Bar
-^^^^^^ rbt-import-in-check/foo.check:3: error: expected keyword checks, encountered keyword import instead
-Processed 2 models, 1 check and 0 requirement files and found 1 error
+{}
+Processed 2 models, and 0 requirement files and found no issues

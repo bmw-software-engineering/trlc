@@ -3,3 +3,7 @@ package Foo
 type T {
    name String
 }
+
+checks T {
+   startswith(name, "potato"), "this is not a good name"
+}

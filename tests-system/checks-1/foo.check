@@ -1,5 +1,0 @@
-package Foo
-
-checks T {
-   a < b, "a must be less than b"
-}

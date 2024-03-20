@@ -1,3 +1,3 @@
 name = 5
        ^ typesystem-1/instances.trlc:5: error: expected string literal, encountered integer literal instead
-Processed 1 model, 0 checks and 1 requirement file and found 1 error
+Processed 1 model, and 1 requirement file and found 1 error

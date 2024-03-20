@@ -1,3 +1,1 @@
-package Foo
-        ^^^ rbt-cannot-declare-in-check-file/foo.check:1: error: unknown symbol Foo
-Processed 0 models, 1 check and 0 requirement files and found 1 error
+Processed 0 models, and 0 requirement files and found no issues

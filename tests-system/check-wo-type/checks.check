@@ -1,5 +1,0 @@
- package bar
-
- checks {
-      status == bar.Status.NEW , error "Status must be NEW"
-  }

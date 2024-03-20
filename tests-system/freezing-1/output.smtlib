@@ -1,3 +1,3 @@
 freeze n = -2
            ^ freezing-1/foo.rsl:16: check warning: n should be positive
-Processed 1 model, 0 checks and 1 requirement file and found 1 warning
+Processed 1 model, and 1 requirement file and found 1 warning

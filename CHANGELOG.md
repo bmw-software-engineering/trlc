@@ -27,6 +27,12 @@ generated in the following situations:
 
 ### 1.2.3-dev
 
+* [LRM, TRLC] Remove checks block in the .check files. 
+  This means you don't need to have a separate check file,
+  allowing you to implement your checks in .rsl file.
+
+* [TRLC] Remove deprecated feature in check files.
+
 * [TRLC] A warning is not issued by the tools when encountering
   duplicate late package declarations.
   

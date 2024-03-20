@@ -1,3 +1,3 @@
 freeze a = 3
        ^ freezing-2/foo.rsl:6: error: duplicate freezing of a, previously frozen at foo.rsl:5
-Processed 1 model, 0 checks and 0 requirement files and found 1 error
+Processed 1 model, and 0 requirement files and found 1 error
