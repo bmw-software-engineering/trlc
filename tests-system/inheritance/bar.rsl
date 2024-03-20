@@ -9,3 +9,6 @@
     type Type2 extends bar.MyType {
     	length Integer
     }
+     checks Type2 {
+     len(name) == length, error "name must have specific length" , name
+     }

@@ -11,3 +11,7 @@ type MyType {
     status optional Status
      link optional MyType
  }
+  checks MyType {
+
+     link != null , "Must be linked"
+  }

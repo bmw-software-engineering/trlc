@@ -1,5 +1,0 @@
- package bar
-
- checks Type2 {
-     len(name) == length, error "name must have specific length" , name
-  }

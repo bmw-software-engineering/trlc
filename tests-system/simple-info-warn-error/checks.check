@@ -1,8 +1,0 @@
-package bar
-
- checks MyType {
-      matches(name, "^D.*"), error "name must start with D", name
-      matches(name, "^E.*"), error "name must start with E", name
-      matches(name, "^W.*"), warning "name must start with W", name
-      matches(name, "^I.*"),  warning "name must start with I", name
-  }

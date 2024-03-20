@@ -1,5 +1,0 @@
-package Foo
-
-checks T {
-   len (txt) == len, warning "length is not as expected", len
-}

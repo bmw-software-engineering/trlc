@@ -29,3 +29,7 @@ type MyType {
     mult String [3..5]
 
  }
+ 
+ checks MyType {
+      len(mult) == 3, "mult must have 3 elements"
+  }

@@ -7,6 +7,9 @@ type MyType {
 type MyType2 extends MyType {
 	middle optional String
 }
+checks MyType {
+      startswith(name, "Q"), "name must start with Q", name
+  }
 
 type MyType3 extends MyType2 {
 

@@ -12,3 +12,7 @@ type MyType {
     status Status
 
  }
+
+  checks MyType {
+      bar.Status.NEW == status , "Status must be NEW"
+  }
