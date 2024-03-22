@@ -1,25 +1,23 @@
-checks MyType {
-       ^^^^^^ simple-info-warn-error/checks.check:3: issue: move this check block into bar.rsl:1 [deprecated_feature]
 matches(name, "^D.*"), error "name must start with D", name
-        ^^^^ simple-info-warn-error/checks.check:4: issue: expression could be null [vcg-evaluation-of-null]
+        ^^^^ simple-info-warn-error/bar.rsl:9: issue: expression could be null [vcg-evaluation-of-null]
            | example record_type triggering error:
            |   MyType bad_potato {
            |     /* name is null */
            |   }
 matches(name, "^E.*"), error "name must start with E", name
-        ^^^^ simple-info-warn-error/checks.check:5: issue: expression could be null [vcg-evaluation-of-null]
+        ^^^^ simple-info-warn-error/bar.rsl:10: issue: expression could be null [vcg-evaluation-of-null]
            | example record_type triggering error:
            |   MyType bad_potato {
            |     /* name is null */
            |   }
 matches(name, "^W.*"), warning "name must start with W", name
-        ^^^^ simple-info-warn-error/checks.check:6: issue: expression could be null [vcg-evaluation-of-null]
+        ^^^^ simple-info-warn-error/bar.rsl:11: issue: expression could be null [vcg-evaluation-of-null]
            | example record_type triggering error:
            |   MyType bad_potato {
            |     /* name is null */
            |   }
 matches(name, "^I.*"),  warning "name must start with I", name
-        ^^^^ simple-info-warn-error/checks.check:7: issue: expression could be null [vcg-evaluation-of-null]
+        ^^^^ simple-info-warn-error/bar.rsl:12: issue: expression could be null [vcg-evaluation-of-null]
            | example record_type triggering error:
            |   MyType bad_potato {
            |     /* name is null */
@@ -48,4 +46,4 @@ name = "BBert"
        ^^^^^^^ simple-info-warn-error/instances.trlc:13: check warning: name must start with W
 name = "BBert"
        ^^^^^^^ simple-info-warn-error/instances.trlc:13: check warning: name must start with I
-Processed 1 model, 1 check and 1 requirement file and found 11 warnings and 6 errors
+Processed 1 model, and 1 requirement file and found 10 warnings and 6 errors

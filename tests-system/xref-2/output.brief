@@ -1,1 +1,1 @@
-xref-2/checks.check:4:24: trlc error: expression 'link' has type MyType, which is not a tuple
+xref-2/bar.rsl:15:24: trlc error: expression 'link' has type MyType, which is not a tuple

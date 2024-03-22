@@ -1,5 +1,3 @@
-checks Requirement {
-       ^^^^^^^^^^^ tutorial-2/example.check:3: issue: move this check block into example.rsl:1 [deprecated_feature]
 description = "potato"
               ^^^^^^^^ tutorial-2/example.trlc:4: check warning: this is not very descriptive
-Processed 1 model, 1 check and 1 requirement file and found 2 warnings
+Processed 1 model, and 1 requirement file and found 1 warning

@@ -1,3 +1,3 @@
 proof, "if this passes then there are no other values for Boolean"
 ^^^^^ rbt-boolean-values/foo.rsl:11: issue: expression is always true [vcg-always-true]
-Processed 1 model, 0 checks and 0 requirement files and found 1 warning
+Processed 1 model, and 0 requirement files and found 1 warning

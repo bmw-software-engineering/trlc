@@ -1,7 +1,5 @@
-checks MyType {
-       ^^^^^^ null-value/checks.check:3: issue: move this check block into bar.rsl:1 [deprecated_feature]
 other != null , "Other must not be null", other
-      ^^ null-value/checks.check:4: issue: expression is always true [vcg-always-true]
+      ^^ null-value/bar.rsl:8: issue: expression is always true [vcg-always-true]
 bar.MyType SomeThing {
            ^^^^^^^^^ null-value/instances.trlc:4: error: required component other (see bar.rsl:5) is not defined
-Processed 1 model, 1 check and 1 requirement file and found 2 warnings and 1 error
+Processed 1 model, and 1 requirement file and found 1 warning and 1 error

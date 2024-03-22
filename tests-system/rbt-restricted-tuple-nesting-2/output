@@ -10,4 +10,4 @@ x = 1 @ "foo"
 ^ rbt-restricted-tuple-nesting-2/foo.trlc:12: error: unknown symbol x
 x = 1 @ 1 @ "foo"
 ^ rbt-restricted-tuple-nesting-2/foo.trlc:16: error: unknown symbol x
-Processed 1 model, 0 checks and 1 requirement file and found 6 errors
+Processed 1 model, and 1 requirement file and found 6 errors

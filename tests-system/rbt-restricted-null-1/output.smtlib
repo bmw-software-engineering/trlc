@@ -2,4 +2,4 @@ null == null, "null is not null"
      ^^ rbt-restricted-null-1/foo.rsl:12: issue: expression is always true [vcg-always-true]
 a = 1
     ^ rbt-restricted-null-1/foo.trlc:4: check error: a is not null
-Processed 1 model, 0 checks and 1 requirement file and found 1 warning and 1 error
+Processed 1 model, and 1 requirement file and found 1 warning and 1 error

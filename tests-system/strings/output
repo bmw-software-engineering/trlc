@@ -1,3 +1,1 @@
-checks T {
-       ^ strings/foo.check:3: issue: move this check block into foo.rsl:1 [deprecated_feature]
-Processed 1 model, 1 check and 1 requirement file and found 1 warning
+Processed 1 model, and 1 requirement file and found no issues

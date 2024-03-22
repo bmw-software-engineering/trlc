@@ -2,4 +2,4 @@
           ^^^^ rbt-restricted-null-2/foo.rsl:14: error: null is not permitted here
 d == (if c then null else d), "not permitted"
                 ^^^^ rbt-restricted-null-2/foo.rsl:18: error: null is not permitted here
-Processed 1 model, 0 checks and 1 requirement file and found 2 errors
+Processed 1 model, and 1 requirement file and found 2 errors

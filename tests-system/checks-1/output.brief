@@ -1,2 +1,2 @@
-checks-1/foo.trlc:3:3: trlc error: rhs of check a < b (foo.check:4) must not be null
+checks-1/foo.trlc:3:3: trlc error: rhs of check a < b (foo.rsl:8) must not be null
 checks-1/foo.trlc:7:3: trlc check error: a must be less than b

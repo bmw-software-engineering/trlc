@@ -2,4 +2,4 @@ name = "Aberx"
        ^^^^^^^ multiple-check-expressions/instances.trlc:5: check error: name must start with Q
 name = "Aberx"
        ^^^^^^^ multiple-check-expressions/instances.trlc:5: check error: name must end with t
-Processed 1 model, 1 check and 1 requirement file and found 2 errors
+Processed 1 model, and 1 requirement file and found 2 errors

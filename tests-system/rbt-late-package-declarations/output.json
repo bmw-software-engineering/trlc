@@ -1,4 +1,4 @@
 package Foo
         ^^^ rbt-late-package-declarations/foo.trlc:1: warning: duplicate late declaration of package Foo, previous declaration in bar.trlc:1; consider adding an rsl file declaring the package
 {}
-Processed 0 models, 0 checks and 3 requirement files and found 1 warning
+Processed 0 models, and 3 requirement files and found 1 warning

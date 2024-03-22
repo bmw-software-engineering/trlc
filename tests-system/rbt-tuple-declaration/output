@@ -8,4 +8,4 @@ baseline  >= 1.0, error "Baseline must be at least 1.0", baseline
        |   }
 cb_link     = 12345      // Equivalent to 12345@null
               ^^^^^ rbt-tuple-declaration/foo.trlc:12: check warning: Please link to a specific version
-Processed 1 model, 0 checks and 1 requirement file and found 2 warnings
+Processed 1 model, and 1 requirement file and found 2 warnings

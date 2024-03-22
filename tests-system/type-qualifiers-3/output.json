@@ -1,3 +1,3 @@
 w Integer
 ^ type-qualifiers-3/foo.rsl:20: error: cannot declare new components in final record type
-Processed 1 model, 0 checks and 0 requirement files and found 1 error
+Processed 1 model, and 0 requirement files and found 1 error
