@@ -1,87 +1,210 @@
-generic.Requirement Item_1 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:4: error: unknown symbol Requirement
-generic.Requirement Item_2 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:8: error: unknown symbol Requirement
-generic.Requirement Item_3 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:13: error: unknown symbol Requirement
-generic.Requirement Item_4 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:18: error: unknown symbol Requirement
-generic.Requirement Item_5 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:23: error: unknown symbol Requirement
-generic.Requirement Item_6 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:28: error: unknown symbol Requirement
-generic.Requirement Item_7 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:33: error: unknown symbol Requirement
-generic.Requirement Item_8 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:38: error: unknown symbol Requirement
-generic.Requirement Item_9 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:43: error: unknown symbol Requirement
-generic.Requirement Item_10 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:47: error: unknown symbol Requirement
-generic.Requirement Item_11 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:52: error: unknown symbol Requirement
-generic.Requirement Item_12 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:57: error: unknown symbol Requirement
-generic.Requirement Item_13 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:62: error: unknown symbol Requirement
-generic.Requirement Item_14 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:67: error: unknown symbol Requirement
-generic.Requirement Item_15 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:72: error: unknown symbol Requirement
-generic.Requirement Item_16 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:77: error: unknown symbol Requirement
-generic.Requirement Item_17 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:82: error: unknown symbol Requirement
-generic.Requirement Item_18 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:87: error: unknown symbol Requirement
-generic.Requirement Item_19 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:92: error: unknown symbol Requirement
-generic.Requirement Item_20 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:97: error: unknown symbol Requirement
-generic.Requirement Item_21 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:102: error: unknown symbol Requirement
-generic.Requirement Item_22 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:107: error: unknown symbol Requirement
-generic.Requirement Item_23 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:111: error: unknown symbol Requirement
-generic.Requirement Item_24 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:116: error: unknown symbol Requirement
-generic.Requirement Item_25 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:121: error: unknown symbol Requirement
-generic.Requirement Item_26 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:126: error: unknown symbol Requirement
-generic.Requirement Item_27 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:131: error: unknown symbol Requirement
-generic.Requirement Item_28 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:136: error: unknown symbol Requirement
-generic.Requirement Item_29 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:141: error: unknown symbol Requirement
-generic.Requirement Item_30 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:146: error: unknown symbol Requirement
-generic.Requirement Item_31 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:151: error: unknown symbol Requirement
-generic.Requirement Item_32 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:156: error: unknown symbol Requirement
-generic.Requirement Item_33 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:161: error: unknown symbol Requirement
-generic.Requirement Item_34 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:166: error: unknown symbol Requirement
-generic.Requirement Item_35 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:171: error: unknown symbol Requirement
-generic.Requirement Item_36 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:176: error: unknown symbol Requirement
-generic.Requirement Item_37 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:181: error: unknown symbol Requirement
-generic.Requirement Item_38 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:186: error: unknown symbol Requirement
-generic.Requirement Item_39 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:191: error: unknown symbol Requirement
-generic.Requirement Item_40 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:196: error: unknown symbol Requirement
-generic.Requirement Item_41 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:201: error: unknown symbol Requirement
-generic.Requirement Item_42 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:206: error: unknown symbol Requirement
-generic.Requirement Item_43 {
-        ^^^^^^^^^^^ large/package_1_1.trlc:211: error: unknown symbol Requirement
-Processed 0 (of 50) models, and 1 (of 159) requirement files and found 43 errors
+Processed 2 (of 50) models, and 5 (of 159) requirement files and found no issues
+> [Included] Model large/generic.rsl (Package generic)
+> [Included] Model large/package_1.rsl (Package package_1)
+> [Excluded] Model large/package_10.rsl (Package package_10)
+> [Excluded] Model large/package_11.rsl (Package package_11)
+> [Excluded] Model large/package_12.rsl (Package package_12)
+> [Excluded] Model large/package_13.rsl (Package package_13)
+> [Excluded] Model large/package_14.rsl (Package package_14)
+> [Excluded] Model large/package_15.rsl (Package package_15)
+> [Excluded] Model large/package_16.rsl (Package package_16)
+> [Excluded] Model large/package_17.rsl (Package package_17)
+> [Excluded] Model large/package_18.rsl (Package package_18)
+> [Excluded] Model large/package_19.rsl (Package package_19)
+> [Excluded] Model large/package_2.rsl (Package package_2)
+> [Excluded] Model large/package_20.rsl (Package package_20)
+> [Excluded] Model large/package_21.rsl (Package package_21)
+> [Excluded] Model large/package_22.rsl (Package package_22)
+> [Excluded] Model large/package_23.rsl (Package package_23)
+> [Excluded] Model large/package_24.rsl (Package package_24)
+> [Excluded] Model large/package_25.rsl (Package package_25)
+> [Excluded] Model large/package_26.rsl (Package package_26)
+> [Excluded] Model large/package_27.rsl (Package package_27)
+> [Excluded] Model large/package_28.rsl (Package package_28)
+> [Excluded] Model large/package_29.rsl (Package package_29)
+> [Excluded] Model large/package_3.rsl (Package package_3)
+> [Excluded] Model large/package_30.rsl (Package package_30)
+> [Excluded] Model large/package_31.rsl (Package package_31)
+> [Excluded] Model large/package_32.rsl (Package package_32)
+> [Excluded] Model large/package_33.rsl (Package package_33)
+> [Excluded] Model large/package_34.rsl (Package package_34)
+> [Excluded] Model large/package_35.rsl (Package package_35)
+> [Excluded] Model large/package_36.rsl (Package package_36)
+> [Excluded] Model large/package_37.rsl (Package package_37)
+> [Excluded] Model large/package_38.rsl (Package package_38)
+> [Excluded] Model large/package_39.rsl (Package package_39)
+> [Excluded] Model large/package_4.rsl (Package package_4)
+> [Excluded] Model large/package_40.rsl (Package package_40)
+> [Excluded] Model large/package_41.rsl (Package package_41)
+> [Excluded] Model large/package_42.rsl (Package package_42)
+> [Excluded] Model large/package_43.rsl (Package package_43)
+> [Excluded] Model large/package_44.rsl (Package package_44)
+> [Excluded] Model large/package_45.rsl (Package package_45)
+> [Excluded] Model large/package_46.rsl (Package package_46)
+> [Excluded] Model large/package_47.rsl (Package package_47)
+> [Excluded] Model large/package_48.rsl (Package package_48)
+> [Excluded] Model large/package_49.rsl (Package package_49)
+> [Excluded] Model large/package_5.rsl (Package package_5)
+> [Excluded] Model large/package_6.rsl (Package package_6)
+> [Excluded] Model large/package_7.rsl (Package package_7)
+> [Excluded] Model large/package_8.rsl (Package package_8)
+> [Excluded] Model large/package_9.rsl (Package package_9)
+> [Excluded] Requirements large/package_10_1.trlc (Package package_10)
+> [Excluded] Requirements large/package_11_1.trlc (Package package_11)
+> [Excluded] Requirements large/package_11_2.trlc (Package package_11)
+> [Excluded] Requirements large/package_11_3.trlc (Package package_11)
+> [Excluded] Requirements large/package_12_1.trlc (Package package_12)
+> [Excluded] Requirements large/package_12_2.trlc (Package package_12)
+> [Excluded] Requirements large/package_12_3.trlc (Package package_12)
+> [Excluded] Requirements large/package_13_1.trlc (Package package_13)
+> [Excluded] Requirements large/package_13_2.trlc (Package package_13)
+> [Excluded] Requirements large/package_14_1.trlc (Package package_14)
+> [Excluded] Requirements large/package_14_2.trlc (Package package_14)
+> [Excluded] Requirements large/package_14_3.trlc (Package package_14)
+> [Excluded] Requirements large/package_14_4.trlc (Package package_14)
+> [Excluded] Requirements large/package_15_1.trlc (Package package_15)
+> [Excluded] Requirements large/package_15_2.trlc (Package package_15)
+> [Excluded] Requirements large/package_16_1.trlc (Package package_16)
+> [Excluded] Requirements large/package_16_2.trlc (Package package_16)
+> [Excluded] Requirements large/package_16_3.trlc (Package package_16)
+> [Excluded] Requirements large/package_16_4.trlc (Package package_16)
+> [Excluded] Requirements large/package_17_1.trlc (Package package_17)
+> [Excluded] Requirements large/package_18_1.trlc (Package package_18)
+> [Excluded] Requirements large/package_19_1.trlc (Package package_19)
+> [Excluded] Requirements large/package_19_2.trlc (Package package_19)
+> [Excluded] Requirements large/package_19_3.trlc (Package package_19)
+> [Excluded] Requirements large/package_19_4.trlc (Package package_19)
+> [Primary]  Requirements large/package_1_1.trlc (Package package_1)
+> [Included] Requirements large/package_1_2.trlc (Package package_1)
+> [Included] Requirements large/package_1_3.trlc (Package package_1)
+> [Included] Requirements large/package_1_4.trlc (Package package_1)
+> [Included] Requirements large/package_1_5.trlc (Package package_1)
+> [Excluded] Requirements large/package_20_1.trlc (Package package_20)
+> [Excluded] Requirements large/package_20_2.trlc (Package package_20)
+> [Excluded] Requirements large/package_21_1.trlc (Package package_21)
+> [Excluded] Requirements large/package_21_2.trlc (Package package_21)
+> [Excluded] Requirements large/package_21_3.trlc (Package package_21)
+> [Excluded] Requirements large/package_21_4.trlc (Package package_21)
+> [Excluded] Requirements large/package_22_1.trlc (Package package_22)
+> [Excluded] Requirements large/package_22_2.trlc (Package package_22)
+> [Excluded] Requirements large/package_22_3.trlc (Package package_22)
+> [Excluded] Requirements large/package_22_4.trlc (Package package_22)
+> [Excluded] Requirements large/package_23_1.trlc (Package package_23)
+> [Excluded] Requirements large/package_23_2.trlc (Package package_23)
+> [Excluded] Requirements large/package_23_3.trlc (Package package_23)
+> [Excluded] Requirements large/package_23_4.trlc (Package package_23)
+> [Excluded] Requirements large/package_23_5.trlc (Package package_23)
+> [Excluded] Requirements large/package_24_1.trlc (Package package_24)
+> [Excluded] Requirements large/package_24_2.trlc (Package package_24)
+> [Excluded] Requirements large/package_25_1.trlc (Package package_25)
+> [Excluded] Requirements large/package_25_2.trlc (Package package_25)
+> [Excluded] Requirements large/package_25_3.trlc (Package package_25)
+> [Excluded] Requirements large/package_25_4.trlc (Package package_25)
+> [Excluded] Requirements large/package_26_1.trlc (Package package_26)
+> [Excluded] Requirements large/package_26_2.trlc (Package package_26)
+> [Excluded] Requirements large/package_27_1.trlc (Package package_27)
+> [Excluded] Requirements large/package_27_2.trlc (Package package_27)
+> [Excluded] Requirements large/package_27_3.trlc (Package package_27)
+> [Excluded] Requirements large/package_27_4.trlc (Package package_27)
+> [Excluded] Requirements large/package_28_1.trlc (Package package_28)
+> [Excluded] Requirements large/package_28_2.trlc (Package package_28)
+> [Excluded] Requirements large/package_28_3.trlc (Package package_28)
+> [Excluded] Requirements large/package_28_4.trlc (Package package_28)
+> [Excluded] Requirements large/package_29_1.trlc (Package package_29)
+> [Excluded] Requirements large/package_29_2.trlc (Package package_29)
+> [Excluded] Requirements large/package_29_3.trlc (Package package_29)
+> [Excluded] Requirements large/package_2_1.trlc (Package package_2)
+> [Excluded] Requirements large/package_2_2.trlc (Package package_2)
+> [Excluded] Requirements large/package_2_3.trlc (Package package_2)
+> [Excluded] Requirements large/package_2_4.trlc (Package package_2)
+> [Excluded] Requirements large/package_2_5.trlc (Package package_2)
+> [Excluded] Requirements large/package_30_1.trlc (Package package_30)
+> [Excluded] Requirements large/package_30_2.trlc (Package package_30)
+> [Excluded] Requirements large/package_30_3.trlc (Package package_30)
+> [Excluded] Requirements large/package_30_4.trlc (Package package_30)
+> [Excluded] Requirements large/package_30_5.trlc (Package package_30)
+> [Excluded] Requirements large/package_31_1.trlc (Package package_31)
+> [Excluded] Requirements large/package_31_2.trlc (Package package_31)
+> [Excluded] Requirements large/package_31_3.trlc (Package package_31)
+> [Excluded] Requirements large/package_31_4.trlc (Package package_31)
+> [Excluded] Requirements large/package_31_5.trlc (Package package_31)
+> [Excluded] Requirements large/package_32_1.trlc (Package package_32)
+> [Excluded] Requirements large/package_32_2.trlc (Package package_32)
+> [Excluded] Requirements large/package_33_1.trlc (Package package_33)
+> [Excluded] Requirements large/package_33_2.trlc (Package package_33)
+> [Excluded] Requirements large/package_34_1.trlc (Package package_34)
+> [Excluded] Requirements large/package_34_2.trlc (Package package_34)
+> [Excluded] Requirements large/package_34_3.trlc (Package package_34)
+> [Excluded] Requirements large/package_34_4.trlc (Package package_34)
+> [Excluded] Requirements large/package_34_5.trlc (Package package_34)
+> [Excluded] Requirements large/package_35_1.trlc (Package package_35)
+> [Excluded] Requirements large/package_36_1.trlc (Package package_36)
+> [Excluded] Requirements large/package_36_2.trlc (Package package_36)
+> [Excluded] Requirements large/package_36_3.trlc (Package package_36)
+> [Excluded] Requirements large/package_36_4.trlc (Package package_36)
+> [Excluded] Requirements large/package_36_5.trlc (Package package_36)
+> [Excluded] Requirements large/package_37_1.trlc (Package package_37)
+> [Excluded] Requirements large/package_37_2.trlc (Package package_37)
+> [Excluded] Requirements large/package_37_3.trlc (Package package_37)
+> [Excluded] Requirements large/package_38_1.trlc (Package package_38)
+> [Excluded] Requirements large/package_38_2.trlc (Package package_38)
+> [Excluded] Requirements large/package_39_1.trlc (Package package_39)
+> [Excluded] Requirements large/package_39_2.trlc (Package package_39)
+> [Excluded] Requirements large/package_39_3.trlc (Package package_39)
+> [Excluded] Requirements large/package_39_4.trlc (Package package_39)
+> [Excluded] Requirements large/package_3_1.trlc (Package package_3)
+> [Excluded] Requirements large/package_3_2.trlc (Package package_3)
+> [Excluded] Requirements large/package_3_3.trlc (Package package_3)
+> [Excluded] Requirements large/package_40_1.trlc (Package package_40)
+> [Excluded] Requirements large/package_40_2.trlc (Package package_40)
+> [Excluded] Requirements large/package_40_3.trlc (Package package_40)
+> [Excluded] Requirements large/package_40_4.trlc (Package package_40)
+> [Excluded] Requirements large/package_41_1.trlc (Package package_41)
+> [Excluded] Requirements large/package_41_2.trlc (Package package_41)
+> [Excluded] Requirements large/package_41_3.trlc (Package package_41)
+> [Excluded] Requirements large/package_41_4.trlc (Package package_41)
+> [Excluded] Requirements large/package_41_5.trlc (Package package_41)
+> [Excluded] Requirements large/package_42_1.trlc (Package package_42)
+> [Excluded] Requirements large/package_43_1.trlc (Package package_43)
+> [Excluded] Requirements large/package_43_2.trlc (Package package_43)
+> [Excluded] Requirements large/package_43_3.trlc (Package package_43)
+> [Excluded] Requirements large/package_44_1.trlc (Package package_44)
+> [Excluded] Requirements large/package_44_2.trlc (Package package_44)
+> [Excluded] Requirements large/package_44_3.trlc (Package package_44)
+> [Excluded] Requirements large/package_44_4.trlc (Package package_44)
+> [Excluded] Requirements large/package_44_5.trlc (Package package_44)
+> [Excluded] Requirements large/package_45_1.trlc (Package package_45)
+> [Excluded] Requirements large/package_45_2.trlc (Package package_45)
+> [Excluded] Requirements large/package_45_3.trlc (Package package_45)
+> [Excluded] Requirements large/package_45_4.trlc (Package package_45)
+> [Excluded] Requirements large/package_45_5.trlc (Package package_45)
+> [Excluded] Requirements large/package_46_1.trlc (Package package_46)
+> [Excluded] Requirements large/package_47_1.trlc (Package package_47)
+> [Excluded] Requirements large/package_47_2.trlc (Package package_47)
+> [Excluded] Requirements large/package_47_3.trlc (Package package_47)
+> [Excluded] Requirements large/package_47_4.trlc (Package package_47)
+> [Excluded] Requirements large/package_47_5.trlc (Package package_47)
+> [Excluded] Requirements large/package_48_1.trlc (Package package_48)
+> [Excluded] Requirements large/package_48_2.trlc (Package package_48)
+> [Excluded] Requirements large/package_48_3.trlc (Package package_48)
+> [Excluded] Requirements large/package_49_1.trlc (Package package_49)
+> [Excluded] Requirements large/package_49_2.trlc (Package package_49)
+> [Excluded] Requirements large/package_49_3.trlc (Package package_49)
+> [Excluded] Requirements large/package_4_1.trlc (Package package_4)
+> [Excluded] Requirements large/package_4_2.trlc (Package package_4)
+> [Excluded] Requirements large/package_4_3.trlc (Package package_4)
+> [Excluded] Requirements large/package_4_4.trlc (Package package_4)
+> [Excluded] Requirements large/package_4_5.trlc (Package package_4)
+> [Excluded] Requirements large/package_5_1.trlc (Package package_5)
+> [Excluded] Requirements large/package_5_2.trlc (Package package_5)
+> [Excluded] Requirements large/package_5_3.trlc (Package package_5)
+> [Excluded] Requirements large/package_5_4.trlc (Package package_5)
+> [Excluded] Requirements large/package_6_1.trlc (Package package_6)
+> [Excluded] Requirements large/package_6_2.trlc (Package package_6)
+> [Excluded] Requirements large/package_7_1.trlc (Package package_7)
+> [Excluded] Requirements large/package_8_1.trlc (Package package_8)
+> [Excluded] Requirements large/package_8_2.trlc (Package package_8)
+> [Excluded] Requirements large/package_8_3.trlc (Package package_8)
+> [Excluded] Requirements large/package_8_4.trlc (Package package_8)
+> [Excluded] Requirements large/package_8_5.trlc (Package package_8)
+> [Excluded] Requirements large/package_9_1.trlc (Package package_9)
