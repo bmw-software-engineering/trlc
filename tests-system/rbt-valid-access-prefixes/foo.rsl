@@ -1,0 +1,22 @@
+package Foo
+
+enum E {
+    A
+    B
+    C
+}
+
+tuple T {
+    first Integer
+    separator @
+    second Integer
+}
+
+type Bar {
+    e E
+    t T
+}
+
+checks Bar {
+    t.first + t.second + t.third !=0, error "sum of tuple elements must not be 0", t
+}
