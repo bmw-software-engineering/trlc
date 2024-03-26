@@ -349,15 +349,15 @@ class Source_Manager:
                     parser = container[file_name]
                     parser.parse_preamble(kind)
                     pkg_name = parser.cu.package.name
-                    if pkg_name + "#rsl" not in graph:
-                        graph[pkg_name + "#rsl"] = set()
-                        graph[pkg_name + "#check"] = set([pkg_name + "#rsl"])
-                        graph[pkg_name + "#trlc"] = set([pkg_name + "#rsl",
-                                                         pkg_name + "#check"])
-                        files[pkg_name + "#rsl"] = set()
-                        files[pkg_name + "#check"] = set()
-                        files[pkg_name + "#trlc"] = set()
-                    files[pkg_name + "#" + kind].add(file_name)
+                    if (pkg_name , "rsl") not in graph:
+                        graph[(pkg_name , "rsl")] = set()
+                        graph[(pkg_name , "check")] = set([(pkg_name , "rsl")])
+                        graph[(pkg_name , "trlc")] = set([(pkg_name , "rsl"),
+                                                         (pkg_name , "check")])
+                        files[(pkg_name , "rsl")] = set()
+                        files[(pkg_name , "check")] = set()
+                        files[(pkg_name , "trlc")] = set()
+                    files[(pkg_name , kind)].add(file_name)
                 except TRLC_Error:
                     ok = False
                     self.files_with_preamble_errors.add(file_name)
@@ -373,18 +373,18 @@ class Source_Manager:
                 pkg_name = parser.cu.package.name
                 parser.cu.resolve_imports(self.mh, self.stab)
 
-                graph[pkg_name + "#" + kind] |= \
-                    {imported_pkg.name + "#" + kind
+                graph[(pkg_name , kind)] |= \
+                    {(imported_pkg.name , kind)
                      for imported_pkg in parser.cu.imports}
 
         # Build closure for our files
-        work_list = {parser.cu.package.name + "#" + "rsl"
+        work_list = {(parser.cu.package.name , "rsl")
                      for parser in self.rsl_files.values()
                      if parser.cu.package and parser.primary}
-        work_list |= {parser.cu.package.name + "#" + "check"
+        work_list |= {(parser.cu.package.name , "check")
                       for parser in self.check_files.values()
                       if parser.cu.package and parser.primary}
-        work_list |= {parser.cu.package.name + "#" + "trlc"
+        work_list |= {(parser.cu.package.name , "trlc")
                       for parser in self.trlc_files.values()
                       if parser.cu.package and parser.primary}
         work_list &= set(graph)
@@ -415,7 +415,7 @@ class Source_Manager:
         ok = True
 
         # Select RSL files that we should parse
-        rsl_map = {parser.cu.package.name + "#rsl": parser
+        rsl_map = {(parser.cu.package.name , "rsl"): parser
                    for parser in self.rsl_files.values()
                    if parser.cu.package and (parser.primary or
                                              parser.secondary)}
