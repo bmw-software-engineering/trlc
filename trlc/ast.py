@@ -1076,6 +1076,7 @@ class Record_Reference(Expression):
         return Value(self.location, self, self.typ)
 
     def resolve_references(self, mh):
+        # lobster-trace: LRM.Markup_String_Late_Reference_Resolution
         assert isinstance(mh, Message_Handler)
 
         self.target = self.package.symbols.lookup_direct(
