@@ -1989,6 +1989,8 @@ class Quantified_Expression(Expression):
                  n_variable,
                  n_source,
                  n_expr):
+        # lobster-trace: LRM.Quantified_Expression
+        # lobster-trace: LRM.Quantification_Type
         super().__init__(location, typ)
         assert isinstance(typ, Builtin_Boolean)
         assert isinstance(universal, bool)
@@ -2020,6 +2022,8 @@ class Quantified_Expression(Expression):
 
     def evaluate(self, mh, context):
         # lobster-trace: LRM.Null_Is_Invalid
+        # lobster-trace: LRM.Universal_Quantification_Semantics
+        # lobster-trace: LRM.Existential_Quantification_Semantics
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
 
