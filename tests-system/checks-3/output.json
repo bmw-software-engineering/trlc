@@ -1,3 +1,3 @@
 a = 5
     ^ checks-3/foo.trlc:8: check error: a must be less than b
-Processed 1 model, and 1 requirement file and found 1 error
+Processed 1 model and 1 requirement file and found 1 error

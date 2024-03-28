@@ -4,4 +4,4 @@ Foo.T Illegal {}
 ^^^ rbt-qualified-name/test2.trlc:4: error: package must be imported before use
 Bar.T Illegal {}
 ^^^ rbt-qualified-name/test3.trlc:4: error: unknown symbol Bar
-Processed 1 model, and 6 requirement files and found 3 errors
+Processed 1 model and 6 requirement files and found 3 errors

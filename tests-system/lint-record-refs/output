@@ -38,4 +38,4 @@ a == b implies x, "potato"
                |     b = Other.T_instance_0
                |     /* x is null */
                |   }
-Processed 4 models, and 0 requirement files and found 5 warnings
+Processed 4 models and 0 requirement files and found 5 warnings

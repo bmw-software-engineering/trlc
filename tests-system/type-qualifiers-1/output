@@ -3,4 +3,4 @@ type T4 extends T3 {
       | Parent record Foo.T3 is final, making this record
       | also final. Marking it explicitly as final
       | clarifies this to casual readers.
-Processed 1 model, and 1 requirement file and found 1 warning
+Processed 1 model and 1 requirement file and found 1 warning

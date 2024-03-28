@@ -513,10 +513,6 @@ class Source_Manager:
             self.callback_parse_end()
             return None
 
-        # Parse check files. At this point we cannot introduce anything
-        # new in terms of packages.
-        # ok &= self.parse_check_files()
-
         if not self.error_recovery and not ok:  # pragma: no cover
             self.callback_parse_end()
             return None
@@ -778,10 +774,6 @@ def main():
                                          total_models,
                                          "model")
 
-        if options.skip_trlc_files:  # pragma: no cover
-            summary += " and"
-        else:
-            summary += ","
         if not options.skip_trlc_files:  # pragma: no cover
             summary += " and %s" % count(parsed_trlc,
                                          total_trlc,

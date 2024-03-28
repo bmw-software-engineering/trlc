@@ -4,4 +4,4 @@ i = 5.2
     ^^^ typesystem-2/foo.trlc:8: error: expected integer literal, encountered decimal literal instead
 d = 5
     ^ typesystem-2/foo.trlc:12: error: expected decimal literal, encountered integer literal instead
-Processed 1 model, and 1 requirement file and found 3 errors
+Processed 1 model and 1 requirement file and found 3 errors

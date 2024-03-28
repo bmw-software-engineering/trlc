@@ -2,4 +2,4 @@ bar.MyType Übergrößenträger {
            ^ unicode/instances.trlc:4: error: unexpected character 'Ü'
 bar.MyType Übergrößenträger {
                  ^ unicode/instances.trlc:4: error: unexpected character 'ö'
-Processed 1 model, and 1 requirement file and found 2 errors
+Processed 1 model and 1 requirement file and found 2 errors
