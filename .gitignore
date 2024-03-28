@@ -16,3 +16,6 @@ dist
 # OSX / VSCode ignores
 .DS_Store
 .idea
+
+# Build-System ignores
+bazel-*

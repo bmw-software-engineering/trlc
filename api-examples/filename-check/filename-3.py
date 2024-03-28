@@ -18,6 +18,8 @@ symbols = sm.process()
 if symbols is None:
     sys.exit(1)
 
+failed = False
+
 # Do something if there are no errors
 for obj in symbols.iter_record_objects():
     values = obj.to_python_dict()
@@ -29,3 +31,8 @@ for obj in symbols.iter_record_objects():
                  message  = "is not a file",
                  fatal    = False,
                  user     = True)
+
+        failed = True
+
+if failed is True:
+    sys.exit(1)
