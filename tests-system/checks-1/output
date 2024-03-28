@@ -9,4 +9,4 @@ T Test_1 {
   ^^^^^^ checks-1/foo.trlc:3: error: rhs of check a < b (foo.rsl:8) must not be null
 T Test_2 {
   ^^^^^^ checks-1/foo.trlc:7: check error: a must be less than b
-Processed 1 model, and 1 requirement file and found 1 warning and 2 errors
+Processed 1 model and 1 requirement file and found 1 warning and 2 errors

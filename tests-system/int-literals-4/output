@@ -1,3 +1,3 @@
 T test1 { v = 0x10.3 }
                   ^ int-literals-4/foo.trlc:3: error: base 16 integer may not contain a decimal point
-Processed 1 model, and 1 requirement file and found 1 error
+Processed 1 model and 1 requirement file and found 1 error

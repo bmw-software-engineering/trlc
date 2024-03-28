@@ -4,4 +4,4 @@ import Baz
        ^^^ preamble-1/baz.rsl:2: error: package Baz cannot import itself
 type T {}
 ^^^^ preamble-1/foo.rsl:1: error: expected keyword package, encountered keyword type instead
-Processed 3 models, and 0 requirement files and found 3 errors
+Processed 3 models and 0 requirement files and found 3 errors

@@ -18,4 +18,4 @@ arr = [42, 42]
       ^ quantifiers/foo.trlc:58: check warning: not everything is 42
 arr = [42, 42]
       ^ quantifiers/foo.trlc:58: check warning: nothing is 42
-Processed 1 model, and 1 requirement file and found 10 warnings
+Processed 1 model and 1 requirement file and found 10 warnings

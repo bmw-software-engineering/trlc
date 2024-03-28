@@ -3,4 +3,4 @@ Requirement Potato {
                  | You must either link this requirement to other requirements
                  | using the derived_from attribute, or you need to set
                  | top_level to true.
-Processed 1 model, and 1 requirement file and found 1 error
+Processed 1 model and 1 requirement file and found 1 error

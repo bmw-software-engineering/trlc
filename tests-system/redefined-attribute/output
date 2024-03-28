@@ -1,3 +1,3 @@
 name = "Xbert" // does start with Q
        ^^^^^^^ redefined-attribute/instances.trlc:5: check error: name must start with Q
-Processed 1 model, and 1 requirement file and found 1 error
+Processed 1 model and 1 requirement file and found 1 error

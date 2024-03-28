@@ -4,4 +4,4 @@ b = "potato"
     ^^^^^^^^ rbt-check-severity-3/foo.trlc:5: check warning: b must be longer than 7
 c = "potatoes"
     ^^^^^^^^^^ rbt-check-severity-3/foo.trlc:6: check warning: c must be longer than 10
-Processed 1 model, and 1 requirement file and found 3 warnings
+Processed 1 model and 1 requirement file and found 3 warnings

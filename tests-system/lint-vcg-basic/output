@@ -52,4 +52,4 @@ a == b % (c + d * 2), "potato"
    |     a = 19
    |     b = 12
    |   }
-Processed 7 models, and 0 requirement files and found 8 warnings
+Processed 7 models and 0 requirement files and found 8 warnings

@@ -2,4 +2,4 @@ status != null , "Internal error when evaluating enum value"
        ^^ enum/bar.rsl:16: issue: expression is always true [vcg-always-true]
 bar.MyType SomeThing {
            ^^^^^^^^^ enum/instances.trlc:4: check error: Status must be NEW
-Processed 1 model, and 1 requirement file and found 1 warning and 1 error
+Processed 1 model and 1 requirement file and found 1 warning and 1 error

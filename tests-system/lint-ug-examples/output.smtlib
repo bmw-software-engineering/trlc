@@ -44,4 +44,4 @@ y Integer [0 .. 1]
                 | be an optional Integer instead.
 abstract type T {
               ^ lint-ug-examples/abstract_leaf_types.rsl:3: issue: abstract type T does not have any extensions [abstract_leaf_types]
-Processed 14 models, and 0 requirement files and found 12 warnings
+Processed 14 models and 0 requirement files and found 12 warnings
