@@ -1,4 +1,0 @@
-package bar
-checks MyType {
-      startswith(name, "Q"), "name must start with Q", name
-  }

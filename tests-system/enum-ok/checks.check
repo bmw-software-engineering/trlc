@@ -1,6 +1,0 @@
-
-package bar
-
- checks MyType {
-      bar.Status.NEW == status , "Status must be NEW"
-  }

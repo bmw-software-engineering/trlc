@@ -1,4 +1,0 @@
-package bar
-checks MyType {
-     1 == 2, "Must fail", name
-  }

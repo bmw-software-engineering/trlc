@@ -1,5 +1,0 @@
- package bar
-
- checks MyType {
-      startsXwith(name, "Q"), error "name must start with Q", name
-  }

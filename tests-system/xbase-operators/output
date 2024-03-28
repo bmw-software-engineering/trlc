@@ -1,5 +1,3 @@
-checks MyType {
-       ^^^^^^ xbase-operators/checks.check:2: issue: move this check block into bar.rsl:1 [deprecated_feature]
 name = "Qbert" // does start with Q
        ^^^^^^^ xbase-operators/instances.trlc:5: check error: Must fail
-Processed 1 model, 1 check and 1 requirement file and found 1 warning and 1 error
+Processed 1 model and 1 requirement file and found 1 error

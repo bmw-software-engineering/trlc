@@ -2,4 +2,4 @@ t = potato
     ^^^^^^ tuples-4/foo.trlc:6: error: lhs of check f2 >= 0 (foo.rsl:12) must not be null
 t = potato@-42
            ^ tuples-4/foo.trlc:14: check warning: potato2
-Processed 1 model, 0 checks and 1 requirement file and found 1 warning and 1 error
+Processed 1 model and 1 requirement file and found 1 warning and 1 error

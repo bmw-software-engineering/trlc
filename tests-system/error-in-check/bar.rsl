@@ -5,3 +5,7 @@
             type MyType {
                name String
             }
+
+             checks MyType {
+              startsXwith(name, "Q"), error "name must start with Q", name
+                }

@@ -1,3 +1,3 @@
 D == I, warning "not equal", D
   ^^ decimal-8/foo.rsl:9: error: type mismatch: Decimal and Integer do not match
-Processed 1 model, 0 checks and 0 requirement files and found 1 error
+Processed 1 model and 0 requirement files and found 1 error

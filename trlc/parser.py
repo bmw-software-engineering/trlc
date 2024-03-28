@@ -1902,44 +1902,6 @@ class Parser(Parser_Base):
 
         return ok
 
-    def parse_check_file(self):
-        # lobster-trace: LRM.Check_File
-        assert self.cu.package is not None
-
-        ok = True
-        while not self.peek_eof():
-            try:
-                n_block = self.parse_check_block()
-                self.cu.add_item(n_block)
-                # lobster-trace: LRM.Deprecated_Check_Files
-                if self.lint_mode:
-                    self.mh.check(
-                        n_block.location,
-                        "move this check block into %s" %
-                        self.mh.cross_file_reference(self.cu.package.location),
-                        "deprecated_feature")
-            except TRLC_Error as err:
-                if not self.error_recovery or err.kind == "lex error":
-                    raise
-
-                ok = False
-
-                # Recovery strategy is to look for the next check
-                # block
-                self.skip_until_newline()
-                # lobster-trace: LRM.Import_In_Check
-                while not self.peek_eof() and not self.peek_kw("checks"):
-                    self.advance()
-                    self.skip_until_newline()
-
-        self.match_eof()
-
-        for tok in self.lexer.tokens:
-            if tok.kind == "COMMENT":
-                self.cu.package.set_ast_link(tok)
-
-        return ok
-
     def parse_trlc_file(self):
         # lobster-trace: LRM.TRLC_File
         assert self.cu.package is not None

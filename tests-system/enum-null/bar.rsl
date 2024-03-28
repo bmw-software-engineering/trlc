@@ -11,3 +11,6 @@ type MyType {
     status optional Status
 
  }
+ checks MyType {
+      status != null , "Status must be not null"
+  }

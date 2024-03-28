@@ -2,4 +2,4 @@ len(s + s + s + s + s + s + s + s + s + s) == 1000,
                                            ^^ rbt-markup-string-values/foo.rsl:10: issue: expression is always true [vcg-always-true]
 s = "not all strings are markup strings: [[ is special"
                                                ^^^^^^^ rbt-markup-string-values/foo.trlc:8: error: expected ]], encountered identifier instead
-Processed 1 model, 0 checks and 1 requirement file and found 1 warning and 1 error
+Processed 1 model and 1 requirement file and found 1 warning and 1 error

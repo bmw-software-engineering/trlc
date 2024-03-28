@@ -3,3 +3,6 @@ import Foo
 
 type T extends Foo.T {
 }
+checks T {
+   endswith(name, "kitten"), "also not a good name"
+}

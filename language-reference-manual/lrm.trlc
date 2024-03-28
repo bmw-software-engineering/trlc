@@ -791,43 +791,6 @@ section "Type declarations" {
 
 }
 
-section "Check Files" {
-
-  Grammar Check_File {
-    text = '''A `.check` file is simply a set of check blocks.'''
-    bnf = '''
-      check_file ::= file_preamble
-                     { check_block }
-      '''
-  }
-
-  Static_Semantics Cannot_Declare_In_Check_File {
-    text = '''It is an error to indicate a package that has not been
-              declared in an `.rsl` file.'''
-  }
-
-  Static_Semantics Import_In_Check {
-    text = '''A check file may not import any packages.'''
-  }
-
-  Recommendation Deprecated_Check_Files {
-    text = '''Check files are a deprecated feature that allows you to
-              specify checks separate from type
-              declarations. While this seems like a good
-              idea at first, in a large project this can
-              create confusion: consider a global definition
-              for your requirement type stored in a central
-              place which everyone is supposed to use. In
-              this example some random user can create in
-              their sub-project a check file that applies to
-              the global definitions, causing hassle for
-              everyone. It is recommended that an
-              implementation suggests moving any check from
-              a `.check` file into the package `.rsl` file.'''
-  }
-
-}
-
 section "Checks" {
 
   Grammar Check_Block {

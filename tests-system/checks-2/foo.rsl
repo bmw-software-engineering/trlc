@@ -4,3 +4,8 @@ type T {
    a          Integer
    b optional Integer
 }
+
+checks T {
+   b != null, fatal "please define b", b
+   a < b, "a must be less than b", a
+}

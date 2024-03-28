@@ -13,3 +13,13 @@
 
 
             }
+
+             checks MyType {
+
+
+               int_ok == 42, error "int must be 42", int_ok
+               int_nok == 42, error "int must be 42", int_nok
+               int_null == null, error "int must be null", int_null
+
+
+               }

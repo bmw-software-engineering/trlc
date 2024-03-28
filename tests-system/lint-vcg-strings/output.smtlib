@@ -4,4 +4,4 @@ c, "potato"
 ^ lint-vcg-strings/test2.rsl:14: issue: expression could be null [vcg-evaluation-of-null]
 c,              warning "potato"
 ^ lint-vcg-strings/test3.rsl:11: issue: expression could be null [vcg-evaluation-of-null]
-Processed 3 models, 0 checks and 0 requirement files and found 3 warnings
+Processed 3 models and 0 requirement files and found 3 warnings

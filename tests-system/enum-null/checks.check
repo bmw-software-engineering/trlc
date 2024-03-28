@@ -1,5 +1,0 @@
-package bar
-
- checks MyType {
-      status != null , "Status must be not null"
-  }

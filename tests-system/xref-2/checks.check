@@ -1,5 +1,0 @@
-package bar
-
-checks MyType {
-  link != null implies link.status == bar.Status.NEW, "Must be linked to new"
-}

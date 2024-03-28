@@ -4,3 +4,7 @@ type T {
    a          Integer
    b optional Integer
 }
+
+checks T {
+   b != null implies a < b, "a must be less than b", a
+}

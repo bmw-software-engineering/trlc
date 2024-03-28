@@ -7,6 +7,10 @@ enum ASIL {
 	C
 	D
 }
+ checks BaseRequirement {
+      asil != null, error "Asil must be set", asil
+
+  }
 
 
 

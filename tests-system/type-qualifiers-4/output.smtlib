@@ -1,3 +1,3 @@
 abstract type T2 {}
               ^^ type-qualifiers-4/foo.rsl:5: issue: abstract type T2 does not have any extensions [abstract_leaf_types]
-Processed 2 models, 0 checks and 0 requirement files and found 1 warning
+Processed 2 models and 0 requirement files and found 1 warning

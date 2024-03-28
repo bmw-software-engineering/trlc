@@ -1,5 +1,0 @@
- package bar
-
- checks MyType {
-      len(mult) == 3, "mult must have 3 elements"
-  }
