@@ -27,6 +27,9 @@ generated in the following situations:
 
 ### 1.2.3-dev
 
+* [TRLC] A warning is not issued by the tools when encountering
+  duplicate late package declarations.
+  
 * [TRLC] The deprecated builtin function syntax `trlc:foo` has been
   removed. You should now use `foo` instead.
 
