@@ -3,4 +3,4 @@ pylint>=2.17
 coverage>=7.2
 sphinx>=7.0
 pyvcg==1.0.6
-cvc5
+cvc5>=1.1.1; sys.platform == "linux" or sys.platform == "darwin"

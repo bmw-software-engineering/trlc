@@ -12,6 +12,7 @@ permissions:
 jobs:
   lint:
     name: PyLint
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +26,6 @@ jobs:
           make lint
   test:
     name: TestSuite
-    needs: lint
     if: success()
     strategy:
       matrix:
@@ -59,8 +59,7 @@ jobs:
         run: |
           brew install python@${{ matrix.py-version }}
           echo "${{ matrix.brew }}/opt/python@${{ matrix.py-version }}/libexec/bin" >> $GITHUB_PATH
-          curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-          python${{ matrix.py-version }} get-pip.py
+          python${{ matrix.py-version }} -m ensurepip
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

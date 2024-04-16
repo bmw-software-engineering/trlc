@@ -5,7 +5,7 @@ if [[ $(git status -s) ]]; then
     git -P diff
     echo "Summary:"
     git status -s
-    exit 0
+    exit 1
 else
     exit 0
 fi
