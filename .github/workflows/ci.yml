@@ -10,58 +10,75 @@ permissions:
   contents: read
 
 jobs:
-
   lint:
     name: PyLint
-    runs-on: ubuntu-20.04
+    needs: test
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.9"
+      - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install pylint pycodestyle
-          pip install --no-deps bmw-lobster-core bmw-lobster-tool-trlc
-      - name: Style check
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pylint pycodestyle
+          python3 -m pip install --no-deps bmw-lobster-core bmw-lobster-tool-trlc
+      - name: Executing linter
         run: |
-          make style
-      - name: Lint
-        run: |
-          make lint -o style
-
+          make lint
   test:
-    name: Test
+    name: TestSuite
+    if: success()
     strategy:
       matrix:
-        py-version: ["3.8", "3.9", "3.10", "3.11"]
-    runs-on: ubuntu-20.04
+        os: [ubuntu-latest, macos-13, macos-14]
+        py-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        include:
+          - os: ubuntu-latest
+            cvc5: "Linux"
+          - os: macos-13
+            brew: "/usr/local"
+            cvc5: "macOS"
+          - os: macos-14
+            brew: "/opt/homebrew"
+            cvc5: "macOS-arm64"
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: supplypike/setup-bin@v3
+      - uses: actions/checkout@v4
+      - name: Install cvc5 binary
+        uses: supplypike/setup-bin@v4
         with:
-          uri: 'https://github.com/cvc5/cvc5/releases/download/cvc5-1.0.8/cvc5-Linux'
+          uri: 'https://github.com/cvc5/cvc5/releases/download/cvc5-1.0.8/cvc5-${{ matrix.cvc5 }}'
           name: 'cvc5'
           version: '1.0.8'
-      - name: Set up Python ${{ matrix.py-version }}
-        uses: actions/setup-python@v3
+      - name: Install python version
+        if: matrix.os != 'macos-14' || matrix.py-version == '3.11' || matrix.py-version == '3.12'
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.py-version }}
+      - name: Install python (3.8, 3.9, 3.10) on macOS-arm64
+        if: matrix.os == 'macos-14' && (matrix.py-version == '3.8' || matrix.py-version == '3.9' || matrix.py-version == '3.10')
+        run: |
+          brew install python@${{ matrix.py-version }}
+          echo "${{ matrix.brew }}/opt/python@${{ matrix.py-version }}/libexec/bin" >> $GITHUB_PATH
+          python${{ matrix.py-version }} -m ensurepip
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - name: Executing system tests
+          python -m pip install -r requirements.txt
+      - name: Install gnu make on macos
+        if: startsWith(matrix.os, 'macos')
         run: |
-          make system-tests
+          brew install make
+          echo "${{ matrix.brew }}/opt/make/libexec/gnubin" >> $GITHUB_PATH
       - name: Executing unit tests
         run: |
           make unit-tests
+      - name: Executing system tests
+        run: |
+          make system-tests-all
       - name: Coverage analysis
         run: |
-          make coverage -o system-tests -o unit-tests
-      - name: Test status
+          make coverage
+      - name: Check output files
+        if: always()
         run: |
           util/check_local_modifications.sh

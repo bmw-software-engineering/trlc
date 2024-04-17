@@ -3,7 +3,6 @@
 lint: style
 	@python3 -m pylint --rcfile=pylint3.cfg \
 		--reports=no \
-		--score=no \
 		trlc trlc*.py lobster-*.py
 
 style:
@@ -60,23 +59,23 @@ package:
 	@python3 setup.py sdist bdist_wheel
 	@python3 setup.py bdist_wheel -p manylinux2014_x86_64
 
-upload_main: package
+upload-main: package
 	python3 -m twine upload --repository pypi dist/*
 
-remove_dev:
+remove-dev:
 	python3 -m util.release
 
-github_release:
+github-release:
 	git push
-	python3 -m util.github_release
+	python3 -m util.github-release
 
 bump:
 	python3 -m util.bump_version_post_release
 
-full_release:
-	make remove_dev
+full-release:
+	make remove-dev
 	git push
-	make github_release
+	make github-release
 	make bump
 	git push
 

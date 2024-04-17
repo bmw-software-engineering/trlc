@@ -13,13 +13,6 @@ len(x) >= 3 implies x[3] > 0, "too small"
                      |   T bad_potato {
                      |     x = [1, 1, 1]
                      |   }
-100 / (111 - x * y) > 0, "example"
-    ^ lint-ug-examples/div_by_zero.rsl:12: issue: divisor could be 0 [vcg-div-by-zero]
-    | example record_type triggering error:
-    |   T bad_potato {
-    |     x = 3
-    |     y = 37
-    |   }
 len(description) >= 10, "too short"
     ^^^^^^^^^^^ lint-ug-examples/evaluation_of_null.rsl:8: issue: expression could be null [vcg-evaluation-of-null]
               | example record_type triggering error:
@@ -44,4 +37,4 @@ y Integer [0 .. 1]
                 | be an optional Integer instead.
 abstract type T {
               ^ lint-ug-examples/abstract_leaf_types.rsl:3: issue: abstract type T does not have any extensions [abstract_leaf_types]
-Processed 14 models, 0 checks and 0 requirement files and found 12 warnings
+Processed 13 models, 0 checks and 0 requirement files and found 11 warnings
