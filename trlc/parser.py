@@ -1807,10 +1807,9 @@ class Parser(Parser_Base):
             self.cu.add_item(self.parse_record_object_declaration())
 
     def parse_preamble(self, kind):
-        assert kind in ("rsl", "check", "trlc")
+        assert kind in ("rsl", "trlc")
         # lobster-trace: LRM.Layout
         # lobster-trace: LRM.Preamble
-        # lobster-trace: LRM.Cannot_Declare_In_Check_File
 
         # First, parse package indication, declaring the package if
         # needed

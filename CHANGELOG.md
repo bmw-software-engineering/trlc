@@ -27,6 +27,12 @@ generated in the following situations:
 
 ### 1.2.3-dev
 
+* [LRM, TRLC] Remove checks block in the `.check` files. This
+  means you don't need to have a separate check file, allowing you to
+  implement your checks in `.rsl` file.
+
+* [TRLC] Remove deprecated feature in check files.
+
 * [TRLC] The deprecated builtin function syntax `trlc:foo` has been
   removed. You should now use `foo` instead.
 
@@ -66,6 +72,7 @@ generated in the following situations:
 
 * [TRLC] Fix a bug in the verifier mistranslating existential
   quantifiers. This could both lead to false alarms and missed bugs.
+
 
 ### 1.2.2
 
