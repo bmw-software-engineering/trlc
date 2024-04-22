@@ -1,0 +1,22 @@
+
+package test2
+import test
+section "first"{
+    test.Req t1{
+        descr = "5 test2 Object details here..."
+    }
+    section "down"{
+        test.Req t2{
+            descr = "6 test2 Object details here..."
+        }
+        test.Req t3{
+            descr = "7 test2 Object details here..."
+        }
+        test.Req t4{
+            descr = "8 test2 Object details here..."
+        }
+    }
+}
+
+
+

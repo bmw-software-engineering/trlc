@@ -1,0 +1,19 @@
+package test
+
+section "test"{
+    Req t1{
+    descr = "1St object details here..."
+    }
+    section "down"{
+        Req t2{
+        descr = "2nd object details here..."
+        }
+        Req t3{
+        descr = "3rd Object details here..."
+        }
+        Req t4{
+        descr = "4th Object details here..."
+        }
+    }
+
+}

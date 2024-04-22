@@ -33,6 +33,7 @@ from trlc.parser import Parser
 from trlc.lexer import Token_Stream
 from trlc.version import TRLC_VERSION, BUGS_URL
 
+
 # pylint: disable=unused-import
 try:
     import cvc5
@@ -892,6 +893,69 @@ def main():
             return 0
     else:
         return 1
+
+
+def iterate_by_file_fun():
+    record_obj_dtl = {}
+    finaloutputarr = []
+    file_dtl_obj = {}
+    file_name_store = []
+    fil_name2 = []
+    flag = True
+    recobjfilename = ""
+
+    mh = Message_Handler()
+    sm = Source_Manager(mh)
+    sm.register_directory("test")
+    stab = sm.process()
+
+    for obj in stab.iter_record_objects():
+        trlcfilename = str(obj.n_package.location.file_name.split("/")[1])
+        record_obj_list = []
+
+        if len(file_name_store) == 0 or (trlcfilename not in file_name_store):
+
+            for recordobject in obj.n_package.symbols.iter_record_objects():
+                objlocfilname = recordobject.location.file_name.split("/")[1]
+                recobjfilename = str(objlocfilname)
+                if objlocfilname == obj.location.file_name.split("/")[1]:
+                    objfilename = str(objlocfilname)
+                    flag = False
+                    recobjdict = recordobject.to_python_dict()
+                    record_obj_dtl = {recordobject.name : recobjdict}
+                    record_obj_list.append(record_obj_dtl)
+
+                else:
+
+                    if len(fil_name2) == 0 or recobjfilename not in fil_name2:
+
+                        record_obj2_list = []
+                        symb = recordobject.n_package.symbols
+                        iternpackobj = symb.iter_record_objects()
+                        for iterateonpack in iternpackobj:
+                            loc = iterateonpack.location
+                            filenamenpack = loc.file_name.split("/")[1]
+                            if filenamenpack == objlocfilname:
+                                packname = iterateonpack.name
+                                iterpackdict = iterateonpack.to_python_dict()
+                                record_obj_dtl = {packname : iterpackdict}
+                                record_obj2_list.append(record_obj_dtl)
+
+                        file_dtl_obj = {str(recobjfilename) : record_obj2_list}
+                        finaloutputarr.append(file_dtl_obj)
+
+                fil_name2.append(recobjfilename)
+
+        else:
+            flag = True
+
+        if flag is False:
+            file_dtl_obj = {str(objfilename) : record_obj_list}
+            finaloutputarr.append(file_dtl_obj)
+
+        file_name_store.append(trlcfilename)
+
+    return finaloutputarr
 
 
 if __name__ == "__main__":
