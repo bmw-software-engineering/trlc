@@ -1,5 +1,12 @@
+TrlcProviderInfo = provider(
+    fields = {
+        "spec": "Holds the specification files (*.rsl) for the `reqs`",
+        "reqs": "Holds the requirement files (*.trlc)",
+    },
+)
+
 def _trlc_specification_impl(ctx):
-    return DefaultInfo(files = depset(ctx.files.srcs))
+    return [DefaultInfo(files = depset(ctx.files.srcs)), TrlcProviderInfo(spec = depset(ctx.files.srcs))]
 
 _trlc_specification = rule(
     implementation = _trlc_specification_impl,
@@ -16,7 +23,10 @@ def _trlc_requirement_impl(ctx):
     for spec in ctx.attr.spec:
         depending_files.append(spec[DefaultInfo].files)
 
-    return DefaultInfo(files = depset(ctx.files.srcs, transitive = depending_files))
+    return [
+        DefaultInfo(files = depset(ctx.files.srcs, transitive = depending_files)),
+        TrlcProviderInfo(spec = depset([], transitive = depending_files), reqs = depset(ctx.files.srcs)),
+    ]
 
 _trlc_requirement = rule(
     implementation = _trlc_requirement_impl,
