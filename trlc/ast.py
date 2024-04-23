@@ -3003,9 +3003,10 @@ class Symbol_Table:
     def __init__(self, parent=None):
         # lobster-exclude: Constructor only declares variables
         assert isinstance(parent, Symbol_Table) or parent is None
-        self.parent   = parent
-        self.imported = []
-        self.table    = OrderedDict()
+        self.parent     = parent
+        self.imported   = []
+        self.table      = OrderedDict()
+        self.trlc_files = []
 
     def all_names(self):
         """ All names in the symbol table
@@ -3016,6 +3017,14 @@ class Symbol_Table:
         if self.parent:
             rv |= self.parent.all_names()
         return rv
+
+    def iter_record_objects_by_file(self):
+        for record_object in self.iter_record_objects():
+            location = record_object.location.file_name
+            if location not in self.trlc_files:
+                self.trlc_files.append(location)
+                yield location
+            yield record_object
 
     def iter_record_objects(self):
         """ Iterate over all record objects
