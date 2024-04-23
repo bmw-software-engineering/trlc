@@ -1,0 +1,55 @@
+module(
+    name = "trlc",
+    compatibility_level = 1,
+    version = "0.0.0",
+)
+
+bazel_dep(
+    name = "rules_python",
+    version = "0.31.0",
+)
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+
+python.toolchain(
+    is_default = True,
+    python_version = "3.11",
+)
+
+use_repo(python, "python_versions")
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+
+pip.parse(
+    hub_name = "trlc_dependencies",
+    python_version = "3.11",
+    requirements_lock = "//:requirements.txt",
+)
+
+use_repo(pip, "trlc_dependencies")
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "cvc5_linux",
+    build_file = "@trlc//:cvc5.BUILD",
+    sha256 = "cf291aef67da8eaa8d425a51f67f3f72f36db8b1040655dc799b64e3d69e6086",
+    strip_prefix = "cvc5-Linux-static",
+    url = "https://github.com/cvc5/cvc5/releases/download/cvc5-1.1.2/cvc5-Linux-static.zip",
+)
+
+http_archive(
+    name = "cvc5_mac",
+    build_file = "@trlc//:cvc5.BUILD",
+    sha256 = "561a5ee82416441fa616c6f416ecaae2fa2dfc06dc81c2c6cc8dcfb31936e326",
+    strip_prefix = "cvc5-macOS-static",
+    url = "https://github.com/cvc5/cvc5/releases/download/cvc5-1.1.2/cvc5-macOS-static.zip",
+)
+
+http_archive(
+    name = "cvc5_windows",
+    build_file = "@trlc//:cvc5.BUILD",
+    sha256 = "f06715b796020c810b2713e6df3969dae99d38c24d2a6eac225a029fc70fe1ee",
+    strip_prefix = "cvc5-Win64-static",
+    url = "https://github.com/cvc5/cvc5/releases/download/cvc5-1.1.2/cvc5-Win64-static.zip",
+)
