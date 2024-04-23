@@ -886,12 +886,11 @@ def main():
                        parser.cu.package.name))
 
     if ok:
-        if options.error_on_warnings and mh.warnings:  # pragma: no cover
+        if options.error_on_warnings and mh.warnings \
+           or mh.errors:  # pragma: no cover
             return 1
-        else:
-            return 0
-    else:
-        return 1
+        return 0
+    return 1
 
 
 if __name__ == "__main__":
