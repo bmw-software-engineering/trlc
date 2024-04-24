@@ -1670,11 +1670,6 @@ section "TRLC Files" {
               declares it.'''
   }
 
-  Recommendation Duplicate_Late_Packages {
-    text = '''It is recommended to issue a warning if two `.trlc` files
-              declare the same package.'''
-  }
-
   Note TRLC_Parse_Issue {
     text = '''For TRLC files it is impossible fully parse a file
               in isolation, since we must process at least the package
