@@ -359,7 +359,7 @@ class Source_Manager:
         work_list = {(parser.cu.package.name , "rsl")
                      for parser in self.rsl_files.values()
                      if parser.cu.package and parser.primary}
-        work_list |= {parser.cu.package.name + "#" + "trlc"
+        work_list |= {(parser.cu.package.name , "trlc")
                       for parser in self.trlc_files.values()
                       if parser.cu.package and parser.primary}
         work_list &= set(graph)

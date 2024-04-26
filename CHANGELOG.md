@@ -30,8 +30,11 @@ generated in the following situations:
 * [LRM, TRLC] Remove checks block in the `.check` files. This
   means you don't need to have a separate check file, allowing you to
   implement your checks in `.rsl` file.
-
+  
 * [TRLC] Remove deprecated feature in check files.
+
+* [TRLC] A warning is not issued by the tools when encountering
+  duplicate late package declarations.
 
 * [TRLC] The deprecated builtin function syntax `trlc:foo` has been
   removed. You should now use `foo` instead.

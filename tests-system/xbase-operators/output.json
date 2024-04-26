@@ -1,7 +1,3 @@
 name = "Qbert" // does start with Q
        ^^^^^^^ xbase-operators/instances.trlc:5: check error: Must fail
-<<<<<<< HEAD
-Processed 1 model, and 1 requirement file and found 1 error
-=======
 Processed 1 model and 1 requirement file and found 1 error
->>>>>>> 362fc7d ( remove the dead and LRM code in check files)
