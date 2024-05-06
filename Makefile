@@ -94,7 +94,6 @@ unit-tests.lobster: $(wildcard tests-unit/*.py)
 	lobster-python --activity --out unit-tests.lobster tests-unit
 
 system-tests.lobster: $(wildcard tests-system/*/*.rsl) \
-                      $(wildcard tests-system/*/*.check) \
                       $(wildcard tests-system/*/*.trlc) \
                       $(wildcard tests-system/*/tracing)
 	python3 lobster-trlc-system-test.py
