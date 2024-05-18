@@ -29,7 +29,7 @@ generated in the following situations:
 
 * [TRLC] A warning is not issued by the tools when encountering
   duplicate late package declarations.
-  
+
 * [TRLC] The deprecated builtin function syntax `trlc:foo` has been
   removed. You should now use `foo` instead.
 
@@ -69,6 +69,9 @@ generated in the following situations:
 
 * [TRLC] Fix a bug in the verifier mistranslating existential
   quantifiers. This could both lead to false alarms and missed bugs.
+
+* [TRLC] Fix a bug parsing record references of incorrect types,
+  instead of an ICE we now create an error message.
 
 ### 1.2.2
 
