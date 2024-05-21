@@ -202,6 +202,8 @@ class BNF_Lexer:
         end_pos  = self.lexpos
         raw_text = self.fragment[start_pos:end_pos + 1]
 
+        # pylint: disable=possibly-used-before-assignment
+
         if kind == "TERMINAL":
             t_kind = ""
             t_name = None
@@ -795,6 +797,8 @@ def fmt_text(text):
 def write_text_object(fd, mh, obj, context, bnf_parser):
     assert isinstance(mh, Message_Handler)
     assert isinstance(obj, ast.Record_Object)
+
+    # pylint: disable=possibly-used-before-assignment
 
     data = obj.to_python_dict()
 
