@@ -2934,7 +2934,7 @@ class Record_Object(Typed_Entity):
         # lobster-trace: LRM.Section_Declaration
         # lobster-trace: LRM.Unspecified_Optional_Components
         assert isinstance(n_typ, Record_Type)
-        assert isinstance(section, Section) or section is None
+        assert isinstance(section, list) or section is None
         assert isinstance(n_package, Package)
         super().__init__(name, location, n_typ)
         self.field     = {
@@ -3040,7 +3040,7 @@ class Section(Entity):
     """
     def __init__(self, name, location, parent):
         super().__init__(name, location)
-        assert isinstance(parent, Section) or parent is None
+        assert isinstance(parent, list) or parent is None
         self.parent  = parent
 
     def dump(self, indent=0):  # pragma: no cover
