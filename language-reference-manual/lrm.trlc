@@ -2,7 +2,7 @@ package LRM
 
 Versioning Version {
   major = 2
-  minor = 9
+  minor = 10
 }
 
 GFDL_License License {
@@ -360,7 +360,8 @@ section "Metamodel (RSL) files" {
       "len",
       "startswith",
       "endswith",
-      "matches"
+      "matches",
+      "oneof"
     ]
   }
 
@@ -1104,7 +1105,7 @@ section "Names" {
 
       parameter_list ::= expression { ',' expression }
     '''
-    text = '''A name can be one of 5 things:'''
+    text = '''A name can be one of four things:'''
     bullets = [
       '''A qualified name referring to either some object, a component
          (in a record) or field (in a tuple), or an enumeration type.''',
@@ -1177,6 +1178,14 @@ section "Names" {
               variable.'''
   }
 
+  Static_Semantics Signature_OneOf {
+    text = '''
+      The builtin function `oneof` is of arity >= 1. Its
+      parameter(s) must be of type `Boolean`. The return
+      type is `Boolean`.
+    '''
+  }
+
   Static_Semantics Signature_Type_Conversion {
     text = '''The numeric type conversion functions are of arity 1 and
               polymorphic (they are defined for both integer and
@@ -1206,6 +1215,11 @@ section "Names" {
     text = '''The `matches` function returns true iff the first parameter
               is matched by the regular expression given in
               the second parameter.'''
+  }
+
+  Dynamic_Semantics OneOf_Semantics {
+    text = '''The `oneof` function returns true iff exactly one of its
+              parameters is true, and all others are false.'''
   }
 
   Dynamic_Semantics Integer_Conversion_Semantics {

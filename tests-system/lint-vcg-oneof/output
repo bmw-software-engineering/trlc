@@ -1,0 +1,22 @@
+goal, "goal"
+^^^^ lint-vcg-oneof/test.rsl:13: issue: expression could be null [vcg-evaluation-of-null]
+   | example record_type triggering error:
+   |   T1 bad_potato {
+   |     a = false
+   |     b = true
+   |     c = false
+   |     /* goal is null */
+   |   }
+goal, "goal"
+^^^^ lint-vcg-oneof/test.rsl:25: issue: expression could be null [vcg-evaluation-of-null]
+   | example record_type triggering error:
+   |   T2 bad_potato {
+   |     a = false
+   |     b = true
+   |     /* goal is null */
+   |   }
+oneof(a, b, c), fatal "potato"
+^^^^^ lint-vcg-oneof/test.rsl:40: issue: expression is always true [vcg-always-true]
+goal, "goal"
+^^^^ lint-vcg-oneof/test.rsl:41: issue: expression is always true [vcg-always-true]
+Processed 1 model, 0 checks and 0 requirement files and found 4 warnings

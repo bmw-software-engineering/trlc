@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 2.9 of [TRLC language reference
+Up to date with version 2.10 of [TRLC language reference
 manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
@@ -26,6 +26,9 @@ generated in the following situations:
 
 
 ### 1.2.3-dev
+
+* [TRLC] New builtin function `oneof`. This can be used to test if
+  precisely one of a number of parameters is true. For example:
 
 * [TRLC] A warning is not issued by the tools when encountering
   duplicate late package declarations.

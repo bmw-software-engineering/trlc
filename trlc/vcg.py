@@ -764,6 +764,9 @@ class VCG:
         elif isinstance(n_expr, Range_Test):
             return self.tr_range_test(n_expr)
 
+        elif isinstance(n_expr, OneOf_Expression):
+            return self.tr_oneof_test(n_expr)
+
         elif isinstance(n_expr, Conditional_Expression):
             if self.functional:
                 return self.tr_conditional_expression_functional(n_expr)
@@ -1045,6 +1048,39 @@ class VCG:
             smt.Comparison("<=", lhs_value, upper_value))
 
         return self.create_return(n_expr, sym_value)
+
+    def tr_oneof_test(self, n_expr):
+        assert isinstance(n_expr, OneOf_Expression)
+
+        choices = []
+        for n_choice in n_expr.choices:
+            c_value, c_valid = self.tr_expression(n_choice)
+            self.attach_validity_check(c_valid, n_choice)
+            choices.append(c_value)
+
+        negated_choices = [smt.Boolean_Negation(c)
+                           for c in choices]
+
+        # pylint: disable=consider-using-enumerate
+
+        if len(choices) == 1:
+            result = choices[0]
+        elif len(choices) == 2:
+            result = smt.Exclusive_Disjunction(choices[0], choices[1])
+        else:
+            assert len(choices) >= 3
+            values = []
+            for choice_id in range(len(choices)):
+                sequence = []
+                for other_id in range(len(choices)):
+                    if other_id == choice_id:
+                        sequence.append(choices[other_id])
+                    else:
+                        sequence.append(negated_choices[other_id])
+                values.append(smt.Conjunction(*sequence))
+            result = smt.Disjunction(*values)
+
+        return self.create_return(n_expr, result)
 
     def tr_conditional_expression_functional(self, n_expr):
         assert isinstance(n_expr, Conditional_Expression)

@@ -1,0 +1,30 @@
+package Foo
+
+type T1 {
+  a Boolean
+}
+
+checks T1 {
+  oneof(a), "potato"
+}
+
+type T2 {
+  a Boolean
+  b Boolean
+}
+
+checks T2 {
+  oneof(a, b), "potato"
+}
+
+type T5 {
+  a Boolean
+  b Boolean
+  c Boolean
+  d Boolean
+  e Boolean
+}
+
+checks T5 {
+  oneof(a, b, c, d, e), "potato"
+}
