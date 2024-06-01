@@ -1,0 +1,42 @@
+package Test
+
+type T1 {
+  a Boolean
+  b Boolean
+  c Boolean
+
+  goal optional Boolean
+}
+
+checks T1 {
+  oneof(a, b, c), fatal "potato"
+  goal, "goal"
+}
+
+type T2 {
+  a Boolean
+  b Boolean
+
+  goal optional Boolean
+}
+
+checks T2 {
+  oneof(a, b), fatal "potato"
+  goal, "goal"
+}
+
+type T3 {
+  a Boolean
+  b Boolean
+  c Boolean
+
+  goal optional Boolean
+}
+
+checks T3 {
+  a xor b, fatal "foo"
+  b xor c, fatal "foo"
+  a xor c, fatal "foo"
+  oneof(a, b, c), fatal "potato"
+  goal, "goal"
+}

@@ -1190,12 +1190,21 @@ class Parser(Parser_Base):
         # Enforce arity
         if isinstance(n_name, ast.Builtin_Function):
             required_arity = n_name.arity
+            precise        = not n_name.arity_at_least
         else:
             required_arity = 1
-        if required_arity != len(parameters):
-            self.mh.error(t_name.location,
-                          "function requires %u parameters" %
-                          n_name.arity)
+            precise        = True
+
+        if precise:
+            if required_arity != len(parameters):
+                self.mh.error(t_name.location,
+                              "function requires %u parameters" %
+                              n_name.arity)
+        else:
+            if required_arity > len(parameters):
+                self.mh.error(t_name.location,
+                              "function requires at least %u parameters" %
+                              n_name.arity)
 
         # Enforce types
         if n_name.name == "len":
@@ -1243,6 +1252,13 @@ class Parser(Parser_Base):
                 operator = ast.Binary_Operator.STRING_REGEX,
                 n_lhs    = parameters[0],
                 n_rhs    = parameters[1])
+
+        elif n_name.name == "oneof":
+            return ast.OneOf_Expression(
+                mh       = self.mh,
+                location = t_name.location,
+                typ      = self.builtin_bool,
+                choices  = parameters)
 
         elif isinstance(n_name, ast.Builtin_Numeric_Type):
             parameters[0].ensure_type(self.mh, ast.Builtin_Numeric_Type)

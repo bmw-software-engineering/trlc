@@ -1,0 +1,9 @@
+T1 test_2 {  // bad
+   ^^^^^^ rbt-oneof-semantics/foo.trlc:7: check error: potato
+T2 test_3 {  // bad
+   ^^^^^^ rbt-oneof-semantics/foo.trlc:11: check error: potato
+T2 test_5 {  // bad
+   ^^^^^^ rbt-oneof-semantics/foo.trlc:21: check error: potato
+T5 test_6 {  // bad
+   ^^^^^^ rbt-oneof-semantics/foo.trlc:26: check error: potato
+Processed 1 model, 0 checks and 1 requirement file and found 4 errors

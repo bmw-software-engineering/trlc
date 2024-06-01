@@ -1,0 +1,40 @@
+package Foo
+
+T1 test_1 {  // good
+  a = true
+}
+
+T1 test_2 {  // bad
+  a = false
+}
+
+T2 test_3 {  // bad
+  a = false
+  b = false
+}
+
+T2 test_4 {  // good
+  a = false
+  b = true
+}
+
+T2 test_5 {  // bad
+  a = true
+  b = true
+}
+
+T5 test_6 {  // bad
+  a = false
+  b = true
+  c = false
+  d = true
+  e = false
+}
+
+T5 test_7 {  // good
+  a = false
+  b = false
+  c = false
+  d = true
+  e = false
+}

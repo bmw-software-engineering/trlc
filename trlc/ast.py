@@ -162,6 +162,7 @@ class Node(metaclass=ABCMeta):
                Builtin_Function len
                Builtin_Function matches
                Builtin_Function startswith
+               Builtin_Function oneof
 
         """
         assert isinstance(indent, int) and indent >= 0
@@ -1813,6 +1814,57 @@ class Range_Test(Expression):
         return False
 
 
+class OneOf_Expression(Expression):
+    """OneOf expression
+
+    For example in::
+
+      oneof(a, b, c)
+            ^^^^^^^ choices
+
+    :attribute choices: a list of boolean expressions to test
+    :type: list[Expression]
+    """
+    def __init__(self, mh, location, typ, choices):
+        # lobster-trace: LRM.Signature_OneOf
+        super().__init__(location, typ)
+        assert isinstance(typ, Builtin_Boolean)
+        assert isinstance(mh, Message_Handler)
+        assert isinstance(choices, list)
+        assert all(isinstance(item, Expression)
+                   for item in choices)
+        self.choices = choices
+
+        for n_choice in choices:
+            n_choice.ensure_type(mh, Builtin_Boolean)
+
+    def to_string(self):
+        return "oneof(%s)" % ", ".join(n_choice.to_string()
+                                       for n_choice in self.choices)
+
+    def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
+        self.write_indent(indent, "OneOf Test")
+        self.write_indent(indent + 1, "Type: %s" % self.typ)
+        for n_choice in self.choices:
+            n_choice.dump(indent + 1)
+
+    def evaluate(self, mh, context):
+        # lobster-trace: LRM.OneOf_Semantics
+        assert isinstance(mh, Message_Handler)
+        assert context is None or isinstance(context, dict)
+
+        v_choices = [n_choice.evaluate(mh, context).value
+                     for n_choice in self.choices]
+
+        return Value(location = self.location,
+                     value    = v_choices.count(True) == 1,
+                     typ      = self.typ)
+
+    def can_be_null(self):
+        return False
+
+
 class Action(Node):
     """An if or elseif part inside a conditional expression
 
@@ -2203,14 +2255,19 @@ class Builtin_Function(Entity):
     :attribute arity: number of parameters
     :type: int
 
+    :attribute arity_at_least: when true, arity indicates a lower bound
+    :type: bool
+
     """
     LOCATION = Location(file_name = "<builtin>")
 
-    def __init__(self, name, arity):
+    def __init__(self, name, arity, arity_at_least=False):
         super().__init__(name, Builtin_Function.LOCATION)
         assert isinstance(arity, int)
+        assert isinstance(arity_at_least, bool)
         assert arity >= 0
-        self.arity = arity
+        self.arity          = arity
+        self.arity_at_least = arity_at_least
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, self.__class__.__name__ + " " + self.name)
@@ -3247,8 +3304,6 @@ class Symbol_Table:
         stab.register(mh, Builtin_Boolean())
         stab.register(mh, Builtin_String())
         stab.register(mh, Builtin_Markup_String())
-
-        # The new-style functions
         stab.register(mh,
                       Builtin_Function("len", 1))
         stab.register(mh,
@@ -3257,6 +3312,8 @@ class Symbol_Table:
                       Builtin_Function("endswith", 2))
         stab.register(mh,
                       Builtin_Function("matches", 2))
+        stab.register(mh,
+                      Builtin_Function("oneof", 1, arity_at_least=True))
 
         return stab
 
