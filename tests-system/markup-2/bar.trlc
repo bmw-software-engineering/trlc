@@ -1,19 +1,19 @@
-package Bar
+package Bar_Package
 
-import Foo
+import Foo_Package
 
-Foo.T foo {
+Foo_Package.T foo {
   M = "potato"
 }
 
-Foo.T test_1 {
+Foo_Package.T test_1 {
   M = "see [[foo]]"
 }
 
-Foo.T test_2 {
-  M = "see [[Foo.potato]]"
+Foo_Package.T test_2 {
+  M = "see [[Foo_Package.potato]]"
 }
 
-Foo.T test_3 {
+Foo_Package.T test_3 {
   M = "see [[Baz.foo]]"
 }

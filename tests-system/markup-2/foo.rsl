@@ -1,4 +1,4 @@
-package Foo
+package Foo_Package
 
 type T {
   M Markup_String
