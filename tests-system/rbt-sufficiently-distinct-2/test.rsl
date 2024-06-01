@@ -1,0 +1,9 @@
+package Test
+
+enum Test_1 {
+  Foo
+  Bar
+  Foo_Bar
+  FooBar
+  bar
+}

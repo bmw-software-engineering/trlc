@@ -313,11 +313,11 @@ class Parser(Parser_Base):
         # it was selected on the command-line and secondary means it
         # was selected by dependency analysis.
 
-        self.builtin_bool    = stab.table["Boolean"]
-        self.builtin_int     = stab.table["Integer"]
-        self.builtin_decimal = stab.table["Decimal"]
-        self.builtin_str     = stab.table["String"]
-        self.builtin_mstr    = stab.table["Markup_String"]
+        self.builtin_bool    = stab.lookup_assuming(self.mh, "Boolean")
+        self.builtin_int     = stab.lookup_assuming(self.mh, "Integer")
+        self.builtin_decimal = stab.lookup_assuming(self.mh, "Decimal")
+        self.builtin_str     = stab.lookup_assuming(self.mh, "String")
+        self.builtin_mstr    = stab.lookup_assuming(self.mh, "Markup_String")
 
         self.section = []
         self.default_scope = ast.Scope()

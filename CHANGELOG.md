@@ -27,6 +27,16 @@ generated in the following situations:
 
 ### 1.2.3-dev
 
+* [TRLC, LRM] The LRM had rules that names need to be sufficiently
+  distinct, for example having `Foo`, `foo` or `Fo_o` in the same
+  namespace would not be allowed. This was previously not implemented
+  at all.
+
+  The rules have been strengthened to apply to all names (packages,
+  types, literals, objects) and are now enforced. This is also a
+  backwards incompatible change as it may invalidate some previously
+  valid `.trlc` or `.rsl` files.
+
 * [TRLC] New builtin function `oneof`. This can be used to test if
   precisely one of a number of parameters is true. For example:
 

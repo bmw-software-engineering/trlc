@@ -2,6 +2,7 @@
 #
 # TRLC - Treat Requirements Like Code
 # Copyright (C) 2022-2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+# Copyright (C) 2024      Florian Schanda
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -3065,17 +3066,25 @@ class Symbol_Table:
         self.imported = []
         self.table    = OrderedDict()
 
+    @staticmethod
+    def simplified_name(name):
+        # lobster-trace: LRM.Sufficiently_Distinct
+        assert isinstance(name, str)
+        return name.lower().replace("_", "")
+
     def all_names(self):
+        # lobster-exclude: API for users
         """ All names in the symbol table
 
         :rtype: set[str]
         """
-        rv = set(self.table)
+        rv = set(item.name for item in self.table.values())
         if self.parent:
             rv |= self.parent.all_names()
         return rv
 
     def iter_record_objects(self):
+        # lobster-exclude: API for users
         """ Iterate over all record objects
 
         :rtype: iterable[Record_Object]
@@ -3088,6 +3097,7 @@ class Symbol_Table:
                 yield item
 
     def values(self, subtype=None):
+        # lobster-exclude: API for users
         assert subtype is None or isinstance(subtype, type)
         if self.parent:
             yield from self.parent.values(subtype)
@@ -3103,21 +3113,56 @@ class Symbol_Table:
         # lobster-trace: LRM.Duplicate_Types
         # lobster-trace: LRM.Unique_Enumeration_Literals
         # lobster-trace: LRM.Tuple_Unique_Field_Names
+        # lobster-trace: LRM.Sufficiently_Distinct
         assert isinstance(mh, Message_Handler)
         assert isinstance(entity, Entity)
 
-        if self.contains(entity.name):
-            pdef = self.lookup_direct(mh, entity.name, entity.location)
-            mh.error(entity.location,
-                     "duplicate definition, previous definition at %s" %
-                     mh.cross_file_reference(pdef.location))
+        simple_name = self.simplified_name(entity.name)
+
+        if self.contains_raw(simple_name):
+            pdef = self.lookup_direct(mh, entity.name, entity.location,
+                                      simplified=True)
+            if pdef.name == entity.name:
+                mh.error(entity.location,
+                         "duplicate definition, previous definition at %s" %
+                         mh.cross_file_reference(pdef.location))
+            else:
+                mh.error(entity.location,
+                         "%s is too similar to %s, declared at %s" %
+                         (entity.name,
+                          pdef.name,
+                          mh.cross_file_reference(pdef.location)))
 
         else:
-            self.table[entity.name] = entity
+            self.table[simple_name] = entity
 
     def __contains__(self, name):
         # lobster-trace: LRM.Described_Name_Equality
         return self.contains(name)
+
+    def contains_raw(self, simple_name, precise_name=None):
+        # lobster-trace: LRM.Described_Name_Equality
+        # lobster-trace: LRM.Sufficiently_Distinct
+        #
+        # Internal function to test if the simplified name is in the
+        # table.
+        assert isinstance(simple_name, str)
+        assert isinstance(precise_name, str) or precise_name is None
+
+        if simple_name in self.table:
+            # No need to continue searching since registering a
+            # clashing name would have been stopped
+            return precise_name is None or \
+                self.table[simple_name].name == precise_name
+
+        elif self.parent:
+            return self.parent.contains_raw(simple_name, precise_name)
+
+        for stab in self.imported:
+            if stab.contains_raw(simple_name, precise_name):
+                return True
+
+        return False
 
     def contains(self, name):
         # lobster-trace: LRM.Described_Name_Equality
@@ -3125,22 +3170,15 @@ class Symbol_Table:
 
         :param name: the name to test
         :type name: str
+
         :rtype: bool
         """
         assert isinstance(name, str)
-        if name in self.table:
-            return True
-        elif self.parent:
-            return self.parent.contains(name)
-
-        for stab in self.imported:
-            if stab.contains(name):
-                return True
-
-        return False
+        return self.contains_raw(self.simplified_name(name), name)
 
     def lookup_assuming(self, mh, name, required_subclass=None):
         # lobster-trace: LRM.Described_Name_Equality
+        # lobster-trace: LRM.Sufficiently_Distinct
         """Retrieve an object from the table assuming its there
 
         This is intended for the API specifically where you want to
@@ -3165,11 +3203,16 @@ class Symbol_Table:
         assert isinstance(name, str)
         assert isinstance(required_subclass, type) or required_subclass is None
 
+        simple_name = self.simplified_name(name)
+
         ptr = self
         for ptr in [self] + self.imported:
             while ptr:
-                if name in ptr.table:
-                    rv = ptr.table[name]
+                if simple_name in ptr.table:
+                    rv = ptr.table[simple_name]
+                    if rv.name != name:
+                        return None
+
                     if required_subclass is not None and \
                        not isinstance(rv, required_subclass):
                         mh.error(rv.location,
@@ -3183,8 +3226,14 @@ class Symbol_Table:
 
         return None
 
-    def lookup_direct(self, mh, name, error_location, required_subclass=None):
+    def lookup_direct(self,
+                      mh,
+                      name,
+                      error_location,
+                      required_subclass=None,
+                      simplified=False):
         # lobster-trace: LRM.Described_Name_Equality
+        # lobster-trace: LRM.Sufficiently_Distinct
         """Retrieve an object from the table
 
         For example::
@@ -3218,6 +3267,10 @@ class Symbol_Table:
         is not an instance of the given class
         :type required_subclass: type
 
+        :param simplified: If set, look up the given simplified name instead \
+        of the actual name
+        :type simplified: bool
+
         :raise TRLC_Error: if the name is not in the table
         :raise TRLC_Error: if the object is not of the required subclass
         :returns: the specified entity
@@ -3228,13 +3281,22 @@ class Symbol_Table:
         assert isinstance(name, str)
         assert isinstance(error_location, Location)
         assert isinstance(required_subclass, type) or required_subclass is None
+        assert isinstance(simplified, bool)
 
-        ptr     = self
-        options = []
+        simple_name = self.simplified_name(name)
+        ptr         = self
+        options     = []
+
         for ptr in [self] + self.imported:
             while ptr:
-                if name in ptr.table:
-                    rv = ptr.table[name]
+                if simple_name in ptr.table:
+                    rv = ptr.table[simple_name]
+                    if not simplified and rv.name != name:
+                        mh.error(error_location,
+                                 "unknown symbol %s, did you mean %s?" %
+                                 (name,
+                                  rv.name))
+
                     if required_subclass is not None and \
                        not isinstance(rv, required_subclass):
                         mh.error(error_location,
@@ -3244,13 +3306,15 @@ class Symbol_Table:
                                   required_subclass.__name__))
                     return rv
                 else:
-                    options += list(ptr.table)
+                    options += list(item.name
+                                    for item in ptr.table.values())
                     ptr      = ptr.parent
 
         matches = get_close_matches(
             word          = name,
             possibilities = options,
             n             = 1)
+
         if matches:
             mh.error(error_location,
                      "unknown symbol %s, did you mean %s?" %

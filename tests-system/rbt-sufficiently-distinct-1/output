@@ -1,0 +1,7 @@
+T Foo {}
+  ^^^ rbt-sufficiently-distinct-1/test.trlc:5: error: Foo is too similar to foo, declared at test.trlc:3
+T f_oo {}
+  ^^^^ rbt-sufficiently-distinct-1/test.trlc:7: error: f_oo is too similar to foo, declared at test.trlc:3
+T f_O_o {}
+  ^^^^^ rbt-sufficiently-distinct-1/test.trlc:9: error: f_O_o is too similar to foo, declared at test.trlc:3
+Processed 1 model, 0 checks and 1 requirement file and found 3 errors
