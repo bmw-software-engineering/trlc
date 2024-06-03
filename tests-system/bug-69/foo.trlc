@@ -1,0 +1,24 @@
+package Foo
+
+R Tiger {
+    a = 1
+}
+
+RE Lion {
+    a = 1
+    b = 2
+}
+
+Potato Bar {
+  ref = [
+    Tiger,  // R, so allowed
+    Lion    // RE, so also allowed
+  ]
+}
+
+Kitten Sonic {
+  ref = [
+    Tiger,   // R, so not allowed
+    Lion     // RE, so allowed
+  ]
+}

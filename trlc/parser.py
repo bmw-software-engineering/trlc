@@ -113,6 +113,7 @@ class Markup_Lexer(Nested_Lexer):
                                    start_pos,
                                    self.lexpos)
 
+        # pylint: disable=possibly-used-before-assignment
         return Markup_Token(loc,
                             kind,
                             self.content[start_pos:self.lexpos + 1])
@@ -429,13 +430,13 @@ class Parser(Parser_Base):
 
         if optional_required or self.peek_kw("optional"):
             self.match_kw("optional")
-            t_optional = self.ct
-            if optional_allowed:
-                field_is_optional = True
-            else:
+            t_optional        = self.ct
+            field_is_optional = True
+            if not optional_allowed:
                 self.mh.error(self.ct.location, optional_reason)
         else:
             field_is_optional = False
+            t_optional        = None
 
         # lobster-trace: LRM.Tuple_Field_Types
         field_type = self.parse_qualified_name(self.default_scope,
@@ -541,12 +542,12 @@ class Parser(Parser_Base):
         assert isinstance(n_record, ast.Record_Type)
 
         c_name, c_descr, t_descr = self.parse_described_name()
+        t_optional = None
+        c_optional = False
         if self.peek_kw("optional"):
             self.match_kw("optional")
             t_optional = self.ct
             c_optional = True
-        else:
-            c_optional = False
         c_typ = self.parse_qualified_name(self.default_scope,
                                           ast.Type)
         c_typ.set_ast_link(self.ct)
@@ -561,12 +562,12 @@ class Parser(Parser_Base):
             self.match("RANGE")
             t_range = self.ct
             a_loc = self.ct.location
+            a_hi  = None
             if self.peek("INTEGER"):
                 self.match("INTEGER")
                 a_hi = self.ct.value
             elif self.peek("OPERATOR") and self.nt.value == "*":
                 self.match("OPERATOR")
-                a_hi = None
             else:
                 self.mh.error(self.nt.location,
                               "expected INTEGER or * for upper bound")
@@ -601,19 +602,18 @@ class Parser(Parser_Base):
         return c_comp
 
     def parse_record_declaration(self):
+        t_abstract  = None
+        t_final     = None
+        is_abstract = False
+        is_final    = False
         if self.peek_kw("abstract"):
             self.match_kw("abstract")
-            t_abstract = self.ct
+            t_abstract  = self.ct
             is_abstract = True
-            is_final    = False
         elif self.peek_kw("final"):
             self.match_kw("final")
-            t_final = self.ct
-            is_abstract = False
-            is_final    = True
-        else:
-            is_abstract = False
-            is_final    = False
+            t_final  = self.ct
+            is_final = True
 
         self.match_kw("type")
         t_type = self.ct
@@ -889,6 +889,7 @@ class Parser(Parser_Base):
 
         n_lhs = self.parse_term(scope)
         if t_unary:
+            # pylint: disable=possibly-used-before-assignment
             if self.lint_mode and \
                isinstance(n_lhs, ast.Binary_Expression) and \
                not has_explicit_brackets:
@@ -1486,6 +1487,9 @@ class Parser(Parser_Base):
                                 severity  = c_sev,
                                 t_message = t_msg,
                                 extrainfo = c_extrainfo)
+
+            # pylint: disable=possibly-used-before-assignment
+            # pylint: disable=used-before-assignment
 
             n_check.set_ast_link(t_first_comma)
             if t_severity:

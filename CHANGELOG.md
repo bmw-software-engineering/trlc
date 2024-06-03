@@ -76,6 +76,8 @@ generated in the following situations:
 * [TRLC] Fix a bug in the verifier mistranslating existential
   quantifiers. This could both lead to false alarms and missed bugs.
 
+* [TRLC] Fix a bug parsing record references of incorrect types,
+  instead of an ICE we now create an error message.
 
 ### 1.2.2
 

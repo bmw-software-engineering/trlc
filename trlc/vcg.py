@@ -322,7 +322,6 @@ class VCG:
         except Unsupported as exc:  # pragma: no cover
             self.mh.warning(exc.location,
                             exc.message)
-            return
 
     def checks_on_composite_type(self, n_ctyp):
         assert isinstance(n_ctyp, Composite_Type)

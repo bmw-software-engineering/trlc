@@ -1085,10 +1085,11 @@ class Record_Reference(Expression):
         if self.typ is None:
             self.typ = self.target.n_typ
         elif not self.target.n_typ.is_subclass_of(self.typ):
-            mh.ice_loc(self.location,
-                       "on resolving references, types do not match; "
-                       "expected %s, got %s" % (self.typ.name,
-                                                self.target.n_typ.name))
+            mh.error(self.location,
+                     "expected reference of type %s, but %s is of type %s" %
+                     (self.typ.name,
+                      self.target.name,
+                      self.target.n_typ.name))
 
     def to_python_object(self):
         return self.target.fully_qualified_name()
