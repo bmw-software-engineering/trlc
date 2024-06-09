@@ -92,7 +92,6 @@ class Source_Manager:
         self.stab        = ast.Symbol_Table.create_global_table(mh)
         self.includes    = {}
         self.rsl_files   = {}
-        self.check_files = {}
         self.trlc_files  = {}
         self.all_files   = {}
         self.dep_graph   = {}
@@ -195,7 +194,6 @@ class Source_Manager:
                    (os.path.join(path, file_name)
                     for file_name in files
                     if os.path.splitext(file_name)[1] in (".rsl",
-                                                          ".check",
                                                           ".trlc"))})
 
     def register_file(self, file_name, file_content=None, primary=True):
@@ -205,7 +203,7 @@ class Source_Manager:
         :type file_name: str
         :raise AssertionError: if the file does not exist
         :raise AssertionError: if the file is registed more than once
-        :raise TRLC_Error: if the file is not a rsl/check/trlc file
+        :raise TRLC_Error: if the file is not a rsl/trlc file
 
         :param file_content: content of the file
         :type file_content: str
@@ -226,14 +224,12 @@ class Source_Manager:
         try:
             if file_name.endswith(".rsl"):
                 self.register_rsl_file(file_name, file_content, primary)
-            elif file_name.endswith(".check"):
-                self.register_check_file(file_name, file_content, primary)
             elif file_name.endswith(".trlc"):
                 self.register_trlc_file(file_name, file_content, primary)
             else:  # pragma: no cover
                 ok = False
                 self.mh.error(Location(os.path.basename(file_name)),
-                              "is not a rsl, check, or trlc file",
+                              "is not a rsl or trlc file",
                               fatal = False)
         except TRLC_Error:
             ok = False
@@ -271,7 +267,6 @@ class Source_Manager:
 
             for file_name in sorted(files):
                 if os.path.splitext(file_name)[1] in (".rsl",
-                                                      ".check",
                                                       ".trlc"):
                     ok &= self.register_file(os.path.join(path, file_name))
         return ok
@@ -288,22 +283,6 @@ class Source_Manager:
                                     file_content,
                                     primary)
         self.rsl_files[file_name] = parser
-        self.all_files[file_name] = parser
-        if os.path.abspath(file_name) in self.includes:
-            del self.includes[os.path.abspath(file_name)]
-
-    def register_check_file(self, file_name, file_content=None, primary=True):
-        assert os.path.isfile(file_name)
-        assert file_name not in self.check_files
-        assert isinstance(file_content, str) or file_content is None
-        assert isinstance(primary, bool)
-        # lobster-trace: LRM.Preamble
-
-        self.update_common_root(file_name)
-        parser = self.create_parser(file_name,
-                                    file_content,
-                                    primary)
-        self.check_files[file_name] = parser
         self.all_files[file_name] = parser
         if os.path.abspath(file_name) in self.includes:
             del self.includes[os.path.abspath(file_name)]
@@ -341,7 +320,6 @@ class Source_Manager:
         graph = self.dep_graph
         files = {}
         for container, kind in ((self.rsl_files, "rsl"),
-                                (self.check_files, "check"),
                                 (self.trlc_files, "trlc")):
             # First parse preamble and register packages in graph
             for file_name in sorted(container):
@@ -351,11 +329,8 @@ class Source_Manager:
                     pkg_name = parser.cu.package.name
                     if (pkg_name , "rsl") not in graph:
                         graph[(pkg_name , "rsl")] = set()
-                        graph[(pkg_name , "check")] = set([(pkg_name , "rsl")])
-                        graph[(pkg_name , "trlc")] = set([(pkg_name , "rsl"),
-                                                         (pkg_name , "check")])
+                        graph[(pkg_name , "trlc")] = set([(pkg_name , "rsl")])
                         files[(pkg_name , "rsl")] = set()
-                        files[(pkg_name , "check")] = set()
                         files[(pkg_name , "trlc")] = set()
                     files[(pkg_name , kind)].add(file_name)
                 except TRLC_Error:
@@ -381,9 +356,6 @@ class Source_Manager:
         work_list = {(parser.cu.package.name , "rsl")
                      for parser in self.rsl_files.values()
                      if parser.cu.package and parser.primary}
-        work_list |= {(parser.cu.package.name , "check")
-                      for parser in self.check_files.values()
-                      if parser.cu.package and parser.primary}
         work_list |= {(parser.cu.package.name , "trlc")
                       for parser in self.trlc_files.values()
                       if parser.cu.package and parser.primary}
@@ -459,26 +431,6 @@ class Source_Manager:
                 processed.add(node)
 
             work_list -= candidates
-
-        return ok
-
-    def parse_check_files(self):
-        # lobster-trace: LRM.Preamble
-        # lobster-trace: LRM.Check_File
-
-        ok = True
-        for name in sorted(self.check_files):
-            parser = self.check_files[name]
-            if name in self.files_with_preamble_errors:
-                continue
-            if not (parser.primary or parser.secondary):
-                continue
-
-            try:
-                ok &= parser.parse_check_file()
-                self.signal_progress()
-            except TRLC_Error:
-                ok = False
 
         return ok
 
@@ -558,14 +510,6 @@ class Source_Manager:
             self.callback_parse_end()
             return None
 
-        # Parse check files. At this point we cannot introduce anything
-        # new in terms of packages.
-        ok &= self.parse_check_files()
-
-        if not self.error_recovery and not ok:  # pragma: no cover
-            self.callback_parse_end()
-            return None
-
         # Perform sanity checks (enabled by default). We only do this
         # if there were no errors so far.
         if self.lint_mode and ok:
@@ -622,8 +566,8 @@ def main():
     og_lint.add_argument("--skip-trlc-files",
                          default=False,
                          action="store_true",
-                         help=("Only process model and check files,"
-                               " do not process trlc files."))
+                         help=("Only process rsl files,"
+                               " do not process any trlc files."))
     og_lint.add_argument("--verify",
                          default=False,
                          action="store_true",
@@ -805,10 +749,6 @@ def main():
         parsed_models = len([item
                              for item in sm.rsl_files.values()
                              if item.primary or item.secondary])
-        total_checks = len(sm.check_files)
-        parsed_checks = len([item
-                             for item in sm.check_files.values()
-                             if item.primary or item.secondary])
         total_trlc = len(sm.trlc_files)
         parsed_trlc = len([item
                            for item in sm.trlc_files.values()
@@ -827,13 +767,6 @@ def main():
                                          total_models,
                                          "model")
 
-        if options.skip_trlc_files:  # pragma: no cover
-            summary += " and"
-        else:
-            summary += ","
-        summary += " %s" % count(parsed_checks,
-                                 total_checks,
-                                 "check")
         if not options.skip_trlc_files:  # pragma: no cover
             summary += " and %s" % count(parsed_trlc,
                                          total_trlc,
@@ -868,12 +801,6 @@ def main():
         for filename in sorted(sm.rsl_files):
             parser = sm.rsl_files[filename]
             print("> %s Model %s (Package %s)" %
-                  (get_status(parser),
-                   filename,
-                   parser.cu.package.name))
-        for filename in sorted(sm.check_files):
-            parser = sm.check_files[filename]
-            print("> %s Checks %s (Package %s)" %
                   (get_status(parser),
                    filename,
                    parser.cu.package.name))

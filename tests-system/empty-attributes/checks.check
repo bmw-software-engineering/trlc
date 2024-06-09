@@ -1,6 +1,0 @@
- package bar
-
- checks BaseRequirement {
-      asil != null, error "Asil must be set", asil
-
-  }

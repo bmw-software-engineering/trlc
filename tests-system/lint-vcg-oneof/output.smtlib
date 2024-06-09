@@ -19,4 +19,4 @@ oneof(a, b, c), fatal "potato"
 ^^^^^ lint-vcg-oneof/test.rsl:40: issue: expression is always true [vcg-always-true]
 goal, "goal"
 ^^^^ lint-vcg-oneof/test.rsl:41: issue: expression is always true [vcg-always-true]
-Processed 1 model, 0 checks and 0 requirement files and found 4 warnings
+Processed 1 model and 0 requirement files and found 4 warnings

@@ -21,4 +21,4 @@ arr1[x] > 0, "potato"
     |     arr1 = [-1, 42, 666]
     |     x = 3
     |   }
-Processed 2 models, 0 checks and 0 requirement files and found 3 warnings
+Processed 2 models and 0 requirement files and found 3 warnings

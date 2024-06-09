@@ -1,3 +1,3 @@
 Tiger,   // R, so not allowed
 ^^^^^ bug-69/foo.trlc:21: error: expected reference of type RE, but Tiger is of type R
-Processed 1 model, 0 checks and 1 requirement file and found 1 error
+Processed 1 model and 1 requirement file and found 1 error

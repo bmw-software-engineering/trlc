@@ -1,16 +1,17 @@
-          package bar
-
+package bar
 
 enum ASIL {
-	A
-	B
-	C
-	D
+  A
+  B
+  C
+  D
 }
 
-
-
 type BaseRequirement {
-	description optional String
-	asil optional ASIL
+  description optional String
+  asil optional ASIL
+}
+
+checks BaseRequirement {
+  asil != null, error "Asil must be set", asil
 }

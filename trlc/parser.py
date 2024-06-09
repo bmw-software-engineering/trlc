@@ -1827,10 +1827,9 @@ class Parser(Parser_Base):
             self.cu.add_item(self.parse_record_object_declaration())
 
     def parse_preamble(self, kind):
-        assert kind in ("rsl", "check", "trlc")
+        assert kind in ("rsl", "trlc")
         # lobster-trace: LRM.Layout
         # lobster-trace: LRM.Preamble
-        # lobster-trace: LRM.Cannot_Declare_In_Check_File
 
         # First, parse package indication, declaring the package if
         # needed
@@ -1840,8 +1839,6 @@ class Parser(Parser_Base):
 
         if kind == "rsl":
             declare_package = True
-        elif kind == "check":
-            declare_package = False
         else:
             # lobster-trace: LRM.Late_Package_Declarations
             declare_package = not self.stab.contains(self.ct.value)
@@ -1901,44 +1898,6 @@ class Parser(Parser_Base):
                        self.peek_kw("tuple") or \
                        self.peek_kw("enum"):
                         break
-                    self.advance()
-                    self.skip_until_newline()
-
-        self.match_eof()
-
-        for tok in self.lexer.tokens:
-            if tok.kind == "COMMENT":
-                self.cu.package.set_ast_link(tok)
-
-        return ok
-
-    def parse_check_file(self):
-        # lobster-trace: LRM.Check_File
-        assert self.cu.package is not None
-
-        ok = True
-        while not self.peek_eof():
-            try:
-                n_block = self.parse_check_block()
-                self.cu.add_item(n_block)
-                # lobster-trace: LRM.Deprecated_Check_Files
-                if self.lint_mode:
-                    self.mh.check(
-                        n_block.location,
-                        "move this check block into %s" %
-                        self.mh.cross_file_reference(self.cu.package.location),
-                        "deprecated_feature")
-            except TRLC_Error as err:
-                if not self.error_recovery or err.kind == "lex error":
-                    raise
-
-                ok = False
-
-                # Recovery strategy is to look for the next check
-                # block
-                self.skip_until_newline()
-                # lobster-trace: LRM.Import_In_Check
-                while not self.peek_eof() and not self.peek_kw("checks"):
                     self.advance()
                     self.skip_until_newline()
 

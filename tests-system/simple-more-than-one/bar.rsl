@@ -1,7 +1,9 @@
-          package bar
+package bar
 
+type MyType {
+  name optional String
+}
 
-
-            type MyType {
-               name optional String
-            }
+checks MyType {
+  matches(name, "^Q.*"),  error "name must start with Q", name
+}

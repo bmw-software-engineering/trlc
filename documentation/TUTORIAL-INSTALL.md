@@ -118,6 +118,5 @@ it is better than nothing.
 (add-hook 'trlc-mode-hook 'flyspell-buffer)
 
 (add-to-list 'auto-mode-alist '("\\.rsl\\'" . trlc-mode))
-(add-to-list 'auto-mode-alist '("\\.check\\'" . trlc-mode))
 (add-to-list 'auto-mode-alist '("\\.trlc\\'" . trlc-mode))
 ```

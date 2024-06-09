@@ -1,5 +1,0 @@
-package bar
-
- checks MyType {
-      matches(name, "^Q.*"),  error "name must start with Q", name
-  }

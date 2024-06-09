@@ -2,4 +2,4 @@ true, """this
       ^^^^^^^ checks-6/foo.rsl:6: error: error message must not contain a newline
 true, """this
 ^^^^ checks-6/foo.rsl:6: issue: expression is always true [vcg-always-true]
-Processed 1 model, 0 checks and 0 requirement files and found 1 warning and 1 error
+Processed 1 model and 0 requirement files and found 1 warning and 1 error

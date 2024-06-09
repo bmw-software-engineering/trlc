@@ -6,4 +6,4 @@ T test_01 {
   ^^^^^^^ rbt-conditional-expression/foo.trlc:3: check error: foobar evaluation elsif
 T test_01 {
   ^^^^^^^ rbt-conditional-expression/foo.trlc:3: check error: potato else
-Processed 1 model, 0 checks and 1 requirement file and found 4 errors
+Processed 1 model and 1 requirement file and found 4 errors

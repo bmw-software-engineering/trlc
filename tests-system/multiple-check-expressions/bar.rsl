@@ -1,7 +1,10 @@
-          package bar
+package bar
 
+type MyType {
+  name String
+}
 
-
-            type MyType {
-               name String
-            }
+checks MyType {
+  startswith(name, "Q"), "name must start with Q", name
+  endswith(name, "t"), "name must end with t", name
+}

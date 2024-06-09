@@ -1,14 +1,12 @@
-checks T {
-       ^ checks-1/foo.check:3: issue: move this check block into foo.rsl:1 [deprecated_feature]
 a < b, "a must be less than b"
-    ^ checks-1/foo.check:4: issue: expression could be null [vcg-evaluation-of-null]
+    ^ checks-1/foo.rsl:9: issue: expression could be null [vcg-evaluation-of-null]
     | example record_type triggering error:
     |   T bad_potato {
     |     a = 0
     |     /* b is null */
     |   }
 T Test_1 {
-  ^^^^^^ checks-1/foo.trlc:3: error: rhs of check a < b (foo.check:4) must not be null
+  ^^^^^^ checks-1/foo.trlc:3: error: rhs of check a < b (foo.rsl:9) must not be null
 T Test_2 {
   ^^^^^^ checks-1/foo.trlc:7: check error: a must be less than b
-Processed 1 model, 1 check and 1 requirement file and found 2 warnings and 2 errors
+Processed 1 model and 1 requirement file and found 1 warning and 2 errors

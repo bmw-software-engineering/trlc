@@ -282,7 +282,6 @@ class Compilation_Unit(Node):
 
     def add_item(self, node):
         # lobster-trace: LRM.RSL_File
-        # lobster-trace: LRM.Check_File
         # lobster-trace: LRM.TRLC_File
         assert isinstance(node, (Concrete_Type,
                                  Check_Block,

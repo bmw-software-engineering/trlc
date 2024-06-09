@@ -1,14 +1,12 @@
-checks T {
-       ^ checks-4/foo.check:3: issue: move this check block into foo.rsl:1 [deprecated_feature]
-(forall v in values => v != foo), "value cannot be same as value of foo", values
-             ^^^^^^ checks-4/foo.check:4: issue: expression could be null [vcg-evaluation-of-null]
+(forall v in values => v != foo),
+             ^^^^^^ checks-4/foo.rsl:9: issue: expression could be null [vcg-evaluation-of-null]
                   | example record_type triggering error:
                   |   T bad_potato {
                   |     /* foo is null */
                   |     /* values is null */
                   |   }
 T Test_1 {
-  ^^^^^^ checks-4/foo.trlc:3: error: values in quantified expression (forall v in values => v != foo) (foo.check:4) must not be null
+  ^^^^^^ checks-4/foo.trlc:3: error: values in quantified expression (forall v in values => v != foo) (foo.rsl:9) must not be null
 values = ["x", "kitten", "z"]
          ^ checks-4/foo.trlc:9: check error: value cannot be same as value of foo
-Processed 1 model, 1 check and 1 requirement file and found 2 warnings and 2 errors
+Processed 1 model and 1 requirement file and found 1 warning and 2 errors

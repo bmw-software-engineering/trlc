@@ -4,3 +4,7 @@ type T {
    txt String
    len Integer
 }
+
+checks T {
+   len (txt) == len, warning "length is not as expected", len
+}

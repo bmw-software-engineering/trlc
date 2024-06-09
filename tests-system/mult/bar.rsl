@@ -1,31 +1,30 @@
-  package bar
-
+package bar
 
 type MyType {
-   name optional String
-   mult String [5..5]
- }
+  name optional String
+  mult String [5..5]
+}
 
- type MyTypeUnbound {
-    name String
-   mult String [0..*]
+checks MyType {
+  len(mult) == 3, "mult must have 3 elements"
+}
 
- }
+type MyTypeUnbound {
+  name String
+  mult String [0..*]
+}
 
-  type ZeroMult {
-    name String
-   mult String [0..0]
+type ZeroMult {
+  name String
+  mult String [0..0]
+}
 
- }
+type WrongOrder {
+  name String
+  mult String [5..3]
+}
 
-   type WrongOrder {
-    name String
-    mult String [5..3]
-
- }
-
-    type DefinedLimits {
-   name String
-    mult String [3..5]
-
- }
+type DefinedLimits {
+  name String
+  mult String [3..5]
+}

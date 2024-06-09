@@ -1,5 +1,0 @@
-package Bar
-
-checks T {
-   endswith(name, "kitten"), "also not a good name"
-}

@@ -17,4 +17,4 @@ len(positives) > 0 implies 5 / positives[0] > 0, "potato"
                              |     /* c is null */
                              |   }
                              | /* note: counter-example is unreliable in this case */
-Processed 3 models, 0 checks and 0 requirement files and found 2 warnings
+Processed 3 models and 0 requirement files and found 2 warnings

@@ -48,12 +48,17 @@ only). It is strongly suggested to turn this on in CI.
 
 The TRLC tool goes beyond what the language definition requires and
 produces additional messages that may be helpful. For example it warns
-you about deprecated language features:
+you if you're trying to unconditionally dereference an optional
+component in a check.
 
 ```
-checks MyType {
-       ^^^^^^ enum-ok/checks.check:4: issue: move this check block into bar.rsl:1 [deprecated_feature]
-Processed 1 model, 1 check and 1 requirement file and found 1 warning
+len(description) >= 10, "too short"
+    ^^^^^^^^^^^ evaluation_of_null.rsl:8: issue: expression could be null [vcg-evaluation-of-null]
+              | example record_type triggering error:
+              |   Requirement bad_potato {
+              |     /* description is null */
+              |   }
+Processed 1 model and 0 requirement files and found 1 warning
 ```
 
 ## Return code

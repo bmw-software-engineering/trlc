@@ -1,13 +1,17 @@
- package bar
-
+package bar
 
 enum Status {
-	NEW
-	OLD
-	DEPRECATED
+  NEW
+  OLD
+  DEPRECATED
 }
+
 type MyType {
-    name String
+  name String
   status optional Status
-   link  optional MyType
- }
+  link  optional MyType
+}
+
+checks MyType {
+  link != null implies link.status == bar.Status.NEW, "Must be linked to new"
+}

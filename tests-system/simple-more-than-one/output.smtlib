@@ -1,7 +1,5 @@
-checks MyType {
-       ^^^^^^ simple-more-than-one/checks.check:3: issue: move this check block into bar.rsl:1 [deprecated_feature]
 matches(name, "^Q.*"),  error "name must start with Q", name
-        ^^^^ simple-more-than-one/checks.check:4: issue: expression could be null [vcg-evaluation-of-null]
+        ^^^^ simple-more-than-one/bar.rsl:8: issue: expression could be null [vcg-evaluation-of-null]
            | example record_type triggering error:
            |   MyType bad_potato {
            |     /* name is null */
@@ -10,4 +8,4 @@ name = "Abert"
        ^^^^^^^ simple-more-than-one/instances.trlc:9: check error: name must start with Q
 name = "BBert"
        ^^^^^^^ simple-more-than-one/instances.trlc:13: check error: name must start with Q
-Processed 1 model, 1 check and 1 requirement file and found 2 warnings and 2 errors
+Processed 1 model and 1 requirement file and found 1 warning and 2 errors

@@ -4,4 +4,4 @@ Bar.T test2 {
       ^^^^^ multiple-models/foo.trlc:8: check error: this is not a good name
 Bar.T test2 {
       ^^^^^ multiple-models/foo.trlc:8: check error: also not a good name
-Processed 2 models, 2 checks and 3 requirement files and found 3 errors
+Processed 2 models and 3 requirement files and found 3 errors

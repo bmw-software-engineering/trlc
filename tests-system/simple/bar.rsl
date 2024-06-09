@@ -3,3 +3,7 @@ package bar
 type MyType {
   name String
 }
+
+checks MyType {
+  len(name) > 1, "name must start with Q", name
+}

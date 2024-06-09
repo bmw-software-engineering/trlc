@@ -89,8 +89,7 @@ however there is significant overlap in dataflow.
   determines the file set to process and mode of operation.
 
 * The Source_Manager registers files and decides on the parse
-  order. For all modes of operation all `.rsl` files are parsed first,
-  and then all `.check` files.
+  order. For all modes of operation all `.rsl` files are parsed first.
 
 * Then (unless `--no-lint` mode is active) the
   [lint.py](../trlc/lint.py) and [vcg.py](../trlc/vcg.py) modules are
@@ -184,9 +183,9 @@ the `Source_Manager`.
   message.
 
 * During this we build a dependency graph, for each package we create
-  three nodes in a graph: a rsl node, a check node, and a trlc
-  node. Initially we link the check to the rsl; and the trlc to both
-  the check and rsl.
+  two nodes in a graph: a rsl node (representing the `.rsl` file) and
+  a trlc node (representing the set of all `.trlc` files for that
+  package). Initially we link the the trlc node to the rsl node.
 
 * When we resolve imports we then add links in this graph. Note that
   an import in an RSL only links to the RSL node of the imported
@@ -197,8 +196,7 @@ the `Source_Manager`.
   all explicitly requested items.
 
 * We then use that to expand into a final file list that is
-  required. Note that for check nodes, all check files are included,
-  and similarly for trlc nodes all trlc files are included.
+  required. Note that for trlc nodes all trlc files are included.
 
 ### Lexer and Parser overview
 
