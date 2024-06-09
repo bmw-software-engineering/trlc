@@ -27,8 +27,11 @@ generated in the following situations:
 
 ### 2.0.0-dev
 
-* [TRLC, LRM, API] New major version as all deprecated features have
-  been removed:
+This new major release includes a number of incompatible
+changes. These have been tagged in the changelog.
+
+* [Incompatible, TRLC, LRM, API] New major version as all deprecated
+  features have been removed:
 
   * The deprecated builtin function syntax `trlc:foo` has been
 	removed. You should now use `foo` instead.
@@ -39,21 +42,21 @@ generated in the following situations:
   * API support surrounding check files in the Source_Manager has been
     removed.
 
-* [TRLC, LRM] The LRM had rules that names need to be sufficiently
-  distinct, for example having `Foo`, `foo` or `Fo_o` in the same
-  namespace would not be allowed. This was previously not implemented
-  at all.
+* [Incompatible, TRLC, LRM, API] The LRM had rules that names need to
+  be sufficiently distinct, for example having `Foo`, `foo` or `Fo_o`
+  in the same namespace would not be allowed. This was previously not
+  implemented at all.
 
   The rules have been strengthened to apply to all names (packages,
   types, literals, objects) and are now enforced. This is also a
   backwards incompatible change as it may invalidate some previously
   valid `.trlc` or `.rsl` files.
 
-* [TRLC] New builtin function `oneof`. This can be used to test if
-  precisely one of a number of parameters is true. For example:
+* [TRLC, LRM] New builtin function `oneof`. This can be used to test
+  if precisely one of a number of parameters is true. For example:
 
-* [TRLC] A warning is not issued by the tools when encountering
-  duplicate late package declarations.
+* [TRLC] The warning about late package declarations is no longer
+  issued.
 
 * [TRLC] New command-line flag `-I` which can be used to register
   include directories. You can use this to automatically parse a
