@@ -8,7 +8,7 @@ import sys
 mh = Message_Handler()
 sm = Source_Manager(mh)
 
-# Read all .rsl, .check, and .trlc files
+# Read all .rsl and .trlc files
 # in the given directory
 sm.register_directory(".")
 

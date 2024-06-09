@@ -96,14 +96,12 @@ abstract type T {
 
 #### deprecated_feature
 
-Some features in TRLC are deprecated, that are scheduled to be removed
-for version 2.0.0. The linter can notify you when you're using such a
-construct, and how it should be done in the future. Right now these
-two features are:
+Some features in TRLC can be deprecated as the language
+evolves. Features that are scheduled to be removed for version 3.0.0
+are flagged by the linter. The linter can notify you when you're using
+such a construct, and how it should be done in the future.
 
-* `.check` files (just move the check blocks into the `.rsl` file)
-* The legacy `trlc:len` style of builtin functions (just use
-  e.g. `len` instead)
+Currently there are no deprecated features in TRLC.
 
 #### separator_based_literal_ambiguity
 

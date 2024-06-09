@@ -13,3 +13,12 @@ type Requirement {
   functional   Boolean
   integrity    optional ASIL
 }
+
+checks Requirement {
+  functional implies integrity != null,
+    error "a functional requirement requires an integrity"
+
+  integrity == ASIL.D implies len (description) > 10,
+    warning "this is not very descriptive",
+    description
+}

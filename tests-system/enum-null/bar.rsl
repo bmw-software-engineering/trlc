@@ -1,13 +1,16 @@
-  package bar
-
+package bar
 
 enum Status {
-	NEW
-	OLD
-	DEPRECATED
+  NEW
+  OLD
+  DEPRECATED
 }
-type MyType {
-    name String
-    status optional Status
 
- }
+type MyType {
+  name String
+  status optional Status
+}
+
+checks MyType {
+  status != null, "Status must be not null"
+}

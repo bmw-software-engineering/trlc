@@ -1,6 +1,11 @@
-          package bar
+package bar
 
-            type MyType {
-                name String
-                other MyType
-            }
+type MyType {
+  name String
+  other MyType
+}
+
+checks MyType {
+  other != null, "Other must not be null", other
+  other == null, "Other must be null", other
+}

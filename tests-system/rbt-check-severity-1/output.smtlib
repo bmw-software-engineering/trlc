@@ -4,4 +4,4 @@ b = "potato"
     ^^^^^^^^ rbt-check-severity-1/foo.trlc:5: check error: b must be longer than 7
 c = "potatoes"
     ^^^^^^^^^^ rbt-check-severity-1/foo.trlc:6: check error: c must be longer than 10
-Processed 1 model, 0 checks and 1 requirement file and found 3 errors
+Processed 1 model and 1 requirement file and found 3 errors

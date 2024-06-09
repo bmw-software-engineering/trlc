@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 2.10 of [TRLC language reference
+Up to date with version 3.0 of [TRLC language reference
 manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
@@ -25,7 +25,19 @@ generated in the following situations:
 ## Changelog
 
 
-### 1.2.3-dev
+### 2.0.0-dev
+
+* [TRLC, LRM, API] New major version as all deprecated features have
+  been removed:
+
+  * The deprecated builtin function syntax `trlc:foo` has been
+	removed. You should now use `foo` instead.
+
+  * Support for check files has been removed. You can simply move any
+    checks into the rsl file.
+
+  * API support surrounding check files in the Source_Manager has been
+    removed.
 
 * [TRLC, LRM] The LRM had rules that names need to be sufficiently
   distinct, for example having `Foo`, `foo` or `Fo_o` in the same
@@ -43,9 +55,6 @@ generated in the following situations:
 * [TRLC] A warning is not issued by the tools when encountering
   duplicate late package declarations.
 
-* [TRLC] The deprecated builtin function syntax `trlc:foo` has been
-  removed. You should now use `foo` instead.
-
 * [TRLC] New command-line flag `-I` which can be used to register
   include directories. You can use this to automatically parse a
   minimal set of file. Normally when invoking eg `trlc foo.trlc` this
@@ -59,7 +68,7 @@ generated in the following situations:
   Especially in large projects this will be much faster than
   explicitly parsing everything.
 
-* [API] The source manage has a new function
+* [API] The source manager has a new function
   [register_include](https://bmw-software-engineering.github.io/trlc/manual/infrastructure.html#trlc.trlc.Source_Manager.register_include)
   which should be used before any `register_file` or `register_dir`
   calls.

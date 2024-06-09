@@ -1,8 +1,8 @@
 package LRM
 
 Versioning Version {
-  major = 2
-  minor = 10
+  major = 3
+  minor = 0
 }
 
 GFDL_License License {
@@ -24,8 +24,8 @@ section "Design Goals" {
          requirements.''',
       '''Language design should be extensible and flexible for future
          changes.''',
-      '''Requirement files (but not necessarily model and check
-         files) should be human-readable with minimal
+      '''Requirement files (but not necessarily model) should
+         be human-readable with minimal
          training or understanding of the language.''',
       '''No business logic should be encoded in the language design.'''
     ]
@@ -206,13 +206,10 @@ section "Lexing" {
 section "Layout and file structure" {
 
   Text Layout {
-    text = "There are three types of files:"
+    text = "There are two types of files:"
     bullets = [
       '''`.rsl` They contains the user-defined type definitions and
          optionally user-defined warnings or checks''',
-      '''(deprecated) `.check` They contain only user-defined warning
-         or error messages for types declared in `.rsl`
-         files''',
       '''`.trlc` They contain instances of the types (this is where
          your requirements go)'''
     ]
@@ -220,8 +217,7 @@ section "Layout and file structure" {
 
   Dynamic_Semantics File_Parsing_Order {
     text = '''
-First, all `.rsl` files are parsed. Then, if no errors are
-raised, all `.check` files are parsed. Finally, if no errors
+First, all `.rsl` files are parsed. Then, if no errors
 are raised, all `.trlc` files are parsed.
 '''
   }
@@ -792,43 +788,6 @@ section "Type declarations" {
 
 }
 
-section "Check Files" {
-
-  Grammar Check_File {
-    text = '''A `.check` file is simply a set of check blocks.'''
-    bnf = '''
-      check_file ::= file_preamble
-                     { check_block }
-      '''
-  }
-
-  Static_Semantics Cannot_Declare_In_Check_File {
-    text = '''It is an error to indicate a package that has not been
-              declared in an `.rsl` file.'''
-  }
-
-  Static_Semantics Import_In_Check {
-    text = '''A check file may not import any packages.'''
-  }
-
-  Recommendation Deprecated_Check_Files {
-    text = '''Check files are a deprecated feature that allows you to
-              specify checks separate from type
-              declarations. While this seems like a good
-              idea at first, in a large project this can
-              create confusion: consider a global definition
-              for your requirement type stored in a central
-              place which everyone is supposed to use. In
-              this example some random user can create in
-              their sub-project a check file that applies to
-              the global definitions, causing hassle for
-              everyone. It is recommended that an
-              implementation suggests moving any check from
-              a `.check` file into the package `.rsl` file.'''
-  }
-
-}
-
 section "Checks" {
 
   Grammar Check_Block {
@@ -868,10 +827,7 @@ section "Checks" {
 
   Note Only_Current_Package {
     text = '''Note that it is never possible to add checks to a type from
-              a foreign package. In check files this is more
-              obvious as you cannot have an import clause,
-              but this is also true for checks declared in
-              `.rsl` files since it is not possible to
+              a foreign package since it is not possible to
               specify a qualified name.'''
   }
 

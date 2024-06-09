@@ -2,4 +2,4 @@ T test1 { v = 3__3 }
                 ^ int-literals-6/foo.trlc:3: error: base 10 digit is required here
 T test1 { v = 3__3 }
                 ^ int-literals-6/foo.trlc:3: error: unexpected character '_'
-Processed 1 model, 0 checks and 1 requirement file and found 2 errors
+Processed 1 model and 1 requirement file and found 2 errors
