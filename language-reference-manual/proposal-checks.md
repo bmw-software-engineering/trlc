@@ -22,17 +22,17 @@ type T {
   begin checks
 
     if a > b then
-	   assert c == "gt", "blah"
-	elif a < b then
-	   assert c == "lt", "blah"
-	else
-	   assert c == "eq", "blah"
-	end if
+       assert c == "gt", "blah"
+    elif a < b then
+       assert c == "lt", "blah"
+    else
+       assert c == "eq", "blah"
+    end if
 
-	let tmp = a + b
+    let tmp = a + b
 
-	for item in d loop
-	   assert d >= tmp, "blah"
+    forall item in d loop
+       assert d >= tmp, "blah"
     end loop
 
   end checks
