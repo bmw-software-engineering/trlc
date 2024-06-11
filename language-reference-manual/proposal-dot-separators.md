@@ -30,7 +30,7 @@ tuple Section_Reference {
    separator .
    subsubsection optional Integer
 }
-``
+```
 
 ## Expressions
 
