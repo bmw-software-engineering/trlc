@@ -1540,7 +1540,7 @@ class Parser(Parser_Base):
         self.match("STRING")
         sec = ast.Section(name     = self.ct.value,
                             location = self.ct.location,
-                            parent   = self.section)
+                            parent   = self.section.copy())
         sec.set_ast_link(self.ct)
         sec.set_ast_link(t_section)
         self.section.append(sec)
