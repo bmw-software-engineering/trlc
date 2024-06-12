@@ -3094,10 +3094,10 @@ class Symbol_Table:
             if record_object.section:
                 self.section_names = record_object.section
                 if len(self.section_names) > 0:
-                    for i in range(len(self.section_names)):
-                        if self.section_names[i].name not in section_dictionary.keys():
-                            section_dictionary.update({self.section_names[i].name: True})                            
-                            yield self.section_names[i].name
+                    for level in range(len(self.section_names)):
+                        if self.section_names[level].name not in section_dictionary.keys():
+                            section_dictionary.update({self.section_names[level].name: True})                            
+                            yield self.section_names[level].name, level
                     yield record_object.name
             else:
                 yield record_object.name
