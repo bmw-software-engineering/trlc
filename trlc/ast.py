@@ -3064,6 +3064,8 @@ class Symbol_Table:
         self.parent   = parent
         self.imported = []
         self.table    = OrderedDict()
+        self.trlc_files = []
+        self.section_names = []
 
     @staticmethod
     def simplified_name(name):
@@ -3081,6 +3083,24 @@ class Symbol_Table:
         if self.parent:
             rv |= self.parent.all_names()
         return rv
+
+    def iter_record_objects_by_section(self):  
+        section_dictionary = {}        
+        for record_object in self.iter_record_objects():           
+            location = record_object.location.file_name        
+            if location not in self.trlc_files:
+                self.trlc_files.append(location)
+                yield location            
+            if record_object.section:
+                self.section_names = record_object.section
+                if len(self.section_names) > 0:
+                    for i in range(len(self.section_names)):
+                        if self.section_names[i].name not in section_dictionary.keys():
+                            section_dictionary.update({self.section_names[i].name: True})                            
+                            yield self.section_names[i].name
+                    yield record_object.name
+            else:
+                yield record_object.name
 
     def iter_record_objects(self):
         # lobster-exclude: API for users
