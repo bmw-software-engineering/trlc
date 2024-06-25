@@ -1535,12 +1535,14 @@ class Parser(Parser_Base):
         self.match_kw("section")
         t_section = self.ct
         self.match("STRING")
-
-        self.match_kw("section")
-        self.match("STRING")
-        sec = ast.Section(name     = self.ct.value,
-                            location = self.ct.location,
-                            parent   = self.section.copy())
+        if self.section:
+            sec = ast.Section(name     = self.ct.value,
+                                location = self.ct.location,
+                                parent   = self.section[-1])
+        else:
+            sec = ast.Section(name     = self.ct.value,
+                              location = self.ct.location,
+                              parent   = None)
         sec.set_ast_link(self.ct)
         sec.set_ast_link(t_section)
         self.section.append(sec)
@@ -1776,7 +1778,7 @@ class Parser(Parser_Base):
             name      = self.ct.value,
             location  = self.ct.location,
             n_typ     = r_typ,
-            section   = self.section if self.section else None,
+            section   = self.section.copy() if self.section else None,
             n_package = self.cu.package)
         self.cu.package.symbols.register(self.mh, obj)
         obj.set_ast_link(self.ct)
