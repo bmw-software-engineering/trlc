@@ -812,8 +812,8 @@ def write_text_object(fd, mh, obj, context, bnf_parser):
 
     # Build current section
     if obj.section:
-        new_section = section_list(obj.section)
-        new_hashes  = section_hashes(obj.section)
+        new_section = section_list(obj.section[-1])
+        new_hashes  = section_hashes(obj.section[-1])
     else:
         new_section = []
 
@@ -1198,14 +1198,17 @@ def write_toc(fd, pkg_lrm):
 
     old_section = None
     for obj in pkg_lrm.symbols.iter_record_objects():
-        if not obj.section:
+        if obj.section is None:
             continue
-        if old_section == obj.section:
+        obj_section = obj.section[-1]
+        if not obj_section:
             continue
-        old_section = obj.section
+        if old_section == obj_section:
+            continue
+        old_section = obj_section
 
         sections = []
-        ptr = obj.section
+        ptr = obj_section
         while ptr:
             sections = [ptr] + sections
             ptr = ptr.parent
