@@ -3094,10 +3094,10 @@ class Symbol_Table:
             if location not in self.trlc_files:
                 self.trlc_files.append(location)
                 yield location
-                if record_object.section:
-                    object_level = len(record_object.section) - 1
-                else:
-                    object_level = 0
+            if record_object.section:
+                object_level = len(record_object.section) - 1
+            else:
+                object_level = 0
             if record_object.section:
                 for level, section in enumerate(record_object.section):
                     if section not in self.section_names:
