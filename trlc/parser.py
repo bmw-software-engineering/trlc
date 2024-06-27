@@ -1535,14 +1535,9 @@ class Parser(Parser_Base):
         self.match_kw("section")
         t_section = self.ct
         self.match("STRING")
-        if self.section:
-            sec = ast.Section(name     = self.ct.value,
-                                location = self.ct.location,
-                                parent   = self.section[-1])
-        else:
-            sec = ast.Section(name     = self.ct.value,
-                              location = self.ct.location,
-                              parent   = None)
+        sec = ast.Section(name     = self.ct.value,
+                          location = self.ct.location,
+                          parent = self.section[-1] if self.section else None)
         sec.set_ast_link(self.ct)
         sec.set_ast_link(t_section)
         self.section.append(sec)
