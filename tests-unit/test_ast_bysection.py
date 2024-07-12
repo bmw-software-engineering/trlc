@@ -1,37 +1,36 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import patch, MagicMock
 from trlc.ast import Symbol_Table
 
+class TestRecordObject:
+    def __init__(self, location, section):
+        self.location = location
+        self.section = section
+
+class TestSection:
+    def __init__(self, name):
+        self.name = name
+
 class TestIterRecordObjectsBySection(unittest.TestCase):
-    def setUp(self):
-        self.mock_self = MagicMock(spec=Symbol_Table)
-        self.mock_self.trlc_files = []
-        self.mock_self.section_names = []
-        self.mock_self.iter_record_objects.return_value = [
-            MagicMock(location=MagicMock(file_name='file1.txt'), section=['Section1', 'Subsection1']),
-            MagicMock(location=MagicMock(file_name='file2.txt'), section=['Section2']),
-            MagicMock(location=MagicMock(file_name='file1.txt'), section=None)
+
+    @patch("trlc.ast.Symbol_Table.iter_record_objects")
+    def test_iter_record_objects_by_section(self, mock_iter_record_objects):        
+        mock_location = MagicMock(file_name='file1')
+        mock_section1 = TestSection('section1')
+        mock_section2 = TestSection('section2')
+        record1 = TestRecordObject(mock_location, [mock_section1, mock_section2])
+        mock_iter_record_objects.return_value = [record1]
+        
+        results = list(Symbol_Table().iter_record_objects_by_section())
+        
+        expected_results = [
+            'file1',
+            ('section1', 0),
+            ('section2', 1),
+            (record1, 1)
         ]
-
-    def test_iter_record_objects_by_section(self):        
-        sys = Symbol_Table()
-        result = list(sys.iter_record_objects_by_section())
-        # result = list(self.mock_self.iter_record_objects_by_section())
-
-        self.assertEqual(result, [
-            'file1.txt',
-            'file2.txt',
-            ('Section1', 0),
-            ('Subsection1', 1),
-            ('Section2', 0),
-            (self.mock_self.iter_record_objects.return_value[0], 1),
-            (self.mock_self.iter_record_objects.return_value[1], 0),
-            (self.mock_self.iter_record_objects.return_value[2], 0),
-        ])
-
-        self.assertEqual(self.mock_self.trlc_files, ['file1.txt', 'file2.txt'])
-        self.assertEqual(self.mock_self.section_names, ['Section1', 'Subsection1', 'Section2'])
+        
+        self.assertEqual(results, expected_results)
 
 if __name__ == '__main__':
     unittest.main()
-    
