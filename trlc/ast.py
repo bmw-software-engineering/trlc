@@ -3096,15 +3096,13 @@ class Symbol_Table:
                 yield location
             if record_object.section:
                 object_level = len(record_object.section) - 1
-            else:
-                object_level = 0
-            if record_object.section:
                 for level, section in enumerate(record_object.section):
                     if section not in self.section_names:
                         self.section_names.append(section)
                         yield section.name, level
                 yield record_object, object_level
             else:
+                object_level = 0
                 yield record_object, object_level
 
     def iter_record_objects(self):
