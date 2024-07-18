@@ -37,7 +37,7 @@ requirements. It has two attributes: the `description` where we'll
 write the requirement text and a flag `critical` to indicate if this
 is safety-related or not.
 
-Don't worry about the `package Exampele` yet, this is explained much
+Don't worry about the `package Example` yet, this is explained much
 later in the [Packages](TUTORIAL-PACKAGE.md) tutorial.
 
 Attributes have types, and the TRLC language provide a bunch of basic
