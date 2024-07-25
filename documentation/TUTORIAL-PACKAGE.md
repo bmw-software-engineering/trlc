@@ -97,7 +97,7 @@ section "Functional Requirements" {
     Requirement fuel {
       functional  = true
       integrity   = QM
-	  description = "the car shall not use fossil fuesl"
+	  description = "the car shall not use fossil fuels"
 	}
     Requirement colour {
       functional  = true
