@@ -27,4 +27,3 @@ You need to write trlc files with requirements which contains sections as well a
     else:
         object_level = 0
         yield record_object, object_level
-        
