@@ -3088,6 +3088,10 @@ class Symbol_Table:
         """API for users
 
         Retriving information about the section hierarchy for record objects
+        Inputs: folder with trlc files where trlc files have sections,
+                sub sections and record objects
+        Output: Information about sections and level of sections,
+                record objects and levels of record object
         """
         for record_object in self.iter_record_objects():
             location = record_object.location.file_name
