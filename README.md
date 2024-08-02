@@ -42,7 +42,7 @@ The Python implementation can be used for several purposes:
   (for language lawyers)
 * [Python API Documentation](https://bmw-software-engineering.github.io/trlc/)
   (API reference for end-users)
-* [Iteration API by Section Documentation](https://bmw-software-engineering.github.io/trlc/section.rst)
+* [Iteration API by Section Documentation](https://bmw-software-engineering.github.io/trlc/section_api.html)
   (API reference for end-users)
 * [AST Hierarchy](https://bmw-software-engineering.github.io/trlc/ast_hierarchy.svg)
   (overview over all classes in the AST)

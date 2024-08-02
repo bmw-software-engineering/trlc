@@ -45,3 +45,8 @@ from this API.
    manual/infrastructure
    manual/errors
    manual/ast
+
+.. toctree::
+  :caption: Iteration API by Section
+
+  section_api
