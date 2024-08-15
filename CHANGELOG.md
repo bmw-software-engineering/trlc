@@ -52,6 +52,10 @@ changes. These have been tagged in the changelog.
   backwards incompatible change as it may invalidate some previously
   valid `.trlc` or `.rsl` files.
 
+* [TRLC] The `--verify` command is now supported on Windows without
+  the use of an external `cvc5` install, now that the Python package
+  for CVC5 is also available on Windows.
+
 * [TRLC, LRM] New builtin function `oneof`. This can be used to test
   if precisely one of a number of parameters is true. For example:
 
