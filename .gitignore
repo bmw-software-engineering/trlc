@@ -19,3 +19,7 @@ dist
 
 # Build-System ignores
 bazel-*
+
+# Special ignores for CI
+cvc5
+cvc5.exe

@@ -10,16 +10,14 @@ deployed and used. This is enabled by default, but you can turn these
 off with the `--no-lint` option.
 
 To enable more detailed checks you can also use the `--verify`
-feature, but please note that this is only available on Linux, and
-requires you to have installed the optional dependency
-[CVC5](https://pypi.org/project/cvc5).
+feature.
 
 ```bash
 $ trlc --verify DIRECTORIES_OR_FILES
 ```
 
-If you are on Windows or Linux, you can also download the CVC5
-executables and ask TRLC to use them directly:
+If the API for CVC5 isn't avialable on your platform, then you can
+also download the CVC5 executables and ask TRLC to use them directly:
 
 ```bash
 $ trlc --verify --use-cvc5-binary=path/to/cvc5.exe DIRECTORIES_OR_FILES
