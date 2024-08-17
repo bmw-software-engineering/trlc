@@ -1,2 +1,2 @@
-pyvcg==1.0.6
-cvc5>=1.1.1; sys.platform == "linux" or sys.platform == "darwin"
+pyvcg==1.0.7
+cvc5>=1.2.0

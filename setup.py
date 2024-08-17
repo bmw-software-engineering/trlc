@@ -30,14 +30,6 @@ project_urls = {
     "Source Code"   : version.CODE_URL,
 }
 
-required_packages = []
-python_required = ">=3.8, <4"
-if "--plat-name" in sys.argv or "-p" in sys.argv:
-     required_packages.append("PyVCG[api]==1.0.6")
-     python_required = ">=3.8, <3.12"
-else:
-    required_packages.append("PyVCG==1.0.6")
-
 setuptools.setup(
     name="trlc",
     version=version.TRLC_VERSION,
@@ -50,8 +42,8 @@ setuptools.setup(
     project_urls=project_urls,
     license="GNU General Public License v3",
     packages=setuptools.find_packages(),
-    install_requires=required_packages,
-    python_requires=python_required,
+    install_requires="PyVCG[api]==1.0.7",
+    python_requires=">=3.8, <3.13",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",

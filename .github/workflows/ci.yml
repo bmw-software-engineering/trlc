@@ -33,22 +33,16 @@ jobs:
         py-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         include:
           - os: ubuntu-latest
-            cvc5: "Linux"
+            cvc5-plat: "linux"
           - os: macos-13
             brew: "/usr/local"
-            cvc5: "macOS"
+            cvc5-plat: "osx13"
           - os: macos-14
             brew: "/opt/homebrew"
-            cvc5: "macOS-arm64"
+            cvc5-plat: "osx14"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install cvc5 binary
-        uses: supplypike/setup-bin@v4
-        with:
-          uri: 'https://github.com/cvc5/cvc5/releases/download/cvc5-1.0.8/cvc5-${{ matrix.cvc5 }}'
-          name: 'cvc5'
-          version: '1.0.8'
       - name: Install python version
         if: matrix.os != 'macos-14' || matrix.py-version == '3.11' || matrix.py-version == '3.12'
         uses: actions/setup-python@v5
@@ -69,6 +63,10 @@ jobs:
         run: |
           brew install make
           echo "${{ matrix.brew }}/opt/make/libexec/gnubin" >> $GITHUB_PATH
+      - name: Fetch CVC5
+        run: |
+          util/fetch_cvc5.py 1.2.0 ${{ matrix.cvc5-plat }}
+          echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
       - name: Executing unit tests
         run: |
           make unit-tests
