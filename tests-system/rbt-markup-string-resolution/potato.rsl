@@ -1,0 +1,5 @@
+package Potato
+
+type T {
+    a Markup_String
+}
