@@ -1,0 +1,17 @@
+package Foo
+
+tuple Sep {
+    a Integer
+    separator @
+    b Integer
+}
+
+tuple NoSep {
+    a Integer
+    b Integer
+}
+
+type T {
+    sep Sep
+    nosep NoSep
+}

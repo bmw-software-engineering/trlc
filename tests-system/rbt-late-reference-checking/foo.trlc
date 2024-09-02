@@ -1,0 +1,11 @@
+package Foo
+
+T Bar {
+    a = 1
+    ref = Kitten
+}
+
+T Kitten {
+    a = 2
+    ref = Potato
+}
