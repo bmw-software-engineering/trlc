@@ -1,3 +1,5 @@
 T Bar {
   ^^^ rbt-universal-quantification-semantics/foo.trlc:3: check warning: All items must be positive
-Processed 1 model, 0 checks and 1 requirement file and found 1 warning
+T Potato {
+  ^^^^^^ rbt-universal-quantification-semantics/foo.trlc:11: check warning: All items must be positive
+Processed 1 model and 1 requirement file and found 2 warnings

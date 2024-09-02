@@ -7,3 +7,7 @@ T Bar {
 T Kitten {
     a = []
 }
+
+T Potato {
+    a = [-1, 1]
+}

@@ -1520,7 +1520,7 @@ section "Quantification" {
     bnf = '''
       quantified_expression ::=
         '(' quantifier IDENTIFIER_name 'in' IDENTIFIER_component_name '=>'
-        expression_PREDICATE ')'ma
+        expression_PREDICATE ')'
 
       quantifier ::= 'forall' | 'exists'
     '''

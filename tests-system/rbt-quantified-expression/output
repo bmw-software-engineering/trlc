@@ -1,3 +1,3 @@
-(exists item in a => item == 7), warning "7 is a lucky number", a
- ^^^^^^ rbt-quantified-expression/foo.rsl:9: issue: expression is always true [vcg-always-true]
-Processed 1 model, 0 checks and 1 requirement file and found 1 warning
+(forall item in a => 42), warning "All items must be positive", a
+                     ^^ rbt-quantified-expression/foo.rsl:10: error: expected expression of type Builtin_Boolean, got Builtin_Integer instead
+Processed 1 model and 1 requirement file and found 1 error
