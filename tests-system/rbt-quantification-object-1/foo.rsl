@@ -1,0 +1,9 @@
+package Foo
+
+type Potato {
+    a String
+}
+
+checks Potato {
+    (forall char in a => char != "a"), warning "a should not contain the letter a"
+}
