@@ -2,4 +2,4 @@ en = Enumm.A
      ^^^^^ rbt-valid-enumeration-literals/foo.trlc:4: error: unknown symbol Enumm
 en = Enum.D
           ^ rbt-valid-enumeration-literals/foo.trlc:8: error: unknown symbol D
-Processed 1 model, 0 checks and 1 requirement file and found 2 errors
+Processed 1 model and 1 requirement file and found 2 errors

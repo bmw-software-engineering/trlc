@@ -1,1 +1,1 @@
-rbt-tuple-generic-form/foo.trlc:4:15: trlc error: expected comma ',', encountered closing parenthesis ')' instead
+rbt-tuple-generic-form/foo.trlc:4:14: trlc error: expected string literal, encountered decimal literal instead

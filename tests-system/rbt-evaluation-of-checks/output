@@ -1,5 +1,3 @@
-freeze tu = 3@6
-            ^ rbt-evaluation-of-checks/foo.rsl:14: warning: Tuple_Aggregate not yet supported in VCG
 T Bar {
   ^^^ rbt-evaluation-of-checks/foo.trlc:3: check warning: a should be less than b
-Processed 1 model, 0 checks and 1 requirement file and found 2 warnings
+Processed 1 model and 1 requirement file and found 1 warning

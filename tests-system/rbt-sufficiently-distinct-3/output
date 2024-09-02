@@ -1,0 +1,5 @@
+type tbar {
+     ^^^^ rbt-sufficiently-distinct-3/foo.rsl:7: error: tbar is too similar to T_Bar, declared at foo.rsl:3
+T_Bar bar_kitten {
+      ^^^^^^^^^^ rbt-sufficiently-distinct-3/foo.trlc:7: error: bar_kitten is too similar to Bar_Kitten, declared at foo.trlc:3
+Processed 1 model and 1 requirement file and found 2 errors

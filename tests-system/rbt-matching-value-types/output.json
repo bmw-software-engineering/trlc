@@ -2,4 +2,4 @@ a = 1.0
     ^^^ rbt-matching-value-types/foo.trlc:4: error: expected integer literal, encountered decimal literal instead
 b = [1, 2, 3]
      ^ rbt-matching-value-types/foo.trlc:10: error: expected string literal, encountered integer literal instead
-Processed 1 model, 0 checks and 1 requirement file and found 2 errors
+Processed 1 model and 1 requirement file and found 2 errors

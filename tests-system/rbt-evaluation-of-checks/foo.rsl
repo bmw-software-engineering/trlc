@@ -1,17 +1,9 @@
 package Foo
 
-tuple Tuple {
-    a Integer
-    separator @
-    b Integer
-}
-
 type T {
     a Integer
     b Integer
     freeze b = 2
-    tu Tuple
-    freeze tu = 3@6
 }
 
 checks T {

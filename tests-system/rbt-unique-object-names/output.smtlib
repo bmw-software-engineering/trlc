@@ -4,4 +4,4 @@ T T {}
   ^ rbt-unique-object-names/foo.trlc:5: error: duplicate definition, previous definition at foo.rsl:3
 T Bar {}
   ^^^ rbt-unique-object-names/foo.trlc:9: error: duplicate definition, previous definition at foo.trlc:7
-Processed 1 model, 0 checks and 1 requirement file and found 3 errors
+Processed 1 model and 1 requirement file and found 3 errors

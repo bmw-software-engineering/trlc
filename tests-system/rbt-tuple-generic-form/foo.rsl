@@ -2,7 +2,7 @@ package Foo
 
 tuple Tuple {
     a Integer
-    b Integer
+    b String
     c Integer
 }
 
