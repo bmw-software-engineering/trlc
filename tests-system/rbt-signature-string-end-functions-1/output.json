@@ -1,3 +1,3 @@
 endswith(c, "en"), warning "a should end with en", c
          ^ rbt-signature-string-end-functions-1/foo.rsl:12: error: expected expression of type Builtin_String, got Builtin_Integer instead
-Processed 1 model, 0 checks and 0 requirement files and found 1 error
+Processed 1 model and 0 requirement files and found 1 error

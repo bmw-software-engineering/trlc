@@ -1156,19 +1156,19 @@ section "Names" {
   }
 
   Dynamic_Semantics Startswith_Semantics {
-    text = '''The `startswith` function returns true if the first
+    text = '''The `startswith` function returns true iff the first
               parameter fully contains the second parameter
               at its start.'''
   }
 
   Dynamic_Semantics Endswith_Semantics {
-    text = '''The `endswith` function returns true if the first parameter
+    text = '''The `endswith` function returns true iff the first parameter
               fully contains the second parameter at its
               end.'''
   }
 
   Dynamic_Semantics Matches_Semantics {
-    text = '''The `matches` function returns true if the first parameter
+    text = '''The `matches` function returns true iff the first parameter
               is matched by the regular expression given in
               the second parameter.'''
   }
@@ -1186,10 +1186,6 @@ section "Names" {
   Dynamic_Semantics Decimal_Conversion_Semantics {
     text = '''The `Decimal` type conversion simply converts
               the given integer to the exact same rational.'''
-  }
-
-  Name_Resolution Case_Sensitive {
-    text = '''Name resolution is case sensitive.'''
   }
 
   Example Name_Examples {
@@ -1548,14 +1544,14 @@ section "Quantification" {
 
   Dynamic_Semantics Universal_Quantification_Semantics {
     text = '''For universal *(forall)* quantification the final value is
-              true if all predicates evaluate to
+              true iff all predicates evaluate to
               true. *(This means universal quantification
               over an empty array is vacuously true.)*'''
   }
 
   Dynamic_Semantics Existential_Quantification_Semantics {
     text = '''For existential *(exists)* quantification the final value is
-              true if the predicate evaluate to true at
+              true iff the predicate evaluate to true at
               least once. *(This means existential
               quantification over an empty array is
               vacuously false.)*'''

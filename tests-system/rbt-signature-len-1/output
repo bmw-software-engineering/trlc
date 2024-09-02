@@ -1,3 +1,3 @@
 len(b) > 7, "b must be longer than 7"
     ^ rbt-signature-len-1/foo.rsl:11: error: expected expression of type Array_Type, got Builtin_Integer instead
-Processed 1 model, 0 checks and 0 requirement files and found 1 error
+Processed 1 model and 0 requirement files and found 1 error
