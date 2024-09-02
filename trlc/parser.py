@@ -221,7 +221,6 @@ class Parser_Base:
 
 
 class Markup_Parser(Parser_Base):
-
     def __init__(self, parent, literal):
         assert isinstance(parent, Parser)
         super().__init__(parent.mh, Markup_Lexer(parent.mh, literal),
@@ -232,7 +231,6 @@ class Markup_Parser(Parser_Base):
         self.references = literal.references
 
     def parse_all_references(self):
-        # lobster-trace: LRM.Markup_String_Late_Reference_Resolution
         while self.nt:
             if self.peek("CHARACTER"):
                 self.advance()

@@ -457,6 +457,7 @@ class Source_Manager:
         return ok
 
     def resolve_record_references(self):
+        # lobster-trace: LRM.Markup_String_Late_Reference_Resolution
         ok = True
         for package in self.stab.values(ast.Package):
             for obj in package.symbols.values(ast.Record_Object):
@@ -533,7 +534,6 @@ class Source_Manager:
         # Resolve record reference names and do the missing semantic
         # analysis.
         # lobster-trace: LRM.File_Parsing_References
-        # lobster-trace: LRM.Markup_String_Late_Reference_Resolution
         if not self.resolve_record_references():
             self.callback_parse_end()
             return None

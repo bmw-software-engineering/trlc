@@ -1,40 +1,25 @@
 type Q extends T {
      ^ lint-ug-examples/clarify_final.rsl:7: issue: consider clarifying that this record is final [clarify_final]
-     | Parent record Clarify_Final.T is final, making this record
-     | also final. Marking it explicitly as final
-     | clarifies this to casual readers.
 -x / 3 < 0, "non-obvious meaning"
 ^ lint-ug-examples/unary_minus_precedence.rsl:8: issue: expression means -(x / 3), place explicit brackets to clarify intent [unary_minus_precedence]
 description != null, "description cannot be empty"
             ^^ lint-ug-examples/always_true.rsl:12: issue: expression is always true [vcg-always-true]
 len(x) >= 3 implies x[3] > 0, "too small"
                      ^ lint-ug-examples/array_index.rsl:8: issue: array index could be larger than len(x) [vcg-array-index]
-                     | example record_type triggering error:
-                     |   T bad_potato {
-                     |     x = [1, 1, 1]
-                     |   }
+100 / (111 - x * y) > 0, "example"
+    ^ lint-ug-examples/div_by_zero.rsl:12: issue: divisor could be 0 [vcg-div-by-zero]
 len(description) >= 10, "too short"
     ^^^^^^^^^^^ lint-ug-examples/evaluation_of_null.rsl:8: issue: expression could be null [vcg-evaluation-of-null]
-              | example record_type triggering error:
-              |   Requirement bad_potato {
-              |     /* description is null */
-              |   }
 x Integer [10 .. 3]
                  ^ lint-ug-examples/impossible_array_types.rsl:4: issue: upper bound must be at least 10 [impossible_array_types]
 y Integer [0 .. 0]
                 ^ lint-ug-examples/impossible_array_types.rsl:5: issue: this array makes no sense [impossible_array_types]
 separator x
           ^ lint-ug-examples/separator_based_literal_ambiguity.rsl:5: issue: x separator after integer component creates ambiguities [separator_based_literal_ambiguity]
-          | For example 0x100 would be a base 16 literal
-          | instead of the tuple segment 0 x 100.
 x Integer [1 .. 1]
                 ^ lint-ug-examples/weird_array_types.rsl:4: issue: array of fixed size 1 should not be an array [weird_array_types]
-                | An array with a fixed size of 1 should not
-                | be an array at all.
 y Integer [0 .. 1]
                 ^ lint-ug-examples/weird_array_types.rsl:5: issue: consider making this array an optional Integer [weird_array_types]
-                | An array with 0 to 1 components should just
-                | be an optional Integer instead.
 abstract type T {
               ^ lint-ug-examples/abstract_leaf_types.rsl:3: issue: abstract type T does not have any extensions [abstract_leaf_types]
-Processed 13 models and 0 requirement files and found 11 warnings
+Processed 14 models and 0 requirement files and found 12 warnings
