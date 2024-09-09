@@ -25,7 +25,7 @@ generated in the following situations:
 ## Changelog
 
 
-### 2.0.0-dev
+### 2.0.0
 
 This new major release includes a number of incompatible
 changes. These have been tagged in the changelog.
