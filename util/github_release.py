@@ -31,6 +31,7 @@ import requests
 from trlc.version import TRLC_VERSION
 import util.changelog
 
+
 def main():
     username = os.environ.get("GITHUB_USERNAME", None)
     if username is None:
@@ -58,6 +59,7 @@ def main():
 
     r = requests.post(api_endpoint, auth=auth, data=json.dumps(data))
     print(r)
+
 
 if __name__ == "__main__":
     main()

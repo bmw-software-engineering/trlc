@@ -66,7 +66,7 @@ remove-dev:
 
 github-release:
 	git push
-	python3 -m util.github-release
+	python3 -m util.github_release
 
 bump:
 	python3 -m util.bump_version_post_release
