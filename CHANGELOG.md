@@ -27,7 +27,8 @@ generated in the following situations:
 
 ### 2.0.1-dev
 
-
+* [TRLC] Fix an UnboundLocalError when missing a term
+  in an expression.
 
 ### 2.0.0
 

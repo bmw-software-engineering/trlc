@@ -1,0 +1,11 @@
+package Foo
+
+type Requirement {
+    name String
+    description String
+    
+}
+
+checks Requirement {
+    name != , warning "bar"
+}
