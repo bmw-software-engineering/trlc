@@ -1310,22 +1310,21 @@ class Parser(Parser_Base):
         # components the true grammar for function calls is always
         # IDENTIFIER '('; so we can slightly special case this.
 
-        if self.peek("IDENTIFIER"):
-            # lobster-trace: LRM.Builtin_Functions
-            # lobster-trace: LRM.Builtin_Type_Conversion_Functions
-            self.match("IDENTIFIER")
-            if self.peek("BRA"):
-                # If we follow our name with brackets
-                # immediately, we have a builtin function call.
-                n_name = self.stab.lookup(self.mh,
-                                          self.ct)
-                if not isinstance(n_name, (ast.Builtin_Function,
-                                           ast.Builtin_Numeric_Type)):
-                    self.mh.error(self.ct.location,
-                                  "not a valid builtin function "
-                                  "or numeric type")
-            else:
-                n_name = self.parse_qualified_name(scope, match_ident=False)
+        # lobster-trace: LRM.Builtin_Functions
+        # lobster-trace: LRM.Builtin_Type_Conversion_Functions
+        self.match("IDENTIFIER")
+        if self.peek("BRA"):
+            # If we follow our name with brackets
+            # immediately, we have a builtin function call.
+            n_name = self.stab.lookup(self.mh,
+                                        self.ct)
+            if not isinstance(n_name, (ast.Builtin_Function,
+                                        ast.Builtin_Numeric_Type)):
+                self.mh.error(self.ct.location,
+                                "not a valid builtin function "
+                                "or numeric type")
+        else:
+            n_name = self.parse_qualified_name(scope, match_ident=False)
 
         # Enum literals are a bit different, so we deal with them
         # first.
