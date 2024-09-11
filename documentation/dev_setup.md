@@ -6,10 +6,9 @@ may be possible to get it to work on other platforms.
 
 ## Setup
 
-* You need a suitable version of Python3 (3.8, 3.9, 3.10, or
-  3.11). The reason we do not support 3.12 or later (for the dev
-  setup) is the dependency on CVC5. Users could use 3.12; but they
-  won't be able to use the CVC5 API.
+* You need a suitable version of Python3 (3.8 <= Python3 <= 3.12). You
+  can install this from your package manager. On Debian the package is
+  called `python3`.
 
 * You also need an executable `cvc5` binary on your PATH. Download the
   appropriate version from

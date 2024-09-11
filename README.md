@@ -58,12 +58,12 @@ The Python implementation can be used for several purposes:
 ## Dependencies
 
 ### Run-time
-* 3.8 <= Python3 <= 3.11
+* 3.8 <= Python3 <= 3.12
 * [PyVCG](https://pypi.org/project/PyVCG)
+* [PyPI CVC5](https://pypi.org/project/cvc5)
+  (required when using the `--verify` option)
 
-Optional dependencies (they are not installed automatically):
-* [PyPI CVC5](https://pypi.org/project/cvc5) (Linux or OSX only,
-  required when using the `--verify` option)
+Optional dependency (not installed automatically):
 * [Binary CVC5](https://github.com/cvc5/cvc5/releases/tag/cvc5-1.0.8)
   (An alternative to PyPI CVC5, make sure to rename the binary to
   `cvc5` and put it on your PATH).
