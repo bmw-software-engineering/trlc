@@ -29,11 +29,13 @@ jobs:
     if: success()
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-13, macos-14]
+        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
         py-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         include:
           - os: ubuntu-latest
             cvc5-plat: "linux"
+          - os: windows-latest
+            cvc5-plat: "windows"
           - os: macos-13
             brew: "/usr/local"
             cvc5-plat: "osx13"
@@ -54,6 +56,12 @@ jobs:
           brew install python@${{ matrix.py-version }}
           echo "${{ matrix.brew }}/opt/python@${{ matrix.py-version }}/libexec/bin" >> $GITHUB_PATH
           python${{ matrix.py-version }} -m ensurepip
+      - name: Install scoop and gnu findutils on windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
+          scoop install findutils
+          "$env:HOMEDRIVE$env:HOMEPATH\scoop\apps\findutils\current\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
