@@ -18,9 +18,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install pylint==3.2.4 pycodestyle==2.12.0
-          python3 -m pip install --no-deps bmw-lobster-core bmw-lobster-tool-trlc
+          python3 -m pip install --upgrade pip --break-system-packages
+          python3 -m pip install pylint==3.2.4 pycodestyle==2.12.0 --break-system-packages
+          python3 -m pip install --no-deps bmw-lobster-core bmw-lobster-tool-trlc --break-system-packages
       - name: Executing linter
         run: |
           make lint
