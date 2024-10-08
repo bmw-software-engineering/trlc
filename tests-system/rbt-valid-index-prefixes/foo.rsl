@@ -1,0 +1,10 @@
+package Foo
+
+type T {
+    a Integer[1..*]
+    b Integer
+}
+
+checks T {
+    a[0] + b[0] != 0, error "potato error"
+}

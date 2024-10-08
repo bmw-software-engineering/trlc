@@ -1,0 +1,3 @@
+size(a) > b, error "potato error"
+^^^^ rbt-valid-function-prefixes/foo.rsl:10: error: unknown symbol size
+Processed 1 model and 0 requirement files and found 1 error

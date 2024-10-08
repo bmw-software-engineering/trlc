@@ -1,0 +1,3 @@
+matches(c, "potato"), warning "a should match with potato", a
+        ^ rbt-signature-matches-1/foo.rsl:10: error: expected expression of type Builtin_String, got Builtin_Integer instead
+Processed 1 model and 0 requirement files and found 1 error

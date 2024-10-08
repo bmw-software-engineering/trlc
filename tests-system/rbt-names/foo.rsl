@@ -1,0 +1,25 @@
+package Foo
+
+enum E {
+    A
+    B
+    C
+}
+
+tuple T {
+    first Integer
+    separator @
+    second Integer
+}
+
+type Bar {
+    e E
+    b Integer[2..*]
+    t T
+}
+
+checks Bar {
+    len(b) < 5, warning "try to minimize the length", b
+    b[0]+b[1] != 0, error "sum of first two elements must not be zero", b
+    t.first + t.second != 0, error "the sum of the versions must not be zero", t
+}
