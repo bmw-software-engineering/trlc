@@ -53,8 +53,6 @@ setuptools.setup(
         "Topic :: Software Development",
     ],
     entry_points={
-        "console_scripts": [
-            "trlc = trlc.trlc:main",
-        ],
+        "console_scripts": ["trlc = trlc.trlc:main"],
     },
 )
