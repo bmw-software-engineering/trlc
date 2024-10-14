@@ -46,16 +46,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install python version
-        if: matrix.os != 'macos-14' || matrix.py-version == '3.11' || matrix.py-version == '3.12'
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.py-version }}
-      - name: Install python (3.8, 3.9, 3.10) on macOS-arm64
-        if: matrix.os == 'macos-14' && (matrix.py-version == '3.8' || matrix.py-version == '3.9' || matrix.py-version == '3.10')
-        run: |
-          brew install python@${{ matrix.py-version }}
-          echo "${{ matrix.brew }}/opt/python@${{ matrix.py-version }}/libexec/bin" >> $GITHUB_PATH
-          python${{ matrix.py-version }} -m ensurepip
       - name: Install scoop and gnu findutils on windows
         if: matrix.os == 'windows-latest'
         run: |
@@ -64,8 +57,8 @@ jobs:
           "$env:HOMEDRIVE$env:HOMEPATH\scoop\apps\findutils\current\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements_dev.txt
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements_dev.txt
       - name: Install gnu make on macos
         if: startsWith(matrix.os, 'macos')
         run: |
