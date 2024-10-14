@@ -39,14 +39,10 @@ Most likely that is enough, but you can access the entire parse tree
 from this API.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: TRLC API Docs
+  :maxdepth: 2
+  :caption: TRLC API Docs
 
-   manual/infrastructure
-   manual/errors
-   manual/ast
-
-.. toctree::
-  :caption: Iteration API by Section
-
-  section_api
+  manual/infrastructure
+  manual/errors
+  manual/ast
+  manual/section_api

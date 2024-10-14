@@ -1,7 +1,7 @@
-TRLC Iteration API by Section
+Iteration API by section
 =============================
 
-This is description for the end-user facing TRLC Iteration API by Section
+This is description for the end-user facing TRLC iteration API by section
 
 Function iter_record_objects_by_section() will yield
 all the information about record objects, sections and file locations::
