@@ -1,0 +1,5 @@
+package Foo
+
+T Bar {
+    a = [1, 2, 3, 7]
+}

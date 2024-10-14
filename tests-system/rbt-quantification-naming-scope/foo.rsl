@@ -1,0 +1,11 @@
+package Foo
+
+type T {
+    a Integer[1..10]
+}
+
+checks T {
+    (forall item in a => item > 0), warning "All items must be positive"
+    (forall item in a => item < 10), warning "All items must be less than 10"
+    (forall a in a => a != 7), warning "No sevens allowed"
+}

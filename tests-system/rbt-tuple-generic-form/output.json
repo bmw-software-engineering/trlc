@@ -1,0 +1,3 @@
+tu = (1, 2.0, 3)
+         ^^^ rbt-tuple-generic-form/foo.trlc:4: error: expected string literal, encountered decimal literal instead
+Processed 1 model and 1 requirement file and found 1 error

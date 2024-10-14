@@ -3,6 +3,6 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence,
-# @bmw-software-engineering/maintainers will be requested for
+# @bmw-software-engineering/trlc-lobster-maintainers will be requested for
 # review when someone opens a pull request.
-*       @bmw-software-engineering/maintainers
+*       @bmw-software-engineering/trlc-lobster-maintainers

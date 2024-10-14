@@ -1,0 +1,9 @@
+package Foo
+
+type T_Bar {
+    a Integer
+}
+
+type tbar {
+    b Integer
+}

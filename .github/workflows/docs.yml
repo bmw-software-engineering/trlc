@@ -32,11 +32,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: supplypike/setup-bin@v4
-        with:
-          uri: 'https://github.com/cvc5/cvc5/releases/download/cvc5-1.0.8/cvc5-Linux'
-          name: 'cvc5'
-          version: '1.0.8'
       - name: Set up Python 3.9
         uses: actions/setup-python@v5
         with:
@@ -48,6 +43,13 @@ jobs:
           pip install bmw-lobster-core bmw-lobster-tool-python
           pip install --no-deps bmw-lobster-tool-trlc
           sudo apt-get install -y graphviz
+      - name: Fetch CVC5
+        run: |
+          util/fetch_cvc5.py 1.2.0 linux
+          echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
+      - name: Test CVC5
+        run: |
+          cvc5 --version
       - name: Generate docs
         run: |
           make docs

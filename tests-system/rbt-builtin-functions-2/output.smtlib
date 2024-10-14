@@ -1,0 +1,3 @@
+name != , warning "bar"
+        ^ rbt-builtin-functions-2/foo.rsl:10: error: expected identifier, encountered comma ',' instead
+Processed 1 model and 0 requirement files and found 1 error

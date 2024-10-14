@@ -1,0 +1,2 @@
+rbt-matching-value-types/foo.trlc:4:9: trlc error: expected integer literal, encountered decimal literal instead
+rbt-matching-value-types/foo.trlc:10:10: trlc error: expected string literal, encountered integer literal instead

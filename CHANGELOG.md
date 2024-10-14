@@ -25,7 +25,12 @@ generated in the following situations:
 ## Changelog
 
 
-### 2.0.0-dev
+### 2.0.1-dev
+
+* [TRLC] Fix an UnboundLocalError when missing a term
+  in an expression.
+
+### 2.0.0
 
 This new major release includes a number of incompatible
 changes. These have been tagged in the changelog.
@@ -51,6 +56,10 @@ changes. These have been tagged in the changelog.
   types, literals, objects) and are now enforced. This is also a
   backwards incompatible change as it may invalidate some previously
   valid `.trlc` or `.rsl` files.
+
+* [TRLC] The `--verify` command is now supported on Windows without
+  the use of an external `cvc5` install, now that the Python package
+  for CVC5 is also available on Windows.
 
 * [TRLC, LRM] New builtin function `oneof`. This can be used to test
   if precisely one of a number of parameters is true. For example:

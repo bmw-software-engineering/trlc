@@ -1,0 +1,11 @@
+package Foo
+
+type T {
+    a Integer
+    b Integer
+    freeze b = 2
+}
+
+checks T {
+    b > a, warning "a should be less than b"
+}

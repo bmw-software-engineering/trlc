@@ -1,0 +1,17 @@
+package Foo
+
+type R {
+    a Integer
+}
+
+type RE extends R {
+    b Integer
+}
+
+type Potato {
+    ref R[1..*]
+}
+
+type Kitten {
+    ref RE[1..*]
+}

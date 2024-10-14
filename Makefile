@@ -56,8 +56,7 @@ docs:
 
 package:
 	@git clean -xdf
-	@python3 setup.py sdist bdist_wheel
-	@python3 setup.py bdist_wheel -p manylinux2014_x86_64
+	@python3 -m build
 
 upload-main: package
 	python3 -m twine upload --repository pypi dist/*
@@ -67,7 +66,7 @@ remove-dev:
 
 github-release:
 	git push
-	python3 -m util.github-release
+	python3 -m util.github_release
 
 bump:
 	python3 -m util.bump_version_post_release

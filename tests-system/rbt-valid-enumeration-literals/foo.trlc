@@ -1,0 +1,9 @@
+package Foo
+
+T Bar {
+    en = Enumm.A
+}
+
+T Kitten {
+    en = Enum.D
+}

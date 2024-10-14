@@ -1,0 +1,11 @@
+package Foo
+
+type T {
+    a Integer[1..*]
+}
+
+checks T {
+    (forall item in a => item > 0), warning "All items must be positive", a
+    (exists item in a => item == 7), warning "7 is a lucky number", a
+    (forall item in a => 42), warning "All items must be positive", a
+}

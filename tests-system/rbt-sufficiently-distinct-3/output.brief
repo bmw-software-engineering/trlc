@@ -1,0 +1,2 @@
+rbt-sufficiently-distinct-3/foo.rsl:7:6: trlc error: tbar is too similar to T_Bar, declared at foo.rsl:3
+rbt-sufficiently-distinct-3/foo.trlc:7:7: trlc error: bar_kitten is too similar to Bar_Kitten, declared at foo.trlc:3

@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
-VERSION_TUPLE = (2, 0, 0)
+VERSION_TUPLE = (2, 0, 1)
 VERSION_SUFFIX = "dev"
 
 TRLC_VERSION = ("%u.%u.%u" % VERSION_TUPLE) + \

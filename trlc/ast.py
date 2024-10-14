@@ -887,7 +887,8 @@ class Array_Aggregate(Expression):
 
     """
     def __init__(self, location, typ):
-        # lobster-exclude: Constructor only declares variables
+        # lobster-trace: LRM.Record_Object_Declaration
+
         super().__init__(location, typ)
         self.value = []
 
@@ -952,6 +953,8 @@ class Tuple_Aggregate(Expression):
     """
     def __init__(self, location, typ):
         # lobster-trace: LRM.Unspecified_Optional_Components
+        # lobster-trace: LRM.Record_Object_Declaration
+
         super().__init__(location, typ)
         self.value = {n_field.name : Implicit_Null(self, n_field)
                       for n_field in self.typ.components.values()}
@@ -1077,6 +1080,7 @@ class Record_Reference(Expression):
         return Value(self.location, self, self.typ)
 
     def resolve_references(self, mh):
+        # lobster-trace: LRM.References_To_Extensions
         assert isinstance(mh, Message_Handler)
 
         self.target = self.package.symbols.lookup_direct(
@@ -2042,6 +2046,8 @@ class Quantified_Expression(Expression):
                  n_variable,
                  n_source,
                  n_expr):
+        # lobster-trace: LRM.Quantified_Expression
+        # lobster-trace: LRM.Quantification_Type
         super().__init__(location, typ)
         assert isinstance(typ, Builtin_Boolean)
         assert isinstance(universal, bool)
@@ -2073,6 +2079,8 @@ class Quantified_Expression(Expression):
 
     def evaluate(self, mh, context):
         # lobster-trace: LRM.Null_Is_Invalid
+        # lobster-trace: LRM.Universal_Quantification_Semantics
+        # lobster-trace: LRM.Existential_Quantification_Semantics
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
 
@@ -2933,6 +2941,8 @@ class Record_Object(Typed_Entity):
     def __init__(self, name, location, n_typ, section, n_package):
         # lobster-trace: LRM.Section_Declaration
         # lobster-trace: LRM.Unspecified_Optional_Components
+        # lobster-trace: LRM.Record_Object_Declaration
+
         assert isinstance(n_typ, Record_Type)
         assert isinstance(section, list) or section is None
         assert isinstance(n_package, Package)
@@ -2996,6 +3006,7 @@ class Record_Object(Typed_Entity):
 
     def perform_checks(self, mh):
         # lobster-trace: LRM.Check_Evaluation_Order
+        # lobster-trace: LRM.Evaluation_Of_Checks
         assert isinstance(mh, Message_Handler)
 
         ok = True
@@ -3140,6 +3151,8 @@ class Symbol_Table:
         # lobster-trace: LRM.Unique_Enumeration_Literals
         # lobster-trace: LRM.Tuple_Unique_Field_Names
         # lobster-trace: LRM.Sufficiently_Distinct
+        # lobster-trace: LRM.Unique_Object_Names
+
         assert isinstance(mh, Message_Handler)
         assert isinstance(entity, Entity)
 
