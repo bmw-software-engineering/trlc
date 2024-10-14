@@ -15,18 +15,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.9
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.9"
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade setuptools wheel requests
+          python3 -m pip install --upgrade pip
+          python3 -m pip install build
       - name:
         run: |
           make package
       - name: Archive wheel files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: "dist/trlc-*.whl"
@@ -40,7 +40,7 @@ jobs:
       id-token: write
     steps:
       - name: Download wheel files
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wheels
           path: dist
