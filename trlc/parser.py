@@ -170,6 +170,8 @@ class Parser_Base:
         return self.peek("KEYWORD") and self.nt.value == value
 
     def match(self, kind):
+        # lobster-trace: LRM.Matching_Value_Types
+
         assert kind in self.language_tokens, \
             "%s is not a valid token" % kind
         if self.nt is None:
@@ -1069,6 +1071,7 @@ class Parser(Parser_Base):
             return self.parse_name(scope)
 
     def parse_quantified_expression(self, scope):
+        # lobster-trace: LRM.Quantified_Expression
         assert isinstance(scope, ast.Scope)
 
         if self.peek_kw("forall"):
@@ -1083,6 +1086,7 @@ class Parser(Parser_Base):
         self.match("IDENTIFIER")
         t_qv = self.ct
         if scope.contains(t_qv.value):
+            # lobster-trace: LRM.Quantification_Naming_Scope
             pdef = scope.lookup(self.mh, t_qv)
             self.mh.error(t_qv.location,
                           "shadows %s %s from %s" %
@@ -1097,6 +1101,7 @@ class Parser(Parser_Base):
                                       field)
         n_source.set_ast_link(self.ct)
         if not isinstance(field.n_typ, ast.Array_Type):
+            # lobster-trace: LRM.Quantification_Object
             self.mh.error(self.ct.location,
                           "you can only quantify over arrays")
         n_var = ast.Quantified_Variable(t_qv.value,
@@ -1312,22 +1317,21 @@ class Parser(Parser_Base):
         # components the true grammar for function calls is always
         # IDENTIFIER '('; so we can slightly special case this.
 
-        if self.peek("IDENTIFIER"):
-            # lobster-trace: LRM.Builtin_Functions
-            # lobster-trace: LRM.Builtin_Type_Conversion_Functions
-            self.match("IDENTIFIER")
-            if self.peek("BRA"):
-                # If we follow our name with brackets
-                # immediately, we have a builtin function call.
-                n_name = self.stab.lookup(self.mh,
-                                          self.ct)
-                if not isinstance(n_name, (ast.Builtin_Function,
-                                           ast.Builtin_Numeric_Type)):
-                    self.mh.error(self.ct.location,
-                                  "not a valid builtin function "
-                                  "or numeric type")
-            else:
-                n_name = self.parse_qualified_name(scope, match_ident=False)
+        # lobster-trace: LRM.Builtin_Functions
+        # lobster-trace: LRM.Builtin_Type_Conversion_Functions
+        self.match("IDENTIFIER")
+        if self.peek("BRA"):
+            # If we follow our name with brackets
+            # immediately, we have a builtin function call.
+            n_name = self.stab.lookup(self.mh,
+                                        self.ct)
+            if not isinstance(n_name, (ast.Builtin_Function,
+                                        ast.Builtin_Numeric_Type)):
+                self.mh.error(self.ct.location,
+                                "not a valid builtin function "
+                                "or numeric type")
+        else:
+            n_name = self.parse_qualified_name(scope, match_ident=False)
 
         # Enum literals are a bit different, so we deal with them
         # first.
@@ -1571,6 +1575,7 @@ class Parser(Parser_Base):
                           "expected boolean literal (true or false)")
 
     def parse_value(self, typ):
+        # lobster-trace: LRM.Tuple_Syntax_Correct_Form
         assert isinstance(typ, ast.Type)
 
         if isinstance(typ, ast.Builtin_Numeric_Type):
@@ -1708,6 +1713,7 @@ class Parser(Parser_Base):
             return rv
 
         elif isinstance(typ, ast.Tuple_Type) and typ.has_separators():
+            # lobster-trace: LRM.Tuple_Separator_Form
             rv = ast.Tuple_Aggregate(self.nt.location, typ)
 
             next_is_optional = False
@@ -1739,6 +1745,7 @@ class Parser(Parser_Base):
             return rv
 
         elif isinstance(typ, ast.Tuple_Type) and not typ.has_separators():
+            # lobster-trace: LRM.Tuple_Generic_Form
             self.match("BRA")
             rv = ast.Tuple_Aggregate(self.ct.location, typ)
             rv.set_ast_link(self.ct)
@@ -1772,6 +1779,13 @@ class Parser(Parser_Base):
 
     def parse_record_object_declaration(self):
         # lobster-trace: LRM.Section_Declaration
+        # lobster-trace: LRM.Record_Object_Declaration
+        # lobster-trace: LRM.Valid_Record_Types
+        # lobster-trace: LRM.Valid_Components
+        # lobster-trace: LRM.Valid_Enumeration_Literals
+        # lobster-trace: LRM.Mandatory_Components
+        # lobster-trace: LRM.Evaluation_Of_Checks
+
         r_typ = self.parse_qualified_name(self.default_scope,
                                           ast.Record_Type)
         r_typ.set_ast_link(self.ct)

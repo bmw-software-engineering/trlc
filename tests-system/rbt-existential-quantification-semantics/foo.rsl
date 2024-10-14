@@ -1,0 +1,9 @@
+package Foo
+
+type T {
+    a Integer[0..*]
+}
+
+checks T {
+    (exists item in a => item == 7), warning "there is no 7 in a"
+}

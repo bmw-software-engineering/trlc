@@ -18,20 +18,19 @@
 # You should have received a copy of the GNU General Public License
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
-import re
-import os
-import sys
-import json
 import argparse
+import json
+import os
+import re
 import subprocess
+import sys
 from fractions import Fraction
 
-from trlc import ast
-from trlc import lint
-from trlc.errors import TRLC_Error, Location, Message_Handler, Kind
-from trlc.parser import Parser
+from trlc import ast, lint
+from trlc.errors import Kind, Location, Message_Handler, TRLC_Error
 from trlc.lexer import Token_Stream
-from trlc.version import TRLC_VERSION, BUGS_URL
+from trlc.parser import Parser
+from trlc.version import BUGS_URL, TRLC_VERSION
 
 # pylint: disable=unused-import
 try:
@@ -458,6 +457,7 @@ class Source_Manager:
 
     def resolve_record_references(self):
         # lobster-trace: LRM.Markup_String_Late_Reference_Resolution
+        # lobster-trace: LRM.Late_Reference_Checking
         ok = True
         for package in self.stab.values(ast.Package):
             for obj in package.symbols.values(ast.Record_Object):
@@ -551,7 +551,7 @@ class Source_Manager:
         return self.stab
 
 
-def main():
+def trlc():
     ap = argparse.ArgumentParser(
         prog="trlc",
         description="TRLC %s (Python reference implementation)" % TRLC_VERSION,
@@ -819,6 +819,17 @@ def main():
             return 1
         return 0
     return 1
+
+
+def main():
+    try:
+        return trlc()
+    except BrokenPipeError:
+        # Python flushes standard streams on exit; redirect remaining output
+        # to devnull to avoid another BrokenPipeError at shutdown
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull, sys.stdout.fileno())
+        return 141
 
 
 if __name__ == "__main__":

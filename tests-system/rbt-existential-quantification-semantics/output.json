@@ -1,0 +1,13 @@
+T Kitten {
+  ^^^^^^ rbt-existential-quantification-semantics/foo.trlc:7: check warning: there is no 7 in a
+{
+  "Bar": {
+    "a": [
+      7
+    ]
+  },
+  "Kitten": {
+    "a": []
+  }
+}
+Processed 1 model and 1 requirement file and found 1 warning

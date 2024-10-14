@@ -1,0 +1,13 @@
+package Foo
+
+T Bar {
+    a = [-1]
+}
+
+T Kitten {
+    a = []
+}
+
+T Potato {
+    a = [-1, 1]
+}

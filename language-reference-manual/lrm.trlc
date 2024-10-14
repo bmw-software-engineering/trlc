@@ -1519,8 +1519,8 @@ section "Quantification" {
   Grammar Quantified_Expression {
     bnf = '''
       quantified_expression ::=
-        quantifier IDENTIFIER_name 'in' IDENTIFIER_component_name '=>'
-        expression_PREDICATE
+        '(' quantifier IDENTIFIER_name 'in' IDENTIFIER_component_name '=>'
+        expression_PREDICATE ')'
 
       quantifier ::= 'forall' | 'exists'
     '''
@@ -1546,14 +1546,6 @@ section "Quantification" {
               quantified expression is Boolean.'''
   }
 
-  Dynamic_Semantics Quantification_Evaluation {
-    text = '''During evaluation of the quantified expression, each element
-              of the array is evaluated in sequence and its
-              value is bound to the declared name. The
-              predicated is then evaluated with this
-              binding.'''
-  }
-
   Dynamic_Semantics Universal_Quantification_Semantics {
     text = '''For universal *(forall)* quantification the final value is
               true iff all predicates evaluate to
@@ -1569,6 +1561,14 @@ section "Quantification" {
               vacuously false.)*'''
   }
 
+  Note Quantification_Evaluation {
+    text = '''During evaluation of the quantified expression, each element
+              of the array is evaluated in sequence and its
+              value is bound to the declared name. The
+              predicated is then evaluated with this
+              binding.'''
+  }
+
   Recommendation Quantification_Short_Circuit_Evaluation {
     text = '''In general Quantification is equivalent to a chain of `and`
               or `or` expressions, however it is left
@@ -1580,6 +1580,7 @@ section "Quantification" {
                '''For static analysis or linting, use non-short-circuit
                   semantics, as using a quantifier as a
                   complex guard is not reasonable.''']
+    untraced_reason = "Non-normative text"
   }
 
 }
@@ -1680,8 +1681,10 @@ section "Record object declarations" {
               | STRING
               | qualified_name_RECORD_OBJECT
               | qualified_name_ENUM_TYPE '.' IDENTIFIER_enumeration_literal
-              | '[' [ value { ',' value } ] ']'
+              | array_aggregate
               | tuple_aggregate
+
+      array_aggregate ::= '[' [ value { ',' value } ] ']'
 
       tuple_aggregate ::= '(' value { ',' value } ')'
                         | value { separator_symbol value }
@@ -1776,18 +1779,18 @@ section "Record object declarations" {
               references to R.)*'''
   }
 
-  Static_Semantics Tuple_Checks {
+  Note Tuple_Checks {
     text = '''The checks for a tuple aggregate are immediately evaluated
               after the last value is parsed.'''
   }
 
-  Name_Resolution Sufficiently_Distinct {
+  /*Name_Resolution Sufficiently_Distinct {
     text = '''When declaring record objects there are wider rules that
               indicate name clashes. Specifically a record
               may not be declared if its "simplified name"
               clashes with any other "simplified name". A
               "simplified name" is the name converted to
-              lowercase and all underscored removed.'''
+              lowercase and all underscores removed.'''
   }
 
   Note Simplified_Name_Example {
@@ -1801,7 +1804,7 @@ section "Record object declarations" {
   Note Simplified_Name_Rationale {
     text = '''The purpose of this rule is to avoid requirements that
               have hard to distinguish names.'''
-  }
+  }*/
 
   Recommendation Record_Object_API {
     text = '''When exposing record instances through the API, it is

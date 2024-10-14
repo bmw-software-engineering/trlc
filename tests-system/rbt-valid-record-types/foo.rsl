@@ -1,0 +1,7 @@
+package Foo
+
+abstract type Ref {}
+
+type T extends Ref{
+    ref Ref
+}

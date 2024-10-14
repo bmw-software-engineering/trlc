@@ -25,7 +25,12 @@ generated in the following situations:
 ## Changelog
 
 
-### 2.0.0-dev
+### 2.0.1-dev
+
+* [TRLC] Fix an UnboundLocalError when missing a term
+  in an expression.
+
+### 2.0.0
 
 This new major release includes a number of incompatible
 changes. These have been tagged in the changelog.
