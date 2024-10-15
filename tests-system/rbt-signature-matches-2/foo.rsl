@@ -1,0 +1,11 @@
+package Foo
+
+type T {
+    a String
+    b String
+    c Integer
+}
+
+checks T {
+    matches(a, b, "potato"), warning "a should match with potato", a
+}

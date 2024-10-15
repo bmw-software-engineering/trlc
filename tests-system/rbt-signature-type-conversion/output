@@ -1,0 +1,5 @@
+T Bar {
+  ^^^ rbt-signature-type-conversion/foo.trlc:3: check warning: a is less than b
+T Bar {
+  ^^^ rbt-signature-type-conversion/foo.trlc:3: check warning: b is greater than a
+Processed 1 model and 1 requirement file and found 2 warnings

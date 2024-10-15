@@ -1,0 +1,20 @@
+b = [1,2,3,4,5,6]
+    ^ rbt-names/foo.trlc:6: check warning: try to minimize the length
+{
+  "potato": {
+    "b": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "e": "A",
+    "t": {
+      "first": 1,
+      "second": 2
+    }
+  }
+}
+Processed 1 model and 1 requirement file and found 1 warning
