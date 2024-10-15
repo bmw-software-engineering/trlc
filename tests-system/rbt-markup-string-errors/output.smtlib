@@ -1,0 +1,7 @@
+a = "[[Bar"
+       ^^^ rbt-markup-string-errors/foo.trlc:4: error: expected ]], encountered end-of-string instead
+a = "But]]"
+        ^^ rbt-markup-string-errors/foo.trlc:8: error: opening [[ for this ]] found
+a = "[[Baz[[But]]]]"
+          ^^ rbt-markup-string-errors/foo.trlc:12: error: cannot nest reference lists
+Processed 1 model and 1 requirement file and found 3 errors

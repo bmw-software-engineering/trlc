@@ -1,0 +1,12 @@
+{
+  "Bar": {
+    "a": "[[Bar]]"
+  },
+  "Baz": {
+    "a": "[[Baz]]"
+  },
+  "But": {
+    "a": "[[Baz]]"
+  }
+}
+Processed 1 model and 1 requirement file and found no issues
