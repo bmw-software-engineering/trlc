@@ -2944,7 +2944,7 @@ class Record_Object(Typed_Entity):
         # lobster-trace: LRM.Record_Object_Declaration
 
         assert isinstance(n_typ, Record_Type)
-        assert isinstance(section, Section) or section is None
+        assert isinstance(section, list) or section is None
         assert isinstance(n_package, Package)
         super().__init__(name, location, n_typ)
         self.field     = {
@@ -2997,7 +2997,7 @@ class Record_Object(Typed_Entity):
             self.write_indent(indent + 1, "Field %s" % key)
             value.dump(indent + 2)
         if self.section:
-            self.section.dump(indent + 1)
+            self.section[-1].dump(indent + 1)
 
     def resolve_references(self, mh):
         assert isinstance(mh, Message_Handler)
@@ -3052,7 +3052,7 @@ class Section(Entity):
     def __init__(self, name, location, parent):
         super().__init__(name, location)
         assert isinstance(parent, Section) or parent is None
-        self.parent  = parent
+        self.parent = parent
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, "Section %s" % self.name)
@@ -3075,6 +3075,8 @@ class Symbol_Table:
         self.parent   = parent
         self.imported = []
         self.table    = OrderedDict()
+        self.trlc_files = []
+        self.section_names = []
 
     @staticmethod
     def simplified_name(name):
@@ -3092,6 +3094,31 @@ class Symbol_Table:
         if self.parent:
             rv |= self.parent.all_names()
         return rv
+
+    def iter_record_objects_by_section(self):
+        """API for users
+
+        Retriving information about the section hierarchy for record objects
+        Inputs: folder with trlc files where trlc files have sections,
+        sub sections and record objects
+        Output: Information about sections and level of sections,
+        record objects and levels of record object
+        """
+        for record_object in self.iter_record_objects():
+            location = record_object.location.file_name
+            if location not in self.trlc_files:
+                self.trlc_files.append(location)
+                yield location
+            if record_object.section:
+                object_level = len(record_object.section) - 1
+                for level, section in enumerate(record_object.section):
+                    if section not in self.section_names:
+                        self.section_names.append(section)
+                        yield section.name, level
+                yield record_object, object_level
+            else:
+                object_level = 0
+                yield record_object, object_level
 
     def iter_record_objects(self):
         # lobster-exclude: API for users
