@@ -1,0 +1,11 @@
+package Foo
+
+type T {
+    b String
+    c Integer
+}
+
+checks T {
+    endswith(c, "en"), warning "a should end with en", c
+    endswith(b, "en"), warning "b should end with en", b
+}

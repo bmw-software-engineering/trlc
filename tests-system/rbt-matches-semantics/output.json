@@ -1,8 +1,23 @@
+a = "123456789 abcdefghijklmn"
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^ rbt-matches-semantics/foo.trlc:4: check warning: a should match with 6 to 12 letters or digits
+b = "??...kitten_...??"
+    ^^^^^^^^^^^^^^^^^^^ rbt-matches-semantics/foo.trlc:5: check warning: b should match only letters, digits, or underscores.
+c = "not potato"
+    ^^^^^^^^^^^^ rbt-matches-semantics/foo.trlc:6: check warning: b should start with 'potato'.
+d = "not Diego"
+    ^^^^^^^^^^^ rbt-matches-semantics/foo.trlc:7: check warning: d should start with D
 {
-  "Bar": {
-    "a": "potato",
-    "b": "kitten",
-    "c": 1
+  "All_Regex_Matches": {
+    "a": "123abc",
+    "b": "3_kitten_",
+    "c": "potato and tomato sauce",
+    "d": "Diego"
+  },
+  "No_Regex_Matches": {
+    "a": "123456789 abcdefghijklmn",
+    "b": "??...kitten_...??",
+    "c": "not potato",
+    "d": "not Diego"
   }
 }
-Processed 1 model and 1 requirement file and found no issues
+Processed 1 model and 1 requirement file and found 4 warnings
