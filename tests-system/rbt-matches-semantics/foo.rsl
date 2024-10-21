@@ -3,9 +3,13 @@ package Foo
 type T {
     a String
     b String
-    c Integer
+    c String
+    d String
 }
 
 checks T {
-    matches(a, "potato"), warning "a should match with potato", a
+    matches(a, "^[a-zA-Z0-9]{6,12}$"), warning "a should match with 6 to 12 letters or digits", a
+    matches(b, "\w+"), warning "b should match only letters, digits, or underscores.", b
+    matches(c, "potato"), warning "b should start with 'potato'.", c
+    matches(d, "^D.*"), warning "d should start with D", d
 }

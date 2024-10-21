@@ -2,7 +2,6 @@ package Foo
 
 type T {
     a String
-    b Integer
     c Integer[1..*]
 }
 

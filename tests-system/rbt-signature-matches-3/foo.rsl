@@ -7,5 +7,5 @@ type T {
 }
 
 checks T {
-    matches(a, "(abc(def)"), warning "a should match with potato", a
+    matches(a, "(abc(def)"), warning "a should match with the regex (abc(def))", a
 }

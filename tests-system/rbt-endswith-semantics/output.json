@@ -1,6 +1,11 @@
+b = "dog"
+    ^^^^^ rbt-endswith-semantics/foo.trlc:8: check warning: b should end with en
 {
   "Bar": {
     "b": "kitten"
+  },
+  "Baz": {
+    "b": "dog"
   }
 }
-Processed 1 model and 1 requirement file and found no issues
+Processed 1 model and 1 requirement file and found 1 warning

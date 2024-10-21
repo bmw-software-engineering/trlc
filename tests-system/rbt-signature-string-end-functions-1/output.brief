@@ -1,1 +1,1 @@
-rbt-signature-string-end-functions-1/foo.rsl:12:14: trlc error: expected expression of type Builtin_String, got Builtin_Integer instead
+rbt-signature-string-end-functions-1/foo.rsl:10:16: trlc error: expected expression of type Builtin_String, got Builtin_Integer instead

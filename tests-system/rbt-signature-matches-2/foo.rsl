@@ -3,7 +3,6 @@ package Foo
 type T {
     a String
     b String
-    c Integer
 }
 
 checks T {
