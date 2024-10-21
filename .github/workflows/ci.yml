@@ -12,7 +12,6 @@ permissions:
 jobs:
   lint:
     name: PyLint
-    needs: test
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +25,7 @@ jobs:
           make lint
   test:
     name: TestSuite
-    if: success()
+    needs: lint
     strategy:
       matrix:
         os: [ubuntu-24.04, windows-2022, macos-13, macos-14]
@@ -50,7 +49,7 @@ jobs:
         with:
           python-version: ${{ matrix.py-version }}
       - name: Install scoop and gnu findutils on windows
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2022'
         run: |
           Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
           scoop install findutils
@@ -81,3 +80,11 @@ jobs:
         if: always()
         run: |
           util/check_local_modifications.sh
+  failure:
+    name: Check all jobs
+    needs: test
+    if: ${{ failure() || cancelled() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Failure
+        run: exit 1
