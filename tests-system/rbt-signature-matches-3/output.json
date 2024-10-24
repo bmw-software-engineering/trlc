@@ -1,0 +1,3 @@
+matches(a, "(abc(def)"), warning "a should match with the regex (abc(def))", a
+           ^^^^^^^^^^^ rbt-signature-matches-3/foo.rsl:10: error: missing ), unterminated subpattern at position 0
+Processed 1 model and 1 requirement file and found 1 error

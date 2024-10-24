@@ -1,0 +1,11 @@
+package Foo
+
+type T {
+    a String
+    c Integer
+}
+
+checks T {
+    startswith(a, "po"), warning "a should start with po", a
+    startswith(c, "po"), warning "b should start with po", b
+}

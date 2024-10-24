@@ -1188,10 +1188,6 @@ section "Names" {
               the given integer to the exact same rational.'''
   }
 
-  Name_Resolution Case_Sensitive {
-    text = '''Name resolution is case sensitive.'''
-  }
-
   Example Name_Examples {
     hidden_rsl = '''
       package Example

@@ -1,0 +1,11 @@
+package Foo
+
+type T {
+    a String
+    c Integer[1..*]
+}
+
+checks T {
+    len(a) == 6, "not true"
+    len(c) == 2, "not true"
+}

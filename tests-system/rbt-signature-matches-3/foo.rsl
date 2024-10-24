@@ -1,0 +1,11 @@
+package Foo
+
+type T {
+    a String
+    b String
+    c Integer
+}
+
+checks T {
+    matches(a, "(abc(def)"), warning "a should match with the regex (abc(def))", a
+}

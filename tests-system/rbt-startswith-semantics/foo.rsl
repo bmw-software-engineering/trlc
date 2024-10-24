@@ -1,0 +1,9 @@
+package Foo
+
+type T {
+    a String
+}
+
+checks T {
+    startswith(a, "p"), warning "a should start with p", a
+}

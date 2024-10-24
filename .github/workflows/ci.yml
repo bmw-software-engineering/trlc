@@ -12,29 +12,28 @@ permissions:
 jobs:
   lint:
     name: PyLint
-    needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip --break-system-packages
-          python3 -m pip install pylint==3.2.4 pycodestyle==2.12.0 --break-system-packages
-          python3 -m pip install --no-deps bmw-lobster-core bmw-lobster-tool-trlc --break-system-packages
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pylint==3.2.4 pycodestyle==2.12.0
+          python3 -m pip install --no-deps bmw-lobster-core bmw-lobster-tool-trlc
       - name: Executing linter
         run: |
           make lint
   test:
     name: TestSuite
-    if: success()
+    needs: lint
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+        os: [ubuntu-24.04, windows-2022, macos-13, macos-14]
         py-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             cvc5-plat: "linux"
-          - os: windows-latest
+          - os: windows-2022
             cvc5-plat: "windows"
           - os: macos-13
             brew: "/usr/local"
@@ -50,7 +49,7 @@ jobs:
         with:
           python-version: ${{ matrix.py-version }}
       - name: Install scoop and gnu findutils on windows
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2022'
         run: |
           Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
           scoop install findutils
@@ -81,3 +80,11 @@ jobs:
         if: always()
         run: |
           util/check_local_modifications.sh
+  failure:
+    name: Check all jobs
+    needs: test
+    if: ${{ failure() || cancelled() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Failure
+        run: exit 1

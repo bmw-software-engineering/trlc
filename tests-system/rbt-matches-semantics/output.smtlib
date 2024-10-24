@@ -1,0 +1,9 @@
+a = "123456789 abcdefghijklmn"
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^ rbt-matches-semantics/foo.trlc:4: check warning: a should match with 6 to 12 letters or digits
+b = "??...kitten_...??"
+    ^^^^^^^^^^^^^^^^^^^ rbt-matches-semantics/foo.trlc:5: check warning: b should match only letters, digits, or underscores.
+c = "not potato"
+    ^^^^^^^^^^^^ rbt-matches-semantics/foo.trlc:6: check warning: b should start with 'potato'.
+d = "not Diego"
+    ^^^^^^^^^^^ rbt-matches-semantics/foo.trlc:7: check warning: d should start with D
+Processed 1 model and 1 requirement file and found 4 warnings

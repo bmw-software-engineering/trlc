@@ -1,0 +1,6 @@
+package Foo
+
+T Bar {
+    a = "potato"
+    c = [2,1]
+}

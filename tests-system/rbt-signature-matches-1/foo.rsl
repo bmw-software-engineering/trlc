@@ -1,0 +1,9 @@
+package Foo
+
+type T {
+    c Integer
+}
+
+checks T {
+    matches(c, "potato"), warning "a should match with potato", a
+}
