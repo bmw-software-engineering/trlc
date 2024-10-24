@@ -1,0 +1,3 @@
+a = "[[T]]"
+       ^ rbt-markup-string-types/foo.trlc:4: error: Record_Type T is not a Record_Object
+Processed 1 model and 1 requirement file and found 1 error

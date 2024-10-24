@@ -1,0 +1,9 @@
+package Foo
+
+T Bar {
+    a = "bar [[Inline]]"
+}
+
+T Inline {
+    a = "inline"
+}
