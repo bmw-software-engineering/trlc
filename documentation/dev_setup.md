@@ -1,8 +1,10 @@
 # Development environment setup
 
-To contribute to TRLC you will need to be able to run the
-testsuite. Currently this is only realistic on GNU/Linux, although it
-may be possible to get it to work on other platforms.
+To contribute to TRLC, you will need to be able to run the
+testsuite. Therefore you need GNU make and GNU findutils.
+We do provide setup steps for Windows and Linux.
+If you run into any problems on macOS, make sure you install
+the latest GNU make version.
 
 ## Setup
 
@@ -18,12 +20,6 @@ may be possible to get it to work on other platforms.
 
 * You need to install the `cvc5` PyPI package, or build it from
   source.
-
-* You need GNU Make. This should be available on all sane GNU/Linux
-  distributions. On Debian the package is called `build-essential`.
-
-* You need to install Graphviz. On Debian the package is called
-  `graphviz`.
 
 * You need to install everything from
   [requirements.txt](../requirements.txt).
@@ -41,6 +37,43 @@ may be possible to get it to work on other platforms.
     pip install bmw-lobster-core bmw-lobster-tool-python
     pip install --no-deps bmw-lobster-tool-trlc
 	```
+
+# Linux Setup
+
+* You need GNU Make. This should be available on all sane GNU/Linux
+  distributions. On Debian the package is called `build-essential`.
+
+* You need to install Graphviz. On Debian the package is called
+  `graphviz`.
+
+# Windows Setup
+
+* You need to Install Scoop.
+  * Check out https://scoop.sh/
+
+* Once Scoop is installed, install GNU findutils by running the following command:
+
+  ```bash
+  scoop install findutils
+  ```
+
+* you need to install GNU Make. You can do this by running the following command:
+
+  ```bash
+  scoop install make
+  ```
+
+* You need to install Graphviz.
+
+  ```bash
+  scoop install Graphviz
+  ```
+
+* You need to install coreutils.
+
+  ```bash
+  scoop install coreutils
+  ```
 
 ## Important make targets
 
