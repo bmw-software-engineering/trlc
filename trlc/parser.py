@@ -1299,7 +1299,6 @@ class Parser(Parser_Base):
 
     def parse_name(self, scope):
         # lobster-trace: LRM.Names
-        # lobster-trace: LRM.Case_Sensitive
 
         # This is a bit more complex. The grammar is:
         #
