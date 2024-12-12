@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 3.0 of [TRLC language reference
+Up to date with version 3.1 of [TRLC language reference
 manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
@@ -29,6 +29,18 @@ generated in the following situations:
 
 * [TRLC] Fix an UnboundLocalError when missing a term
   in an expression.
+
+* [LRM, TRLC] Add check to detect duplicated components of a record when parsing a TRLC file.
+  Below is an example of a `*.trlc` file demonstrating the new behavior.
+  ```
+  Something duplicated
+  {
+    description = "This is fine!"
+    description = "This is the duplicate."  // will be detected as an error
+  }
+  ```
+  The Language Reference Manual has been updated accordingly, and its version
+  has been increased to 3.1
 
 ### 2.0.0
 

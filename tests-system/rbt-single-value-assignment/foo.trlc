@@ -1,0 +1,13 @@
+package Example
+
+Requirement safety {
+  critical    = false
+  description = "Is it critical, or is it not?"
+  critical    = true
+}
+
+Requirement duplicated {
+  description = "This is fine"
+  critical    = true
+  description = "This is not fine anymore"
+}
