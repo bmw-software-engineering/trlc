@@ -7,8 +7,11 @@ docs
 *.pyc
 *.egg-info
 .venv/
+venv/
 build
 dist
+launch.json
+settings.json
 
 # EMACS ignores
 *~

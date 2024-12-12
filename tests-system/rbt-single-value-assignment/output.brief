@@ -1,0 +1,2 @@
+rbt-single-value-assignment/foo.trlc:11:3: trlc error: component 'critical' already assigned at line 9
+rbt-single-value-assignment/foo.trlc:22:3: trlc error: component 'description' already assigned at line 20
