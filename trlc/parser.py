@@ -1810,6 +1810,11 @@ class Parser(Parser_Base):
             comp = r_typ.components.lookup(self.mh,
                                            self.ct,
                                            ast.Composite_Component)
+            if obj.is_component_implicit_null(comp):
+                self.mh.error(self.ct.location,
+                              "component '%s' already assigned at line %i" %
+                              (comp.name,
+                              obj.field[comp.name].location.line_no))
             comp.set_ast_link(self.ct)
             if r_typ.is_frozen(comp):
                 self.mh.error(self.ct.location,
