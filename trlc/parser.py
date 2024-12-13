@@ -1814,7 +1814,7 @@ class Parser(Parser_Base):
                 self.mh.error(self.ct.location,
                               "component '%s' already assigned at line %i" %
                               (comp.name,
-                              obj.field[comp.name].location.line_no))
+                               obj.field[comp.name].location.line_no))
             comp.set_ast_link(self.ct)
             if r_typ.is_frozen(comp):
                 self.mh.error(self.ct.location,

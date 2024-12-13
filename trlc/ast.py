@@ -2998,7 +2998,7 @@ class Record_Object(Typed_Entity):
         """
         return {name: value.to_python_object()
                 for name, value in self.field.items()}
-    
+
     def is_component_implicit_null(self, component) -> bool:
         return not isinstance(self.field[component.name], Implicit_Null)
 
@@ -3012,7 +3012,8 @@ class Record_Object(Typed_Entity):
                                   Unary_Expression)), \
                 "value is %s" % value.__class__.__name__
         if self.is_component_implicit_null(component):
-            raise KeyError(f"Component {component.name} already assigned to {self.n_typ.name} {self.name}!")
+            raise KeyError(f"Component {component.name} \
+                           already assigned to {self.n_typ.name} {self.name}!")
         self.field[component.name] = value
 
     def dump(self, indent=0):  # pragma: no cover
