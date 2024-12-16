@@ -1810,8 +1810,7 @@ class Parser(Parser_Base):
             comp = r_typ.components.lookup(self.mh,
                                            self.ct,
                                            ast.Composite_Component)
-            # Check for duplicate assignments using is_component_implicit_null
-            if not obj.is_component_implicit_null(comp):
+            if obj.is_component_implicit_null(comp):
                 self.mh.error(self.ct.location,
                               "component '%s' already assigned at line %i" %
                               (comp.name,
