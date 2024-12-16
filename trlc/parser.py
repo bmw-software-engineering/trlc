@@ -1784,6 +1784,7 @@ class Parser(Parser_Base):
         # lobster-trace: LRM.Valid_Enumeration_Literals
         # lobster-trace: LRM.Mandatory_Components
         # lobster-trace: LRM.Evaluation_Of_Checks
+        # lobster-trace: LRM.Implicit_Null_Validation
 
         r_typ = self.parse_qualified_name(self.default_scope,
                                           ast.Record_Type)
