@@ -3011,7 +3011,9 @@ class Record_Object(Typed_Entity):
                                   Implicit_Null,
                                   Unary_Expression)), \
                 "value is %s" % value.__class__.__name__
+        print(f"DEBUG: Current value of {component.name}: {self.field.get(component.name, 'UNINITIALIZED')}")
         if self.is_component_implicit_null(component):
+            print ("print to test if this if were true")
             raise KeyError(f"Component {component.name} \
                            already assigned to {self.n_typ.name} {self.name}!")
         self.field[component.name] = value
