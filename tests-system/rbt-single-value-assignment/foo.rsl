@@ -1,0 +1,6 @@
+package Example
+
+type Requirement {
+  description String
+  critical    Boolean
+}

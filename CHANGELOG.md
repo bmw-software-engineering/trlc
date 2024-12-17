@@ -30,6 +30,10 @@ generated in the following situations:
 * [TRLC] Fix an UnboundLocalError when missing a term
   in an expression.
 
+* Adds the feature of checking for duplicated records
+  in `*.trlc` and `*.rsl` files. This led to mistakenly
+  overwrite already set attribute's value.
+
 ### 2.0.0
 
 This new major release includes a number of incompatible
