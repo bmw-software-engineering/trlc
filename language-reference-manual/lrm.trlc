@@ -1775,11 +1775,9 @@ section "Record object declarations" {
               references to R.)*'''
   }
 
-Dynamic_Semantics Implicit_Null_Validation {
-  text = '''Each component of a record object can be assigned a value 
-            only once and only if the component currently has an `Implicit_Null`
-            value. Reassigning a component that already has a non-null
-            value will raise an error.'''
+Dynamic_Semantics Single_Value_Assignment {
+  text = '''A value can be assigned to a component of a record object
+            only once.'''
 }
 
   Note Tuple_Checks {
