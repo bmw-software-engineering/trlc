@@ -1,0 +1,2 @@
+tests-system/rbt-implicit-null-validation/foo.trlc:11:3: trlc error: component 'critical' already assigned at line 9
+tests-system/rbt-implicit-null-validation/foo.trlc:22:3: trlc error: component 'description' already assigned at line 20
