@@ -1,4 +1,4 @@
-.PHONY: docs test style lint package
+.PHONY: docs test style lint package squash-commits
 
 lint: style
 	@python3 -m pylint --rcfile=pylint3.cfg \
@@ -111,3 +111,12 @@ tracing: report.lobster
 	mkdir -p docs
 	lobster-html-report report.lobster --out=docs/tracing.html
 	lobster-ci-report report.lobster
+
+clean-coverage:
+	@rm -rf htmlcov
+	@find . -name '.coverage*' -type f -delete
+	@find . -name '*.pyc' -type f -delete
+	@echo "All .coverage, .coverage.* and *.pyc files deleted."
+
+squash-commits:
+	util/squash_commits.sh

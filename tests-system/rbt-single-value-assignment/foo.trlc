@@ -1,0 +1,23 @@
+package Example
+
+Requirement shape {
+  description = "Our car shall have four wheels."
+  critical    = false
+}
+
+Requirement safety {
+  critical    = false
+  description = "Our car shall not explode."
+  critical    = true
+}
+
+Requirement form {
+  description = "Our car should look nice."
+  critical    = false
+}
+
+Requirement duplicated {
+  description = "This is fine"
+  critical    = true
+  description = "This is not fine anymore"
+}

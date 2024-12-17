@@ -1,8 +1,8 @@
 package LRM
 
 Versioning Version {
-  major = 3
-  minor = 0
+  major = 7
+  minor = 1
 }
 
 GFDL_License License {
@@ -1774,6 +1774,11 @@ section "Record object declarations" {
               of R and RE. A list of RE may not contain any
               references to R.)*'''
   }
+
+Dynamic_Semantics Single_Value_Assignment {
+  text = '''A value can be assigned to a component of a record object
+            only once.'''
+}
 
   Note Tuple_Checks {
     text = '''The checks for a tuple aggregate are immediately evaluated
