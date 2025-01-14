@@ -69,7 +69,7 @@ changes. These have been tagged in the changelog.
 
 * [TRLC] New command-line flag `-I` which can be used to register
   include directories. You can use this to automatically parse a
-  minimal set of file. Normally when invoking eg `trlc foo.trlc` this
+  minimal set of file. Normally when invoking e.g. `trlc foo.trlc` this
   will fail, because you did not provide e.g. `foo.rsl`.
 
   With the `-I` flag you can now automatically let the tool discover
@@ -85,8 +85,8 @@ changes. These have been tagged in the changelog.
   which should be used before any `register_file` or `register_dir`
   calls.
 
-* [API] *When using includes*, the symbol table will contains packages
-  for every discovered package. These are indistinguisable from normal
+* [API] *When using includes*, the symbol table will contain packages
+  for every discovered package. These are indistinguishable from normal
   (but empty) packages, so if you're relying on iterating over all
   known packages you will find a lot of unused and empty ones now. If
   the include mechanism is not used, then there is no change in
@@ -129,7 +129,7 @@ changes. These have been tagged in the changelog.
   [CVC5](https://pypi.org/project/cvc5) instead.
 
 * [TRLC] Remove the `--lint` option. Lint messages are now enabled by
-  default, and `.trlc` files are processed as well. Instead there is a
+  default, and `.trlc` files are processed as well. Instead, there is a
   `--no-lint` option which turns off the extra warnings.
 
 * [TRLC] Add the `--skip-trlc-files` option which disables processing
@@ -185,7 +185,7 @@ changes. These have been tagged in the changelog.
   like the `'''` strings, these can contain newlines.
 
 * [TRLC, LRM] User defined checks are now not allowed to contain a
-  newline. However you can now provide additional information that
+  newline. However, you can now provide additional information that
   _can_ contain a newline. For example:
 
   ```trlc
@@ -216,7 +216,7 @@ changes. These have been tagged in the changelog.
 * [TRLC] Add support for Python 3.11. We now support Python 3.8 up to
   and including 3.11.
 
-* [TRLC] Add new option `--no-detailed-info` which supresses the
+* [TRLC] Add new option `--no-detailed-info` which suppresses the
   additional information the linter may add to a message, such as
   counter-examples or reasoning.
 
@@ -286,12 +286,12 @@ changes. These have been tagged in the changelog.
   encoding. We now print an error message indicating the issue.
 
 * [TRLC] Fix bug when parsing arrays: arrays without comma separators
-  were accapted when they should have been rejected.
+  were accepted when they should have been rejected.
 
 * [TRLC] Fix tool crash when parsing a file with an unterminated `/*`
   comment.
 
-* [LRM] Fix typo in in several places: `.rls` should be `.rsl`.
+* [LRM] Fix typo in several places: `.rls` should be `.rsl`.
 
 ### 1.1.6
 
@@ -330,8 +330,7 @@ changes. These have been tagged in the changelog.
 
 * [Package] Provide Linux and OSX packages, along with the default
   package, which should automatically install PyVCG where it is
-  available. On Windows, `pip` should fall back to the platform
-  agnostic package.
+  available. On Windows, `pip` should fall back to the platform-agnostic package.
 
 * [TRLC] Add new option `--no-user-warnings` to suppress any warning
   generated from a user-defined check.
@@ -386,9 +385,9 @@ changes. These have been tagged in the changelog.
 
 ### 1.1.4
 
-* [TRLC] Improve error messages by using a more human readable form of
-  expected tokens, so now you see "opening brace '{'" instead of
-  "C_BRA".
+* [TRLC] Improve error messages by using a more human-readable form of
+  expected tokens, so now you see `opening brace '{'` instead of
+  `C_BRA`.
 
 ### 1.1.3
 
@@ -416,7 +415,7 @@ changes. These have been tagged in the changelog.
   generic datatype, for specifying e.g. coordinates, qualified
   information, complex numbers, vectors, etc.
 
-  Have a look at the new [Tuples Tutorial](TUTORIAL-TUPLES.md) for
+  Have a look at the new [Tuples Tutorial](documentation/TUTORIAL-TUPLES.md) for
   some examples.
 
 * [LRM, TRLC] Support for freezing record components: you can now
@@ -426,14 +425,14 @@ changes. These have been tagged in the changelog.
   overwritten, or unfrozen again.
 
   Have a look at the updated [Catch-all base types
-  tutorial](TUTORIAL-OPTIONAL-BASE.md) for an example.
+  tutorial](documentation/TUTORIAL-OPTIONAL-BASE.md) for an example.
 
 * [LRM, TRLC] Support for abstract and final types: abstract must be
   extended before they can be used, and final types cannot gain new
   components.
 
-  Have a look at the new [Advaned tips &
-  tricks](TUTORIAL-ADVANCED-TYPES.md) tutorial for examples.
+  Have a look at the new [Advanced tips &
+  tricks](documentation/TUTORIAL-ADVANCED-TYPES.md) tutorial for examples.
 
 * [TRLC] Introducing the tuple type required significant
   reorganisation of the AST, to mark this significant backwards
@@ -497,7 +496,7 @@ changes. These have been tagged in the changelog.
   correctly yourself.
 
 * [TRLC, LRM] new type `Markup_String` which is a special kind of
-  `String` that behaves in exactly the same way. However you reference
+  `String` that behaves in exactly the same way. However, you reference
   other TRLC records directly: `for example see [[potato,
   package.wibble]]`. These references are checked and validated by
   TRLC.
@@ -506,8 +505,8 @@ changes. These have been tagged in the changelog.
 
 * [TRLC] You can now provide more than one directory on the
   command-line to process, as well as individual files. If no files or
-  directories are provided the default is now to analyse the currenty
-  directory `.` including all sub-directories.
+  directories are provided the default is now to analyse the current
+  directory `.` including all subdirectories.
 
 * [TRLC] In error messages that reference another file+location more
   of the path is now shown to help you find the problem. For example
@@ -526,9 +525,9 @@ changes. These have been tagged in the changelog.
 
 * [LRM] The LRM for TRLC is [now written in
   TRLC](https://github.com/bmw-software-engineering/trlc/tree/main/language-reference-manual). There
-  is also a [HTML
+  is also an [HTML
   version](https://bmw-software-engineering.github.io/trlc/lrm.html)
-  available for easier reading. During conversion we fixed a number of
+  available for easier reading. During conversion, we fixed a number of
   issues in the LRM (missing keywords, etc.) and made a few cleanups
   and simplifications; however the language and its semantics have not
   changed.
@@ -588,7 +587,7 @@ changes. These have been tagged in the changelog.
 
 * [TRLC] Add two new API functions (a [simpler
   lookup](https://bmw-software-engineering.github.io/trlc/manual/ast.html#trlc.ast.Symbol_Table.lookup_assuming)
-  and [inheritence
+  and [inheritance
   checking](https://bmw-software-engineering.github.io/trlc/manual/ast.html#trlc.ast.Record_Type.is_subclass_of)
   for record types).
 
