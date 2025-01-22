@@ -25,7 +25,7 @@ generated in the following situations:
 ## Changelog
 
 
-### 2.0.1-dev
+### 2.0.1
 
 * [TRLC] Fix an UnboundLocalError when missing a term
   in an expression.
