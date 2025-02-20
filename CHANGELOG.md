@@ -27,7 +27,7 @@ generated in the following situations:
 
 ### 2.0.2-dev
 
-
+* [TRLC] Fix help message for command line argument `--no-detailed-info`.
 
 ### 2.0.1
 

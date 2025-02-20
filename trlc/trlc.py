@@ -613,8 +613,9 @@ def trlc():
                                  " supplemental information on failed"
                                  " checks. The specific values of"
                                  " counter-examples are unpredictable"
-                                 " from system to system, so if you need 100%"
-                                 " reproducible output then use this option."))
+                                 " from system to system, so if you need"
+                                 " perfectly reproducible output then use"
+                                 " this option."))
     og_output.add_argument("--no-user-warnings",
                            default=False,
                            action="store_true",
