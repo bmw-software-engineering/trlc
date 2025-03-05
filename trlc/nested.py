@@ -29,13 +29,13 @@ class Nested_Lexer(Lexer_Base):
         assert isinstance(literal, String_Literal)
 
         origin_full_text = literal.location.text()
-        self.origin_normal_string = origin_full_text.startswith('"')
-        if self.origin_normal_string:
-            self.base_offset = 1
-            text = origin_full_text[1:-1].replace('\\"', '"')
-        else:
+        self.origin_multi_string = origin_full_text.startswith(('"""', "'''"))
+        if self.origin_multi_string:
             self.base_offset = 3
             text = origin_full_text[3:-3]
+        else:
+            self.base_offset = 1
+            text = origin_full_text[1:-1].replace('\\"', '"')
 
         self.origin_location = literal.location
 
@@ -46,7 +46,21 @@ class Nested_Lexer(Lexer_Base):
         assert start_line >= 1
         assert start_col >= 1
 
-        if self.origin_normal_string:
+        if self.origin_multi_string:
+            loc = Source_Reference(
+                lexer      = self.origin_location.lexer,
+                start_line = self.origin_location.line_no + (start_line - 1),
+                start_col  = (self.origin_location.col_no + self.base_offset
+                              if start_line == 1
+                              else start_col),
+                start_pos  = (self.origin_location.start_pos +
+                              self.base_offset +
+                              begin),
+                end_pos    = (self.origin_location.start_pos +
+                              self.base_offset +
+                              end))
+
+        else:
             escapes_to_start = self.content[0:begin].count('"')
             escapes_to_end = escapes_to_start + \
                 self.content[begin:end + 1].count('"')
@@ -63,20 +77,6 @@ class Nested_Lexer(Lexer_Base):
                 end_pos    = (self.origin_location.start_pos +
                               self.base_offset +
                               end + escapes_to_end))
-
-        else:
-            loc = Source_Reference(
-                lexer      = self.origin_location.lexer,
-                start_line = self.origin_location.line_no + (start_line - 1),
-                start_col  = (self.origin_location.col_no + self.base_offset
-                              if start_line == 1
-                              else start_col),
-                start_pos  = (self.origin_location.start_pos +
-                              self.base_offset +
-                              begin),
-                end_pos    = (self.origin_location.start_pos +
-                              self.base_offset +
-                              end))
 
         return loc
 
