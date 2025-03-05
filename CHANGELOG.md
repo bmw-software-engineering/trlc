@@ -27,6 +27,8 @@ generated in the following situations:
 
 ### 2.0.2-dev
 
+* [TRLC] Fix AssertionError when using Markup_String with triple double quoted strings
+
 * [TRLC] Fix help message for command line argument `--no-detailed-info`.
 
 ### 2.0.1

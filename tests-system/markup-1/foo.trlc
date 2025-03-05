@@ -15,3 +15,11 @@ T test_2 {
     potato]] is "good
   '''
 }
+
+T test_3 {
+  S = "potato"
+  M = """
+    pot"ato [[Foo.kitten,
+    potato]] is "good
+  """
+}
