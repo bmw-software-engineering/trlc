@@ -12,7 +12,7 @@ $ pip3 install --user trlc
 
 There is currently only one required dependency (PyVCG which should be
 installed automatically), all you need is a moderatly recent Python
-3.8 / 3.9 / 3.10 / 3.11 / 3.12.
+3.8 / 3.9 / 3.10 / 3.11 / 3.12 / 3.13.
 
 Don't forget to adjust your `PATH` so that `.local/bin` (or the
 equivalent on Windows) is on it; so that the `trlc` executable can be
