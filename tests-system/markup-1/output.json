@@ -8,6 +8,10 @@
   "test_2": {
     "M": "pot\"ato [[Foo.kitten,\npotato]] is \"good",
     "S": "potato"
+  },
+  "test_3": {
+    "M": "pot\"ato [[Foo.kitten,\npotato]] is \"good",
+    "S": "potato"
   }
 }
 Processed 1 model and 1 requirement file and found no issues
