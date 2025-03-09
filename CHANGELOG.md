@@ -27,6 +27,8 @@ generated in the following situations:
 
 ### 2.0.2-dev
 
+* [TRLC] Add linter warning on unused imports.
+
 * [TRLC] Add support for Python 3.13.
 
 * [TRLC] Fix help message for command line argument `--no-detailed-info`.

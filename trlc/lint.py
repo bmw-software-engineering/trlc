@@ -41,7 +41,7 @@ class Linter:
         self.abstract_extensions = {}
         self.checked_types       = set()
 
-    def verify(self):
+    def perform_sanity_checks(self):
         # lobster-exclude: Not safety relevant
         ok = True
         for package in self.stab.values(ast.Package):
@@ -202,3 +202,35 @@ class Linter:
                           "An array with 0 to 1 components should just\n"
                           "be an optional %s instead." %
                           n_typ.element_type.name)
+
+    def markup_ref(self, item, string_literals):
+        for string_literal in string_literals:
+            for reference in string_literal.references:
+                if reference.package.name == item.name:
+                    return string_literal
+        return None
+
+    def verify_imports(self):
+        for file in self.mh.sm.all_files.values():
+            if not file.primary and not file.secondary:
+                continue
+            if not file.cu.imports:
+                continue
+            for item in file.cu.imports:
+                import_tokens = [t for t in file.lexer.tokens
+                                 if t.value == item.name]
+                markup = self.markup_ref(item,
+                                         (m.ast_link for m in
+                                          file.lexer.tokens if
+                                          isinstance(m.ast_link,
+                                                     ast.String_Literal) and
+                                          m.ast_link.has_references))
+                if markup is not None:
+                    import_tokens.append(markup)
+                if len(import_tokens) == 1:
+                    import_tk = import_tokens[0]
+                    self.mh.check(import_tk.location,
+                                    "unused import %s" % import_tk.value,
+                                    "unused_imports",
+                                    "Consider deleting this import"
+                                    " statement if not needed.")
