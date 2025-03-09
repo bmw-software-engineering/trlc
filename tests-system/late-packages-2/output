@@ -1,1 +1,4 @@
-Processed 0 models and 2 requirement files and found no issues
+import Foo
+       ^^^ late-packages-2/bar.trlc:2: issue: unused import Foo [unused_imports]
+         | Consider deleting this import statement if not needed.
+Processed 0 models and 2 requirement files and found 1 warning
