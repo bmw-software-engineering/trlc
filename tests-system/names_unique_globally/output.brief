@@ -1,2 +1,3 @@
 names_unique_globally/f1.trlc:4:5: trlc error: required component l (see def.rsl:4) is not defined
 names_unique_globally/f2.trlc:3:5: trlc error: duplicate definition, previous definition at f1.trlc:4
+Processed 1 model and 2 requirement files and found 2 errors

@@ -1,3 +1,4 @@
 rbt-unique-object-names/foo.trlc:3:3: trlc error: duplicate definition, previous definition at foo.rsl:1
 rbt-unique-object-names/foo.trlc:5:3: trlc error: duplicate definition, previous definition at foo.rsl:3
 rbt-unique-object-names/foo.trlc:9:3: trlc error: duplicate definition, previous definition at foo.trlc:7
+Processed 1 model and 1 requirement file and found 3 errors

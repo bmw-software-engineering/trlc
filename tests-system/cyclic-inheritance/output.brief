@@ -1,2 +1,3 @@
 cyclic-inheritance/bar.rsl:5:22: trlc error: unknown symbol MyType3
 cyclic-inheritance/bar.rsl:9:22: trlc error: unknown symbol MyType2
+Processed 1 model and 0 requirement files and found 2 errors

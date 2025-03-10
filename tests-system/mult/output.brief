@@ -2,3 +2,4 @@ mult/instances.trlc:6:22: trlc error: this array requires at least 5 elements (o
 mult/instances.trlc:16:22: trlc error: this array requires at least 5 elements (only 2 provided)
 mult/instances.trlc:21:22: trlc error: this array requires at least 3 elements (only 2 provided)
 mult/instances.trlc:4:12: trlc check error: mult must have 3 elements
+Processed 1 model and 1 requirement file and found 4 errors
