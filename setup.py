@@ -34,7 +34,7 @@ setuptools.setup(
     name="trlc",
     version=version.TRLC_VERSION,
     author="Bayerische Motoren Werke Aktiengesellschaft (BMW AG)",
-    author_email="florian.schanda@bmw.de",
+    author_email="philipp.wullstein-kammler@bmw.de",
     description="Treat Requirements Like Code",
     long_description=long_description,
     long_description_content_type="text/markdown",
