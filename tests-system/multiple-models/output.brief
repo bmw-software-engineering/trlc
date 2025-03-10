@@ -1,3 +1,4 @@
 multiple-models/foo.trlc:4:7: trlc check error: this is not a good name
 multiple-models/foo.trlc:8:7: trlc check error: this is not a good name
 multiple-models/foo.trlc:8:7: trlc check error: also not a good name
+Processed 2 models and 3 requirement files and found 3 errors

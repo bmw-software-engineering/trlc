@@ -1,3 +1,4 @@
 typesystem-2/foo.trlc:4:7: trlc error: expected integer literal, encountered decimal literal instead
 typesystem-2/foo.trlc:8:7: trlc error: expected integer literal, encountered decimal literal instead
 typesystem-2/foo.trlc:12:7: trlc error: expected decimal literal, encountered integer literal instead
+Processed 1 model and 1 requirement file and found 3 errors

@@ -1,3 +1,4 @@
 rbt-qualified-name/test1.trlc:4:1: trlc error: unknown symbol T
 rbt-qualified-name/test2.trlc:4:1: trlc error: package must be imported before use
 rbt-qualified-name/test3.trlc:4:1: trlc error: unknown symbol Bar
+Processed 1 model and 6 requirement files and found 3 errors

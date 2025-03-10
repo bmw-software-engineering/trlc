@@ -27,6 +27,10 @@ generated in the following situations:
 
 ### 2.0.2-dev
 
+* [TRLC] Modify behavior of `--brief`:
+  the summary showing the total number of processed model and requirement files and
+  issues is always printed.
+
 * [TRLC] Add support for Python 3.13.
 
 * [TRLC] Fix help message for command line argument `--no-detailed-info`.

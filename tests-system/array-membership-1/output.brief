@@ -4,3 +4,4 @@ array-membership-1/foo.trlc:22:12: trlc check warning: 42 is not in array
 array-membership-1/foo.trlc:22:12: trlc check warning: 42 is in array
 array-membership-1/foo.trlc:34:12: trlc check warning: 42 is not in array
 array-membership-1/foo.trlc:34:12: trlc check warning: 42 is in array
+Processed 1 model and 1 requirement file and found 6 warnings

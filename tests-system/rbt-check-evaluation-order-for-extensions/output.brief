@@ -1,2 +1,3 @@
 rbt-check-evaluation-order-for-extensions/bar.trlc:4:9: trlc check warning: a has to be more than 7 chars
 rbt-check-evaluation-order-for-extensions/bar.trlc:4:9: trlc check error: a has to be more than 10 chars
+Processed 2 models and 1 requirement file and found 1 warning and 1 error
