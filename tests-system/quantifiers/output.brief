@@ -8,3 +8,4 @@ quantifiers/foo.trlc:46:9: trlc check warning: not everything is 42
 quantifiers/foo.trlc:46:9: trlc check warning: nothing is 42
 quantifiers/foo.trlc:58:9: trlc check warning: not everything is 42
 quantifiers/foo.trlc:58:9: trlc check warning: nothing is 42
+Processed 1 model and 1 requirement file and found 10 warnings

@@ -2,3 +2,4 @@ rbt-oneof-semantics/foo.trlc:7:4: trlc check error: potato
 rbt-oneof-semantics/foo.trlc:11:4: trlc check error: potato
 rbt-oneof-semantics/foo.trlc:21:4: trlc check error: potato
 rbt-oneof-semantics/foo.trlc:26:4: trlc check error: potato
+Processed 1 model and 1 requirement file and found 4 errors

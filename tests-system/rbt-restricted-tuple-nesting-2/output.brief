@@ -4,3 +4,4 @@ rbt-restricted-tuple-nesting-2/foo.trlc:4:3: trlc error: unknown symbol x
 rbt-restricted-tuple-nesting-2/foo.trlc:8:3: trlc error: unknown symbol x
 rbt-restricted-tuple-nesting-2/foo.trlc:12:3: trlc error: unknown symbol x
 rbt-restricted-tuple-nesting-2/foo.trlc:16:3: trlc error: unknown symbol x
+Processed 1 model and 1 requirement file and found 6 errors

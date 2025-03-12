@@ -1,3 +1,4 @@
 preamble-1/bar.rsl:1:1: trlc error: expected keyword package, encountered keyword import instead
 preamble-1/baz.rsl:2:8: trlc error: package Baz cannot import itself
 preamble-1/foo.rsl:1:1: trlc error: expected keyword package, encountered keyword type instead
+Processed 3 models and 0 requirement files and found 3 errors

@@ -1,2 +1,3 @@
 rbt-signature-type-conversion/foo.trlc:3:3: trlc check warning: a is less than b
 rbt-signature-type-conversion/foo.trlc:3:3: trlc check warning: b is greater than a
+Processed 1 model and 1 requirement file and found 2 warnings

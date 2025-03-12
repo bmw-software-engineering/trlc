@@ -1,3 +1,4 @@
 rbt-sufficiently-distinct-1/test.trlc:5:3: trlc error: Foo is too similar to foo, declared at test.trlc:3
 rbt-sufficiently-distinct-1/test.trlc:7:3: trlc error: f_oo is too similar to foo, declared at test.trlc:3
 rbt-sufficiently-distinct-1/test.trlc:9:3: trlc error: f_O_o is too similar to foo, declared at test.trlc:3
+Processed 1 model and 1 requirement file and found 3 errors
