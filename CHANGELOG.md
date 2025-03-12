@@ -29,6 +29,8 @@ generated in the following situations:
 
 * [TRLC] Fix AssertionError when using Markup_String with triple double quoted strings
 
+* [TRLC] Add linter warning on unused imports.
+
 * [TRLC] Add support for Python 3.13.
 
 * [TRLC] Fix help message for command line argument `--no-detailed-info`.

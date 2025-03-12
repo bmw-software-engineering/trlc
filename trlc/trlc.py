@@ -480,14 +480,6 @@ class Source_Manager:
 
         return ok
 
-    def perform_sanity_checks(self):
-        linter = lint.Linter(mh            = self.mh,
-                             stab          = self.stab,
-                             verify_checks = self.verify_mode,
-                             debug_vcg     = self.debug_vcg,
-                             cvc5_binary   = self.cvc5_binary)
-        return linter.verify()
-
     def process(self):
         """Parse all registered files.
 
@@ -514,8 +506,12 @@ class Source_Manager:
         # Perform sanity checks (enabled by default). We only do this
         # if there were no errors so far.
         if self.lint_mode and ok:
-            ok &= self.perform_sanity_checks()
-
+            linter = lint.Linter(mh            = self.mh,
+                                 stab          = self.stab,
+                                 verify_checks = self.verify_mode,
+                                 debug_vcg     = self.debug_vcg,
+                                 cvc5_binary   = self.cvc5_binary)
+            ok &= linter.perform_sanity_checks()
         # Stop here if we're not processing TRLC files.
         if not self.parse_trlc:  # pragma: no cover
             self.callback_parse_end()
@@ -546,6 +542,9 @@ class Source_Manager:
         if not self.perform_checks():
             self.callback_parse_end()
             return None
+
+        if self.lint_mode and ok:
+            linter.verify_imports()
 
         self.callback_parse_end()
         return self.stab
