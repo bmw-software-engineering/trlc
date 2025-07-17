@@ -1,2 +1,3 @@
 checks-2/foo.trlc:3:3: trlc check error: please define b
 checks-2/foo.trlc:8:8: trlc check error: a must be less than b
+Processed 1 model and 1 requirement file and found 2 errors

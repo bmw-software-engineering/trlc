@@ -1,3 +1,4 @@
 rbt-duplicate-types/foo.rsl:7:6: trlc error: duplicate definition, previous definition at foo.rsl:3
 rbt-duplicate-types/foo.rsl:10:6: trlc error: duplicate definition, previous definition at foo.rsl:4
 rbt-duplicate-types/foo.rsl:14:7: trlc error: duplicate definition, previous definition at foo.rsl:5
+Processed 1 model and 0 requirement files and found 3 errors

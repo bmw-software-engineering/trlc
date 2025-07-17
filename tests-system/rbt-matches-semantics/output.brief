@@ -2,3 +2,4 @@ rbt-matches-semantics/foo.trlc:4:9: trlc check warning: a should match with 6 to
 rbt-matches-semantics/foo.trlc:5:9: trlc check warning: b should match only letters, digits, or underscores.
 rbt-matches-semantics/foo.trlc:6:9: trlc check warning: b should start with 'potato'.
 rbt-matches-semantics/foo.trlc:7:9: trlc check warning: d should start with D
+Processed 1 model and 1 requirement file and found 4 warnings

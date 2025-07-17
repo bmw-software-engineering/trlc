@@ -1,2 +1,3 @@
 array-length/foo.trlc:4:27: trlc error: this array requires at most 2 elements (3 provided)
 array-length/foo.trlc:8:18: trlc error: this array requires at least 2 elements (only 1 provided)
+Processed 1 model and 1 requirement file and found 2 errors

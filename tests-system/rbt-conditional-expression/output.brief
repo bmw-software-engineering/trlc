@@ -2,3 +2,4 @@ rbt-conditional-expression/foo.trlc:3:3: trlc check error: kitten
 rbt-conditional-expression/foo.trlc:3:3: trlc check error: foobar evaluation if
 rbt-conditional-expression/foo.trlc:3:3: trlc check error: foobar evaluation elsif
 rbt-conditional-expression/foo.trlc:3:3: trlc check error: potato else
+Processed 1 model and 1 requirement file and found 4 errors

@@ -604,7 +604,8 @@ def trlc():
                            default=False,
                            action="store_true",
                            help=("Simpler output intended for CI. Does not"
-                                 " show context or additional information."))
+                                 " show context or additional information,"
+                                 " but prints the usual summary at the end."))
     og_output.add_argument("--no-detailed-info",
                            default=False,
                            action="store_true",
@@ -745,50 +746,49 @@ def trlc():
 
             print(json.dumps(tmp, indent=2, sort_keys=True))
 
-    if not options.brief:
-        total_models = len(sm.rsl_files)
-        parsed_models = len([item
-                             for item in sm.rsl_files.values()
-                             if item.primary or item.secondary])
-        total_trlc = len(sm.trlc_files)
-        parsed_trlc = len([item
-                           for item in sm.trlc_files.values()
-                           if item.primary or item.secondary])
+    total_models = len(sm.rsl_files)
+    parsed_models = len([item
+                            for item in sm.rsl_files.values()
+                            if item.primary or item.secondary])
+    total_trlc = len(sm.trlc_files)
+    parsed_trlc = len([item
+                        for item in sm.trlc_files.values()
+                        if item.primary or item.secondary])
 
-        def count(parsed, total, what):
-            rv = str(parsed)
-            if parsed < total:
-                rv += " (of %u)" % total
-            rv += " " + what
-            if total == 0 or total > 1:
-                rv += "s"
-            return rv
+    def count(parsed, total, what):
+        rv = str(parsed)
+        if parsed < total:
+            rv += " (of %u)" % total
+        rv += " " + what
+        if total == 0 or total > 1:
+            rv += "s"
+        return rv
 
-        summary = "Processed %s" % count(parsed_models,
-                                         total_models,
-                                         "model")
+    summary = "Processed %s" % count(parsed_models,
+                                        total_models,
+                                        "model")
 
-        if not options.skip_trlc_files:  # pragma: no cover
-            summary += " and %s" % count(parsed_trlc,
-                                         total_trlc,
-                                         "requirement file")
+    if not options.skip_trlc_files:  # pragma: no cover
+        summary += " and %s" % count(parsed_trlc,
+                                        total_trlc,
+                                        "requirement file")
 
-        summary += " and found"
+    summary += " and found"
 
-        if mh.errors and mh.warnings:
-            summary += " %s" % count(mh.warnings, mh.warnings, "warning")
-            summary += " and %s" % count(mh.errors, mh.errors, "error")
-        elif mh.warnings:
-            summary += " %s" % count(mh.warnings, mh.warnings, "warning")
-        elif mh.errors:
-            summary += " %s" % count(mh.errors, mh.errors, "error")
-        else:
-            summary += " no issues"
+    if mh.errors and mh.warnings:
+        summary += " %s" % count(mh.warnings, mh.warnings, "warning")
+        summary += " and %s" % count(mh.errors, mh.errors, "error")
+    elif mh.warnings:
+        summary += " %s" % count(mh.warnings, mh.warnings, "warning")
+    elif mh.errors:
+        summary += " %s" % count(mh.errors, mh.errors, "error")
+    else:
+        summary += " no issues"
 
-        if mh.suppressed:  # pragma: no cover
-            summary += " with %u supressed messages" % mh.suppressed
+    if mh.suppressed:  # pragma: no cover
+        summary += " with %u supressed messages" % mh.suppressed
 
-        print(summary)
+    print(summary)
 
     if options.show_file_list and ok:  # pragma: no cover
         def get_status(parser):

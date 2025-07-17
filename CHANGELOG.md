@@ -35,6 +35,10 @@ generated in the following situations:
 
 * [TRLC] Fix help message for command line argument `--no-detailed-info`.
 
+* [TRLC] Modify behavior of `--brief`:
+  the summary showing the total number of processed model and requirement files and
+  issues is always printed.
+
 ### 2.0.1
 
 * [TRLC] Fix an UnboundLocalError when missing a term
