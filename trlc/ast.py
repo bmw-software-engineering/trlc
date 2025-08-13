@@ -167,7 +167,7 @@ class Node(metaclass=ABCMeta):
 
         """
         assert isinstance(indent, int) and indent >= 0
-        assert False, "dump not implemented for %s" % self.__class__.__name__
+        assert False, f"dump not implemented for {self.__class__.__name__}"
         # lobster-exclude: Debugging feature
 
 
@@ -199,7 +199,7 @@ class Check_Block(Node):
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
         self.write_indent(indent, "Check_Block")
-        self.write_indent(indent + 1, "Type: %s" % self.n_typ.name)
+        self.write_indent(indent + 1, f"Type: {self.n_typ.name}")
         for n_check in self.checks:
             n_check.dump(indent + 1)
 
@@ -227,10 +227,9 @@ class Compilation_Unit(Node):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Compilation_Unit (%s)" %
-                          self.location.file_name)
+        self.write_indent(indent, f"Compilation_Unit ({self.location.file_name})")
         for t_import in self.raw_imports:
-            self.write_indent(indent + 1, "Import: %s" % t_import.value)
+            self.write_indent(indent + 1, f"Import: {t_import.value}")
         for n_item in self.items:
             n_item.dump(indent + 1)
 
@@ -347,13 +346,13 @@ class Check(Node):
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
         if self.severity == "warning":
-            self.write_indent(indent, "Warning '%s'" % self.message)
+            self.write_indent(indent, f"Warning '{self.message}'")
         elif self.severity == "error":
-            self.write_indent(indent, "Error '%s'" % self.message)
+            self.write_indent(indent, f"Error '{self.message}'")
         else:
-            self.write_indent(indent, "Fatal error '%s'" % self.message)
+            self.write_indent(indent, f"Fatal error '{self.message}'")
         if self.n_anchor:
-            self.write_indent(indent + 1, "Anchor: %s" % self.n_anchor.name)
+            self.write_indent(indent + 1, f"Anchor: {self.n_anchor.name}")
         self.n_expr.dump(indent + 1)
 
     def get_real_location(self, composite_object):
@@ -664,7 +663,7 @@ class Integer_Literal(Literal):
         self.value = token.value
 
     def dump(self, indent=0):  # pragma: no cover
-        self.write_indent(indent, "Integer Literal %u" % self.value)
+        self.write_indent(indent, f"Integer Literal {self.value}")
 
     def to_string(self):
         return str(self.value)
@@ -711,7 +710,7 @@ class Decimal_Literal(Literal):
         self.value = token.value
 
     def dump(self, indent=0):  # pragma: no cover
-        self.write_indent(indent, "Decimal Literal %u" % self.value)
+        self.write_indent(indent, f"Decimal Literal {self.value}")
 
     def to_string(self):
         return str(self.value)
@@ -759,7 +758,7 @@ class String_Literal(Literal):
         self.references     = []
 
     def dump(self, indent=0):  # pragma: no cover
-        self.write_indent(indent, "String Literal %s" % repr(self.value))
+        self.write_indent(indent, f"String Literal {repr(self.value)}")
         if self.has_references:
             self.write_indent(indent + 1, "Markup References")
             for ref in self.references:
@@ -803,7 +802,7 @@ class Boolean_Literal(Literal):
         self.value = token.value == "true"
 
     def dump(self, indent=0):  # pragma: no cover
-        self.write_indent(indent, "Boolean Literal %s" % self.value)
+        self.write_indent(indent, f"Boolean Literal {self.value}")
 
     def to_string(self):
         return str(self.value)
@@ -850,8 +849,7 @@ class Enumeration_Literal(Literal):
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
         self.write_indent(indent,
-                          "Enumeration Literal %s.%s" % (self.typ.name,
-                                                         self.value.name))
+                          f"Enumeration Literal {self.typ.name}.{self.value.name}")
 
     def to_string(self):
         return self.typ.name + "." + self.value.name
@@ -974,7 +972,7 @@ class Tuple_Aggregate(Expression):
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
         self.write_indent(indent, "Tuple_Aggregate")
-        self.write_indent(indent + 1, "Type: %s" % self.typ.name)
+        self.write_indent(indent + 1, f"Type: {self.typ.name}")
         for n_item in self.typ.iter_sequence():
             if isinstance(n_item, Composite_Component):
                 self.value[n_item.name].dump(indent + 1)
@@ -1068,9 +1066,9 @@ class Record_Reference(Expression):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Record Reference %s" % self.name)
+        self.write_indent(indent, f"Record Reference {self.name}")
         self.write_indent(indent + 1,
-                          "Resolved: %s" % (self.target is not None))
+                          f"Resolved: {self.target is not None}")
 
     def to_string(self):
         return self.name
@@ -1134,7 +1132,7 @@ class Name_Reference(Expression):
         self.entity = entity
 
     def dump(self, indent=0):  # pragma: no cover
-        self.write_indent(indent, "Name Reference to %s" % self.entity.name)
+        self.write_indent(indent, f"Name Reference to {self.entity.name}")
 
     def to_string(self):
         return self.entity.name
@@ -1242,8 +1240,8 @@ class Unary_Expression(Expression):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Unary %s Expression" % self.operator)
-        self.write_indent(indent + 1, "Type: %s" % self.typ.name)
+        self.write_indent(indent, f"Unary {self.operator} Expression")
+        self.write_indent(indent + 1, f"Type: {self.typ.name}")
         self.n_operand.dump(indent + 1)
 
     def evaluate(self, mh, context):
@@ -1446,8 +1444,8 @@ class Binary_Expression(Expression):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Binary %s Expression" % self.operator)
-        self.write_indent(indent + 1, "Type: %s" % self.typ.name)
+        self.write_indent(indent, f"Binary {self.operator} Expression")
+        self.write_indent(indent + 1, f"Type: {self.typ.name}")
         self.n_lhs.dump(indent + 1)
         self.n_rhs.dump(indent + 1)
 
@@ -1740,7 +1738,7 @@ class Field_Access_Expression(Expression):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Field_Access (%s)" % self.n_field.name)
+        self.write_indent(indent, f"Field_Access ({self.n_field.name})")
         self.n_prefix.dump(indent + 1)
 
     def to_string(self):
@@ -1800,7 +1798,7 @@ class Range_Test(Expression):
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
         self.write_indent(indent, "Range Test")
-        self.write_indent(indent + 1, "Type: %s" % self.typ)
+        self.write_indent(indent + 1, f"Type: {self.typ}")
         self.n_lhs.dump(indent + 1)
         self.n_lower.dump(indent + 1)
         self.n_upper.dump(indent + 1)
@@ -1870,7 +1868,7 @@ class OneOf_Expression(Expression):
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
         self.write_indent(indent, "OneOf Test")
-        self.write_indent(indent + 1, "Type: %s" % self.typ)
+        self.write_indent(indent + 1, f"Type: {self.typ}")
         for n_choice in self.choices:
             n_choice.dump(indent + 1)
 
@@ -1930,7 +1928,7 @@ class Action(Node):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "%s Action" % self.kind.capitalize())
+        self.write_indent(indent, f"{self.kind.capitalize()} Action")
         self.write_indent(indent + 1, "Condition")
         self.n_cond.dump(indent + 2)
         self.write_indent(indent + 1, "Value")
@@ -2206,7 +2204,7 @@ class Quantified_Variable(Typed_Entity):
     """
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Quantified Variable %s" % self.name)
+        self.write_indent(indent, f"Quantified Variable {self.name}")
         self.n_typ.dump(indent + 1)
 
 
@@ -2368,13 +2366,12 @@ class Array_Type(Type):
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
         self.write_indent(indent, "Array_Type")
-        self.write_indent(indent + 1, "Lower bound: %u" % self.lower_bound)
+        self.write_indent(indent + 1, f"Lower bound: {self.lower_bound}")
         if self.upper_bound is None:
             self.write_indent(indent + 1, "Upper bound: *")
         else:
-            self.write_indent(indent + 1, "Upper bound: %u" % self.upper_bound)
-        self.write_indent(indent + 1, "Element type: %s" %
-                          self.element_type.name)
+            self.write_indent(indent + 1, f"Upper bound: {self.upper_bound}")
+        self.write_indent(indent + 1, f"Element type: {self.element_type.name}")
 
     def perform_type_checks(self, mh, value):
         assert isinstance(mh, Message_Handler)
@@ -2480,8 +2477,8 @@ class Package(Entity):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Package %s" % self.name)
-        self.write_indent(indent + 1, "Declared_Late: %s" % self.declared_late)
+        self.write_indent(indent, f"Package {self.name}")
+        self.write_indent(indent + 1, f"Declared_Late: {self.declared_late}")
         self.symbols.dump(indent + 1, omit_heading=True)
 
     def __repr__(self):
@@ -2578,11 +2575,11 @@ class Composite_Component(Typed_Entity):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Composite_Component %s" % self.name)
+        self.write_indent(indent, f"Composite_Component {self.name}")
         if self.description:
-            self.write_indent(indent + 1, "Description: %s" % self.description)
-        self.write_indent(indent + 1, "Optional: %s" % self.optional)
-        self.write_indent(indent + 1, "Type: %s" % self.n_typ.name)
+            self.write_indent(indent + 1, f"Description: {self.description}")
+        self.write_indent(indent + 1, f"Optional: {self.optional}")
+        self.write_indent(indent + 1, f"Type: {self.n_typ.name}")
 
     def __repr__(self):
         return "%s<%s>" % (self.__class__.__name__,
@@ -2643,11 +2640,11 @@ class Record_Type(Composite_Type):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Record_Type %s" % self.name)
+        self.write_indent(indent, f"Record_Type {self.name}")
         if self.description:
-            self.write_indent(indent + 1, "Description: %s" % self.description)
+            self.write_indent(indent + 1, f"Description: {self.description}")
         if self.parent:
-            self.write_indent(indent + 1, "Parent: %s" % self.parent.name)
+            self.write_indent(indent + 1, f"Parent: {self.parent.name}")
         self.components.dump(indent + 1, omit_heading=True)
         if self.checks:
             self.write_indent(indent + 1, "Checks")
@@ -2784,9 +2781,9 @@ class Tuple_Type(Composite_Type):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Tuple_Type %s" % self.name)
+        self.write_indent(indent, f"Tuple_Type {self.name}")
         if self.description:
-            self.write_indent(indent + 1, "Description: %s" % self.description)
+            self.write_indent(indent + 1, f"Description: {self.description}")
         self.write_indent(indent + 1, "Fields")
         for n_item in self.iter_sequence():
             n_item.dump(indent + 2)
@@ -2852,7 +2849,7 @@ class Separator(Node):
         }.get(self.token.kind, self.token.value)
 
     def dump(self, indent=0):  # pragma: no cover
-        self.write_indent(indent, "Separator %s" % self.token.value)
+        self.write_indent(indent, f"Separator {self.token.value}")
 
 
 class Enumeration_Type(Concrete_Type):
@@ -2879,9 +2876,9 @@ class Enumeration_Type(Concrete_Type):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Enumeration_Type %s" % self.name)
+        self.write_indent(indent, f"Enumeration_Type {self.name}")
         if self.description:
-            self.write_indent(indent + 1, "Description: %s" % self.description)
+            self.write_indent(indent + 1, f"Description: {self.description}")
         self.literals.dump(indent + 1, omit_heading=True)
 
     def get_example_value(self):
@@ -2918,9 +2915,9 @@ class Enumeration_Literal_Spec(Typed_Entity):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Enumeration_Literal_Spec %s" % self.name)
+        self.write_indent(indent, f"Enumeration_Literal_Spec {self.name}")
         if self.description:
-            self.write_indent(indent + 1, "Description: %s" % self.description)
+            self.write_indent(indent + 1, f"Description: {self.description}")
 
 
 class Record_Object(Typed_Entity):
@@ -3018,10 +3015,10 @@ class Record_Object(Typed_Entity):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent, "Record_Object %s" % self.name)
-        self.write_indent(indent + 1, "Type: %s" % self.n_typ.name)
+        self.write_indent(indent, f"Record_Object {self.name}")
+        self.write_indent(indent + 1, f"Type: {self.n_typ.name}")
         for key, value in self.field.items():
-            self.write_indent(indent + 1, "Field %s" % key)
+            self.write_indent(indent + 1, f"Field {key}")
             value.dump(indent + 2)
         if self.section:
             self.section[-1].dump(indent + 1)
@@ -3082,11 +3079,11 @@ class Section(Entity):
         self.parent = parent
 
     def dump(self, indent=0):  # pragma: no cover
-        self.write_indent(indent, "Section %s" % self.name)
+        self.write_indent(indent, f"Section {self.name}")
         if self.parent is None:
             self.write_indent(indent + 1, "Parent: None")
         else:
-            self.write_indent(indent + 1, "Parent: %s" % self.parent.name)
+            self.write_indent(indent + 1, f"Parent: {self.parent.name}")
 
 
 ##############################################################################
