@@ -1,0 +1,12 @@
+{
+  "test_1": {
+    "field": 5
+  },
+  "test_2": {
+    "link": {
+      "derived": "Example.test_1",
+      "field_a": 5
+    }
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

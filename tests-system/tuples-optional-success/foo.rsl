@@ -1,0 +1,22 @@
+package Example
+
+type A {
+  field Integer
+}
+
+tuple Link_B2A {   
+  derived  A
+  separator @
+  field_a "derived@field" optional Integer
+  separator @
+  field_b "$parent@field" optional Integer
+}
+
+type B {
+  field Integer
+  link  Link_B2A[1 .. *]
+}
+
+checks Link_B2A {
+  field_a != null and field_b != null, error "resolve optional field failed"
+}

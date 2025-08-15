@@ -1,0 +1,15 @@
+package Example
+
+A test_1 {
+  field = 5
+}
+
+A test_2 {
+  field = 1
+}
+
+B test_3 {
+  field = 5
+  link = [test_1, test_2]
+}
+

@@ -1,0 +1,19 @@
+package Example
+
+type A {
+  field Integer
+}
+
+tuple Link_B2A {   
+  derived  A
+  separator @
+  field_a "derived@field" optional Integer
+}
+
+type B {
+  link  Link_B2A
+}
+
+checks Link_B2A {
+  field_a >= 0, error "field shall be bigger than zero"
+}
