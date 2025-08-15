@@ -930,6 +930,10 @@ class Array_Aggregate(Expression):
     def can_be_null(self):
         return False
 
+    def update_items(self, parent):
+        for value in self.value:
+            if isinstance(value, (Tuple_Aggregate, Array_Aggregate)):
+                value.update_items(parent)
 
 class Tuple_Aggregate(Expression):
     """Instances of a tuple
@@ -1022,6 +1026,25 @@ class Tuple_Aggregate(Expression):
     def can_be_null(self):
         return False
 
+    def update_items(self, parent):
+        for n_item in self.typ.iter_sequence():
+            if isinstance(n_item, Composite_Component):
+                if n_item.description is None:
+                    continue
+                current = self.value
+                for part in n_item.description.split("@"):
+                    if part == "$parent":
+                        current = parent
+                        continue
+                    if isinstance(current, dict) and part in current:
+                        current = current[part]
+                        if isinstance(current, Record_Reference):
+                            current = current.target
+                    elif isinstance(current, Record_Object):
+                        current = current.get_field(part)
+                    else:
+                        raise KeyError(f"Cannot resolve part '{part}' in {current}")
+                self.value[n_item.name] = current
 
 class Record_Reference(Expression):
     """Reference to another record object
@@ -1355,7 +1378,7 @@ class Binary_Expression(Expression):
     :attribute n_lhs: the first operand
     :type: Expression
 
-    :attribute n_lhs: the second operand
+    :attribute n_rhs: the second operand
     :type: Expression
 
     """
@@ -1773,7 +1796,7 @@ class Range_Test(Expression):
     :attribute n_lower: the lower bound
     :type: Expression
 
-    :attribute n_lower: the upper bound
+    :attribute n_upper: the upper bound
     :type: Expression
 
     """
@@ -3030,6 +3053,14 @@ class Record_Object(Typed_Entity):
         assert isinstance(mh, Message_Handler)
         for val in self.field.values():
             val.resolve_references(mh)
+
+    def update_items(self):
+        for value in self.field.values():
+            if isinstance(value, (Tuple_Aggregate, Array_Aggregate)):
+                value.update_items(self)
+
+    def get_field(self, name):
+        return self.field.get(name, None)
 
     def perform_checks(self, mh):
         # lobster-trace: LRM.Check_Evaluation_Order

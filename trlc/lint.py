@@ -154,7 +154,7 @@ class Linter:
         if n_record_type.is_abstract:
             if n_record_type not in self.abstract_extensions:
                 self.abstract_extensions[n_record_type] = set()
-        elif n_record_type.parent and n_record_type.parent.is_abstract:
+        if n_record_type.parent and n_record_type.parent.is_abstract:
             if n_record_type.parent not in self.abstract_extensions:
                 self.abstract_extensions[n_record_type.parent] = set()
             self.abstract_extensions[n_record_type.parent].add(n_record_type)

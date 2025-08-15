@@ -69,7 +69,7 @@ class Source_Manager:
     :param debug_vcg: If true and verify_mode is also true, emit the \
       individual SMTLIB2 VCs and generate a picture of the program \
       graph. Requires Graphviz to be installed.
-    :type parse_trlc: bool
+    :type debug_vcg: bool
 
     """
     def __init__(self, mh,
@@ -463,6 +463,7 @@ class Source_Manager:
             for obj in package.symbols.values(ast.Record_Object):
                 try:
                     obj.resolve_references(self.mh)
+                    obj.update_items()
                 except TRLC_Error:
                     ok = False
 

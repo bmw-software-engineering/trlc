@@ -1465,7 +1465,8 @@ class VCG:
         assert isinstance(n_expr, Field_Access_Expression)
 
         prefix_value, prefix_valid = self.tr_expression(n_expr.n_prefix)
-        self.attach_validity_check(prefix_valid, n_expr.n_prefix)
+        if not self.functional:
+            self.attach_validity_check(prefix_valid, n_expr.n_prefix)
 
         field_value = smt.Record_Access(prefix_value,
                                         n_expr.n_field.name + ".value")
