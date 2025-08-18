@@ -27,7 +27,7 @@ generated in the following situations:
 
 ### 2.0.3-dev
 
-
+* [API] Fix incorrect output of `Integer_Literal.dump()` method.
 
 ### 2.0.2
 
