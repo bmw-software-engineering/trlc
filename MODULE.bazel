@@ -28,6 +28,14 @@ pip.parse(
 
 use_repo(pip, "trlc_dependencies")
 
+pip.parse(
+    hub_name = "trlc_renderer_dependencies",
+    python_version = "3.12",
+    requirements_lock = "//renderer:requirements_lock.txt",
+)
+
+use_repo(pip, "trlc_renderer_dependencies")
+
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
