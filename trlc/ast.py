@@ -1353,7 +1353,7 @@ class Binary_Expression(Expression):
     :attribute n_lhs: the first operand
     :type: Expression
 
-    :attribute n_lhs: the second operand
+    :attribute n_rhs: the second operand
     :type: Expression
 
     """
@@ -1771,7 +1771,7 @@ class Range_Test(Expression):
     :attribute n_lower: the lower bound
     :type: Expression
 
-    :attribute n_lower: the upper bound
+    :attribute n_upper: the upper bound
     :type: Expression
 
     """
