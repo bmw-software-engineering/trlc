@@ -1,0 +1,8 @@
+field_a >= 0, error "field shall be bigger than zero"
+^^^^^^^ tuples-optional-null-warning/foo.rsl:18: issue: expression could be null [vcg-evaluation-of-null]
+      | example tuple_type triggering error:
+      |   Link_B2A bad_potato {
+      |     derived = A_instance_0
+      |     /* field_a is null */
+      |   }
+Processed 1 model and 1 requirement file and found 1 warning
