@@ -23,9 +23,9 @@
 import os
 import sys
 
-from lobster.items import Tracing_Tag, Activity
-from lobster.location import File_Reference
-from lobster.io import lobster_write
+from lobster.common.items import Tracing_Tag, Activity
+from lobster.common.location import File_Reference
+from lobster.common.io import lobster_write
 
 from trlc.trlc import Source_Manager
 from trlc.errors import Message_Handler
