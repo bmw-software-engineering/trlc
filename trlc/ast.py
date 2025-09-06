@@ -928,6 +928,11 @@ class Array_Aggregate(Expression):
     def can_be_null(self):
         return False
 
+    def resolve_optional_fields(self, parent, mh):
+        for value in self.value:
+            if isinstance(value, (Tuple_Aggregate, Array_Aggregate)):
+                value.resolve_optional_fields(parent, mh)
+
 
 class Tuple_Aggregate(Expression):
     """Instances of a tuple
@@ -1019,6 +1024,76 @@ class Tuple_Aggregate(Expression):
 
     def can_be_null(self):
         return False
+
+    def resolve_optional_fields(self, parent, mh):
+        """
+        resolve each optional field with a valid `description`.
+
+        Resolution supports:
+        - Nested paths using '@' as a separator.
+        - Special reference `$parent` pointing to the parent object.
+
+        Example for two supported forms::
+            type A {
+                field int
+            }
+            tuple LinkB2A {
+                derived  A
+                separator @
+                field_a "derived@field" optional int
+                         ^^^^^^^^^^^^^1
+                separator @
+                field_b "$parent@field" optional int
+                         ^^^^^^^^^^^^^2
+            }
+            type B {
+                field int
+                derived_from LinkB2A
+            }
+
+        :form 1: `<type name>@<field name>` (see 1)
+            `field_a` resolves to the referenced field in type A.
+
+        :form 2: `$parent@<field name>` (see 2)
+            `field_b` resolves to the field in the parent type B.
+
+        Note that only fields with valid `description` are eligible for this resolution,
+        and shall be declared as "optional".
+
+        """
+        for n_item in self.typ.iter_sequence():
+            if not isinstance(n_item, Composite_Component):
+                continue
+            desc = n_item.description
+            if desc is None or ("@" not in desc and "$parent" not in desc):
+                continue
+
+            current = self.value
+            parts = desc.split("@")
+            if parts[0] == "$parent":
+                current, parts = parent, parts[1:]
+            elif "$parent" in parts:
+                mh.error(self.location,
+                         "Invalid reference description %s, "
+                         "$parent only allowed at beginning." %
+                         (desc))
+            for part in parts:
+                if isinstance(current, dict):
+                    current = current.get(part)
+                elif isinstance(current, Record_Object):
+                    current = current.field.get(part)
+                else:
+                    mh.error(self.location,
+                             "Invalid traversal at %s in %s to resolve the tuple." %
+                             (part, desc))
+                if current is None:
+                    mh.error(self.location,
+                             "Fail to resolve the %s in the tuple %s, "
+                             "%s is not valid reference description." %
+                             (n_item.name, self.typ.name, part))
+                if isinstance(current, Record_Reference):
+                    current = current.target
+            self.value[n_item.name] = current
 
 
 class Record_Reference(Expression):
@@ -3027,6 +3102,11 @@ class Record_Object(Typed_Entity):
         assert isinstance(mh, Message_Handler)
         for val in self.field.values():
             val.resolve_references(mh)
+
+    def resolve_optional_fields(self, mh):
+        for value in self.field.values():
+            if isinstance(value, (Tuple_Aggregate, Array_Aggregate)):
+                value.resolve_optional_fields(self, mh)
 
     def perform_checks(self, mh):
         # lobster-trace: LRM.Check_Evaluation_Order
