@@ -58,7 +58,7 @@ The Python implementation can be used for several purposes:
 ## Dependencies
 
 ### Run-time
-* 3.8 <= Python3 <= 3.13.*
+* 3.8 <= Python3 < 3.14
 * [PyVCG](https://pypi.org/project/PyVCG)
 * [PyPI CVC5](https://pypi.org/project/cvc5)
   (required when using the `--verify` option)
