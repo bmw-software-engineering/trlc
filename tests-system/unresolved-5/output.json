@@ -1,0 +1,14 @@
+{
+  "Test_1": {
+    "linked": []
+  },
+  "Test_2": {
+    "linked": [
+      {
+        "LinkVersion": 1,
+        "item": "Example.Test_1"
+      }
+    ]
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

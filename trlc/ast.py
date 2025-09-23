@@ -1154,6 +1154,11 @@ class Record_Reference(Expression):
             name              = self.name,
             error_location    = self.location,
             required_subclass = Record_Object)
+        if isinstance(self.target, Unresolved_Type):
+            mh.error(
+                self.location,
+                self.target.error_msg
+            )
         if self.typ is None:
             self.typ = self.target.n_typ
         elif not self.target.n_typ.is_subclass_of(self.typ):
@@ -2887,6 +2892,13 @@ class Tuple_Type(Composite_Type):
         else:
             return "(%s)" % ", ".join(parts)
 
+class Unresolved_Type(Composite_Type):
+    def __init__(self, name, description, location, package):
+        super().__init__(name, description, location, package)
+        self.error_msg = None
+
+    def dump(self):
+        pass
 
 class Separator(Node):
     # lobster-trace: LRM.Tuple_Declaration
@@ -3454,13 +3466,35 @@ class Symbol_Table:
             n             = 1)
 
         if matches:
-            mh.error(error_location,
-                     "unknown symbol %s, did you mean %s?" %
-                     (name,
-                      matches[0]))
+            pkg_dummy = Package(
+                "__unresolved__",
+                error_location,
+                Symbol_Table(),
+                declared_late=True
+            )
+            n_unresolved = Unresolved_Type(
+                name=name,
+                description=None,
+                location=error_location,
+                package=pkg_dummy
+            )
+            n_unresolved.error_msg = "unknown symbol %s, did you mean %s?" % (name, matches[0])
+            return n_unresolved
         else:
-            mh.error(error_location,
-                     "unknown symbol %s" % name)
+            pkg_dummy = Package(
+                "__unresolved__",
+                error_location,
+                Symbol_Table(),
+                declared_late=True
+            )
+            n_unresolved = Unresolved_Type(
+                name=name,
+                description=None,
+                location=error_location,
+                package=pkg_dummy
+            )
+            n_unresolved.error_msg = "unknown symbol %s" % name
+            return n_unresolved
 
     def lookup(self, mh, referencing_token, required_subclass=None):
         # lobster-trace: LRM.Described_Name_Equality
