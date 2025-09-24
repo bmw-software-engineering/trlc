@@ -463,6 +463,7 @@ class Source_Manager:
             for obj in package.symbols.values(ast.Record_Object):
                 try:
                     obj.resolve_references(self.mh)
+                    obj.update_items()
                 except TRLC_Error:
                     ok = False
 

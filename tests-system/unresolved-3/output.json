@@ -1,0 +1,3 @@
+linked = [Test_1@1]
+         ^ unresolved-3/foo.trlc:8: error: unknown symbol ReqId
+Processed 1 model and 1 requirement file and found 1 error

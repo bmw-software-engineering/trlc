@@ -1,0 +1,9 @@
+package Example
+
+Requirement Test_1 {
+    linked = Test_2@2
+}
+
+Requirement Test_2 {
+    linked = Test_1@1
+}

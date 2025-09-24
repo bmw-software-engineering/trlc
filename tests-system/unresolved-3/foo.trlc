@@ -1,0 +1,9 @@
+package Example
+
+Requirement Test_1 {
+    linked = []
+}
+
+Requirement Test_2 {
+    linked = [Test_1@1]
+}

@@ -1,0 +1,9 @@
+package Example
+
+T Test_1 {
+    linked = Test_2@1
+}
+
+T Test_2 {
+    linked = Test_1@1
+}

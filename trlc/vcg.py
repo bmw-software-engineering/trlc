@@ -537,6 +537,18 @@ class VCG:
                                                          item)
                                       for item in value)
 
+        elif isinstance(n_typ, Unresolved_Type):
+            if value < 0:
+                instance_id = value * -2 - 1
+            else:
+                instance_id = value * 2
+            if n_typ.n_package is self.n_ctyp.n_package:
+                return "%s_instance_%i" % (n_typ.name, instance_id)
+            else:
+                return "%s.%s_instance_%i" % (n_typ.n_package.name,
+                                              n_typ.name,
+                                              instance_id)
+
         else:  # pragma: no cover
             self.flag_unsupported(n_typ,
                                   "back-conversion from %s" % n_typ.name)
@@ -726,6 +738,9 @@ class VCG:
             # we can't really _do_ anything with them. We just need a
             # variable with infinite range so we can generate
             # arbitrary fictional record names
+            return smt.BUILTIN_INTEGER
+
+        elif isinstance(n_type, Unresolved_Type):
             return smt.BUILTIN_INTEGER
 
         else:  # pragma: no cover

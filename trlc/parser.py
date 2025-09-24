@@ -638,6 +638,12 @@ class Parser(Parser_Base):
         else:
             root_record = None
 
+        if isinstance(root_record, ast.Unresolved_Type):
+            self.mh.error(
+                self.ct.location,
+                root_record.error_msg
+            )
+
         if self.lint_mode and \
            root_record and root_record.is_final and \
            not is_final:
@@ -1097,6 +1103,11 @@ class Parser(Parser_Base):
         t_in = self.ct
         self.match("IDENTIFIER")
         field = scope.lookup(self.mh, self.ct, ast.Composite_Component)
+        if isinstance(field, ast.Unresolved_Type):
+            self.mh.error(
+                self.ct.location,
+                field.error_msg
+            )
         n_source = ast.Name_Reference(self.ct.location,
                                       field)
         n_source.set_ast_link(self.ct)
@@ -1328,6 +1339,11 @@ class Parser(Parser_Base):
             # immediately, we have a builtin function call.
             n_name = self.stab.lookup(self.mh,
                                         self.ct)
+            if isinstance(n_name, ast.Unresolved_Type):
+                self.mh.error(
+                    self.ct.location,
+                    n_name.error_msg
+                )
             if not isinstance(n_name, (ast.Builtin_Function,
                                         ast.Builtin_Numeric_Type)):
                 self.mh.error(self.ct.location,
@@ -1350,6 +1366,12 @@ class Parser(Parser_Base):
                                                literal  = lit)
             enum_lit.set_ast_link(self.ct)
             return enum_lit
+
+        if isinstance(n_name, ast.Unresolved_Type):
+            self.mh.error(
+                self.ct.location,
+                n_name.error_msg
+            )
 
         # Anything that remains is either a function call or an actual
         # name. Let's just enforce this for sanity.
@@ -1395,6 +1417,11 @@ class Parser(Parser_Base):
                 n_field = n_name.typ.components.lookup(self.mh,
                                                        self.ct,
                                                        ast.Composite_Component)
+                if isinstance(n_field, ast.Unresolved_Type):
+                    self.mh.error(
+                        self.ct.location,
+                        n_field.error_msg
+                    )
                 n_field.set_ast_link(self.ct)
                 n_name = ast.Field_Access_Expression(
                     mh       = self.mh,
@@ -1440,6 +1467,11 @@ class Parser(Parser_Base):
         n_ctype = self.cu.package.symbols.lookup(self.mh,
                                                  self.ct,
                                                  ast.Composite_Type)
+        if isinstance(n_ctype, ast.Unresolved_Type):
+            self.mh.error(
+                self.ct.location,
+                n_ctype.error_msg
+            )
         n_check_block = ast.Check_Block(location = self.ct.location,
                                         n_typ    = n_ctype)
         n_check_block.set_ast_link(t_checks)
@@ -1669,6 +1701,11 @@ class Parser(Parser_Base):
         elif isinstance(typ, ast.Enumeration_Type):
             enum = self.parse_qualified_name(self.default_scope,
                                              ast.Enumeration_Type)
+            if isinstance(enum, ast.Unresolved_Type):
+                self.mh.error(
+                    self.ct.location,
+                    enum.error_msg
+                )
             enum.set_ast_link(self.ct)
             if enum != typ:
                 self.mh.error(self.ct.location,
@@ -1679,6 +1716,11 @@ class Parser(Parser_Base):
             lit = enum.literals.lookup(self.mh,
                                        self.ct,
                                        ast.Enumeration_Literal_Spec)
+            if isinstance(lit, ast.Unresolved_Type):
+                self.mh.error(
+                    self.ct.location,
+                    lit.error_msg
+                )
             return ast.Enumeration_Literal(self.ct.location,
                                            lit)
 
@@ -1763,6 +1805,12 @@ class Parser(Parser_Base):
             rv.set_ast_link(self.ct)
             return rv
 
+        elif isinstance(typ, ast.Unresolved_Type):
+            self.mh.error(
+                self.ct.location,
+                typ.error_msg
+            )
+
         else:
             self.mh.ice_loc(self.ct.location,
                             "logic error: unexpected type %s" %
@@ -1788,6 +1836,11 @@ class Parser(Parser_Base):
 
         r_typ = self.parse_qualified_name(self.default_scope,
                                           ast.Record_Type)
+        if isinstance(r_typ, ast.Unresolved_Type):
+            self.mh.error(
+                self.ct.location,
+                r_typ.error_msg
+            )
         r_typ.set_ast_link(self.ct)
         if r_typ.is_abstract:
             self.mh.error(self.ct.location,
@@ -1811,6 +1864,11 @@ class Parser(Parser_Base):
             comp = r_typ.components.lookup(self.mh,
                                            self.ct,
                                            ast.Composite_Component)
+            if isinstance(comp, ast.Unresolved_Type):
+                self.mh.error(
+                    self.ct.location,
+                    comp.error_msg
+                )
             if obj.is_component_implicit_null(comp):
                 self.mh.error(self.ct.location,
                               "component '%s' already assigned at line %i" %
@@ -1926,6 +1984,8 @@ class Parser(Parser_Base):
                         break
                     self.advance()
                     self.skip_until_newline()
+        # Try to resolve any Unresolved_Type placeholders collected during parsing
+        self.resolve_unresolved_types()
 
         self.match_eof()
 
@@ -1934,6 +1994,38 @@ class Parser(Parser_Base):
                 self.cu.package.set_ast_link(tok)
 
         return ok
+    
+    def resolve_unresolved_types(self, fail_on_unresolved=True):
+        if len(getattr(self.default_scope, "scope", [])) > 1:
+            pkg_stab = self.default_scope.scope[1]
+            pkg_table = getattr(pkg_stab, "table", {})
+            for n_item in self.cu.items:
+                if isinstance(n_item, ast.Tuple_Type) or isinstance(n_item, ast.Record_Type):
+                    for comp_name in list(n_item.components.table.keys()):
+                        comp = n_item.components.table[comp_name]
+                        if not isinstance(comp.n_typ, ast.Unresolved_Type):
+                            continue
+                        for sym_key in list(pkg_table.keys()):
+                            sym = pkg_table[sym_key]
+                            if comp.n_typ.name == getattr(sym, "name", None):
+                                n_item.components.table[comp_name].n_typ = sym
+                                break
+
+        if not fail_on_unresolved:
+            return
+
+        remaining = []
+        for item in self.cu.items:
+            if isinstance(item, (ast.Tuple_Type, ast.Record_Type)):
+                for comp in item.components.table.values():
+                    if isinstance(comp.n_typ, ast.Unresolved_Type):
+                        remaining.append((item, comp))
+
+        if remaining:
+            names = ", ".join("%s.%s" % (it.name, comp.name) for it, comp in remaining)
+            first_loc = remaining[0][1].n_typ.location
+            self.mh.error(first_loc,
+                          comp.n_typ.error_msg)
 
     def parse_trlc_file(self):
         # lobster-trace: LRM.TRLC_File

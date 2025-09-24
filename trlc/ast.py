@@ -928,6 +928,10 @@ class Array_Aggregate(Expression):
     def can_be_null(self):
         return False
 
+    def update_fields(self, parent):
+        for value in self.value:
+            if isinstance(value, (Tuple_Aggregate, Array_Aggregate)):
+                value.update_fields(parent)
 
 class Tuple_Aggregate(Expression):
     """Instances of a tuple
@@ -1020,6 +1024,69 @@ class Tuple_Aggregate(Expression):
     def can_be_null(self):
         return False
 
+    def update_fields(self, parent):
+        """
+        Update `self.value` dictionary with resolved values for each optional field
+        that has a valid `description` in `self.typ`.
+
+        Resolution supports:
+        - Nested paths using '@' as a separator.
+        - Special reference `$parent` pointing to the parent object.
+
+        Example for two supported forms::
+            type A {
+                field int
+            }
+            tuple LinkB2A {   
+                derived  A
+                separator @
+                field_A "derived@field" optional int
+                         ^^^^^^^^^^^^^1
+                separator @
+                field_B "$parent@field" optional int
+                         ^^^^^^^^^^^^^2
+            }
+            type B {
+                field int
+                derived_from LinkB2A[1 .. *]
+            }
+
+        :form 1: `<type name>@<field name>` (see 1)
+            `field_A` resolves to the referenced field in type A.
+        
+        :form 2: `$parent@<field name>` (see 2)
+            `field_B` resolves to the field in the parent type B.
+
+        Note that only fields with valid `description` are eligible for this resolution,
+        and shall be declared as "optional".
+
+        """
+        for n_item in self.typ.iter_sequence():
+            if not isinstance(n_item, Composite_Component):
+                continue
+            desc = n_item.description
+            if desc is None or ("@" not in desc and "$parent" not in desc):
+                continue
+
+            current = self.value
+            parts = desc.split("@")
+            if parts[0] == "$parent":
+                current, parts = parent, parts[1:]
+            elif "$parent" in parts:
+                raise KeyError(f"Invalid description '{desc}': $parent only allowed at beginning")
+
+            for part in parts:
+                if isinstance(current, dict):
+                    current = current.get(part)
+                elif isinstance(current, Record_Object):
+                    current = current.field.get(part)
+                else:
+                    raise KeyError(f"Invalid traversal at '{part}' in {desc}")
+                if current is None:
+                    raise KeyError(f"Cannot resolve '{part}' in '{desc}'")
+                if isinstance(current, Record_Reference):
+                    current = current.target
+            self.value[n_item.name] = current
 
 class Record_Reference(Expression):
     """Reference to another record object
@@ -1087,6 +1154,11 @@ class Record_Reference(Expression):
             name              = self.name,
             error_location    = self.location,
             required_subclass = Record_Object)
+        if isinstance(self.target, Unresolved_Type):
+            mh.error(
+                self.location,
+                self.target.error_msg
+            )
         if self.typ is None:
             self.typ = self.target.n_typ
         elif not self.target.n_typ.is_subclass_of(self.typ):
@@ -2820,6 +2892,13 @@ class Tuple_Type(Composite_Type):
         else:
             return "(%s)" % ", ".join(parts)
 
+class Unresolved_Type(Composite_Type):
+    def __init__(self, name, description, location, package):
+        super().__init__(name, description, location, package)
+        self.error_msg = None
+
+    def dump(self):
+        pass
 
 class Separator(Node):
     # lobster-trace: LRM.Tuple_Declaration
@@ -3027,6 +3106,11 @@ class Record_Object(Typed_Entity):
         assert isinstance(mh, Message_Handler)
         for val in self.field.values():
             val.resolve_references(mh)
+
+    def update_items(self):
+        for value in self.field.values():
+            if isinstance(value, (Tuple_Aggregate, Array_Aggregate)):
+                value.update_fields(self)
 
     def perform_checks(self, mh):
         # lobster-trace: LRM.Check_Evaluation_Order
@@ -3382,13 +3466,35 @@ class Symbol_Table:
             n             = 1)
 
         if matches:
-            mh.error(error_location,
-                     "unknown symbol %s, did you mean %s?" %
-                     (name,
-                      matches[0]))
+            pkg_dummy = Package(
+                "__unresolved__",
+                error_location,
+                Symbol_Table(),
+                declared_late=True
+            )
+            n_unresolved = Unresolved_Type(
+                name=name,
+                description=None,
+                location=error_location,
+                package=pkg_dummy
+            )
+            n_unresolved.error_msg = "unknown symbol %s, did you mean %s?" % (name, matches[0])
+            return n_unresolved
         else:
-            mh.error(error_location,
-                     "unknown symbol %s" % name)
+            pkg_dummy = Package(
+                "__unresolved__",
+                error_location,
+                Symbol_Table(),
+                declared_late=True
+            )
+            n_unresolved = Unresolved_Type(
+                name=name,
+                description=None,
+                location=error_location,
+                package=pkg_dummy
+            )
+            n_unresolved.error_msg = "unknown symbol %s" % name
+            return n_unresolved
 
     def lookup(self, mh, referencing_token, required_subclass=None):
         # lobster-trace: LRM.Described_Name_Equality
