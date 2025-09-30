@@ -78,11 +78,11 @@ full-release:
 	make bump
 	git push
 
-requirements.lobster: language-reference-manual/lobster-trlc.conf \
+requirements.lobster: language-reference-manual/lobster-trlc.yaml \
                       language-reference-manual/lrm.rsl \
                       language-reference-manual/lrm.trlc
 	lobster-trlc \
-		--config-file=language-reference-manual/lobster-trlc.conf \
+		--config=language-reference-manual/lobster-trlc.yaml \
 		--out requirements.lobster \
 		language-reference-manual
 
@@ -101,11 +101,11 @@ report.lobster: lobster.conf \
                 requirements.lobster \
                 code.lobster \
                 system-tests.lobster \
-		unit-tests.lobster
+                unit-tests.lobster
 	lobster-report \
 		--lobster-config=lobster.conf \
 		--out=report.lobster
-	lobster-online-report report.lobster
+	lobster-online-report --config=online_report_config.yaml --out=report.lobster
 
 tracing: report.lobster
 	mkdir -p docs
