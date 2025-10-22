@@ -52,3 +52,40 @@ type ACME_Requirement extends Supplier_Requirement {
 This makes sure that any and all supplier requirements are completely
 uniform, and nobody adds new fields that may be confusing or
 unexpected to the suppliers.
+
+### Type Checks
+
+A field within a type can also reference another type. 
+You can access fields of a referenced type using the `.` notation:
+
+```
+type BaseType {
+   name  String
+}
+
+type MyType {
+   name  String
+   link  BaseType
+}
+
+checks MyType {
+   link.name != name, "cannot link the type with the same name."
+}
+```
+
+Self-referencing (recursive) type definitions are also supported.
+To prevent infinite recursion, any recursive field must be declared as `optional`:
+
+```
+type MyType {
+   name String
+   link optional MyType
+}
+
+checks MyType {
+   link != null implies link.name != name, 
+      "link status must be the same as status"
+}
+```
+Excessive recursion may lead to performance degradation,
+so complex recursive designs are not recommended.

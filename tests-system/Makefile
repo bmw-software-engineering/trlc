@@ -1,4 +1,4 @@
-RAW_TARGETS=$(filter-out bulk, $(subst ./,,$(shell find . -mindepth 1 -maxdepth 1 -type d)))
+RAW_TARGETS=$(if $(TARGET),$(TARGET),$(filter-out bulk, $(subst ./,,$(shell find . -mindepth 1 -maxdepth 1 -type d))))
 
 TARGETS=\
 	$(addsuffix /output, $(RAW_TARGETS)) \

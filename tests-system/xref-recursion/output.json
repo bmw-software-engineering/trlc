@@ -1,0 +1,13 @@
+{
+  "DeprecatedR": {
+    "link": null,
+    "name": "dep",
+    "status": "DEPRECATED"
+  },
+  "NewXR": {
+    "link": "bar.DeprecatedR",
+    "name": "new",
+    "status": "DEPRECATED"
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

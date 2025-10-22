@@ -10,32 +10,32 @@ a != b implies x, "potato"
                ^ lint-record-refs/test2.rsl:10: issue: expression could be null [vcg-evaluation-of-null]
                | example record_type triggering error:
                |   T bad_potato {
-               |     a = T_instance_1
-               |     b = T_instance_0
+               |     a = None
+               |     b = None
                |     /* x is null */
                |   }
 a == b implies x, "potato"
                ^ lint-record-refs/test2.rsl:11: issue: expression could be null [vcg-evaluation-of-null]
                | example record_type triggering error:
                |   T bad_potato {
-               |     a = T_instance_0
-               |     b = T_instance_0
+               |     a = None
+               |     b = None
                |     /* x is null */
                |   }
 a != b implies x, "potato"
                ^ lint-record-refs/test3.rsl:11: issue: expression could be null [vcg-evaluation-of-null]
                | example record_type triggering error:
                |   T bad_potato {
-               |     a = Other.T_instance_1
-               |     b = Other.T_instance_0
+               |     a = ("")
+               |     b = ("A")
                |     /* x is null */
                |   }
 a == b implies x, "potato"
                ^ lint-record-refs/test3.rsl:12: issue: expression could be null [vcg-evaluation-of-null]
                | example record_type triggering error:
                |   T bad_potato {
-               |     a = Other.T_instance_0
-               |     b = Other.T_instance_0
+               |     a = ("")
+               |     b = ("")
                |     /* x is null */
                |   }
 Processed 4 models and 0 requirement files and found 5 warnings

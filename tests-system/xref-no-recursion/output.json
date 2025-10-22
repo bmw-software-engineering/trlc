@@ -1,0 +1,12 @@
+{
+  "DeprecatedR": {
+    "name": "base",
+    "status": "NEW"
+  },
+  "NewXR": {
+    "link": "instances.DeprecatedR",
+    "name": "new",
+    "status": "NEW"
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

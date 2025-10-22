@@ -1,0 +1,12 @@
+package bar
+    
+bar.MyType DeprecatedR {
+   name = "dep"
+   status = bar.Status.DEPRECATED
+} 
+
+bar.MyType NewXR {
+   name = "new"
+   status = bar.Status.DEPRECATED
+   link = bar.DeprecatedR
+}

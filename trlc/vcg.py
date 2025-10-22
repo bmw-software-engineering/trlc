@@ -104,6 +104,7 @@ class VCG:
         self.enumerations = {}
         self.tuples       = {}
         self.arrays       = {}
+        self.records      = {}
         self.bound_vars   = {}
         self.qe_vars      = {}
         self.tuple_base   = {}
@@ -353,7 +354,11 @@ class VCG:
                            encoding = "UTF-8")
 
         # Generate VCs
-        self.vcg.generate()
+        try:
+            self.vcg.generate()
+        except smt.Recursion:  # pragma: no cover
+            self.mh.error(self.n_ctyp.location,
+                          "Complex recursive is not supported.")
 
         # Solve VCs and provide feedback
         nok_feasibility_checks = []
@@ -496,16 +501,17 @@ class VCG:
                 return '"%s"' % value
 
         elif isinstance(n_typ, Record_Type):
-            if value < 0:
-                instance_id = value * -2 - 1
-            else:
-                instance_id = value * 2
-            if n_typ.n_package is self.n_ctyp.n_package:
-                return "%s_instance_%i" % (n_typ.name, instance_id)
-            else:
-                return "%s.%s_instance_%i" % (n_typ.n_package.name,
-                                              n_typ.name,
-                                              instance_id)
+            if value and isinstance(value, dict):
+                parts = []
+                for n_item in n_typ.all_components():
+                    if n_item.optional and not value[n_item.name + ".valid"]:
+                        continue
+                    if sub_val := self.value_to_trlc(n_item.n_typ,
+                                                     value[n_item.name + ".value"]):
+                        parts.append(sub_val)
+                if parts:
+                    return "(%s)" % ", ".join(parts)
+            return None
 
         elif isinstance(n_typ, Tuple_Type):
             parts = []
@@ -697,13 +703,15 @@ class VCG:
             if n_type not in self.tuples:
                 s_sort = smt.Record(n_type.n_package.name +
                                     "." + n_type.name)
+                self.tuples[n_type] = s_sort
+
                 for n_component in n_type.all_components():
                     s_sort.add_component(n_component.name + ".value",
                                          self.tr_type(n_component.n_typ))
                     if n_component.optional:
                         s_sort.add_component(n_component.name + ".valid",
                                              smt.BUILTIN_BOOLEAN)
-                self.tuples[n_type] = s_sort
+
                 self.start.add_statement(
                     smt.Record_Declaration(
                         s_sort,
@@ -722,11 +730,26 @@ class VCG:
             return self.arrays[n_type]
 
         elif isinstance(n_type, Record_Type):
-            # Record references are modelled as a free integer, since
-            # we can't really _do_ anything with them. We just need a
-            # variable with infinite range so we can generate
-            # arbitrary fictional record names
-            return smt.BUILTIN_INTEGER
+            if n_type not in self.records:
+                s_sort = smt.Record(n_type.n_package.name +
+                                    "." + n_type.name)
+                self.records[n_type] = s_sort
+
+                for n_component in n_type.all_components():
+                    s_sort.add_component(n_component.name + ".value",
+                                         self.tr_type(n_component.n_typ))
+                    if n_component.optional:
+                        s_sort.add_component(n_component.name + ".valid",
+                                             smt.BUILTIN_BOOLEAN)
+
+                self.start.add_statement(
+                    smt.Record_Declaration(
+                        s_sort,
+                        "reocrd %s from %s" % (
+                            n_type.name,
+                            n_type.location.to_string())))
+
+            return self.records[n_type]
 
         else:  # pragma: no cover
             self.flag_unsupported(n_type)
@@ -1465,7 +1488,8 @@ class VCG:
         assert isinstance(n_expr, Field_Access_Expression)
 
         prefix_value, prefix_valid = self.tr_expression(n_expr.n_prefix)
-        self.attach_validity_check(prefix_valid, n_expr.n_prefix)
+        if not self.functional:
+            self.attach_validity_check(prefix_valid, n_expr.n_prefix)
 
         field_value = smt.Record_Access(prefix_value,
                                         n_expr.n_field.name + ".value")
