@@ -1,0 +1,17 @@
+{
+  "DeprecatedR": {
+    "name": "base",
+    "status": "NEW"
+  },
+  "NewXR": {
+    "derived_from": [
+      {
+        "link_type": "instances.DeprecatedR",
+        "version": 1
+      }
+    ],
+    "name": "new",
+    "status": "NEW"
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

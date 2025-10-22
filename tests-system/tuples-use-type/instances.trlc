@@ -1,0 +1,14 @@
+package instances
+
+import bar
+
+bar.BaseType DeprecatedR {
+  name = "base" // does start with Q
+  status = bar.Status.NEW
+}
+
+bar.MyType NewXR {
+  name = "new"
+  status = bar.Status.NEW
+  derived_from = [ DeprecatedR@1 ]
+}
