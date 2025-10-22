@@ -1,0 +1,22 @@
+package bar
+
+enum Status {
+  NEW
+  OLD
+  DEPRECATED
+}
+
+type BaseType {
+  name String
+  status  Status
+}
+
+type MyType {
+  name String
+  status  Status
+  link optional BaseType
+}
+
+checks MyType {
+  link != null implies link.status == status, "link status must be the same as status"
+}

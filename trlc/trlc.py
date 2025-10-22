@@ -76,7 +76,7 @@ class Source_Manager:
                  lint_mode      = True,
                  parse_trlc     = True,
                  verify_mode    = False,
-                 debug_vcg      = False,
+                 debug_vcg      = True,
                  error_recovery = True,
                  cvc5_binary    = None):
         assert isinstance(mh, Message_Handler)
@@ -473,7 +473,7 @@ class Source_Manager:
         for package in self.stab.values(ast.Package):
             for obj in package.symbols.values(ast.Record_Object):
                 try:
-                    if not obj.perform_checks(self.mh):
+                    if not obj.perform_checks(self.mh, self.stab):
                         ok = False
                 except TRLC_Error:
                     ok = False

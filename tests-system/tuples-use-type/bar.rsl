@@ -1,0 +1,29 @@
+package bar
+
+enum Status {
+  NEW
+  OLD
+  DEPRECATED
+}
+
+type BaseType {
+  name String
+  status  Status
+}
+
+tuple LinkMy2Base {
+  link_type BaseType
+  separator @
+  version Integer
+}
+
+type MyType {
+  name String
+  status  Status
+  derived_from optional LinkMy2Base[0 .. *]
+}
+
+checks MyType {
+  derived_from != null implies (forall elem in derived_from => elem.link_type.status == status), 
+    error "link status must be the same as status"
+}
