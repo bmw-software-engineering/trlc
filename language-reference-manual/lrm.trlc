@@ -1084,8 +1084,13 @@ section "Names" {
               a valid literal of that type. If the prefix of
               a dot (`.`) access resolves to a tuple, then
               the identifier must be a valid field of the
-              type of that tuple. Any other prefix is an
-              error.
+              type of that tuple. If the prefix of a dot (`.`)
+              access resolves to a record object, then the identifier
+              must be the name of a component declared inside
+              that record. Optional components are represented as a
+              pair `(valid, value)`, and may be accessed using
+              `record.field.valid` and `record.field.value`. Nested
+              field access is allowed. Any other prefix is an error.
            '''
   }
 
@@ -1100,7 +1105,6 @@ section "Names" {
               builtin functions.
            '''
   }
-
 
   Static_Semantics Signature_Len {
     text = '''The builtin function `len` is of arity 1. Its parameter must
@@ -1197,14 +1201,16 @@ section "Names" {
         separator @
         version optional Integer
       }
+      type Name_Base {
+        description string
+      }
       type Name_Examples {
-         foo Boolean
-         bar Name_Examples
-         asil ASIL
-         potato Integer [0 .. *]
-         wibble Decimal
-         field String
-         cb_link Codebeamer_Item
+        foo Boolean
+        bar Name_Base
+        asil ASIL
+        potato Integer [0 .. *]
+        field String
+        cb_link Codebeamer_Item
       }
     '''
     rsl = '''
@@ -1223,6 +1229,9 @@ section "Names" {
 
         cb_link.item >= 50000, warning "cb item value is oddly low"
         // you can obtain a tuple's values
+
+        bar.description, "foo"
+        // you can obtain a record's component
       }
     '''
   }

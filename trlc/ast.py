@@ -2746,22 +2746,6 @@ class Record_Type(Composite_Type):
         # lobster-exclude: utility method
         return "%s_instance" % self.name
 
-    def is_recursive(self):
-        visited = set()
-
-        def _dfs(record):
-            if record is None:
-                return False
-            if record in visited:
-                return True
-            visited.add(record)
-            for comp in record.components.table.values():
-                if isinstance(comp.n_typ, Record_Type):
-                    if _dfs(comp.n_typ):
-                        return True
-            return False
-        return _dfs(self)
-
 
 class Tuple_Type(Composite_Type):
     """A user-defined tuple type.

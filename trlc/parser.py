@@ -1389,12 +1389,6 @@ class Parser(Parser_Base):
                                   "which is neither a tuple nor a type" %
                                   (n_name.to_string(),
                                    n_name.typ.name))
-                if isinstance(n_name.typ, ast.Record_Type) and \
-                   n_name.typ.is_recursive():
-                    self.mh.error(n_name.location,
-                                  "expression '%s' has recursive type, "
-                                  "access field is not supported" %
-                                  (n_name.to_string()))
                 self.match("DOT")
                 t_dot = self.ct
                 self.match("IDENTIFIER")
