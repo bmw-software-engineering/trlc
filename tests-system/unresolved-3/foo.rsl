@@ -1,0 +1,11 @@
+package Example
+
+type Requirement {
+    linked ReqId[0 .. *]
+}
+
+tuple ReqId {
+    item Requirement
+    separator @
+    LinkVersion Integer
+}
