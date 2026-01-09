@@ -103,10 +103,12 @@ class VCG:
         self.constants    = {}
         self.enumerations = {}
         self.tuples       = {}
+        self.records      = {}
         self.arrays       = {}
         self.bound_vars   = {}
         self.qe_vars      = {}
         self.tuple_base   = {}
+        self.uf_records   = {}
 
         self.uf_matches   = None
         # Pointer to the UF we use for matches. We only generate it
@@ -738,7 +740,7 @@ class VCG:
 
         # If the check belongs to a different type then we are looking
         # at a type extension. In this case we do not create checks
-        # again, because if a check would failt it would already have
+        # again, because if a check would fail it would already have
         # failed.
         if n_check.n_type is not self.n_ctyp:
             old_emit, self.emit_checks = self.emit_checks, False
@@ -1466,18 +1468,65 @@ class VCG:
     def tr_field_access_expression(self, n_expr):
         assert isinstance(n_expr, Field_Access_Expression)
 
-        if isinstance(n_expr.n_prefix.typ, Record_Type):
-            self.flag_unsupported(n_expr.n_prefix,
-                                  "record field reference")
+        if self.functional:  # pragma: no cover
+            self.flag_unsupported(n_expr,
+                                  "functional evaluation of field access")
 
         prefix_value, prefix_valid = self.tr_expression(n_expr.n_prefix)
+        prefix_typ = n_expr.n_prefix.typ
         self.attach_validity_check(prefix_valid, n_expr.n_prefix)
 
-        if isinstance(n_expr.n_prefix.typ, Tuple_Type):
+        if isinstance(prefix_typ, Tuple_Type):
             field_value = smt.Record_Access(prefix_value,
                                             n_expr.n_field.name + ".value")
             if n_expr.n_field.optional:
                 field_valid = smt.Record_Access(prefix_value,
+                                                n_expr.n_field.name + ".valid")
+            else:
+                field_valid = smt.Boolean_Literal(True)
+
+        elif isinstance(prefix_typ, Record_Type):
+            # We need a sort for the record instance + a UF to convert
+            # the int values into instances of this sort.
+            if prefix_typ in self.records:
+                record_sort  = self.records[prefix_typ]
+                to_record_uf = self.uf_records[prefix_typ]
+            else:
+                record_sort = smt.Record(prefix_typ.n_package.name +
+                                         "." + prefix_typ.name)
+                for n_component in prefix_typ.all_components():
+                    record_sort.add_component(n_component.name + ".value",
+                                              self.tr_type(n_component.n_typ))
+                    if n_component.optional:
+                        record_sort.add_component(n_component.name + ".valid",
+                                                  smt.BUILTIN_BOOLEAN)
+                self.records[prefix_typ] = record_sort
+                self.preamble.add_statement(
+                    smt.Record_Declaration(
+                        record_sort,
+                        "record %s from %s" % (
+                            prefix_typ.name,
+                            prefix_typ.location.to_string())))
+
+                to_record_uf = smt.Function(
+                    "access.%s.%s" %
+                    (prefix_typ.n_package.name, prefix_typ.name),
+                    record_sort,
+                    smt.Bound_Variable(smt.BUILTIN_INTEGER, "ref"))
+                self.preamble.add_statement(
+                    smt.Function_Declaration(to_record_uf))
+
+                self.uf_records[prefix_typ] = to_record_uf
+
+            # We can now apply the magic int to the UF to get a record
+            # value
+            dereference = smt.Function_Application(to_record_uf, prefix_value)
+
+            # We can now perform the access on the record value
+            field_value = smt.Record_Access(dereference,
+                                            n_expr.n_field.name + ".value")
+            if n_expr.n_field.optional:
+                field_valid = smt.Record_Access(dereference,
                                                 n_expr.n_field.name + ".valid")
             else:
                 field_valid = smt.Boolean_Literal(True)
@@ -1487,4 +1536,5 @@ class VCG:
                             "unexpected type %s as prefix of field access" %
                             n_expr.n_prefix.typ.__class__.__name__)
 
+        # pylint: disable=possibly-used-before-assignment
         return field_value, field_valid

@@ -1,5 +1,10 @@
 link.value == value, "potato"
-^^^^ record-reference-1/test.rsl:9: warning: record field reference not yet supported in VCG
+^^^^ record-reference-1/test.rsl:9: issue: expression could be null [vcg-evaluation-of-null]
+   | example record_type triggering error:
+   |   T bad_potato {
+   |     value = 0
+   |     /* link is null */
+   |   }
 T R1 {
   ^^ record-reference-1/test.trlc:3: check error: potato
 T R2 {
