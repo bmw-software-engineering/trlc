@@ -1,0 +1,4 @@
+record-reference-1/test.trlc:3:3: trlc check error: potato
+record-reference-1/test.trlc:8:3: trlc check error: potato
+record-reference-1/test.rsl:9:3: trlc error: null dereference
+Processed 1 model and 1 requirement file and found 3 errors

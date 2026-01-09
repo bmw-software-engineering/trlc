@@ -1,0 +1,17 @@
+package Test_5
+
+R one {
+  value = 1
+}
+
+R two {
+  value = 2
+}
+
+Q test_5_1 {
+  pair = (one, two)
+}
+
+Q test_5_2 {
+  pair = (two, one)
+}

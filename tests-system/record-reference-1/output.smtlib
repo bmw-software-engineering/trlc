@@ -1,0 +1,9 @@
+link.value == value, "potato"
+^^^^ record-reference-1/test.rsl:9: warning: record field reference not yet supported in VCG
+T R1 {
+  ^^ record-reference-1/test.trlc:3: check error: potato
+T R2 {
+  ^^ record-reference-1/test.trlc:8: check error: potato
+link.value == value, "potato"
+^^^^ record-reference-1/test.rsl:9: error: null dereference
+Processed 1 model and 1 requirement file and found 1 warning and 3 errors

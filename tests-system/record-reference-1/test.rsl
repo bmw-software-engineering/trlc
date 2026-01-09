@@ -1,0 +1,10 @@
+package Test
+
+type T {
+  value Integer
+  link optional T
+}
+
+checks T {
+  link.value == value, "potato"
+}

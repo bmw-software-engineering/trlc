@@ -2,7 +2,7 @@
 #
 # TRLC - Treat Requirements Like Code
 # Copyright (C) 2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
-# Copyright (C) 2023 Florian Schanda
+# Copyright (C) 2023-2025 Florian Schanda
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -722,10 +722,12 @@ class VCG:
             return self.arrays[n_type]
 
         elif isinstance(n_type, Record_Type):
-            # Record references are modelled as a free integer, since
-            # we can't really _do_ anything with them. We just need a
-            # variable with infinite range so we can generate
-            # arbitrary fictional record names
+            # Record references are modelled as a free integer. If we
+            # access their field then we use an uninterpreted
+            # function. Some of these have special meaning:
+            #   0             - the null reference
+            #   1             - the self reference
+            #   anything else - uninterpreted
             return smt.BUILTIN_INTEGER
 
         else:  # pragma: no cover
@@ -987,7 +989,7 @@ class VCG:
                                              lhs_value)
 
         elif n_expr.operator == Binary_Operator.STRING_REGEX:
-            rhs_evaluation = n_expr.n_rhs.evaluate(self.mh, None).value
+            rhs_evaluation = n_expr.n_rhs.evaluate(self.mh, None, None).value
             assert isinstance(rhs_evaluation, str)
 
             sym_value = smt.Function_Application(
@@ -1005,7 +1007,7 @@ class VCG:
         elif n_expr.operator == Binary_Operator.POWER:
             # LRM says that the exponent is always static and an
             # integer
-            static_value = n_expr.n_rhs.evaluate(self.mh, None).value
+            static_value = n_expr.n_rhs.evaluate(self.mh, None, None).value
             assert isinstance(static_value, int) and static_value >= 0
 
             if static_value == 0:
@@ -1464,15 +1466,25 @@ class VCG:
     def tr_field_access_expression(self, n_expr):
         assert isinstance(n_expr, Field_Access_Expression)
 
+        if isinstance(n_expr.n_prefix.typ, Record_Type):
+            self.flag_unsupported(n_expr.n_prefix,
+                                  "record field reference")
+
         prefix_value, prefix_valid = self.tr_expression(n_expr.n_prefix)
         self.attach_validity_check(prefix_valid, n_expr.n_prefix)
 
-        field_value = smt.Record_Access(prefix_value,
-                                        n_expr.n_field.name + ".value")
-        if n_expr.n_field.optional:
-            field_valid = smt.Record_Access(prefix_value,
-                                            n_expr.n_field.name + ".valid")
+        if isinstance(n_expr.n_prefix.typ, Tuple_Type):
+            field_value = smt.Record_Access(prefix_value,
+                                            n_expr.n_field.name + ".value")
+            if n_expr.n_field.optional:
+                field_valid = smt.Record_Access(prefix_value,
+                                                n_expr.n_field.name + ".valid")
+            else:
+                field_valid = smt.Boolean_Literal(True)
+
         else:
-            field_valid = smt.Boolean_Literal(True)
+            self.mh.ice_loc(n_expr.n_prefix.location,
+                            "unexpected type %s as prefix of field access" %
+                            n_expr.n_prefix.typ.__class__.__name__)
 
         return field_value, field_valid

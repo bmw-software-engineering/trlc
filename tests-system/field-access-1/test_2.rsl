@@ -1,0 +1,14 @@
+package Test_2
+
+type T {
+  value            Integer
+  ref_a   optional T
+  ref_b   optional T
+
+  goal optional Boolean
+}
+
+checks T {
+  ref_a != ref_b, fatal "potato"
+  goal, "potato"
+}

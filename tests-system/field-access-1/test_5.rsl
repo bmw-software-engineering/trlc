@@ -1,0 +1,24 @@
+package Test_5
+
+type R {
+  value Integer
+}
+
+tuple T {
+  first  R
+  second R
+}
+
+checks T {
+  first.value < second.value, fatal "potato"
+}
+
+type Q {
+  pair T
+  goal optional Boolean
+}
+
+checks Q {
+  pair.first.value >= 0, fatal "kitten"
+  goal, "goal"
+}
