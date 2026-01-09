@@ -1,0 +1,5 @@
+Q test_5_1 {
+  ^^^^^^^^ field-access-1/test_5.trlc:11: error: check goal (test_5.rsl:23) evaluates to null
+pair = (two, one)
+       ^ field-access-1/test_5.trlc:16: check error: potato
+Processed 5 models and 1 requirement file and found 2 errors

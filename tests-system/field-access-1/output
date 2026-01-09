@@ -1,0 +1,24 @@
+ref != null implies ref.value < value, fatal "potato"
+                    ^^^ field-access-1/test_1.rsl:10: warning: record field reference not yet supported in VCG
+goal, "potato"
+^^^^ field-access-1/test_2.rsl:13: issue: expression could be null [vcg-evaluation-of-null]
+   | example record_type triggering error:
+   |   T bad_potato {
+   |     value = 0
+   |     /* ref_a is null */
+   |     ref_b = T_instance_0
+   |     /* goal is null */
+   |   }
+10 / len(ref.arr) > 0, "potato"
+         ^^^ field-access-1/test_3.rsl:9: warning: record field reference not yet supported in VCG
+(forall e in arr => e.value < value), fatal "potato"
+                    ^ field-access-1/test_4.rsl:9: warning: record field reference not yet supported in VCG
+first.value < second.value, fatal "potato"
+^^^^^ field-access-1/test_5.rsl:13: warning: record field reference not yet supported in VCG
+first.value < second.value, fatal "potato"
+^^^^^ field-access-1/test_5.rsl:13: warning: record field reference not yet supported in VCG
+Q test_5_1 {
+  ^^^^^^^^ field-access-1/test_5.trlc:11: error: check goal (test_5.rsl:23) evaluates to null
+pair = (two, one)
+       ^ field-access-1/test_5.trlc:16: check error: potato
+Processed 5 models and 1 requirement file and found 6 warnings and 2 errors

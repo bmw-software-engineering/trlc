@@ -1,0 +1,11 @@
+package Test_4
+
+type T {
+  value Integer
+  arr T [0 .. *]
+}
+
+checks T {
+  (forall e in arr => e.value < value), fatal "potato"
+  0 / (len(arr) - 5) == 0, "potato"
+}

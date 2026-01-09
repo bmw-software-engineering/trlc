@@ -1,0 +1,25 @@
+package Test
+
+T R1 {
+  value = 23
+  link = R2
+}
+
+T R2 {
+  value = 11
+  link = R1
+}
+
+T R3 {
+  value = 123
+  link = R3
+}
+
+T R4 {
+  value = 23
+  link = R1
+}
+
+T R5 {
+  value = 0
+}

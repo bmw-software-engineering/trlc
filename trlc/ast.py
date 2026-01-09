@@ -2,7 +2,7 @@
 #
 # TRLC - Treat Requirements Like Code
 # Copyright (C) 2022-2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
-# Copyright (C) 2024      Florian Schanda
+# Copyright (C) 2024-2025 Florian Schanda
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -369,17 +369,29 @@ class Check(Node):
         else:
             return fields[self.n_anchor.name].location
 
-    def perform(self, mh, composite_object):
+    def perform(self, mh, composite_object, gstab):
         # lobster-trace: LRM.Check_Messages
         # lobster-trace: LRM.Check_Severity
         assert isinstance(mh, Message_Handler)
         assert isinstance(composite_object, (Record_Object,
                                              Tuple_Aggregate))
+        assert isinstance(gstab, Symbol_Table)
 
         if isinstance(composite_object, Record_Object):
-            result = self.n_expr.evaluate(mh, copy(composite_object.field))
+            result = self.n_expr.evaluate(mh,
+                                          copy(composite_object.field),
+                                          gstab)
         else:
-            result = self.n_expr.evaluate(mh, copy(composite_object.value))
+            result = self.n_expr.evaluate(mh,
+                                          copy(composite_object.value),
+                                          gstab)
+        if result.value is None:
+            loc = self.get_real_location(composite_object)
+            mh.error(loc,
+                     "check %s (%s) evaluates to null" %
+                     (self.n_expr.to_string(),
+                      mh.cross_file_reference(self.location)))
+
         assert isinstance(result.value, bool)
 
         if not result.value:
@@ -462,13 +474,17 @@ class Expression(Node, metaclass=ABCMeta):
         assert typ is None or isinstance(typ, Type)
         self.typ = typ
 
-    def evaluate(self, mh, context):  # pragma: no cover
+    def evaluate(self, mh, context, gstab):  # pragma: no cover
         """Evaluate the expression in the given context
 
         The context can be None, in which case the expression is
         evaluated in a static context. Otherwise it must be a
         dictionary that maps names (such as record fields or
         quantified variables) to expressions.
+
+        The global symbol table must be None (for static context
+        evaluations), otherwise it must contain the global symbol
+        table to resolve record references.
 
         :param mh: the message handler to use
         :type mh: Message_Handler
@@ -477,9 +493,11 @@ class Expression(Node, metaclass=ABCMeta):
         :raise TRLC_Error: if the expression cannot be evaluated
         :return: result of the evaluation
         :rtype: Value
+
         """
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
         assert False, "evaluate not implemented for %s" % \
             self.__class__.__name__
 
@@ -564,10 +582,11 @@ class Implicit_Null(Expression):
     def to_string(self):
         return "null"
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         # lobster-trace: LRM.Unspecified_Optional_Components
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
         return Value(self.location, None, None)
 
     def to_python_object(self):
@@ -621,9 +640,10 @@ class Null_Literal(Literal):
     def to_string(self):
         return "null"
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
         return Value(self.location, None, None)
 
     def to_python_object(self):
@@ -668,9 +688,10 @@ class Integer_Literal(Literal):
     def to_string(self):
         return str(self.value)
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
         return Value(self.location, self.value, self.typ)
 
     def to_python_object(self):
@@ -715,9 +736,10 @@ class Decimal_Literal(Literal):
     def to_string(self):
         return str(self.value)
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
         return Value(self.location, self.value, self.typ)
 
     def to_python_object(self):
@@ -767,9 +789,10 @@ class String_Literal(Literal):
     def to_string(self):
         return self.value
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
         return Value(self.location, self.value, self.typ)
 
     def to_python_object(self):
@@ -807,9 +830,10 @@ class Boolean_Literal(Literal):
     def to_string(self):
         return str(self.value)
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
         return Value(self.location, self.value, self.typ)
 
     def to_python_object(self):
@@ -854,9 +878,10 @@ class Enumeration_Literal(Literal):
     def to_string(self):
         return self.typ.name + "." + self.value.name
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
         return Value(self.location, self.value, self.typ)
 
     def to_python_object(self):
@@ -908,11 +933,12 @@ class Array_Aggregate(Expression):
     def to_string(self):
         return "[" + ", ".join(x.to_string() for x in self.value) + "]"
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
         return Value(self.location,
-                     list(element.evaluate(mh, context)
+                     list(element.evaluate(mh, context, gstab)
                           for element in self.value),
                      self.typ)
 
@@ -999,11 +1025,12 @@ class Tuple_Aggregate(Expression):
             rv = ")"
         return rv
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
         return Value(self.location,
-                     {name : element.evaluate(mh, context)
+                     {name : element.evaluate(mh, context, gstab)
                       for name, element in self.value.items()},
                      self.typ)
 
@@ -1073,10 +1100,11 @@ class Record_Reference(Expression):
     def to_string(self):
         return self.name
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
-        return Value(self.location, self, self.typ)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
+        return Value(self.location, copy(self.target.field), self.typ)
 
     def resolve_references(self, mh):
         # lobster-trace: LRM.References_To_Extensions
@@ -1137,16 +1165,17 @@ class Name_Reference(Expression):
     def to_string(self):
         return self.entity.name
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
 
         if context is None:
             mh.error(self.location,
                      "cannot be used in a static context")
 
         assert self.entity.name in context
-        return context[self.entity.name].evaluate(mh, context)
+        return context[self.entity.name].evaluate(mh, context, gstab)
 
     def can_be_null(self):
         # The only way we could generate null here (without raising
@@ -1244,7 +1273,7 @@ class Unary_Expression(Expression):
         self.write_indent(indent + 1, f"Type: {self.typ.name}")
         self.n_operand.dump(indent + 1)
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         # lobster-trace: LRM.Null_Is_Invalid
         # lobster-trace: LRM.Signature_Len
         # lobster-trace: LRM.Signature_Type_Conversion
@@ -1254,8 +1283,9 @@ class Unary_Expression(Expression):
 
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
 
-        v_operand = self.n_operand.evaluate(mh, context)
+        v_operand = self.n_operand.evaluate(mh, context, gstab)
         if v_operand.value is None:
             mh.error(v_operand.location,
                      "input to unary expression %s (%s) must not be null" %
@@ -1493,7 +1523,7 @@ class Binary_Expression(Expression):
         else:
             assert False
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         # lobster-trace: LRM.Null_Equivalence
         # lobster-trace: LRM.Null_Is_Invalid
         # lobster-trace: LRM.Signature_String_End_Functions
@@ -1504,8 +1534,9 @@ class Binary_Expression(Expression):
 
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
 
-        v_lhs = self.n_lhs.evaluate(mh, context)
+        v_lhs = self.n_lhs.evaluate(mh, context, gstab)
         if v_lhs.value is None and \
            self.operator not in (Binary_Operator.COMP_EQ,
                                  Binary_Operator.COMP_NEQ):
@@ -1518,7 +1549,7 @@ class Binary_Expression(Expression):
         if self.operator == Binary_Operator.LOGICAL_AND:
             assert isinstance(v_lhs.value, bool)
             if v_lhs.value:
-                return self.n_rhs.evaluate(mh, context)
+                return self.n_rhs.evaluate(mh, context, gstab)
             else:
                 return v_lhs
 
@@ -1527,19 +1558,19 @@ class Binary_Expression(Expression):
             if v_lhs.value:
                 return v_lhs
             else:
-                return self.n_rhs.evaluate(mh, context)
+                return self.n_rhs.evaluate(mh, context, gstab)
 
         elif self.operator == Binary_Operator.LOGICAL_IMPLIES:
             assert isinstance(v_lhs.value, bool)
             if v_lhs.value:
-                return self.n_rhs.evaluate(mh, context)
+                return self.n_rhs.evaluate(mh, context, gstab)
             else:
                 return Value(location = self.location,
                              value    = True,
                              typ      = self.typ)
 
         # Otherwise, evaluate RHS and do the operation
-        v_rhs = self.n_rhs.evaluate(mh, context)
+        v_rhs = self.n_rhs.evaluate(mh, context, gstab)
         if v_rhs.value is None and \
            self.operator not in (Binary_Operator.COMP_EQ,
                                  Binary_Operator.COMP_NEQ):
@@ -1712,14 +1743,14 @@ class Binary_Expression(Expression):
 
 
 class Field_Access_Expression(Expression):
-    """Tuple field access
+    """Tuple or Record field access
 
     For example in::
 
       foo.bar
       ^1  ^2
 
-    :attribute n_prefix: expression with tuple type (see 1)
+    :attribute n_prefix: expression with tuple or record type (see 1)
     :type: Expression
 
     :attribute n_field: a tuple field to dereference (see 2)
@@ -1744,11 +1775,24 @@ class Field_Access_Expression(Expression):
     def to_string(self):
         return self.n_prefix.to_string() + "." + self.n_field.name
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
 
-        return self.n_prefix.evaluate(mh, context).value[self.n_field.name]
+        v_prefix = self.n_prefix.evaluate(mh,
+                                          context,
+                                          gstab).value
+        if v_prefix is None:
+            # lobster-trace: LRM.Dereference
+            mh.error(self.n_prefix.location,
+                     "null dereference")
+
+        v_field = v_prefix[self.n_field.name]
+        if isinstance(v_field, Implicit_Null):
+            return v_field.evaluate(mh, context, gstab)
+        else:
+            return v_field
 
     def can_be_null(self):
         return False
@@ -1803,26 +1847,27 @@ class Range_Test(Expression):
         self.n_lower.dump(indent + 1)
         self.n_upper.dump(indent + 1)
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         # lobster-trace: LRM.Null_Is_Invalid
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
 
-        v_lhs = self.n_lhs.evaluate(mh, context)
+        v_lhs = self.n_lhs.evaluate(mh, context, gstab)
         if v_lhs.value is None:
             mh.error(v_lhs.location,
                      "lhs of range check %s (%s) see must not be null" %
                      (self.to_string(),
                       mh.cross_file_reference(self.location)))
 
-        v_lower = self.n_lower.evaluate(mh, context)
+        v_lower = self.n_lower.evaluate(mh, context, gstab)
         if v_lower.value is None:
             mh.error(v_lower.location,
                      "lower bound of range check %s (%s) must not be null" %
                      (self.to_string(),
                       mh.cross_file_reference(self.location)))
 
-        v_upper = self.n_upper.evaluate(mh, context)
+        v_upper = self.n_upper.evaluate(mh, context, gstab)
         if v_upper.value is None:
             mh.error(v_upper.location,
                      "upper bound of range check %s (%s) must not be null" %
@@ -1872,12 +1917,13 @@ class OneOf_Expression(Expression):
         for n_choice in self.choices:
             n_choice.dump(indent + 1)
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         # lobster-trace: LRM.OneOf_Semantics
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
 
-        v_choices = [n_choice.evaluate(mh, context).value
+        v_choices = [n_choice.evaluate(mh, context, gstab).value
                      for n_choice in self.choices]
 
         return Value(location = self.location,
@@ -2006,24 +2052,25 @@ class Conditional_Expression(Expression):
         rv += ")"
         return rv
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         # lobster-trace: LRM.Conditional_Expression_Else
         # lobster-trace: LRM.Conditional_Expression_Evaluation
         # lobster-trace: LRM.Null_Is_Invalid
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
 
         for action in self.actions:
-            v_cond = action.n_cond.evaluate(mh, context)
+            v_cond = action.n_cond.evaluate(mh, context, gstab)
             if v_cond.value is None:
                 mh.error(v_cond.location,
                          "condition of %s (%s) must not be null" %
                          (action.to_string(),
                           mh.cross_file_reference(self.location)))
             if v_cond.value:
-                return action.n_expr.evaluate(mh, context)
+                return action.n_expr.evaluate(mh, context, gstab)
 
-        return self.else_expr.evaluate(mh, context)
+        return self.else_expr.evaluate(mh, context, gstab)
 
     def can_be_null(self):
         if self.else_expr and self.else_expr.can_be_null():
@@ -2096,12 +2143,13 @@ class Quantified_Expression(Expression):
                                         self.n_source.to_string(),
                                         self.n_expr.to_string())
 
-    def evaluate(self, mh, context):
+    def evaluate(self, mh, context, gstab):
         # lobster-trace: LRM.Null_Is_Invalid
         # lobster-trace: LRM.Universal_Quantification_Semantics
         # lobster-trace: LRM.Existential_Quantification_Semantics
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
+        assert gstab is None or isinstance(gstab, Symbol_Table)
 
         if context is None:
             new_ctx = {}
@@ -2127,7 +2175,7 @@ class Quantified_Expression(Expression):
         loc = self.location
         for binding in array_values.value:
             new_ctx[self.n_var.name] = binding
-            result = self.n_expr.evaluate(mh, new_ctx)
+            result = self.n_expr.evaluate(mh, new_ctx, gstab)
             assert isinstance(result.value, bool)
             if self.universal and not result.value:
                 rv  = False
@@ -2212,9 +2260,10 @@ class Type(Entity, metaclass=ABCMeta):
     """Abstract base class for all types.
 
     """
-    def perform_type_checks(self, mh, value):
+    def perform_type_checks(self, mh, value, gstab):
         assert isinstance(mh, Message_Handler)
         assert isinstance(value, Expression)
+        assert isinstance(gstab, Symbol_Table)
         return True
 
     def get_example_value(self):
@@ -2373,10 +2422,12 @@ class Array_Type(Type):
             self.write_indent(indent + 1, f"Upper bound: {self.upper_bound}")
         self.write_indent(indent + 1, f"Element type: {self.element_type.name}")
 
-    def perform_type_checks(self, mh, value):
+    def perform_type_checks(self, mh, value, gstab):
         assert isinstance(mh, Message_Handler)
+        assert isinstance(gstab, Symbol_Table)
+
         if isinstance(value, Array_Aggregate):
-            return all(self.element_type.perform_type_checks(mh, v)
+            return all(self.element_type.perform_type_checks(mh, v, gstab)
                        for v in value.value)
         else:
             assert isinstance(value, Implicit_Null)
@@ -2794,13 +2845,15 @@ class Tuple_Type(Composite_Type):
         else:
             self.write_indent(indent + 1, "Checks: None")
 
-    def perform_type_checks(self, mh, value):
+    def perform_type_checks(self, mh, value, gstab):
         # lobster-trace: LRM.Check_Evaluation_Order
         assert isinstance(mh, Message_Handler)
+        assert isinstance(gstab, Symbol_Table)
+
         if isinstance(value, Tuple_Aggregate):
             ok = True
             for check in self.iter_checks():
-                if not check.perform(mh, value):
+                if not check.perform(mh, value, gstab):
                     ok = False
             return ok
         else:
@@ -3028,24 +3081,28 @@ class Record_Object(Typed_Entity):
         for val in self.field.values():
             val.resolve_references(mh)
 
-    def perform_checks(self, mh):
+    def perform_checks(self, mh, gstab):
         # lobster-trace: LRM.Check_Evaluation_Order
         # lobster-trace: LRM.Evaluation_Of_Checks
         assert isinstance(mh, Message_Handler)
+        assert isinstance(gstab, Symbol_Table)
 
         ok = True
 
         # First evaluate all tuple checks
         for n_comp in self.n_typ.all_components():
             if not n_comp.n_typ.perform_type_checks(mh,
-                                                    self.field[n_comp.name]):
+                                                    self.field[n_comp.name],
+                                                    gstab):
                 ok = False
+
+        # TODO: Is there a bug here (a check relies on a tuple check)?
 
         # Then evaluate all record checks
         for check in self.n_typ.iter_checks():
             # Prints messages, if applicable. Raises exception on
             # fatal checks, which causes this to abort.
-            if not check.perform(mh, self):
+            if not check.perform(mh, self, gstab):
                 ok = False
 
         return ok

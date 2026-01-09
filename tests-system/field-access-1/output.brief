@@ -1,0 +1,3 @@
+field-access-1/test_5.trlc:11:3: trlc error: check goal (test_5.rsl:23) evaluates to null
+field-access-1/test_5.trlc:16:10: trlc check error: potato
+Processed 5 models and 1 requirement file and found 2 errors

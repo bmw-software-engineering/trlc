@@ -5,7 +5,7 @@ c, "potato"
 |     x = 1
 |     y = 2
 |     p = -1
-|     q = -3
+|     q = -2
 |     /* c is null */
 |   }
 then x.version > 5

@@ -1,3 +1,5 @@
 link != null implies link.status == bar.Status.NEW, "Must be linked to new"
-                     ^^^^ xref-2/bar.rsl:16: error: expression 'link' has type MyType, which is not a tuple
-Processed 1 model and 1 requirement file and found 1 error
+                     ^^^^ xref-2/bar.rsl:16: warning: record field reference not yet supported in VCG
+bar.MyType NewXR {
+           ^^^^^ xref-2/instances.trlc:10: check error: Must be linked to new
+Processed 1 model and 1 requirement file and found 1 warning and 1 error
