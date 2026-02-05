@@ -28,16 +28,13 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        os: [ubuntu-24.04, windows-2022, macos-13, macos-14]
+        os: [ubuntu-24.04, windows-2022, macos-14]
         py-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           - os: ubuntu-24.04
             cvc5-plat: "linux"
           - os: windows-2022
             cvc5-plat: "windows"
-          - os: macos-13
-            brew: "/usr/local"
-            cvc5-plat: "osx13"
           - os: macos-14
             brew: "/opt/homebrew"
             cvc5-plat: "osx14"
@@ -65,7 +62,7 @@ jobs:
           echo "${{ matrix.brew }}/opt/make/libexec/gnubin" >> $GITHUB_PATH
       - name: Fetch CVC5
         run: |
-          util/fetch_cvc5.py 1.2.0 ${{ matrix.cvc5-plat }}
+          util/fetch_cvc5.py 1.3.1 ${{ matrix.cvc5-plat }}
           echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
       - name: Executing unit tests
         run: |

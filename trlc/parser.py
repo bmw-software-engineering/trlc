@@ -2,6 +2,7 @@
 #
 # TRLC - Treat Requirements Like Code
 # Copyright (C) 2022-2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+# Copyright (C) 2025      Florian Schanda
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -1000,7 +1001,7 @@ class Parser(Parser_Base):
                 self.match("OPERATOR")
                 t_op  = self.ct
                 n_rhs = self.parse_primary(scope)
-                rhs_value = n_rhs.evaluate(self.mh, None)
+                rhs_value = n_rhs.evaluate(self.mh, None, None)
                 a_binary = ast.Binary_Operator.POWER
                 t_op.ast_link = a_binary
                 n_lhs = ast.Binary_Expression(
@@ -1252,7 +1253,7 @@ class Parser(Parser_Base):
             try:
                 # lobster-trace: LRM.Static_Regular_Expression
                 # scope is None on purpose to enforce static context
-                value = parameters[1].evaluate(self.mh, None)
+                value = parameters[1].evaluate(self.mh, None, None)
                 assert isinstance(value.typ, ast.Builtin_String)
                 re.compile(value.value)
             except re.error as err:
@@ -1382,11 +1383,12 @@ class Parser(Parser_Base):
         n_name.set_ast_link(self.ct)
         while self.peek("DOT") or self.peek("S_BRA"):
             if self.peek("DOT"):
-                if not isinstance(n_name.typ, ast.Tuple_Type):
+                if not isinstance(n_name.typ, (ast.Tuple_Type,
+                                               ast.Record_Type)):
                     # lobster-trace: LRM.Valid_Index_Prefixes
                     self.mh.error(n_name.location,
                                   "expression '%s' has type %s, "
-                                  "which is not a tuple" %
+                                  "which is not a tuple or record" %
                                   (n_name.to_string(),
                                    n_name.typ.name))
                 self.match("DOT")

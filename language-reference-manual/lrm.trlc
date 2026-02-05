@@ -2,7 +2,7 @@ package LRM
 
 Versioning Version {
   major = 3
-  minor = 1
+  minor = 2
 }
 
 GFDL_License License {
@@ -216,17 +216,43 @@ section "Layout and file structure" {
   }
 
   Dynamic_Semantics File_Parsing_Order {
-    text = '''
-First, all `.rsl` files are parsed. Then, if no errors
-are raised, all `.trlc` files are parsed.
-'''
+    text = '''First, all `.rsl` files are parsed. Then, if no errors
+              are raised, all `.trlc` files are parsed.
+           '''
   }
 
   Dynamic_Semantics File_Parsing_References {
-    text = '''
-After all files are parsed, references are resolved and
-user-defined checks are applied.
-'''
+    text = '''After all files are parsed, references are resolved,
+              in unspecified order.'''
+  }
+
+  Dynamic_Semantics Order_Of_Evaluation_Unordered {
+    text = '''After references are resolved, used-defined checks are
+              resolved on record objects. The order of record objects
+              is unspecified.'''
+  }
+
+  Note Evaluation_Truly_Unordered {
+    text = '''Note that this means that any record accessed through a
+              field access does not necessarily pass all of its checks,
+              since they have not been evaluated yet. Only properties
+              that are checked before checks are evaluated can be assumed
+              to hold (e.g. array length).
+           '''
+  }
+
+  Note Evaluation_Truly_Unordered_Across_Packages {
+    text = '''Note that this unspecified order even extends to packages.
+              If you have package A and B, it is not valid to assume that
+              all objects from A will be evaluated before B, nor is it
+              valid to assume that all objects from B are evaluated before A.
+           '''
+  }
+
+  Note Parallel_Evaluation {
+    text = '''This also means that it's possible to check two or more
+              record objects in parallel.
+           '''
   }
 
   Recommendation Errors_In_TRLC_Files {
@@ -1065,7 +1091,8 @@ section "Names" {
     bullets = [
       '''A qualified name referring to either some object, a component
          (in a record) or field (in a tuple), or an enumeration type.''',
-      '''A tuple field or enumeration literal.''',
+      """A contained tuple's field, a referenced record's component,
+         or enumeration literal.""",
       '''An index into an array.''',
       '''A (builtin) function call.'''
     ]
@@ -1082,10 +1109,13 @@ section "Names" {
     text = '''If the prefix of a dot (`.`) access resolves to an
               enumeration type, then the identifier must be
               a valid literal of that type. If the prefix of
-              a dot (`.`) access resolves to a tuple, then
-              the identifier must be a valid field of the
-              type of that tuple. Any other prefix is an
-              error.
+              a dot (`.`) access resolves to component
+              containing a tuple, then the identifier must
+              be a valid field of the type of that tuple. If
+              the prefix of a dot (`.`) access resolves to a
+              component referencing another record, then the
+              identifier must be a valid component of that
+              record. Any other prefix is an error.
            '''
   }
 
@@ -1100,7 +1130,6 @@ section "Names" {
               builtin functions.
            '''
   }
-
 
   Static_Semantics Signature_Len {
     text = '''The builtin function `len` is of arity 1. Its parameter must
@@ -1148,6 +1177,13 @@ section "Names" {
               rationals). They return the type indicated by the function
               name. *(They are polymorphic in case we want to introduce
               a true rational type, or a floating point type.)*'''
+  }
+
+  Dynamic_Semantics Dereference {
+    text = '''Evaluating the dot (`.`) operator to access a
+              field of a referenced record requires the
+              prefix to be not null. Dereferencing null is
+              undefined behaviour.'''
   }
 
   Dynamic_Semantics Len_Semantics {
@@ -1223,6 +1259,9 @@ section "Names" {
 
         cb_link.item >= 50000, warning "cb item value is oddly low"
         // you can obtain a tuple's values
+
+        bar.asil == asil, warning "mismatch in ASIL levels"
+        // you can peek into a referenced record
       }
     '''
   }
@@ -1561,7 +1600,7 @@ section "Quantification" {
     text = '''During evaluation of the quantified expression, each element
               of the array is evaluated in sequence and its
               value is bound to the declared name. The
-              predicated is then evaluated with this
+              predicate is then evaluated with this
               binding.'''
   }
 

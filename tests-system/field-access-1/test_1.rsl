@@ -1,0 +1,12 @@
+package Test_1
+
+type T {
+  value          Integer
+  ref   optional T
+  goal  optional Boolean
+}
+
+checks T {
+  ref != null implies ref.value < value, fatal "potato"
+  goal, "potato"
+}

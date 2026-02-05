@@ -1,0 +1,14 @@
+conversion-rules:
+  - package: LRM
+    record-type: Text
+    namespace: req
+    description-fields:
+      - text
+      - bullets
+    justification-down-fields:
+      - untraced_reason
+
+  - package: LRM
+    record-type: Grammar
+    namespace: req
+    description-fields: bnf

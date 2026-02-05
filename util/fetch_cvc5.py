@@ -41,8 +41,6 @@ CVC5_VERSION = options.version
 
 if options.platform == "linux":
     CVC5_PLATFORM = "Linux-x86_64-static"
-elif options.platform == "osx13":
-    CVC5_PLATFORM = "macOS-x86_64-static"
 elif options.platform == "osx14":
     CVC5_PLATFORM = "macOS-arm64-static"
 elif options.platform == "windows":

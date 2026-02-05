@@ -69,7 +69,7 @@ class Source_Manager:
     :param debug_vcg: If true and verify_mode is also true, emit the \
       individual SMTLIB2 VCs and generate a picture of the program \
       graph. Requires Graphviz to be installed.
-    :type parse_trlc: bool
+    :type debug_vcg: bool
 
     """
     def __init__(self, mh,
@@ -456,6 +456,7 @@ class Source_Manager:
         return ok
 
     def resolve_record_references(self):
+        # lobster-trace: LRM.File_Parsing_References
         # lobster-trace: LRM.Markup_String_Late_Reference_Resolution
         # lobster-trace: LRM.Late_Reference_Checking
         ok = True
@@ -469,11 +470,12 @@ class Source_Manager:
         return ok
 
     def perform_checks(self):
+        # lobster-trace: LRM.Order_Of_Evaluation_Unordered
         ok = True
         for package in self.stab.values(ast.Package):
             for obj in package.symbols.values(ast.Record_Object):
                 try:
-                    if not obj.perform_checks(self.mh):
+                    if not obj.perform_checks(self.mh, self.stab):
                         ok = False
                 except TRLC_Error:
                     ok = False
@@ -487,6 +489,7 @@ class Source_Manager:
         :rtype: Symbol_Table
         """
         # lobster-trace: LRM.File_Parsing_Order
+        # lobster-trace: LRM.File_Parsing_References
 
         # Notify callback
         self.callback_parse_begin()
