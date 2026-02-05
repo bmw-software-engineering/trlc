@@ -951,7 +951,7 @@ section "Checks" {
       '''
     rsl = """
       checks Requirement {
-        len(description) < 10,
+        len(description) >= 10,
           warning "Description is too short",
           description
 
