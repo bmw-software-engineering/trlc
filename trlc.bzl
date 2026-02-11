@@ -1,7 +1,8 @@
 TrlcProviderInfo = provider(
     fields = {
-        "spec": "Holds the specification files (*.rsl) for the `reqs`",
-        "reqs": "Holds the requirement files (*.trlc)",
+        "spec": "Holds the specification files (*.rsl) including transitive",
+        "reqs": "Holds only the direct requirement files (*.trlc) from srcs",
+        "deps": "Holds only the transitive requirement files (*.trlc) from deps",
     },
 )
 
@@ -35,6 +36,7 @@ def _trlc_requirement_impl(ctx):
         trlc_provider = dep[TrlcProviderInfo]
         transitive_spec.append(trlc_provider.spec)
         transitive_reqs.append(trlc_provider.reqs)
+        transitive_reqs.append(trlc_provider.deps)
 
     own_specs = ctx.files.spec if hasattr(ctx.files, "spec") else []
 
@@ -44,7 +46,8 @@ def _trlc_requirement_impl(ctx):
         ),
         TrlcProviderInfo(
             spec = depset(own_specs, transitive = transitive_spec),
-            reqs = depset(ctx.files.srcs, transitive = transitive_reqs),
+            reqs = depset(ctx.files.srcs),
+            deps = depset(transitive = transitive_reqs),
         ),
     ]
 
