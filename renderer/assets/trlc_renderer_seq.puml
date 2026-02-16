@@ -1,0 +1,27 @@
+@startuml
+participant "TRLCRenderer" as Renderer
+participant "Source_Manager" as SourceManager
+participant "TRLC AST" as TRLC
+participant "Output File" as Output
+
+== Initialization ==
+Renderer -> Renderer: load_type_mapping(mapping_file)
+Renderer -> Renderer: parse_trlc_files_in()
+
+== Create AST ==
+Renderer -> SourceManager: Source_Manager(Handler)
+SourceManager -> Renderer: register_directory(input_directory)
+SourceManager -> TRLC: process()
+TRLC -> Renderer: return symbols
+
+== Convert AST ==
+Renderer -> Renderer: convert_symbols_to_objects()
+Renderer -> Renderer: build_parent_tree(section)
+
+== Write Output ==
+Renderer -> Renderer: render_restructured_text_file()
+Renderer -> Output: write output
+Output -> Renderer: output complete
+
+
+@enduml
