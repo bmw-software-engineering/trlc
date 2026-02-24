@@ -32,6 +32,7 @@ The Python implementation can be used for several purposes:
 ### For normal users
 
 * [Tutorial](documentation/TUTORIAL.md) (read this as a first introduction)
+* [Bazel integration](documentation/TUTORIAL-BAZEL.md) (how to use TRLC inside a Bazel build)
 * [User manual: TRLC linter](documentation/linter.md) (the user manual for the TRLC static analysis and linter)
 * [Release Notes](CHANGELOG.md) (read this to find out whats new)
 * [License](LICENSE)
