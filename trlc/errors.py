@@ -149,6 +149,12 @@ class Message_Handler:
     :attribute brief: When true displays as much context as possible
     :type: Boolean
 
+    :attribute out: Output stream (stdout if None)
+    :type: file or None
+
+    :attribute strip_prefix: Prefix stripped from file paths in messages
+    :type: str or None
+
     :attribute warnings: Number of system or user warnings raised
     :type: int
 
@@ -158,9 +164,16 @@ class Message_Handler:
     :attribute supressed: Number of messages supressed by policy
     :type: int
 
+    Can be used as a context manager (``with Message_Handler(...) as
+    mh:``), which will automatically close any file opened via
+    ``out_path``.
+
     """
-    def __init__(self, brief=False, detailed_info=True):
+    def __init__(self, brief=False, detailed_info=True,
+                 out=None, strip_prefix=None, out_path=None):
         assert isinstance(brief, bool)
+        assert isinstance(strip_prefix, str) or strip_prefix is None
+        assert isinstance(out_path, str) or out_path is None
         self.brief         = brief
         self.show_details  = detailed_info
         self.warnings      = 0
@@ -168,6 +181,27 @@ class Message_Handler:
         self.suppressed    = 0
         self.sm            = None
         self.suppress_kind = set()
+        self.strip_prefix  = strip_prefix
+        if out_path is not None:
+            self._owned_file = open(out_path, "w", encoding="UTF-8")  # pylint: disable=consider-using-with
+            self.out         = self._owned_file
+        else:
+            self._owned_file = None
+            self.out         = out
+
+    def close(self):
+        if self._owned_file is not None:
+            self._owned_file.close()
+            self._owned_file = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        self.close()
+
+    def __del__(self):
+        self.close()
 
     def suppress(self, kind):
         assert isinstance(kind, Kind)
@@ -178,8 +212,7 @@ class Message_Handler:
 
         if self.sm is None:
             return location.to_string(include_column=False)
-        else:
-            return self.sm.cross_file_reference(location)
+        return self.sm.cross_file_reference(location)
 
     def emit(self,
              location,
@@ -195,15 +228,21 @@ class Message_Handler:
         assert isinstance(extrainfo, str) or extrainfo is None
         assert isinstance(category, str) or category is None
 
+        def _loc_str(include_column=True):
+            loc = location.to_string(include_column)
+            if self.strip_prefix and loc.startswith(self.strip_prefix):
+                loc = loc[len(self.strip_prefix):]
+            return loc
+
         if self.brief:
             context = None
-            msg = "%s: trlc %s: %s" % (location.to_string(),
+            msg = "%s: trlc %s: %s" % (_loc_str(),
                                        str(kind),
                                        message)
 
         else:
             context = location.context_lines()
-            msg = "%s: %s: %s" % (location.to_string(len(context) == 0),
+            msg = "%s: %s: %s" % (_loc_str(len(context) == 0),
                                   str(kind),
                                   message)
 
@@ -216,10 +255,10 @@ class Message_Handler:
         else:
             if context:
                 assert len(context) == 2
-                print(context[0].replace("\t", " "))
-                print(context[1].replace("\t", " "), msg)
+                print(context[0].replace("\t", " "), file=self.out)
+                print(context[1].replace("\t", " "), msg, file=self.out)
             else:
-                print(msg)
+                print(msg, file=self.out)
 
             if not self.brief \
                and self.show_details \
@@ -230,7 +269,7 @@ class Message_Handler:
                     indent = 0
                 for line in extrainfo.splitlines():
                     print("%s| %s" % (" " * indent,
-                                      line.rstrip()))
+                                      line.rstrip()), file=self.out)
 
         if fatal:
             raise TRLC_Error(location, kind, message)
