@@ -1,0 +1,11 @@
+package DepsBase
+
+Component Engine {
+    name        = "Engine"
+    description = "Main propulsion unit"
+}
+
+Component Wheel {
+    name        = "Wheel"
+    description = "Wheel assembly"
+}

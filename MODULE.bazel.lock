@@ -685,7 +685,7 @@
         "usagesDigest": "B9WByXMQOeCDEjtpOkG/1hz+Pl4i2Pyiw1BRraLz0zk=",
         "recordedFileInputs": {
           "@@//requirements.txt": "3fbbc32af771695c98b9f794b0513f0809c342b973aa0d4005727965af158b8f",
-          "@@//requirements_dev_lock.txt": "4859f25307badbe8aaad7b49426c9336cfb60a09a326027e16f780d1573279f3",
+          "@@//requirements_dev_lock.txt": "02f3ced94521bd20df5fa3b866ca6f83f381538df4748c388ff38336a1d6901f",
           "@@protobuf+//python/requirements.txt": "983be60d3cec4b319dcab6d48aeb3f5b2f7c3350f26b3a9e97486c37967c73c5",
           "@@rules_fuzzing+//fuzzing/requirements.txt": "ab04664be026b632a0d2a2446c4f65982b7654f5b6851d2f9d399a19b7242a5b",
           "@@rules_python+//tools/publish/requirements_darwin.txt": "095d4a4f3d639dce831cd493367631cd51b53665292ab20194bac2c0c6458fa8",
@@ -3330,15 +3330,6 @@
               "requirement": "cvc5==1.3.2 --hash=sha256:04174c5cd3c858c972792debc96436632635db2f8c4098806cc7aa51a8de2920 --hash=sha256:13759b6b50d46aa79e3a75e8979b8f36d5eb3fbce9430c5de5ee014ab202344a --hash=sha256:1b1cee4e49db78d8053a509109cede9e768fb3353c3662f72cd28b3a2fb73762 --hash=sha256:1d8bd54142131346a127ec9eebda155c961c05489909d6f16a5c29f1b38d6030 --hash=sha256:2109a1577b9f62f79dd72f8d8eb06db9e51eb2a6b9e84abf79865e1694dd1a59 --hash=sha256:25bcf19294cb166fc4a4f4b5c77379707706f9fc215ecf581328050ada4865fc --hash=sha256:298ac4ab00d54aadde83cfd21fe886177446523bc0d4ace4bb3eb9b300f8611d --hash=sha256:29d4c28e3399244b8df7c9e5154f3f8c47fcf9720dbd2dd38b2c59abc8b40e51 --hash=sha256:2ab5ce33c38229c7c02d7190f9da4d99bf016a5d066be6d5b71d99747c334bd4 --hash=sha256:30565c03228b4eed78d21fbc86130f0b9c7b4454eec4364b0bc62f1a01f2266b --hash=sha256:31782354a51464d98bc8f64fdb2db148365e584954eee2f9e7b3eaedc5722f81 --hash=sha256:31ca0e5ba1592c85459f40e8559bc07dea1fcf7d59074a2abd07e3f2abf0ddf5 --hash=sha256:31d6f9265232fdf4d413d25a446210f14d6d08fc697f4ce5c6f2e878331cceb7 --hash=sha256:3b63586503d90628fda73f6f8f3ddabd73bebb7fb93bc369beecd4c389d999dc --hash=sha256:3baef0cef04cd4c956e91aab2c6937b0930f7c4d98454b11dc8a33f13a25e7b3 --hash=sha256:3e2a1ba179ac76d3ce3b973cf99d4a1368cf5b69ce8952163d668a08e6d76b1c --hash=sha256:40938b5a7551ec0850d3945ed54a3249cb9d00fba7a4eec360e81e2a1f5cc1e5 --hash=sha256:420e3b389d12df6650ff8781d297762edbaad35eb1946e72fdf2b713a0088ad0 --hash=sha256:43301779da3d09d5159f0950cc99e93a814dc366a5b0af913a3d4c1ffb2f54a8 --hash=sha256:4544943cbf58d7130773f2026399c27eb9410d6a739b77ce730339f82c82243e --hash=sha256:49602b38f3c9789d8052c2ff598f43f661efa226fc4487cfdb03cc05f20b95d2 --hash=sha256:4a50718aac4030e3be48744f2419a5609c17553495822c841164fa10811fd426 --hash=sha256:4c16e8238152e34a12c742a6c97909dab551f5ff775d1b6b872f2993d0192760 --hash=sha256:59fdb1c2cc84d2875de228873b38b3a8a6af13ee8e6d87a963045c1f4ca8df00 --hash=sha256:5f22deab1feb6b5c594cdff174781a8ce44a9b9061b386918eb426203cd0133c --hash=sha256:62144306406721ef1b0d1d060ecb1b31624e98d1eeb2ed886b2f1673d04d6fc4 --hash=sha256:64e9160cd89cb415bade28ec35e8521b187f698ca332c4276bf1cfdddfdc6660 --hash=sha256:7390831bd32067c263fd78485cf1413cf5ccd635df3cfc391138368c90b78356 --hash=sha256:794aca0e5b57b0bdf707ca2c6f46072e7d90cf04470685a07eeafd395bd8acb8 --hash=sha256:7af4c8cc835ed32aa6190585b888a7e49a90e491152b3229c2ba3ad1306eb7c7 --hash=sha256:7b0b2eff94641f413bbeb172b54cfd0ac2a26c2c6bb79d41d18df1bc4a8ecb0c --hash=sha256:7bbe7f1a6949aed2eb059794697d9a25afc13efbeb1a729d5c327971a45a05b9 --hash=sha256:7e2a39dc267caacfa0f1fb23844c6cc58ddeeef9b1417d7e5e3ca1f51ac68e5f --hash=sha256:878d73ccd8b7dcd17a5f5e9750bc45f4b7da5ed07dd36a77cb8369d089883540 --hash=sha256:912e4de05eda1fa86f707eda932f1bd9e8d8a6316a28458fd57334d2f8f104f9 --hash=sha256:92dc62facddffd7c08be9048f42cbc0283544918a8db770cadab04041c176b11 --hash=sha256:9534ffd384356db74b83818f41ab9da58f8c7dc7551ae81a11ad624a7f519844 --hash=sha256:9b962b21635f83b46bd9a82d4f33f5e7d960b40b8b2eabad43f82172bcaaa659 --hash=sha256:aa2ea64dd6bee47c3a3a0606de014f7f60acabb0eb5282404aa12e990910b656 --hash=sha256:b1946ebe0f5990431d4d0569839813d0165b5299c95f486e5064b0c4454f4977 --hash=sha256:c77cadfde393d7949bda2a48f3d4c2a6f572cb0bc2147159212c29913c5a8c56 --hash=sha256:c7ac86cc4e68b732a4f9f80cdcacc085c3e11bb2aeef7c3138f2eb1fbef83a09 --hash=sha256:c8d897f85d3b9014df8d5320925b2c3b19bfd11d49667660e385ae673656de8a --hash=sha256:ce5efe02238e63df935a3fc737c4f059797acfd9282b74c37d8fd01473691ebf --hash=sha256:d10a263214327f086bbb3825029135f6224c4b0498997a4817a4f7af29de2a9b --hash=sha256:d208c9eda9f0279cc31e36f5af2b7c057749b267f1766bd4a1f1c4aefe646218 --hash=sha256:d94b9f2a3c51720e60798ca0995debac8aa967d374a29d0a25e346d05429a409 --hash=sha256:d9c3e89bf650ffa2c9ab6bb63a7229d7bce8d7ba880655a73878d8a9fb3716d5 --hash=sha256:dbaa132c67daa6513aa94ab96406db258dcc41bc3fd5ce68019beebdc9fb280b --hash=sha256:f1f0209a641723c33c94c4998cd56fc085a0ae136932680cd8e1995e94430d48 --hash=sha256:f1ffd51587c2de76242e1857bc27dc482da8801391cd968f00d106de60473297 --hash=sha256:f2671232073e45c84c1f0c807b9c398b1e321b695d031a4a61f2c4ae4664c797 --hash=sha256:f37f25713d0dff3653d7e04668d1733d003855a735fc63d3666dcd2fbde0dca5 --hash=sha256:f7f410e513b4ca7c8e36cf8b3293de09841ec32825c4c073c9a802023a528108 --hash=sha256:f850dbcaffab3f3b3265ed17425db5f5dc841f9a8f5c5fa74bff02cebc198ed6 --hash=sha256:fb4146591032ff9e542f126ed51def92bc88aa1315ce400b16c0d56e773d5a7a --hash=sha256:ff41096837dbd0b09e9565bb5bf273a444bb0dff9331a1e90cb6c8876500928e"
             }
           },
-          "trlc_dev_dependencies_312_dill": {
-            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
-            "attributes": {
-              "dep_template": "@trlc_dev_dependencies//{name}:{target}",
-              "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
-              "repo": "trlc_dev_dependencies_312",
-              "requirement": "dill==0.4.1 --hash=sha256:1e1ce33e978ae97fcfcff5638477032b801c46c7c65cf717f95fbc2248f79a9d --hash=sha256:423092df4182177d4d8ba8290c8a5b640c66ab35ec7da59ccfa00f6fa3eea5fa"
-            }
-          },
           "trlc_dev_dependencies_312_docutils": {
             "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
             "attributes": {
@@ -3411,15 +3402,6 @@
               "requirement": "packaging==26.0 --hash=sha256:00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4 --hash=sha256:b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529"
             }
           },
-          "trlc_dev_dependencies_312_platformdirs": {
-            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
-            "attributes": {
-              "dep_template": "@trlc_dev_dependencies//{name}:{target}",
-              "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
-              "repo": "trlc_dev_dependencies_312",
-              "requirement": "platformdirs==4.9.2 --hash=sha256:9170634f126f8efdae22fb58ae8a0eaa86f38365bc57897a6c4f781d1f5875bd --hash=sha256:9a33809944b9db043ad67ca0db94b14bf452cc6aeaac46a88ea55b26e2e9d291"
-            }
-          },
           "trlc_dev_dependencies_312_pycodestyle": {
             "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
             "attributes": {
@@ -3444,7 +3426,7 @@
               "dep_template": "@trlc_dev_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
               "repo": "trlc_dev_dependencies_312",
-              "requirement": "pylint==4.0.5 --hash=sha256:00f51c9b14a3b3ae08cff6b2cdd43f28165c78b165b628692e428fb1f8dc2cf2 --hash=sha256:8cd6a618df75deb013bd7eb98327a95f02a6fb839205a6bbf5456ef96afb317c"
+              "requirement": "pylint==2.3.0 --hash=sha256:2bf4bd58d6d5d87174fbc9d1d134a9aeee852d4dc29cbd422a7015772770bc63 --hash=sha256:ee80c7af4f127b2a480d83010c9f0e97beb8eaa652b78c2837d3ed30b12e1182"
             }
           },
           "trlc_dev_dependencies_312_pyproject_hooks": {
@@ -3553,15 +3535,6 @@
               "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
               "repo": "trlc_dev_dependencies_312",
               "requirement": "sphinxcontrib-serializinghtml==2.0.0 --hash=sha256:6e2cb0eef194e10c27ec0023bfeb25badbbb5868244cf5bc5bdc04e4464bf331 --hash=sha256:e9d912827f872c029017a53f0ef2180b327c3f7fd23c87229f7a8e8b70031d4d"
-            }
-          },
-          "trlc_dev_dependencies_312_tomlkit": {
-            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
-            "attributes": {
-              "dep_template": "@trlc_dev_dependencies//{name}:{target}",
-              "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
-              "repo": "trlc_dev_dependencies_312",
-              "requirement": "tomlkit==0.14.0 --hash=sha256:592064ed85b40fa213469f81ac584f67a4f2992509a7c3ea2d632208623a3680 --hash=sha256:cf00efca415dbd57575befb1f6634c4f42d2d87dbba376128adb42c121b87064"
             }
           },
           "trlc_dev_dependencies_312_urllib3": {
@@ -3701,7 +3674,6 @@
                 "charset_normalizer": "{\"trlc_dev_dependencies_312_charset_normalizer\":[{\"version\":\"3.12\"}]}",
                 "coverage": "{\"trlc_dev_dependencies_312_coverage\":[{\"version\":\"3.12\"}]}",
                 "cvc5": "{\"trlc_dev_dependencies_312_cvc5\":[{\"version\":\"3.12\"}]}",
-                "dill": "{\"trlc_dev_dependencies_312_dill\":[{\"version\":\"3.12\"}]}",
                 "docutils": "{\"trlc_dev_dependencies_312_docutils\":[{\"version\":\"3.12\"}]}",
                 "idna": "{\"trlc_dev_dependencies_312_idna\":[{\"version\":\"3.12\"}]}",
                 "imagesize": "{\"trlc_dev_dependencies_312_imagesize\":[{\"version\":\"3.12\"}]}",
@@ -3710,7 +3682,6 @@
                 "markupsafe": "{\"trlc_dev_dependencies_312_markupsafe\":[{\"version\":\"3.12\"}]}",
                 "mccabe": "{\"trlc_dev_dependencies_312_mccabe\":[{\"version\":\"3.12\"}]}",
                 "packaging": "{\"trlc_dev_dependencies_312_packaging\":[{\"version\":\"3.12\"}]}",
-                "platformdirs": "{\"trlc_dev_dependencies_312_platformdirs\":[{\"version\":\"3.12\"}]}",
                 "pycodestyle": "{\"trlc_dev_dependencies_312_pycodestyle\":[{\"version\":\"3.12\"}]}",
                 "pygments": "{\"trlc_dev_dependencies_312_pygments\":[{\"version\":\"3.12\"}]}",
                 "pylint": "{\"trlc_dev_dependencies_312_pylint\":[{\"version\":\"3.12\"}]}",
@@ -3726,7 +3697,6 @@
                 "sphinxcontrib_jsmath": "{\"trlc_dev_dependencies_312_sphinxcontrib_jsmath\":[{\"version\":\"3.12\"}]}",
                 "sphinxcontrib_qthelp": "{\"trlc_dev_dependencies_312_sphinxcontrib_qthelp\":[{\"version\":\"3.12\"}]}",
                 "sphinxcontrib_serializinghtml": "{\"trlc_dev_dependencies_312_sphinxcontrib_serializinghtml\":[{\"version\":\"3.12\"}]}",
-                "tomlkit": "{\"trlc_dev_dependencies_312_tomlkit\":[{\"version\":\"3.12\"}]}",
                 "urllib3": "{\"trlc_dev_dependencies_312_urllib3\":[{\"version\":\"3.12\"}]}"
               },
               "packages": [
@@ -3738,7 +3708,6 @@
                 "charset_normalizer",
                 "coverage",
                 "cvc5",
-                "dill",
                 "docutils",
                 "idna",
                 "imagesize",
@@ -3747,7 +3716,6 @@
                 "markupsafe",
                 "mccabe",
                 "packaging",
-                "platformdirs",
                 "pycodestyle",
                 "pygments",
                 "pylint",
@@ -3763,7 +3731,6 @@
                 "sphinxcontrib_jsmath",
                 "sphinxcontrib_qthelp",
                 "sphinxcontrib_serializinghtml",
-                "tomlkit",
                 "urllib3"
               ],
               "groups": {}

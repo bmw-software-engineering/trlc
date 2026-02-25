@@ -57,3 +57,9 @@ alias(
     name = "format.fix",
     actual = "//tools/format:format",
 )
+
+filegroup(
+    name = "coverage",
+    srcs = ["coverage.cfg"],
+    visibility = ["//visibility:public"],
+)

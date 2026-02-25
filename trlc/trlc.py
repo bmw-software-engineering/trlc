@@ -637,13 +637,13 @@ def trlc():
                            help=("If there are no errors, produce a summary"
                                  " naming every file processed."))
     og_output.add_argument("--log",
-                           nargs    = 2,
+                           nargs    = '+',
                            metavar  = ("FILE", "PREFIX"),
                            default  = None,
-                           help     = ("Write all output to FILE, strip PREFIX"
-                                       " from file paths in messages."
-                                       " Intended for use as a Bazel build"
-                                       " action."))
+                           help     = ("Write all output to FILE, optionally"
+                                       " strip PREFIX from file paths in"
+                                       " messages. Intended for use as a"
+                                       " Bazel build action."))
     og_output.add_argument("--error-on-warnings",
                            action="store_true",
                            help=("If there are warnings, return status code"
@@ -669,6 +669,12 @@ def trlc():
                     nargs="*",
                     metavar="DIR|FILE")
     options = ap.parse_args()
+
+    if options.log:
+        if len(options.log) > 2:
+            ap.error("--log accepts at most 2 values: FILE and optionally PREFIX")
+        if len(options.log) == 1:
+            options.log.append(None)
 
     if options.version:  # pragma: no cover
         print(TRLC_VERSION)
@@ -829,8 +835,7 @@ def trlc():
                        parser.cu.package.name), file=mh.out)
 
     if ok:
-        if options.error_on_warnings and mh.warnings \
-           or mh.errors:  # pragma: no cover
+        if (options.error_on_warnings and mh.warnings) or mh.errors:  # pragma: no cover
             rv = 1
         else:
             rv = 0

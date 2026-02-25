@@ -1,0 +1,13 @@
+package DepsExt
+
+import DepsBase
+
+DepsBase.Component Gearbox {
+    name        = "Gearbox"
+    description = "Transmission unit"
+}
+
+System Powertrain {
+    name     = "Powertrain"
+    priority = 1
+}

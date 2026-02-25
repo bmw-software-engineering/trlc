@@ -1,0 +1,13 @@
+{
+  "REQ_001": {
+    "description": "The system shall process inputs correctly",
+    "id": "REQ_001",
+    "priority": 1
+  },
+  "REQ_002": {
+    "description": "The system shall produce correct outputs",
+    "id": "REQ_002",
+    "priority": 2
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

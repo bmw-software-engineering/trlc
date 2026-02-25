@@ -27,6 +27,7 @@ def trlc_specification_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc
         main = main,
         deps = ["@trlc//trlc:trlc"],
         data = ["@trlc//:cvc5"] + reqs,
+        **kwargs
     )
 
 def _trlc_requirement_impl(ctx):
@@ -71,4 +72,5 @@ def trlc_requirements_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc.
         main = main,
         deps = ["@trlc//trlc:trlc"],
         data = ["@trlc//:cvc5"] + reqs,
+        **kwargs
     )

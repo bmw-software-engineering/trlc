@@ -183,11 +183,12 @@ class Message_Handler:
         self.suppress_kind = set()
         self.strip_prefix  = strip_prefix
         if out_path is not None:
-            self._owned_file = open(out_path, "w", encoding="UTF-8")  # pylint: disable=consider-using-with
+            self._owned_file = open(  # pylint: disable=consider-using-with
+                out_path, "w", encoding="UTF-8")
             self.out         = self._owned_file
         else:
             self._owned_file = None
-            self.out         = out
+            self.out         = out if out is not None else sys.stdout
 
     def close(self):
         if self._owned_file is not None:
