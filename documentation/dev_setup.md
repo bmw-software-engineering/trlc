@@ -90,3 +90,20 @@ the latest GNU make version.
 
 * `make docs` to build all the documentation (including the LRM and
   the LOBSTER report).
+
+## Code Formatting
+
+```bash
+# Check formatting — exits non-zero if any file would change
+bazel run //:format.check
+
+# Apply formatting in-place: ruff and buildifier
+bazel run //:format.fix
+```
+
+## Code Linting
+
+```bash
+# Run all linters (pylint + ty) over every Python target
+bazel build --config=lint //...
+```

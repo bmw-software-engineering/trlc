@@ -1,0 +1,52 @@
+[tool.ty.rules]
+# ty is Astral's Python type checker (fast, Rust-based)
+# Add per-rule overrides here as needed, e.g.:
+#   invalid-return-type = "warn"
+
+# ---------------------------------------------------------------------------
+# Pylint — migrated from pylint3.cfg
+# ---------------------------------------------------------------------------
+[tool.pylint.main]
+persistent = false
+
+[tool.pylint.messages_control]
+disable = [
+    "bad-indentation",
+    "consider-using-f-string",
+    "fixme",
+    "inconsistent-return-statements",
+    "len-as-condition",
+    "locally-disabled",
+    "missing-docstring",
+    "no-else-break",
+    "no-else-continue",
+    "no-else-raise",
+    "no-else-return",
+    "similarities",
+    "too-few-public-methods",
+    "too-many-ancestors",
+    "too-many-arguments",
+    "too-many-boolean-expressions",
+    "too-many-branches",
+    "too-many-instance-attributes",
+    "too-many-lines",
+    "too-many-locals",
+    "too-many-nested-blocks",
+    "too-many-positional-arguments",
+    "too-many-public-methods",
+    "too-many-return-statements",
+    "too-many-statements",
+    "unused-wildcard-import",
+    "wildcard-import",
+]
+
+[tool.pylint.reports]
+output-format = "text"
+reports = true
+
+[tool.pylint.basic]
+class-rgx = "([A-Z]+|[A-Z][a-z]+)(_[A-Z]+|[A-Z][a-z])*"
+good-names = ["i", "j", "k", "c", "f", "fd", "zf", "n", "ap", "rv", "mh", "sm", "wp", "ok", "cc", "nc", "ct", "nt", "cu", "vc"]
+
+[tool.pylint.format]
+max-line-length = 88
