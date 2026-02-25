@@ -636,6 +636,14 @@ def trlc():
                            action="store_true",
                            help=("If there are no errors, produce a summary"
                                  " naming every file processed."))
+    og_output.add_argument("--log",
+                           nargs    = 2,
+                           metavar  = ("FILE", "PREFIX"),
+                           default  = None,
+                           help     = ("Write all output to FILE, strip PREFIX"
+                                       " from file paths in messages."
+                                       " Intended for use as a Bazel build"
+                                       " action."))
     og_output.add_argument("--error-on-warnings",
                            action="store_true",
                            help=("If there are warnings, return status code"
@@ -688,7 +696,10 @@ def trlc():
         except subprocess.CalledProcessError:
             ap.error("cannot run %s" % options.use_cvc5_binary)
 
-    mh = Message_Handler(options.brief, not options.no_detailed_info)
+    mh = Message_Handler(options.brief,
+                          not options.no_detailed_info,
+                          out_path     = options.log[0] if options.log else None,
+                          strip_prefix = options.log[1] if options.log else None)
 
     if options.no_user_warnings:  # pragma: no cover
         mh.suppress(Kind.USER_WARNING)
@@ -731,6 +742,7 @@ def trlc():
         ok &= sm.register_directory(".")
 
     if not ok:
+        mh.close()
         return 1
 
     if sm.process() is None:
@@ -747,7 +759,7 @@ def trlc():
                     if isinstance(tmp[obj.name][key], Fraction):
                         tmp[obj.name][key] = float(tmp[obj.name][key])
 
-            print(json.dumps(tmp, indent=2, sort_keys=True))
+            print(json.dumps(tmp, indent=2, sort_keys=True), file=mh.out)
 
     total_models = len(sm.rsl_files)
     parsed_models = len([item
@@ -791,7 +803,7 @@ def trlc():
     if mh.suppressed:  # pragma: no cover
         summary += " with %u supressed messages" % mh.suppressed
 
-    print(summary)
+    print(summary, file=mh.out)
 
     if options.show_file_list and ok:  # pragma: no cover
         def get_status(parser):
@@ -807,21 +819,25 @@ def trlc():
             print("> %s Model %s (Package %s)" %
                   (get_status(parser),
                    filename,
-                   parser.cu.package.name))
+                   parser.cu.package.name), file=mh.out)
         if not options.skip_trlc_files:
             for filename in sorted(sm.trlc_files):
                 parser = sm.trlc_files[filename]
                 print("> %s Requirements %s (Package %s)" %
                       (get_status(parser),
                        filename,
-                       parser.cu.package.name))
+                       parser.cu.package.name), file=mh.out)
 
     if ok:
         if options.error_on_warnings and mh.warnings \
            or mh.errors:  # pragma: no cover
-            return 1
-        return 0
-    return 1
+            rv = 1
+        else:
+            rv = 0
+    else:
+        rv = 1
+    mh.close()
+    return rv
 
 
 def main():
