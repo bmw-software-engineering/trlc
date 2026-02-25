@@ -1,1 +1,4 @@
 common --enable_bzlmod
+
+build:lint --aspects=//tools/lint:linters.bzl%pylint,//tools/lint:linters.bzl%ty
+build:lint --output_groups=+rules_lint_human

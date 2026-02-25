@@ -27,7 +27,11 @@ generated in the following situations:
 
 ### 2.0.4-dev
 
+* [BAZEL] Add Rules Lint for Formatting and Linting
 
+* [BAZEL] Update Bazel to 8.5.1
+
+* [BAZEL] Update Rules Python to 1.1.0
 
 ### 2.0.3
 

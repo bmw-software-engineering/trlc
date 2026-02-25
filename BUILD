@@ -1,8 +1,12 @@
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 
-# This is additionally exposed for the test rule in trlc.bzl
+# trlc.py is exposed for the test rule in trlc.bzl;
+# pyproject.toml is needed by pylint/ty via rules_lint.
 exports_files(
-    ["trlc.py"],
+    [
+        "trlc.py",
+        "pyproject.toml",
+    ],
     visibility = ["//visibility:public"],
 )
 
@@ -30,9 +34,26 @@ alias(
     visibility = ["//visibility:public"],
 )
 
-# Run bazel run //:requirements.update
+# Run: bazel run //:requirements.update
 compile_pip_requirements(
     name = "requirements",
     src = "requirements.txt",
     requirements_txt = "requirements.txt.bazel",
+)
+
+# Run: bazel run //:requirements_dev.update
+compile_pip_requirements(
+    name = "requirements_dev",
+    src = "requirements_dev.txt",
+    requirements_txt = "requirements_dev_lock.txt",
+)
+
+alias(
+    name = "format.check",
+    actual = "//tools/format:format.check",
+)
+
+alias(
+    name = "format.fix",
+    actual = "//tools/format:format",
 )
