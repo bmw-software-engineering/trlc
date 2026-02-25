@@ -1,0 +1,7 @@
+package SpecCheck
+
+type Requirement {
+    id          String
+    description String
+    severity    Integer
+}

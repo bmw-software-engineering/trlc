@@ -12,21 +12,26 @@ test: unit-tests system-tests
 	make coverage
 	util/check_local_modifications.sh
 
+# bazel equivalent: bazel test //tests-unit/... //tests-system:all_tests
 test-all: unit-tests system-tests-all
 	make coverage
 	util/check_local_modifications.sh
 
+# bazel equivalent: bazel coverage --combined_report=lcov //tests-system/... //api-examples/...
+#   genhtml "$(bazel info output_path)/_coverage/_coverage_report.dat" -o htmlcov
 coverage:
 	coverage combine -q
 	coverage html --rcfile=coverage.cfg
 	coverage report --rcfile=coverage.cfg --fail-under=94
 
+# bazel equivalent: bazel test //tests-unit/...
 unit-tests:
 	coverage run -p \
                 --branch --rcfile=coverage.cfg \
                 --data-file .coverage \
                 -m unittest discover -s tests-unit -v
 
+# bazel equivalent: bazel test //tests-system:fast
 system-tests:
 	mkdir -p docs
 	coverage run -p --rcfile=coverage.cfg --branch --data-file .coverage \
@@ -34,6 +39,7 @@ system-tests:
 	make -C tests-system -B -j8 fast
 	make -C tests-large-partial -B -j8 fast
 
+# bazel equivalent: bazel test //tests-system:all_tests
 system-tests-all:
 	mkdir -p docs
 	coverage run -p --rcfile=coverage.cfg --branch --data-file .coverage \

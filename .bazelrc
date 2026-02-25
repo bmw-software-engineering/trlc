@@ -2,3 +2,8 @@ common --enable_bzlmod
 
 build:lint --aspects=//tools/lint:linters.bzl%pylint,//tools/lint:linters.bzl%ty
 build:lint --output_groups=+rules_lint_human
+
+# --combined_report=lcov merges per-test .dat files into one LCOV report.
+# --instrumentation_filter restricts instrumentation to the trlc library only.
+coverage --combined_report=lcov
+coverage --instrumentation_filter="//trlc[/:]"

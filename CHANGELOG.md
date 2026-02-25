@@ -27,11 +27,24 @@ generated in the following situations:
 
 ### 2.0.4-dev
 
+* [TRLC] Rework system tests as Bazel-native golden-file tests: each
+  test directory is now a single `py_test` with one method per output
+  mode (`output`, `output.brief`, `output.json`, `output.smtlib`),
+  selectable via `--test_filter`.
+
+* [TRLC] Add `--log FILE PREFIX` to write all output to FILE
+  and strip PREFIX from file paths (used by Bazel system test actions).
+
+* [TRLC] `Message_Handler` now accepts `out_path` to open and manage
+  its own output file; use as a context manager to ensure it is closed.
+
+* [TRLC] Update Bazel CVC5 version to 1.3.2.
+
+* [BAZEL] Update Rules Python to 1.1.0
+
 * [BAZEL] Add Rules Lint for Formatting and Linting
 
 * [BAZEL] Update Bazel to 8.5.1
-
-* [BAZEL] Update Rules Python to 1.1.0
 
 ### 2.0.3
 

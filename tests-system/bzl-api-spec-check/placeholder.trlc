@@ -1,0 +1,7 @@
+package SpecCheck
+
+Requirement SPEC_001 {
+    id          = "SPEC_001"
+    description = "Placeholder requirement for spec-check test"
+    severity    = 3
+}
