@@ -1,0 +1,8 @@
+parent.a == 1, "must link to a=1"
+^^^^^^ union-type-field-access/test.rsl:17: issue: expression could be null [vcg-evaluation-of-null]
+     | example record_type triggering error:
+     |   Req bad_potato {
+     |     description = ""
+     |     /* parent is null */
+     |   }
+Processed 1 model and 1 requirement file and found 1 warning

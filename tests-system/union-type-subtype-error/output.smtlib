@@ -1,0 +1,3 @@
+parent      [TypeA, TypeB, TypeC]
+            ^ union-type-subtype-error/test.rsl:18: issue: TypeB is a subtype of TypeA which is already in this union [union_redundant_subtype]
+Processed 1 model and 1 requirement file and found 1 warning

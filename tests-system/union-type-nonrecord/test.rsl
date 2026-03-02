@@ -1,0 +1,10 @@
+package Test
+
+type TypeA {
+  x Integer
+}
+
+type Req {
+  description String
+  parent      [Integer, TypeA]
+}

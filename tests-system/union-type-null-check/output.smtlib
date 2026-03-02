@@ -1,0 +1,3 @@
+Req r2 {
+    ^^ union-type-null-check/test.trlc:12: check error: parent is required
+Processed 1 model and 1 requirement file and found 1 error

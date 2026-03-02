@@ -1,0 +1,17 @@
+{
+  "a1": {
+    "a": 1
+  },
+  "b1": {
+    "b": 2
+  },
+  "r1": {
+    "description": "Links to TypeA",
+    "parent": "Test.a1"
+  },
+  "r2": {
+    "description": "Links to TypeB",
+    "parent": "Test.b1"
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

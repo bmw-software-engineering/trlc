@@ -81,6 +81,27 @@ class Linter:
         elif isinstance(n_typ, ast.Array_Type):
             self.verify_array_type(n_typ)
 
+        elif isinstance(n_typ, ast.Union_Type):
+            # lobster-trace: LRM.Union_Type_Minimum_Members
+            if len(n_typ.types) == 1:
+                self.mh.check(
+                    n_typ.location,
+                    "union type with a single member is equivalent to a"
+                    " plain record reference",
+                    "union_single_type")
+            # lobster-trace: LRM.Union_Type_No_Subtype_Relations
+            for i, t_i in enumerate(n_typ.types):
+                for j, t_j in enumerate(n_typ.types):
+                    if i != j and t_i is not t_j and \
+                            t_i.is_subclass_of(t_j):
+                        self.mh.check(
+                            n_typ.location,
+                            "%s is a subtype of %s which is already"
+                            " in this union" % (t_i.name, t_j.name),
+                            "union_redundant_subtype")
+            for member_type in n_typ.types:
+                self.verify_type(member_type)
+
     def verify_tuple_type(self, n_tuple_type):
         assert isinstance(n_tuple_type, ast.Tuple_Type)
 
