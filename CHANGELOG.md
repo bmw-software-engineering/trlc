@@ -46,6 +46,8 @@ generated in the following situations:
 
 * [BAZEL] Update Bazel to 8.5.1
 
+* [LRM] Refactor `Abstract_Type` requirement
+
 ### 2.0.3
 
 * [API] Fix incorrect output of `Integer_Literal.dump()` method.

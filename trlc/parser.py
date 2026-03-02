@@ -616,6 +616,7 @@ class Parser(Parser_Base):
         t_final     = None
         is_abstract = False
         is_final    = False
+        # lobster-trace: LRM.Abstract_Type_Declaration
         if self.peek_kw("abstract"):
             self.match_kw("abstract")
             t_abstract  = self.ct
@@ -1791,6 +1792,7 @@ class Parser(Parser_Base):
         r_typ = self.parse_qualified_name(self.default_scope,
                                           ast.Record_Type)
         r_typ.set_ast_link(self.ct)
+        # lobster-trace: LRM.Abstract_Types
         if r_typ.is_abstract:
             self.mh.error(self.ct.location,
                           "cannot declare object of abstract record type %s" %
