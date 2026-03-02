@@ -1,0 +1,29 @@
+package Test
+
+TypeA a1 {
+  a = 1
+}
+
+TypeB b1 {
+  a = 2
+  b = 20
+}
+
+TypeC c1 {
+  c = 100
+}
+
+Req r1 {
+  description = "TypeA (direct member)"
+  parent = a1
+}
+
+Req r2 {
+  description = "TypeB (subclass of TypeA, which is a union member)"
+  parent = b1
+}
+
+Req r3 {
+  description = "TypeC (direct member)"
+  parent = c1
+}

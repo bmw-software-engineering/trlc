@@ -1,0 +1,10 @@
+package Test
+
+OtherType o1 {
+  c = 99
+}
+
+Req bad {
+  description = "I have the wrong parent type"
+  parent = o1
+}

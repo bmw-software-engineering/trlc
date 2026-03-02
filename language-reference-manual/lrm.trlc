@@ -643,7 +643,10 @@ section "Type declarations" {
 
       component_declaration ::=
         described_name [ 'optional' ]
-        qualified_name_COMPONENT_TYPE  [ array_declaration ]
+        ( qualified_name_COMPONENT_TYPE | union_type ) [ array_declaration ]
+
+      union_type ::= '[' qualified_name_RECORD_TYPE
+                     { ',' qualified_name_RECORD_TYPE } ']'
 
       array_declaration ::= '[' INTEGER_lower '..' '*' ']'
                           | '[' INTEGER_lower '..' INTEGER_upper ']'
@@ -697,6 +700,83 @@ section "Type declarations" {
               the language, this forces the user type
               hierarchy to be a DAG, but permitting
               self-references.)*'''
+    }
+
+    Recommendation Union_Type_Minimum_Members {
+      text = '''It is recommended to warn when a union type lists only a
+              single record type, as this is equivalent to a plain
+              record reference and the bracket syntax adds no value.'''
+    }
+
+    Static_Semantics Union_Type_No_Duplicates {
+      text = '''Each record type in a union type shall appear at most once.
+              It is an error to list the same type more than once.'''
+    }
+
+    Recommendation Union_Type_No_Subtype_Relations {
+      text = '''It is recommended to warn when a union type lists both a
+              type and one of its (direct or transitive) subtypes. The
+              subtype entry is already covered by the supertype, which
+              gives a false impression of independent alternatives.'''
+    }
+
+    Static_Semantics Union_Type_Record_Types_Only {
+      text = '''All types listed in a union type shall be record types.
+              Builtin types, enumeration types, tuple types, and array
+              types may not appear in a union type.'''
+    }
+
+    Static_Semantics Union_Type_No_Field_Access {
+      text = '''A field access on a component with a union type is
+              permitted if the field exists (by name) in at least one
+              member type. If the field does not exist in any member
+              type, it is a static error.'''
+    }
+
+    Static_Semantics Union_Type_Field_Access {
+      text = '''When field access on a union-typed component is
+              permitted (see Union_Type_No_Field_Access), the static
+              type of the resulting expression is the declared type of
+              that field in the member types that contain it. This
+              type must be identical across all members that declare
+              the field (see Union_Type_Field_Type_Conflict).'''
+    }
+
+    Static_Semantics Union_Type_Field_Type_Conflict {
+      text = '''When a field name exists in multiple members of a union
+              type but with incompatible types across those members,
+              accessing that field is a static error. Two types are
+              incompatible if they are not the same type object
+              (nominal, not structural, comparison).'''
+    }
+
+    Recommendation Union_Type_Partial_Field_Access {
+      text = '''It is recommended to warn when accessing a field on a
+              union type that does not exist in all member types
+              (see Union_Type_Partial_Field_Null for the evaluation
+              semantics of such an access).'''
+    }
+
+    Dynamic_Semantics Union_Type_Partial_Field_Null {
+      text = '''When a field access is performed on a union-typed
+              component and the field does not exist in the concrete
+              type of the referenced record object, the expression
+              evaluates to null. This null is typeless (consistent
+              with the Restricted_Null design: there is no polymorphic
+              null literal). The Dereference rule applies only to the
+              prefix of the dot operator (the union-typed component
+              itself must be non-null); it does not apply to the
+              presence or absence of the field in the concrete type.
+              When the prefix is non-null but the concrete type lacks
+              the field, no Dereference error is raised.'''
+    }
+
+    Static_Semantics Union_Type_Equality {
+      text = '''Equality comparisons on union-typed components follow the
+              same semantics as equality on ordinary record references:
+              two union-typed values are equal iff they both refer to
+              the same named record object *(i.e. identity, not
+              structural equality)*.'''
     }
 
     Static_Semantics Anonymous_Arrays {
@@ -1188,8 +1268,14 @@ section "Names" {
   Dynamic_Semantics Dereference {
     text = '''Evaluating the dot (`.`) operator to access a
               field of a referenced record requires the
-              prefix to be not null. Dereferencing null is
-              undefined behaviour.'''
+              prefix (the expression to the left of the dot) to be
+              not null. Dereferencing null is undefined behaviour
+              and is a run-time error. Note: for union-typed
+              components the prefix null check still applies, but
+              once the prefix is non-null a further check is made
+              whether the concrete type of the record object declares
+              the accessed field; if it does not, the result is null
+              rather than an error (see Union_Type_Partial_Field_Null).'''
   }
 
   Dynamic_Semantics Len_Semantics {

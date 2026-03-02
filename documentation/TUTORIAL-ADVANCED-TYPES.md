@@ -2,6 +2,22 @@
 
 This is part of the [TRLC Tutorial](TUTORIAL.md).
 
+## Union types
+
+A *union type* allows a record attribute to accept a reference to any
+of several listed record types. Unlike inheritance, the types do not
+need to share a common base:
+
+```
+type Software_Requirement {
+  description  String
+  derived_from [System_Requirement, Codebeamer_Requirement]
+}
+```
+
+See [References and Extensions](TUTORIAL-ADVANCED.md) for the full
+description with arrays and cross-package examples.
+
 ## Type Qualifiers
 
 There are two modifiers available when declaring types: `abstract` and

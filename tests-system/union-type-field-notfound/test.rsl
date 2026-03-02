@@ -1,0 +1,17 @@
+package Test
+
+type TypeA {
+  x Integer
+}
+
+type TypeB {
+  y Integer
+}
+
+type Req {
+  parent [TypeA, TypeB]
+}
+
+checks Req {
+  parent.z == 1, "check z"
+}
