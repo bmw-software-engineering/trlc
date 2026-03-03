@@ -1,0 +1,6 @@
+package Ant_house
+
+//Expectation: A warning should be emitted as abstract type is not extended
+abstract type Ant {
+  x Integer
+}

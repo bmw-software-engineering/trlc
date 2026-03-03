@@ -52,13 +52,13 @@ class Linter:
                     ok = False
 
         # Complain about abstract types without extensions
+        # lobster-trace: LRM.Abstract_Type_Not_Extended
         for package in self.stab.values(ast.Package):
             for n_typ in package.symbols.values(ast.Record_Type):
                 if n_typ.is_abstract and not self.abstract_extensions[n_typ]:
                     self.mh.check(
                         n_typ.location,
-                        "abstract type %s does not have any extensions" %
-                        n_typ.name,
+                        f"abstract type {n_typ.name} does not have any extensions",
                         "abstract_leaf_types")
 
         return ok

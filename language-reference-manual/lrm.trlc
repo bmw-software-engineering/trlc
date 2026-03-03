@@ -656,19 +656,17 @@ section "Type declarations" {
       text = "The root type for a record extension must be a valid record type."
     }
 
-    Static_Semantics Abstract_Type_Declaration {
-      text = '''
-        A record may be marked `abstract`.
-      '''
-    }
-
     Static_Semantics Abstract_Types {
       text = '''
-        If a record is marked `abstract`, then no objects of this
+        A record may be marked `abstract`, in which case no objects of this
         type may be declared. It must be extended *(even if that extension is
         empty)* before instances of that type can be declared.
         *(Note that it is possible to have components of an abstract type.)*
       '''
+    }
+
+    Recommendation Abstract_Type_Not_Extended {
+      text = '''It is recommended to emit a warning if an abstract type is not extended.'''
     }
 
     Static_Semantics Final_Types {
