@@ -1,3 +1,0 @@
-abstract type Ant {
-              ^^^ rbt-abstract-types-not-extended/abstract.rsl:4: issue: abstract type Ant does not have any extensions [abstract_leaf_types]
-Processed 1 model and 0 requirement files and found 1 warning
