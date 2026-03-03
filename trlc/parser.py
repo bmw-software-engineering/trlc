@@ -616,7 +616,6 @@ class Parser(Parser_Base):
         t_final     = None
         is_abstract = False
         is_final    = False
-        # lobster-trace: LRM.Abstract_Type_Declaration
         if self.peek_kw("abstract"):
             self.match_kw("abstract")
             t_abstract  = self.ct
