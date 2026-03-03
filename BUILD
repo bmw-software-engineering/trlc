@@ -38,7 +38,7 @@ alias(
 compile_pip_requirements(
     name = "requirements",
     src = "requirements.txt",
-    requirements_txt = "requirements.txt.bazel",
+    requirements_txt = "requirements_lock.txt",
 )
 
 # Run: bazel run //:requirements_dev.update

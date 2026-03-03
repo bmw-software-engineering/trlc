@@ -40,7 +40,7 @@ pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
     pip.parse(
         hub_name = "trlc_dependencies",
         python_version = python_version,
-        requirements_lock = "//:requirements.txt",
+        requirements_lock = "//:requirements_lock.txt",
     )
     for python_version in [
         "3.9",
@@ -70,6 +70,11 @@ use_repo(pip_dev, "trlc_dev_dependencies")
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 
+# ---------------------------------------------------------------------------
+# CVC5 binary archives
+# Keep in synch with CVC5_DEFAULT_VERSION in util/fetch_cvc5.py
+# and requirements.txt / requirements_dev.txt
+# ---------------------------------------------------------------------------
 http_archive(
     name = "cvc5_linux",
     build_file = "@trlc//:cvc5.BUILD",
