@@ -31,8 +31,17 @@ CVC5_RELEASES = "http://github.com/cvc5/cvc5/releases/download"
 CVC5_BINARY = "cvc5"
 CVC5_EXECUTABLE = True
 
+# -----------------------------------------------------------------------
+# Canonical CVC5 binary version used throughout this project.
+# Bump this together with:
+#   * The http_archive URLs/sha256 hashes in MODULE.bazel
+#   * The "cvc5>=" lower-bound in requirements.txt / requirements_dev.txt
+# -----------------------------------------------------------------------
+CVC5_DEFAULT_VERSION = "1.3.2"
+
 ap = argparse.ArgumentParser()
-ap.add_argument("version")
+ap.add_argument("--version", default=CVC5_DEFAULT_VERSION,
+                help="CVC5 release tag (default: %(default)s)")
 ap.add_argument("platform")
 
 options = ap.parse_args()
