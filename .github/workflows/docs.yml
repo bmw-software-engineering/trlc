@@ -45,7 +45,7 @@ jobs:
           sudo apt-get install -y graphviz
       - name: Fetch CVC5
         run: |
-          util/fetch_cvc5.py 1.2.0 linux
+          util/fetch_cvc5.py linux
           echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
       - name: Test CVC5
         run: |
