@@ -23,7 +23,7 @@ def trlc_specification_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc
     native.py_test(
         name = name,
         srcs = srcs,
-        args = ["--use-cvc5-binary $(location @trlc//:cvc5)", "--verify", "--skip-trlc-files"],
+        args = ["--verify", "--skip-trlc-files"],
         main = main,
         deps = ["@trlc//trlc:trlc"],
         data = ["@trlc//:cvc5"] + reqs,
@@ -68,7 +68,7 @@ def trlc_requirements_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc.
     native.py_test(
         name = name,
         srcs = srcs,
-        args = ["--use-cvc5-binary $(location @trlc//:cvc5)", "--verify"],
+        args = ["--verify"],
         main = main,
         deps = ["@trlc//trlc:trlc"],
         data = ["@trlc//:cvc5"] + reqs,

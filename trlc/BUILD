@@ -17,5 +17,8 @@ py_library(
         "version.py",
     ],
     visibility = ["//visibility:public"],
-    deps = [requirement("pyvcg")],
+    deps = [
+        requirement("pyvcg"),
+        requirement("cvc5"),
+    ],
 )

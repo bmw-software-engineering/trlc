@@ -67,14 +67,12 @@ def _run_mode(mode):
 
     args = ["trlc"]
 
-    if mode in ("output", "output.smtlib"):
+    if mode == "output":
+        args += ["--verify"]
+    elif mode == "output.smtlib":
         # _CVC5_RLOC is a runfiles-relative path produced by
         # $(rlocationpath //:cvc5); resolve it via TEST_SRCDIR directly.
         cvc5 = os.path.join(os.environ["TEST_SRCDIR"], _CVC5_RLOC)
-        # TODO: The Makefile only passes --use-cvc5-binary for
-        #       output.smtlib, not for plain output.  Align once the
-        #       golden files have been regenerated without cvc5 for
-        #       the "output" mode.
         args += ["--verify", "--use-cvc5-binary", cvc5]
     elif mode == "output.brief":
         args += ["--no-lint", "--brief"]
