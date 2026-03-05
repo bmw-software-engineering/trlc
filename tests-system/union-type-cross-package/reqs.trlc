@@ -1,0 +1,25 @@
+package Reqs
+
+import Base
+
+Base.SystemReq sr1 {
+  description = "System requirement 1"
+}
+
+Base.CodebeamerReq cb1 {
+  title = "Codebeamer requirement 1"
+}
+
+Requirement r1 {
+  description = "links to system req"
+  parent = sr1
+}
+
+Requirement r2 {
+  description = "links to codebeamer req"
+  parent = cb1
+}
+
+Requirement r3 {
+  description = "no parent"
+}

@@ -1,0 +1,20 @@
+package Test
+
+ConcreteA ca1 {
+  x = 1
+  y = 2
+}
+
+TypeB tb1 {
+  z = 3
+}
+
+Req r1 {
+  description = "ConcreteA extends Base, accepted"
+  parent = ca1
+}
+
+Req r2 {
+  description = "TypeB direct member, accepted"
+  parent = tb1
+}

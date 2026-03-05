@@ -387,6 +387,111 @@ simplification. The only node worth pointing out as special is
 `Name_Reference`, as that is the only node where the entity it refers
 to may be filled in late.
 
+#### Records, Tuples, and Union Types
+
+Three type constructs in TRLC are superficially similar but represent
+fundamentally different concepts. Understanding what they share and
+where they diverge is essential for working on the parser, evaluator,
+and VCG.
+
+##### Overview
+
+| | Record (`type T`) | Tuple (`tuple T`) | Union (`[T1, T2]`) |
+|---|---|---|---|
+| **What it is** | Named entity type | Named composite value type | Anonymous type constraint |
+| **Declared with** | `type` keyword | `tuple` keyword | `[...]` bracket syntax on a component |
+| **AST class** | `Record_Type(Composite_Type)` | `Tuple_Type(Composite_Type)` | `Union_Type(Type)` |
+| **Has own components** | Yes (via `Composite_Type.components`) | Yes (via `Composite_Type.components`) | No — borrows from members |
+| **Instances** | Top-level named objects in `.trlc` files | Anonymous inline values | No instances of its own |
+| **Referenced by name** | Yes | No | No |
+| **Supports inheritance** | Yes (`extends`) | No | No |
+| **Supports checks** | Yes (`checks T { ... }`) | Yes | No (checks live on the member record types) |
+| **Can be a component type** | Yes (as reference) | Yes (inline) | Yes (constrains a reference) |
+| **VCG sort** | `BUILTIN_INTEGER` | SMT `Record` datatype | `BUILTIN_INTEGER` |
+
+##### Record types
+
+`Record_Type` (`type T { ... }`) defines *named, independently
+addressable entities*. Instances are created as top-level named objects
+in `.trlc` files; each has a unique name within its package. A record
+component of type `T` does not hold the contents of the target inline
+— it holds a *reference by name* to some record object whose type is
+`T` or a subtype. Records form a nominal type hierarchy via `extends`.
+
+`Record_Type` is a `Composite_Type` (itself a `Concrete_Type`): it
+owns a `components` symbol table, has a package, a fully qualified
+name, and can host user-defined checks. Field access on a record
+reference goes through `components.lookup()`.
+
+##### Tuples
+
+`Tuple_Type` (`tuple T { ... }`) defines *anonymous, inline composite
+values*. A tuple instance has no independent identity and no name; it
+lives only as the value of the field that contains it. It cannot be
+referenced by name from other record objects and cannot be used in a
+record reference context. Tuple types are declared with the `tuple`
+keyword, must be declared before use, and do not support inheritance.
+
+Like `Record_Type`, `Tuple_Type` is a `Composite_Type`: it owns its
+own `components` symbol table. The critical difference is that a tuple
+value *is* the composite data (stored inline), whereas a record
+component holds a *reference* to an independently named object.
+
+##### Union types
+
+`Union_Type` (`[T1, T2, ...]`) is *not a named type at all*. A
+`Union_Type` node is an anonymous, structurally created constraint
+attached to a single record component. It means: this field holds a
+reference to a named record object, and that object's concrete type
+must be one of the listed types (or a subtype thereof).
+
+###### Key difference from Record_Type
+
+Although `Union_Type` and `Record_Type` are both encoded as integers
+in the VCG (both represent references to named record objects), and
+although the parser and VCG share much of their handling, they are
+fundamentally different in the AST:
+
+* **`Record_Type` is a `Composite_Type`** — it *owns* its components.
+  It has a `components` symbol table, a package, a fully qualified
+  name, a position in the inheritance hierarchy, etc.
+* **`Union_Type` is a plain `Type`** — it does *not* inherit from
+  `Composite_Type` and does *not* own any components. It has no
+  symbol table of its own, no package, no inheritance chain.
+
+A `Union_Type` is essentially a *constraint on a reference*: "the
+target object's concrete type must be one of these record types". The
+record types listed as members are ordinary `Record_Type` objects that
+exist independently in the symbol table. The `Union_Type` merely
+points at them.
+
+This distinction matters most for field access: on a `Record_Type`
+the set of accessible fields is simply `all_components()`. On a
+`Union_Type` accessible fields must be *computed* by intersecting
+the members' component lists — which is what `get_field_map()` does.
+
+###### The field map
+
+`Union_Type` lazily computes a *field map* via `get_field_map()` to
+support field access (see the Parser and Evaluation sections for how
+the map is consumed). It is built on first access; it iterates each
+member type's `all_components()` (which traverses the full
+inheritance chain) and for each field name records:
+
+| Key | Meaning |
+|---|---|
+| `component` | Representative `Composite_Component` (first member that declares the field; used as `n_field` of the resulting `Field_Access_Expression`) |
+| `n_typ` | Declared type, or `None` if different members have conflicting types |
+| `count` | Number of member types that declare this field |
+| `total` | Total number of member types in the union |
+| `optional_in_any` | `True` if the field is optional in at least one member |
+
+Type identity uses `is` (not `==`): non-union type objects are
+structural singletons in the symbol table, so identity comparison is
+correct and cheap. The map is owned by the `Union_Type` node
+(`_field_map`) and cached for the lifetime of the symbol table (the
+entire run).
+
 ## Evaluation
 
 Evaluation of expressions is a major component of the language. Each
@@ -425,8 +530,8 @@ values).
 * `list` of `Value` (for `Array_Type`)
 * `dict` of `str` -> `Value` (for `Tuple_Aggregate`)
 * `fractions.Fraction` (for `Builtin_Decimal`)
-* `Record_Reference` (for `Record_Type`; i.e. we store the reference
-  itself not the object referred to)
+* `Record_Reference` (for `Record_Type` or `Union_Type`; i.e. we store
+  the reference itself not the object referred to)
 * `Enumeration_Literal_Spec` (for `Enumeration_Type`)
 
 Evaluation itself is pretty simple, we just apply the relevant python
@@ -487,6 +592,29 @@ it can appear.
 This effectively dodges the issue, without any real loss of generality
 in the language; and we can parse everything in one pass and resolve
 all types immediately.
+
+### Union type field access evaluation
+
+When a `Field_Access_Expression` with `is_union_access=True` is
+evaluated, the prefix yields a `Value` whose `.value` is a
+`dict[str, Expression]` drawn from the concrete `Record_Object.field`
+of the referenced object. `Record_Object.field` is populated at parse
+time with `Implicit_Null` for every field declared by *that specific
+type*, so a field absent from the concrete type is simply not a key
+in the dict.
+
+Two distinct null situations arise inside
+`Field_Access_Expression.evaluate`:
+
+* **Prefix is null** — the union-typed component has no assigned
+  value. The standard `Dereference` error fires before any field
+  lookup (`mh.error` on finding `v_prefix is None`).
+* **Field absent in concrete type** (partial access) — the prefix is
+  non-null but `n_field.name` is not a key in the dict, because the
+  concrete type does not declare that field. Returns
+  `Value(location, None, None)`: a typeless null, consistent with
+  the `Null_Literal` / `Restricted_Null` design (no polymorphic
+  typed null exists in TRLC). No `Dereference` error is raised.
 
 ## Linter
 
@@ -860,6 +988,7 @@ We model types as follows
 | Builtin_Decimal  | BUILTIN_REAL    | Real        |
 | Builtin_String   | BUILTIN_STRING  | String      |
 | Record_Type      | BUILTIN_INTEGER | Int         |
+| Union_Type       | BUILTIN_INTEGER | Int         |
 | Tuple_Type       | Record          | datatype    |
 | Enumeration_Type | Enumeration     | datatype    |
 | Array_Type       | Sequence        | Seq         |
@@ -906,12 +1035,59 @@ the divisor must be a product of 2s and 5s. We tried this with a
 recursive function, but these things immediately make everything
 undecidable in general.
 
-##### Records
+##### Records and Union Types
 
 It may appear surprising to model records as integers, but we can't
 actually access records in the check language. We just need to model
 that there are N different records the user could pick when
 referencing them.
+
+A union type is also modelled as an integer, for exactly the same
+reason. A union-typed component still holds a reference to a named
+record object — we just allow more than one possible concrete type for
+that object. The `tr_type` and `value_to_trlc` methods handle both
+`Record_Type` and `Union_Type` in a single branch, since both are
+encoded as `BUILTIN_INTEGER`.
+
+This means that a check like
+
+```trlc
+checks Req {
+  parent != null, "parent is required"
+  parent == parent, "always true"
+}
+```
+
+produces the same VCG behaviour regardless of whether `parent` is a
+plain `Record_Type` or a `Union_Type`.
+
+###### Field access on records and union types in the VCG
+
+When a `Record_Type` or `Union_Type` expression is used as the prefix
+of a field access, the VCG must dereference the integer into a
+structured value. Both types use the shared helper
+`_ensure_record_deref(type_key, sort_name, uf_name, components)` which
+lazily creates:
+
+1. An SMT `Record` sort with `.value` (and optionally `.valid`)
+   components for each accessible field.
+2. An uninterpreted function mapping `BUILTIN_INTEGER → Record`.
+3. Caching in `self.records` / `self.uf_records` keyed by the type
+   object, so repeated accesses reuse the same sort and UF.
+
+The only difference between the two types is how the component list
+is built:
+
+* **`Record_Type`**: iterates `all_components()`; a `.valid` flag is
+  added when `component.optional` is `True`.
+* **`Union_Type`**: iterates the `get_field_map()`; a `.valid` flag
+  is added when the field is partial (`count < total`) or optional in
+  any member (`optional_in_any`).
+
+After dereferencing, the field access is identical for both types:
+`Record_Access(UF(prefix), field + ".value")` for the value, and
+`Record_Access(UF(prefix), field + ".valid")` (or a literal `True`)
+for validity.
 
 ##### Tuples
 

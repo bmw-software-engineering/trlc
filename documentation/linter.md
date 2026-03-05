@@ -355,3 +355,92 @@ type Q extends T {
 The static analyser does not consider this check to be always true
 now, since you could have instances of just T, even though Q would
 always make it true.
+
+### Union type checks
+
+#### union_single_type
+
+A union type with only a single member is equivalent to a plain record
+reference. The bracket syntax adds no value and may confuse readers.
+
+```trlc
+package Union_Single_Type
+
+type TypeA {
+  x Integer
+}
+
+type Requirement {
+  parent [TypeA]
+}
+```
+
+Generates:
+
+```plain
+  parent [TypeA]
+         ^ union_single_type.rsl:9: issue: union type with a single member is equivalent to a plain record reference [union_single_type]
+```
+
+#### union_redundant_subtype
+
+A union type that lists both a record type and one of its subtypes is
+redundant: the supertype already covers all instances of the subtype,
+giving a false impression of independent alternatives.
+
+```trlc
+package Union_Redundant_Subtype
+
+type TypeA {
+  x Integer
+}
+
+type TypeB extends TypeA {
+  y Integer
+}
+
+type Requirement {
+  parent [TypeA, TypeB]
+}
+```
+
+Generates:
+
+```plain
+  parent [TypeA, TypeB]
+         ^ union_redundant_subtype.rsl:13: issue: TypeB is a subtype of TypeA which is already in this union [union_redundant_subtype]
+```
+
+#### union_partial_field_access
+
+Accessing a field on a union type that does not exist in all member
+types is allowed but may return `null` at run-time.  The linter warns
+so that users are aware of this.
+
+```trlc
+package Union_Partial_Field
+
+type TypeA {
+  x Integer
+  description String
+}
+
+type TypeB {
+  x Integer
+}
+
+type Requirement {
+  parent [TypeA, TypeB]
+}
+
+checks Requirement {
+  parent != null and parent.description != null, "need description"
+}
+```
+
+Generates:
+
+```plain
+  parent != null and parent.description != null, "need description"
+                            ^^^^^^^^^^^ union_partial_field.rsl:18: issue: field description exists only in 1 of 2 members of union type [TypeA, TypeB]; accessing it on other members returns null [union_partial_field_access]
+```

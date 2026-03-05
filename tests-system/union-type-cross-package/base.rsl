@@ -1,0 +1,9 @@
+package Base
+
+type SystemReq {
+  description String
+}
+
+type CodebeamerReq {
+  title String
+}

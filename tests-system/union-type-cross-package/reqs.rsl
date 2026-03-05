@@ -1,0 +1,8 @@
+package Reqs
+
+import Base
+
+type Requirement {
+  description String
+  parent optional [Base.SystemReq, Base.CodebeamerReq]
+}

@@ -1,0 +1,2 @@
+union-type-field-notfound/test.rsl:16:10: trlc error: field z does not exist in any member of union type [TypeA, TypeB]
+Processed 1 model and 1 requirement file and found 1 error
