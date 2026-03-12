@@ -23,7 +23,8 @@ def trlc_specification_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc
     native.py_test(
         name = name,
         srcs = srcs,
-        args = ["--verify", "--skip-trlc-files"],
+        args = ["--verify", "--skip-trlc-files"] +
+               ["$(locations %s)" % req for req in reqs],
         main = main,
         deps = ["@trlc//trlc:trlc"],
         data = ["@trlc//:cvc5"] + reqs,
@@ -39,14 +40,17 @@ def _trlc_requirement_impl(ctx):
         transitive_reqs.append(trlc_provider.reqs)
         transitive_reqs.append(trlc_provider.deps)
 
-    own_specs = ctx.files.spec if hasattr(ctx.files, "spec") else []
+    own_specs = depset(transitive = [
+        spec_target[DefaultInfo].files
+        for spec_target in ctx.attr.spec
+    ])
 
     return [
         DefaultInfo(
-            files = depset(ctx.files.srcs, transitive = transitive_reqs + transitive_spec + [depset(own_specs)])
+            files = depset(ctx.files.srcs, transitive = transitive_reqs + transitive_spec + [own_specs]),
         ),
         TrlcProviderInfo(
-            spec = depset(own_specs, transitive = transitive_spec),
+            spec = depset(transitive = [own_specs] + transitive_spec),
             reqs = depset(ctx.files.srcs),
             deps = depset(transitive = transitive_reqs),
         ),
@@ -68,7 +72,8 @@ def trlc_requirements_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc.
     native.py_test(
         name = name,
         srcs = srcs,
-        args = ["--verify"],
+        args = ["--verify"] +
+               ["$(locations %s)" % req for req in reqs],
         main = main,
         deps = ["@trlc//trlc:trlc"],
         data = ["@trlc//:cvc5"] + reqs,
