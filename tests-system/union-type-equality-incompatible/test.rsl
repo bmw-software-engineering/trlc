@@ -1,0 +1,23 @@
+package Test
+
+type TypeA {
+  x Integer
+}
+
+type TypeB {
+  x Integer
+}
+
+// Completely unrelated type - not compatible with [TypeA, TypeB]
+type TypeC {
+  x Integer
+}
+
+type Req {
+  parent [TypeA, TypeB]
+  other  TypeC
+}
+
+checks Req {
+  parent == other, "union vs unrelated record is a type error"
+}

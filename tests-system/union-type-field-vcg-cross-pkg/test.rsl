@@ -1,0 +1,12 @@
+package Test
+
+import PkgA
+import PkgB
+
+type Holder {
+  parent [PkgA.Item, PkgB.Item]
+}
+
+checks Holder {
+  parent != null and parent.value == parent.value, "always true"
+}

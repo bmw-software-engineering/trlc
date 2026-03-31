@@ -1442,7 +1442,7 @@ class Parser(Parser_Base):
                     # lobster-trace: LRM.Valid_Index_Prefixes
                     self.mh.error(n_name.location,
                                   "expression '%s' has type %s, "
-                                  "which is not a tuple or record" %
+                                  "which is not a tuple, record, or union" %
                                   (n_name.to_string(),
                                    n_name.typ.name))
 
@@ -1458,7 +1458,7 @@ class Parser(Parser_Base):
                 if is_union_access:
                     # lobster-trace: LRM.Union_Type_Field_Access
                     # lobster-trace: LRM.Union_Type_Field_Type_Conflict
-                    # lobster-trace: LRM.Union_Type_No_Field_Access
+                    # lobster-trace: LRM.Union_Type_Field_Access_Validity
                     field_name = t_field.value
                     field_map = n_name.typ.get_field_map()
                     if field_name not in field_map:

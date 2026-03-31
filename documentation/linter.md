@@ -414,7 +414,7 @@ Generates:
 #### union_partial_field_access
 
 Accessing a field on a union type that does not exist in all member
-types is allowed but may return `null` at run-time.  The linter warns
+types is allowed but may return `null` at run-time. The linter warns
 so that users are aware of this.
 
 ```trlc

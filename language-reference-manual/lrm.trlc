@@ -724,7 +724,7 @@ section "Type declarations" {
               types may not appear in a union type.'''
     }
 
-    Static_Semantics Union_Type_No_Field_Access {
+    Static_Semantics Union_Type_Field_Access_Validity {
       text = '''A field access on a component with a union type is
               permitted if the field exists (by name) in at least one
               member type. If the field does not exist in any member
@@ -733,7 +733,7 @@ section "Type declarations" {
 
     Static_Semantics Union_Type_Field_Access {
       text = '''When field access on a union-typed component is
-              permitted (see Union_Type_No_Field_Access), the static
+              permitted (see Union_Type_Field_Access_Validity), the static
               type of the resulting expression is the declared type of
               that field in the member types that contain it. This
               type must be identical across all members that declare
@@ -775,6 +775,17 @@ section "Type declarations" {
               two union-typed values are equal iff they both refer to
               the same named record object *(i.e. identity, not
               structural equality)*.'''
+    }
+
+    Static_Semantics Union_Type_Equality_Domain {
+      text = '''An equality or inequality operator applied to a union-typed
+              component requires the other operand to have a compatible
+              type. An operand type T is compatible with a union type U
+              if T is one of the member types of U, or T is a (transitive)
+              extension of a member type of U, or one of the member types
+              of U is a (transitive) extension of T. If no such
+              compatibility exists between the two operands, it is a
+              static error.'''
     }
 
     Static_Semantics Anonymous_Arrays {

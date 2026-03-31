@@ -1424,6 +1424,7 @@ class Binary_Expression(Expression):
         elif operator in (Binary_Operator.COMP_EQ,
                           Binary_Operator.COMP_NEQ):
             # lobster-trace: LRM.Union_Type_Equality
+            # lobster-trace: LRM.Union_Type_Equality_Domain
             if (self.n_lhs.typ is None) or (self.n_rhs.typ is None):
                 # We can compary anything to null (including itself)
                 pass
@@ -1440,6 +1441,24 @@ class Binary_Expression(Expression):
                              "type mismatch: %s and %s do not match" %
                              (self.n_lhs.typ.name,
                               self.n_rhs.typ.name))
+                else:
+                    # Check that there is at least one pair of member
+                    # types (one from each side) where one is a subtype
+                    # of the other. This implements Equality_Domain for
+                    # union types: an unrelated record type is rejected.
+                    lhs_members = (self.n_lhs.typ.types
+                                   if isinstance(self.n_lhs.typ, Union_Type)
+                                   else [self.n_lhs.typ])
+                    rhs_members = (self.n_rhs.typ.types
+                                   if isinstance(self.n_rhs.typ, Union_Type)
+                                   else [self.n_rhs.typ])
+                    if not any(lm.is_subclass_of(rm) or rm.is_subclass_of(lm)
+                               for lm in lhs_members
+                               for rm in rhs_members):
+                        mh.error(self.location,
+                                 "type mismatch: %s and %s do not match" %
+                                 (self.n_lhs.typ.name,
+                                  self.n_rhs.typ.name))
             elif self.n_lhs.typ != self.n_rhs.typ:
                 # Otherwise we can compare anything, as long as the
                 # types match

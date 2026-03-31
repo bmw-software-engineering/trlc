@@ -1545,7 +1545,8 @@ class VCG:
                                             prefix_typ.name)
             else:
                 field_map = prefix_typ.get_field_map()
-                union_id = "_".join(t.name for t in prefix_typ.types)
+                union_id = "_".join(t.fully_qualified_name()
+                                    for t in prefix_typ.types)
                 components = [
                     (name,
                      self.tr_type(info["n_typ"]),
