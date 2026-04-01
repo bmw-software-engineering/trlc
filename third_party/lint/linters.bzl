@@ -5,7 +5,7 @@ load("@aspect_rules_lint//lint:pylint.bzl", "lint_pylint_aspect")
 load("@aspect_rules_lint//lint:ty.bzl", "lint_ty_aspect")
 
 pylint = lint_pylint_aspect(
-    binary = Label("//tools/lint:pylint"),
+    binary = Label("//third_party/lint:pylint"),
     config = Label("//:pyproject.toml"),
 )
 
