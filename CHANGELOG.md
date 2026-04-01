@@ -26,6 +26,7 @@ generated in the following situations:
 
 
 ### 2.0.4-dev
+* [TRLC_RST] Add tool to convert TRLC Requirements to Sphinx RST Files
 
 * [TRLC] Add support for Python 3.14.
 
