@@ -43,7 +43,7 @@ setuptools.setup(
     license="GNU General Public License v3",
     packages=setuptools.find_packages(),
     install_requires="PyVCG[api]==1.0.8",
-    python_requires=">=3.8, <3.14",
+    python_requires=">=3.8, <3.15",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",

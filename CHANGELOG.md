@@ -27,6 +27,8 @@ generated in the following situations:
 
 ### 2.0.4-dev
 
+* [TRLC] Add support for Python 3.14.
+
 * [TRLC] Rework system tests as Bazel-native golden-file tests: each
   test directory is now a single `py_test` with one method per output
   mode (`output`, `output.brief`, `output.json`, `output.smtlib`),
