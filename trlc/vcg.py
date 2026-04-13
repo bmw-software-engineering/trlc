@@ -1476,7 +1476,7 @@ class VCG:
         """Lazily create an SMT record sort and uninterpreted function
         for dereferencing integer-encoded references.
 
-        :param type_key: cache key (Record_Type or Union_Type object)
+        :param type_key: cache key; always the canonical sort_name string
         :param sort_name: name for the SMT Record sort
         :param uf_name: name for the UF mapping integer to sort
         :param components: iterable of (field_name, smt_sort, needs_valid)
@@ -1495,8 +1495,7 @@ class VCG:
         self.preamble.add_statement(
             smt.Record_Declaration(
                 record_sort,
-                "%s from %s" % (type_key.name,
-                                type_key.location.to_string())))
+                sort_name))
 
         to_record_uf = smt.Function(
             uf_name, record_sort,
@@ -1559,7 +1558,7 @@ class VCG:
                 uf_name = "access.union." + union_id
 
             _, to_record_uf = self._ensure_record_deref(
-                prefix_typ, sort_name, uf_name, components)
+                sort_name, sort_name, uf_name, components)
             dereference = smt.Function_Application(to_record_uf,
                                                    prefix_value)
 
