@@ -52,6 +52,22 @@ pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 
 use_repo(pip, "trlc_dependencies")
 
+[
+    pip.parse(
+        hub_name = "trlc_sphinx_dependencies",
+        python_version = python_version,
+        requirements_lock = "//tools/sphinx:requirements.txt",
+    )
+    for python_version in [
+        "3.9",
+        "3.10",
+        "3.11",
+        "3.12",
+    ]
+]
+
+use_repo(pip, "trlc_sphinx_dependencies")
+
 # Dev-only pip hub: tools required for linting, static analysis, etc.
 pip_dev = use_extension(
     "@rules_python//python/extensions:pip.bzl",
@@ -68,7 +84,6 @@ pip_dev.parse(
 use_repo(pip_dev, "trlc_dev_dependencies")
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
 
 # ---------------------------------------------------------------------------
 # CVC5 binary archives

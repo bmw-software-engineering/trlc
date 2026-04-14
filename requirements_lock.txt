@@ -4,6 +4,10 @@
 #
 #    bazel run //:requirements.update
 #
+bigtree==0.17.0 \
+    --hash=sha256:5aa096ac6fddad9db0d38c8710242351fffe97463a1b3f00acbd32f815d61d4d \
+    --hash=sha256:b906913b47b2462bfb1fa16f492ecd00c2a6bc1eb16a6e75092affec77c251f1
+    # via -r requirements.txt
 cvc5==1.3.2 \
     --hash=sha256:04174c5cd3c858c972792debc96436632635db2f8c4098806cc7aa51a8de2920 \
     --hash=sha256:13759b6b50d46aa79e3a75e8979b8f36d5eb3fbce9430c5de5ee014ab202344a \

@@ -56,6 +56,10 @@ The Python implementation can be used for several purposes:
 * [Requirements Coverage Report](https://bmw-software-engineering.github.io/trlc/tracing.html)
 * [Code Coverage Report](https://bmw-software-engineering.github.io/trlc/htmlcov/index.html)
 
+### Tools Available
+
+* [TRLC_RST](tools/trlc_rst/README.md) Convert TRLC Requirements for Sphinx Build
+
 ## Dependencies
 
 ### Run-time

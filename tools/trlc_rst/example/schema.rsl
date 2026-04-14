@@ -1,0 +1,5 @@
+package MyProject
+
+type Requirement {
+    description optional String
+}

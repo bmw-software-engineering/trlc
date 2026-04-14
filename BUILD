@@ -50,12 +50,12 @@ compile_pip_requirements(
 
 alias(
     name = "format.check",
-    actual = "//tools/format:format.check",
+    actual = "//third_party/format:format.check",
 )
 
 alias(
     name = "format.fix",
-    actual = "//tools/format:format",
+    actual = "//third_party/format:format",
 )
 
 filegroup(
