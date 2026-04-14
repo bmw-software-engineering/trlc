@@ -548,6 +548,53 @@ class Parser(Parser_Base):
 
         return n_tuple
 
+    def parse_union_type(self):
+        """Parse a union type declaration: '[' Type1 ',' Type2 ... ']'
+
+        The leading S_BRA must be the next token when called.
+        Returns an ast.Union_Type node.
+        """
+        # lobster-trace: LRM.union_type
+        # lobster-trace: LRM.Union_Type_No_Duplicates
+        # lobster-trace: LRM.Union_Type_Record_Types_Only
+        self.match("S_BRA")
+        t_s_bra = self.ct
+
+        union_type_entries = []  # list of (Record_Type, Location)
+        first_type = self.parse_qualified_name(self.default_scope,
+                                               ast.Record_Type)
+        first_type.set_ast_link(self.ct)
+        union_type_entries.append((first_type, self.ct.location))
+
+        while self.peek("COMMA"):
+            self.match("COMMA")
+            next_type = self.parse_qualified_name(
+                self.default_scope,
+                ast.Record_Type)
+            next_type.set_ast_link(self.ct)
+            union_type_entries.append((next_type, self.ct.location))
+
+        self.match("S_KET")
+        t_s_ket = self.ct
+
+        seen = {}
+        for t, loc in union_type_entries:
+            fqn = t.fully_qualified_name()
+            if fqn in seen:
+                self.mh.error(loc,
+                              "duplicate type %s in union" % t.name,
+                              fatal=False)
+            else:
+                seen[fqn] = loc
+
+        union_types = [t for t, _ in union_type_entries]
+        c_typ = ast.Union_Type(
+            location = t_s_bra.location,
+            types    = union_types)
+        c_typ.set_ast_link(t_s_bra)
+        c_typ.set_ast_link(t_s_ket)
+        return c_typ
+
     def parse_record_component(self, n_record):
         assert isinstance(n_record, ast.Record_Type)
 
@@ -558,9 +605,15 @@ class Parser(Parser_Base):
             self.match_kw("optional")
             t_optional = self.ct
             c_optional = True
-        c_typ = self.parse_qualified_name(self.default_scope,
-                                          ast.Type)
-        c_typ.set_ast_link(self.ct)
+
+        # S_BRA here means a union type '[T1, T2, ...]', not array bounds.
+        # Array bounds '[INTEGER..INTEGER]' are checked in the next block.
+        if self.peek("S_BRA"):
+            c_typ = self.parse_union_type()
+        else:
+            c_typ = self.parse_qualified_name(self.default_scope,
+                                              ast.Type)
+            c_typ.set_ast_link(self.ct)
 
         if self.peek("S_BRA"):
             self.match("S_BRA")
@@ -1384,25 +1437,72 @@ class Parser(Parser_Base):
         while self.peek("DOT") or self.peek("S_BRA"):
             if self.peek("DOT"):
                 if not isinstance(n_name.typ, (ast.Tuple_Type,
-                                               ast.Record_Type)):
+                                               ast.Record_Type,
+                                               ast.Union_Type)):
                     # lobster-trace: LRM.Valid_Index_Prefixes
                     self.mh.error(n_name.location,
                                   "expression '%s' has type %s, "
-                                  "which is not a tuple or record" %
+                                  "which is not a tuple, record, or union" %
                                   (n_name.to_string(),
                                    n_name.typ.name))
+
                 self.match("DOT")
                 t_dot = self.ct
                 self.match("IDENTIFIER")
-                n_field = n_name.typ.components.lookup(self.mh,
-                                                       self.ct,
-                                                       ast.Composite_Component)
-                n_field.set_ast_link(self.ct)
+                t_field = self.ct
+
+                is_union_access = isinstance(n_name.typ,
+                                             ast.Union_Type)
+                is_universal = True
+
+                if is_union_access:
+                    # lobster-trace: LRM.Union_Type_Field_Access
+                    # lobster-trace: LRM.Union_Type_Field_Type_Conflict
+                    # lobster-trace: LRM.Union_Type_Field_Access_Validity
+                    field_name = t_field.value
+                    field_map = n_name.typ.get_field_map()
+                    if field_name not in field_map:
+                        self.mh.error(
+                            t_field.location,
+                            "field %s does not exist in any member"
+                            " of union type %s" %
+                            (field_name, n_name.typ.name))
+                    info = field_map[field_name]
+                    if info["n_typ"] is None:
+                        self.mh.error(
+                            t_field.location,
+                            "field %s has conflicting types in"
+                            " members of union type %s" %
+                            (field_name, n_name.typ.name))
+                    is_universal = info["count"] == info["total"]
+                    # lobster-trace: LRM.Union_Type_Partial_Field_Access
+                    if self.lint_mode and not is_universal:
+                        self.mh.check(
+                            t_field.location,
+                            "field %s exists only in %u of %u"
+                            " members of union type %s;"
+                            " accessing it on other members"
+                            " returns null" %
+                            (field_name,
+                             info["count"],
+                             info["total"],
+                             n_name.typ.name),
+                            "union_partial_field_access")
+                    n_field = info["component"]
+                else:
+                    n_field = n_name.typ.components.lookup(
+                        self.mh,
+                        t_field,
+                        ast.Composite_Component)
+
+                n_field.set_ast_link(t_field)
                 n_name = ast.Field_Access_Expression(
-                    mh       = self.mh,
-                    location = self.ct.location,
-                    n_prefix = n_name,
-                    n_field  = n_field)
+                    mh              = self.mh,
+                    location        = t_field.location,
+                    n_prefix        = n_name,
+                    n_field         = n_field,
+                    is_union_access = is_union_access,
+                    is_universal    = is_universal)
                 n_name.set_ast_link(t_dot)
 
             elif self.peek("S_BRA"):
@@ -1684,7 +1784,7 @@ class Parser(Parser_Base):
             return ast.Enumeration_Literal(self.ct.location,
                                            lit)
 
-        elif isinstance(typ, ast.Record_Type):
+        elif isinstance(typ, (ast.Record_Type, ast.Union_Type)):
             self.match("IDENTIFIER")
             t_name = self.ct
             if self.peek("DOT"):

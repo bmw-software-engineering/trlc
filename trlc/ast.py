@@ -1083,7 +1083,7 @@ class Record_Reference(Expression):
         # lobster-exclude: Constructor only declares variables
         assert isinstance(location, Location)
         assert isinstance(name, str)
-        assert isinstance(typ, Record_Type) or typ is None
+        assert isinstance(typ, (Record_Type, Union_Type)) or typ is None
         assert isinstance(package, Package)
         super().__init__(location, typ)
 
@@ -1108,6 +1108,7 @@ class Record_Reference(Expression):
 
     def resolve_references(self, mh):
         # lobster-trace: LRM.References_To_Extensions
+        # lobster-trace: LRM.Union_Type_Minimum_Members
         assert isinstance(mh, Message_Handler)
 
         self.target = self.package.symbols.lookup_direct(
@@ -1117,6 +1118,14 @@ class Record_Reference(Expression):
             required_subclass = Record_Object)
         if self.typ is None:
             self.typ = self.target.n_typ
+        elif isinstance(self.typ, Union_Type):
+            if not self.typ.is_compatible(self.target.n_typ):
+                mh.error(self.location,
+                         "expected reference of type %s,"
+                         " but %s is of type %s" %
+                         (self.typ.name,
+                          self.target.name,
+                          self.target.n_typ.name))
         elif not self.target.n_typ.is_subclass_of(self.typ):
             mh.error(self.location,
                      "expected reference of type %s, but %s is of type %s" %
@@ -1414,9 +1423,42 @@ class Binary_Expression(Expression):
 
         elif operator in (Binary_Operator.COMP_EQ,
                           Binary_Operator.COMP_NEQ):
+            # lobster-trace: LRM.Union_Type_Equality
+            # lobster-trace: LRM.Union_Type_Equality_Domain
             if (self.n_lhs.typ is None) or (self.n_rhs.typ is None):
                 # We can compary anything to null (including itself)
                 pass
+            elif isinstance(self.n_lhs.typ, Union_Type) or \
+                 isinstance(self.n_rhs.typ, Union_Type):
+                # For union types, we allow comparison if both
+                # sides are record-like (Record_Type or Union_Type)
+                lhs_is_record = isinstance(self.n_lhs.typ,
+                                           (Record_Type, Union_Type))
+                rhs_is_record = isinstance(self.n_rhs.typ,
+                                           (Record_Type, Union_Type))
+                if not (lhs_is_record and rhs_is_record):
+                    mh.error(self.location,
+                             "type mismatch: %s and %s do not match" %
+                             (self.n_lhs.typ.name,
+                              self.n_rhs.typ.name))
+                else:
+                    # Check that there is at least one pair of member
+                    # types (one from each side) where one is a subtype
+                    # of the other. This implements Equality_Domain for
+                    # union types: an unrelated record type is rejected.
+                    lhs_members = (self.n_lhs.typ.types
+                                   if isinstance(self.n_lhs.typ, Union_Type)
+                                   else [self.n_lhs.typ])
+                    rhs_members = (self.n_rhs.typ.types
+                                   if isinstance(self.n_rhs.typ, Union_Type)
+                                   else [self.n_rhs.typ])
+                    if not any(lm.is_subclass_of(rm) or rm.is_subclass_of(lm)
+                               for lm in lhs_members
+                               for rm in rhs_members):
+                        mh.error(self.location,
+                                 "type mismatch: %s and %s do not match" %
+                                 (self.n_lhs.typ.name,
+                                  self.n_rhs.typ.name))
             elif self.n_lhs.typ != self.n_rhs.typ:
                 # Otherwise we can compare anything, as long as the
                 # types match
@@ -1743,29 +1785,43 @@ class Binary_Expression(Expression):
 
 
 class Field_Access_Expression(Expression):
-    """Tuple or Record field access
+    """Tuple, Record, or Union field access
 
     For example in::
 
       foo.bar
       ^1  ^2
 
-    :attribute n_prefix: expression with tuple or record type (see 1)
+    :attribute n_prefix: expression with tuple, record, or union type (see 1)
     :type: Expression
 
-    :attribute n_field: a tuple field to dereference (see 2)
+    :attribute n_field: a field to dereference (see 2)
     :type: Composite_Component
 
+    :attribute is_union_access: True if the prefix is a union type
+    :type: bool
+
+    :attribute is_universal: True if field exists in all union members.
+    Only meaningful when is_union_access is True.
+    :type: bool
+
     """
-    def __init__(self, mh, location, n_prefix, n_field):
+    def __init__(self, mh, location, n_prefix, n_field,
+                 is_union_access=False, is_universal=True):
+        # lobster-trace: LRM.Union_Type_Field_Access
         assert isinstance(mh, Message_Handler)
         assert isinstance(n_prefix, Expression)
         assert isinstance(n_field, Composite_Component)
+        assert isinstance(is_union_access, bool)
+        assert isinstance(is_universal, bool)
         super().__init__(location, n_field.n_typ)
-        self.n_prefix = n_prefix
-        self.n_field  = n_field
+        self.n_prefix        = n_prefix
+        self.n_field         = n_field
+        self.is_union_access = is_union_access
+        self.is_universal    = is_universal
 
-        self.n_prefix.ensure_type(mh, self.n_field.member_of)
+        if not is_union_access:
+            self.n_prefix.ensure_type(mh, self.n_field.member_of)
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
@@ -1788,6 +1844,11 @@ class Field_Access_Expression(Expression):
             mh.error(self.n_prefix.location,
                      "null dereference")
 
+        # lobster-trace: LRM.Union_Type_Partial_Field_Access
+        # lobster-trace: LRM.Union_Type_Partial_Field_Null
+        if self.n_field.name not in v_prefix:
+            return Value(self.location, None, None)
+
         v_field = v_prefix[self.n_field.name]
         if isinstance(v_field, Implicit_Null):
             return v_field.evaluate(mh, context, gstab)
@@ -1795,7 +1856,10 @@ class Field_Access_Expression(Expression):
             return v_field
 
     def can_be_null(self):
-        return False
+        # A union field access on a partial field (not present in all
+        # member types) evaluates to null at runtime, so we must
+        # report True in that case.
+        return self.is_union_access and not self.is_universal
 
 
 class Range_Test(Expression):
@@ -2436,6 +2500,112 @@ class Array_Type(Type):
     def get_example_value(self):
         # lobster-exclude: utility method
         return "[%s]" % self.element_type.get_example_value()
+
+
+class Union_Type(Type):
+    # lobster-trace: LRM.union_type
+    # lobster-trace: LRM.Union_Type_Minimum_Members
+    # lobster-trace: LRM.Union_Type_Record_Types_Only
+    """Anonymous union type for record references.
+
+    These are declared implicitly when a record component specifies
+    multiple allowed record types using bracket syntax::
+
+      parent [Systemrequirement, Codebeamerrequirement]
+             ^
+
+    :attribute types: the allowed record types
+    :type: list[Record_Type]
+
+    """
+    def __init__(self, location, types):
+        assert isinstance(types, list)
+        assert len(types) >= 1
+        assert all(isinstance(t, Record_Type) for t in types)
+        name = "[%s]" % ", ".join(t.name for t in types)
+        super().__init__(name, location)
+        self.types = types
+        self._field_map = None
+
+    def get_field_map(self):
+        # lobster-trace: LRM.Union_Type_Field_Access
+        """Compute accessible fields across all union members.
+
+        Returns a dict mapping field name to a dict with keys:
+
+        * ``component``: a representative Composite_Component
+        * ``n_typ``: the field type (None if conflicting)
+        * ``count``: how many member types have this field
+        * ``total``: total number of member types
+        * ``optional_in_any``: True if optional in at least one member
+
+        :rtype: dict[str, dict]
+        """
+        if self._field_map is not None:
+            return self._field_map
+
+        field_map = {}
+        for record_type in self.types:
+            seen_in_type = set()
+            for comp in record_type.all_components():
+                if comp.name in seen_in_type:
+                    continue
+                seen_in_type.add(comp.name)
+                if comp.name not in field_map:
+                    field_map[comp.name] = {
+                        "component"       : comp,
+                        "n_typ"           : comp.n_typ,
+                        "count"           : 1,
+                        "total"           : len(self.types),
+                        "optional_in_any" : comp.optional,
+                    }
+                else:
+                    info = field_map[comp.name]
+                    info["count"] += 1
+                    # Type identity (is) is correct here:
+                    # non-union type objects are structural
+                    # singletons in the symbol table, so
+                    # identity comparison is both correct and
+                    # cheap.
+                    if info["n_typ"] is not comp.n_typ:
+                        info["n_typ"] = None  # type conflict
+                    if comp.optional:
+                        info["optional_in_any"] = True
+
+        self._field_map = field_map
+        return self._field_map
+
+    def dump(self, indent=0):  # pragma: no cover
+        # lobster-exclude: Debugging feature
+        self.write_indent(indent, "Union_Type")
+        for t in self.types:
+            self.write_indent(indent + 1, t.name)
+
+    def perform_type_checks(self, mh, value, gstab):
+        # Union types have no checks of their own; type validation
+        # happens in Record_Reference.resolve_references() via
+        # is_compatible().  Returning True unconditionally is
+        # intentional.
+        assert isinstance(mh, Message_Handler)
+        assert isinstance(value, Expression)
+        assert isinstance(gstab, Symbol_Table)
+        return True
+
+    def is_compatible(self, record_type):
+        """Test if the given record type is accepted by this union.
+
+        :param record_type: type to check
+        :type record_type: Record_Type
+
+        :returns: true if the type is or extends one of the union members
+        :rtype: bool
+        """
+        assert isinstance(record_type, Record_Type)
+        return any(record_type.is_subclass_of(t) for t in self.types)
+
+    def get_example_value(self):
+        # lobster-exclude: utility method
+        return "%s_instance" % self.types[0].name
 
 
 class Builtin_Integer(Builtin_Numeric_Type):

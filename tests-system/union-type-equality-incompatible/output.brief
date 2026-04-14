@@ -1,0 +1,2 @@
+union-type-equality-incompatible/test.rsl:22:10: trlc error: type mismatch: [TypeA, TypeB] and TypeC do not match
+Processed 1 model and 1 requirement file and found 1 error

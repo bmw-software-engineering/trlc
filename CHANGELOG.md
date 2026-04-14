@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 3.1 of [TRLC language reference
+Up to date with version 3.3 of [TRLC language reference
 manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
@@ -29,6 +29,11 @@ generated in the following situations:
 
 * [TRLC] Add support for Python 3.14.
 
+* [TRLC, LRM] Add union type syntax for record attributes:
+  `parent [TypeA, TypeB]` allows an attribute to reference objects of any of the listed record types.
+
+* [LRM] Refactor `Abstract_Type` requirement
+
 * [TRLC] Rework system tests as Bazel-native golden-file tests: each
   test directory is now a single `py_test` with one method per output
   mode (`output`, `output.brief`, `output.json`, `output.smtlib`),
@@ -47,8 +52,6 @@ generated in the following situations:
 * [BAZEL] Add Rules Lint for Formatting and Linting
 
 * [BAZEL] Update Bazel to 8.5.1
-
-* [LRM] Refactor `Abstract_Type` requirement
 
 ### 2.0.3
 

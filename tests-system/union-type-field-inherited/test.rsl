@@ -1,0 +1,21 @@
+package Test
+
+type Base {
+  description String
+}
+
+type TypeA extends Base {
+  y Integer
+}
+
+type TypeB extends Base {
+  z Integer
+}
+
+type Req {
+  parent [TypeA, TypeB]
+}
+
+checks Req {
+  parent.description != null, "need description"
+}
