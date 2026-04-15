@@ -1,0 +1,13 @@
+package Test3
+
+T foo {
+  x     = 5
+  ref   = foo
+  extra = 3
+}
+
+T bar {
+  x     = -10
+  ref   = bar
+  extra = 3
+}

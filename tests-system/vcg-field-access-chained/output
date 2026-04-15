@@ -1,0 +1,9 @@
+c, "potato"
+^ vcg-field-access-chained/test1.rsl:20: issue: expression could be null [vcg-evaluation-of-null]
+| example record_type triggering error:
+|   T3 bad_potato {
+|     mid = T2_instance_0
+|     /* mid_opt is null */
+|     /* c is null */
+|   }
+Processed 1 model and 0 requirement files and found 1 warning

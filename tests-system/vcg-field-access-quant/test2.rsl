@@ -1,0 +1,16 @@
+package Test2
+
+type T {
+  x Integer
+}
+
+type U {
+  items T [0 .. *]
+  limit Integer
+  c     optional Boolean
+}
+
+checks U {
+  (forall e in items => e.x < limit), fatal "potato"
+  c, "potato"
+}

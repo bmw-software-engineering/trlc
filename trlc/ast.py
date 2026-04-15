@@ -342,6 +342,26 @@ class Check(Node):
         # raised is non-fatal.
         self.message   = t_message.value.replace("\n", " ")
         self.extrainfo = extrainfo
+        self._uses_field_access = None
+
+    @property
+    def uses_field_access(self):
+        """Cached test: does this check's expression follow a record/union
+        reference?
+
+        Returns True if any sub-expression of the check expression is a
+        :class:`Field_Access_Expression` whose prefix has a
+        :class:`Record_Type` or :class:`Union_Type` type. Used by
+        the VCG to split checks into Phase A ("at declaration") and
+        Phase B ("after references").
+
+        :return: whether this check dereferences a record/union reference
+        :rtype: bool
+
+        """
+        if self._uses_field_access is None:
+            self._uses_field_access = self.n_expr.uses_field_access()
+        return self._uses_field_access
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
@@ -544,6 +564,22 @@ class Expression(Node, metaclass=ABCMeta):
         """
         assert False, "can_be_null not implemented for %s" % \
             self.__class__.__name__
+
+    def uses_field_access(self):
+        """Test if this expression contains a field access on a record or
+        union reference.
+
+        Returns True if any sub-expression is a
+        :class:`Field_Access_Expression` whose prefix has a
+        :class:`Record_Type` or :class:`Union_Type` type. This is
+        used by the VCG to split checks into "at declaration"
+        (Phase A) and "after references" (Phase B).
+
+        :return: whether this expression follows a record/union reference
+        :rtype: bool
+
+        """
+        return False
 
 
 class Implicit_Null(Expression):
@@ -954,6 +990,9 @@ class Array_Aggregate(Expression):
     def can_be_null(self):
         return False
 
+    def uses_field_access(self):
+        return any(expr.uses_field_access() for expr in self.value)
+
 
 class Tuple_Aggregate(Expression):
     """Instances of a tuple
@@ -1046,6 +1085,10 @@ class Tuple_Aggregate(Expression):
 
     def can_be_null(self):
         return False
+
+    def uses_field_access(self):
+        return any(expr.uses_field_access()
+                   for expr in self.value.values())
 
 
 class Record_Reference(Expression):
@@ -1351,6 +1394,9 @@ class Unary_Expression(Expression):
 
     def can_be_null(self):
         return False
+
+    def uses_field_access(self):
+        return self.n_operand.uses_field_access()
 
 
 class Binary_Expression(Expression):
@@ -1783,6 +1829,10 @@ class Binary_Expression(Expression):
     def can_be_null(self):
         return False
 
+    def uses_field_access(self):
+        return (self.n_lhs.uses_field_access() or
+                self.n_rhs.uses_field_access())
+
 
 class Field_Access_Expression(Expression):
     """Tuple, Record, or Union field access
@@ -1850,7 +1900,8 @@ class Field_Access_Expression(Expression):
             return Value(self.location, None, None)
 
         v_field = v_prefix[self.n_field.name]
-        if isinstance(v_field, Implicit_Null):
+        if isinstance(v_field, Expression):
+            # lobster-trace: LRM.Dereference
             return v_field.evaluate(mh, context, gstab)
         else:
             return v_field
@@ -1860,6 +1911,12 @@ class Field_Access_Expression(Expression):
         # member types) evaluates to null at runtime, so we must
         # report True in that case.
         return self.is_union_access and not self.is_universal
+
+    def uses_field_access(self):
+        # lobster-trace: LRM.Dereference
+        if isinstance(self.n_prefix.typ, (Record_Type, Union_Type)):
+            return True
+        return self.n_prefix.uses_field_access()
 
 
 class Range_Test(Expression):
@@ -1945,6 +2002,11 @@ class Range_Test(Expression):
     def can_be_null(self):
         return False
 
+    def uses_field_access(self):
+        return (self.n_lhs.uses_field_access() or
+                self.n_lower.uses_field_access() or
+                self.n_upper.uses_field_access())
+
 
 class OneOf_Expression(Expression):
     """OneOf expression
@@ -1996,6 +2058,9 @@ class OneOf_Expression(Expression):
 
     def can_be_null(self):
         return False
+
+    def uses_field_access(self):
+        return any(n_choice.uses_field_access() for n_choice in self.choices)
 
 
 class Action(Node):
@@ -2143,6 +2208,13 @@ class Conditional_Expression(Expression):
         return any(action.n_expr.can_be_null()
                    for action in self.actions)
 
+    def uses_field_access(self):
+        return (any(action.n_cond.uses_field_access() or
+                    action.n_expr.uses_field_access()
+                    for action in self.actions) or
+                (self.else_expr is not None and
+                 self.else_expr.uses_field_access()))
+
 
 class Quantified_Expression(Expression):
     """A quantified expression
@@ -2256,6 +2328,10 @@ class Quantified_Expression(Expression):
 
     def can_be_null(self):
         return False
+
+    def uses_field_access(self):
+        return (self.n_source.uses_field_access() or
+                self.n_expr.uses_field_access())
 
 
 ##############################################################################

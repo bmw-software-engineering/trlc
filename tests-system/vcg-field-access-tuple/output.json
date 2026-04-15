@@ -1,0 +1,5 @@
+pair = (bar, foo)
+       ^ vcg-field-access-tuple/test1.trlc:16: check error: potato
+U passing {
+  ^^^^^^^ vcg-field-access-tuple/test1.trlc:11: error: check c (test1.rsl:23) evaluates to null
+Processed 1 model and 1 requirement file and found 2 errors

@@ -1,0 +1,25 @@
+c, "potato"
+^ vcg-field-access-phase-order/test1.rsl:12: issue: expression could be null [vcg-evaluation-of-null]
+| example record_type triggering error:
+|   T bad_potato {
+|     x = 0
+|     /* ref_a is null */
+|     ref_b = T_instance_0
+|     /* c is null */
+|   }
+c, "potato"
+^ vcg-field-access-phase-order/test2.rsl:15: issue: expression could be null [vcg-evaluation-of-null]
+| example record_type triggering error:
+|   U bad_potato {
+|     /* c is null */
+|     ref = T_instance_0
+|   }
+U bad_score {
+  ^^^^^^^^^ vcg-field-access-phase-order/test2.trlc:15: check error: wibble
+U bad_score {
+  ^^^^^^^^^ vcg-field-access-phase-order/test2.trlc:15: error: check c (test2.rsl:15) evaluates to null
+U no_ref {
+  ^^^^^^ vcg-field-access-phase-order/test2.trlc:19: check error: potato
+U passing {
+  ^^^^^^^ vcg-field-access-phase-order/test2.trlc:11: error: check c (test2.rsl:15) evaluates to null
+Processed 3 models and 1 requirement file and found 2 warnings and 4 errors
