@@ -1,0 +1,20 @@
+package Test2
+
+T foo {
+  x = 10
+}
+
+T bar {
+  x = 0
+}
+
+U passing {
+  ref = foo
+}
+
+U bad_score {
+  ref = bar
+}
+
+U no_ref {
+}

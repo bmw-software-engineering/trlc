@@ -1,0 +1,15 @@
+package Test2
+
+type T {
+  lo Integer
+  hi Integer
+}
+
+type U {
+  bounds T
+  x     Integer
+}
+
+checks U {
+  x in bounds.lo .. bounds.hi, "potato"
+}

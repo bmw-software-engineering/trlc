@@ -26,6 +26,9 @@ generated in the following situations:
 
 ### 2.0.5-dev
 
+* [TRLC] Add VCG support for field access on record/union references
+  (two-phase check analysis, #156 step 2/2).
+
 * [TRLC, API] Fix various typos in the documentation.
 
 * [TRLC, LRM] Allow union types as tuple field types:

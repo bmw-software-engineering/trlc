@@ -1,0 +1,3 @@
+vcg-field-access-quant/test2.trlc:20:3: trlc check error: potato
+vcg-field-access-quant/test2.trlc:15:3: trlc error: check c (test2.rsl:15) evaluates to null
+Processed 2 models and 1 requirement file and found 2 errors

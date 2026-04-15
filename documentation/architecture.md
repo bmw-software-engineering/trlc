@@ -977,6 +977,62 @@ that `fatal_error_1` could not have occurred. But we cannot make the
 same assumption about `normal_error_1`, any checks under
 `fatal_error_1` do *not* get the truth of `normal_error_1` asserted.
 
+#### Two-phase check analysis
+
+Checks within a type are split into two phases before building the VCG graph:
+
+* **Phase A — "at declaration"**: Checks whose expressions do *not*
+  dereference any record or union reference (i.e., the expression
+  tree contains no `Field_Access_Expression` with a `Record_Type` or
+  `Union_Type` prefix). These checks operate only on the type's own
+  components and are analyzed first.
+
+* **Phase B — "after references"**: Checks whose expressions *do*
+  dereference a record or union reference via a `Field_Access_Expression`.
+  These are analyzed after Phase A, so they benefit from any
+  knowledge accumulated by Phase A `fatal` checks.
+
+The classification is computed lazily and cached on each `Check` node
+via `Check.uses_field_access`. Note that on `Check` this is a
+`@property` (no parentheses), whereas the same-named method on
+`Expression` subclasses is a regular method (called with `()`).
+
+The asymmetry is intentional. `Check` is a stable, long-lived AST
+node; its expression tree never changes, so caching the result in
+`_uses_field_access` is safe and future-proofs against callers that
+may read the property more than once. `Expression` subclasses recurse
+into their children and are only ever called from within that `Check`
+property, so they execute at most once already — adding a backing
+field and lazy-init boilerplate to every one of the ~15 concrete
+expression classes would cost more than it saves.
+
+The split is implemented in `checks_on_composite_type` as two passes
+over `iter_checks()`, with Phase B having access to the
+`fatal`-accumulated state from Phase A.
+
+This ordering cannot be observed at runtime (all checks are evaluated
+in declaration order), but the VCG is more precise when
+non-reference checks have already contributed their `fatal` knowledge
+before reference-based checks are proved.
+
+The reason precision improves is rooted in how referenced records are
+modelled. A record reference (e.g. `parent optional Requirement`) is
+encoded as a bare integer (the record's unique ID). To access a field
+on it — say `parent.priority` — the VCG creates an *uninterpreted
+function* `access.Package.Requirement : Int → RecordSort` that maps
+the ID to a synthetic SMT record sort. An uninterpreted function is
+axiom-free: the solver can assign any field value it pleases unless we
+have added explicit assertions. Phase A `fatal` checks establish
+concrete facts about the type's *own* components (integers, booleans,
+etc.) without involving any UF. When those facts are in the SMT
+context before Phase B runs, they constrain what the solver can try
+when reasoning about UF results — for example, knowing `severity <= 3`
+(fatal, Phase A) means the solver cannot use `severity = 99` when
+trying to defeat a later Phase B check on `parent.priority >
+severity`. Without the split the Phase A knowledge would arrive too
+late and the solver would treat the component as unbounded, producing
+a false positive.
+
 #### Types
 
 We model types as follows

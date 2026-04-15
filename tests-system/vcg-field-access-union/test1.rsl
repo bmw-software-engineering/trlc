@@ -1,0 +1,18 @@
+package Test1
+
+type T1 {
+  x Integer
+}
+
+type T2 {
+  x Integer
+}
+
+type U {
+  ref optional [T1, T2]
+}
+
+checks U {
+  ref != null, fatal "potato"
+  ref.x > 0, "wibble"
+}

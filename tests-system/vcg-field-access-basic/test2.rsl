@@ -1,0 +1,10 @@
+package Test2
+
+type T {
+  x   Integer [2 .. *]
+  ref T
+}
+
+checks T {
+  10 / len(ref.x) > 0, "potato"
+}
