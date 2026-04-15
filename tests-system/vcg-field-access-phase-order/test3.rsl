@@ -1,0 +1,15 @@
+package Test3
+
+type T {
+  x Integer
+}
+
+type U {
+  ref optional T
+  y   Integer
+}
+
+checks U {
+  ref != null implies ref.x > 0, "wibble"
+  y > 0, fatal "potato"
+}

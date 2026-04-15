@@ -1,0 +1,7 @@
+U no_ref {
+  ^^^^^^ vcg-field-access-union/test1.trlc:19: check error: potato
+U with_b {
+  ^^^^^^ vcg-field-access-union/test1.trlc:15: check error: wibble
+U fail_b {
+  ^^^^^^ vcg-field-access-union/test2.trlc:26: check error: wibble
+Processed 2 models and 2 requirement files and found 3 errors

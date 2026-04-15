@@ -1,0 +1,21 @@
+package Test1
+
+type T1 {
+  x Integer
+}
+
+type T2 {
+  inner T1
+}
+
+type T3 {
+  mid     T2
+  mid_opt optional T2
+  c       optional Boolean
+}
+
+checks T3 {
+  mid.inner.x > 0, fatal "potato"
+  mid_opt != null implies mid_opt.inner.x > 0, "potato"
+  c, "potato"
+}

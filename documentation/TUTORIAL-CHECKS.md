@@ -181,7 +181,41 @@ checks Requirement {
 }
 ```
 
-## Current limitations and notes
+## Following references
 
-Right now it is not possible to "follow references" in the check
-language. We are considering to add this in a future release.
+It is possible to access fields of a referenced record directly in
+check expressions using the `.` operator. For example, given:
+
+```
+type Node {
+  value Integer
+  next  optional Node
+}
+
+checks Node {
+  next != null implies next.value > value, fatal "must be in order"
+}
+```
+
+You can also use field access inside quantifiers. For example, if you
+have an array of record references you can write:
+
+```
+type Item {
+  value Integer
+}
+
+type Container {
+  items Item [0 .. *]
+  limit Integer
+}
+
+checks Container {
+  (forall e in items => e.value < limit), fatal "all items must be below limit"
+}
+```
+
+Note that accessing a field on an optional reference without a null
+guard will produce a runtime error if the reference is null. The
+static analyser (VCG) will check for potential null dereferences and
+warn you accordingly.

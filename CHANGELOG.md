@@ -26,6 +26,9 @@ generated in the following situations:
 
 
 ### 2.0.4-dev
+* [TRLC] Add VCG support for field access on record/union references
+  (two-phase check analysis, #156 step 2/2).
+
 * [TRLC_RST] Add tool to convert TRLC Requirements to Sphinx RST Files
 
 * [TRLC] Add support for Python 3.14.

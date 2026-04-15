@@ -1,0 +1,18 @@
+c, "potato"
+^ vcg-field-access-basic/test1.rsl:11: issue: expression could be null [vcg-evaluation-of-null]
+| example record_type triggering error:
+|   T bad_potato {
+|     x = 0
+|     /* ref is null */
+|     /* c is null */
+|   }
+10 / len(ref.x) > 0, "potato"
+   ^ vcg-field-access-basic/test2.rsl:9: issue: divisor could be 0 [vcg-div-by-zero]
+   | example record_type triggering error:
+   |   T bad_potato {
+   |     x = [-1, -1]
+   |     ref = T_instance_0
+   |   }
+T bar {
+  ^^^ vcg-field-access-basic/test3.trlc:9: check error: potato
+Processed 3 models and 1 requirement file and found 2 warnings and 1 error

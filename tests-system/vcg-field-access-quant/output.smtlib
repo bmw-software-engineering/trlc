@@ -1,0 +1,22 @@
+0 / (len(arr) - 5) == 0, "potato"
+  ^ vcg-field-access-quant/test1.rsl:10: issue: divisor could be 0 [vcg-div-by-zero]
+  | example record_type triggering error:
+  |   T bad_potato {
+  |     x = 0
+  |     arr = [T_instance_2, T_instance_2, T_instance_2, T_instance_2, T_instance_2]
+  |   }
+0 / (len(arr) - 5) == 0, "potato"
+                   ^^ vcg-field-access-quant/test1.rsl:10: issue: expression is always true [vcg-always-true]
+c, "potato"
+^ vcg-field-access-quant/test2.rsl:15: issue: expression could be null [vcg-evaluation-of-null]
+| example record_type triggering error:
+|   U bad_potato {
+|     items = []
+|     limit = 0
+|     /* c is null */
+|   }
+U failing {
+  ^^^^^^^ vcg-field-access-quant/test2.trlc:20: check error: potato
+U passing {
+  ^^^^^^^ vcg-field-access-quant/test2.trlc:15: error: check c (test2.rsl:15) evaluates to null
+Processed 2 models and 1 requirement file and found 3 warnings and 2 errors

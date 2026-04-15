@@ -1,0 +1,9 @@
+U bad_score {
+  ^^^^^^^^^ vcg-field-access-phase-order/test2.trlc:15: check error: wibble
+U bad_score {
+  ^^^^^^^^^ vcg-field-access-phase-order/test2.trlc:15: error: check c (test2.rsl:15) evaluates to null
+U no_ref {
+  ^^^^^^ vcg-field-access-phase-order/test2.trlc:19: check error: potato
+U passing {
+  ^^^^^^^ vcg-field-access-phase-order/test2.trlc:11: error: check c (test2.rsl:15) evaluates to null
+Processed 3 models and 1 requirement file and found 4 errors

@@ -1,0 +1,14 @@
+package Test1
+
+type T {
+  a Boolean
+  b Boolean
+}
+
+type U {
+  flags T
+}
+
+checks U {
+  oneof(flags.a, flags.b), "potato"
+}

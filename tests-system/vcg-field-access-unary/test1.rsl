@@ -1,0 +1,15 @@
+package Test1
+
+type T {
+  flag Boolean
+}
+
+type U {
+  ref T
+  c   optional Boolean
+}
+
+checks U {
+  not ref.flag, "potato"
+  c, "potato"
+}

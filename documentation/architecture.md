@@ -977,6 +977,32 @@ that `fatal_error_1` could not have occurred. But we cannot make the
 same assumption about `normal_error_1`, any checks under
 `fatal_error_1` do *not* get the truth of `normal_error_1` asserted.
 
+#### Two-phase check analysis
+
+Checks within a type are split into two phases before building the VCG graph:
+
+* **Phase A — "at declaration"**: Checks whose expressions do *not*
+  dereference any record or union reference (i.e., the expression
+  tree contains no `Field_Access_Expression` with a `Record_Type` or
+  `Union_Type` prefix). These checks operate only on the type's own
+  components and are analyzed first.
+
+* **Phase B — "after references"**: Checks whose expressions *do*
+  dereference a record or union reference via a `Field_Access_Expression`.
+  These are analyzed after Phase A, so they benefit from any
+  knowledge accumulated by Phase A `fatal` checks.
+
+The classification is computed lazily and cached on each `Check` node
+via `Check.uses_field_access`. The split is implemented in
+`checks_on_composite_type` as two passes over `iter_checks()`, with
+Phase B having access to the `fatal`-accumulated state from Phase A.
+
+This ordering cannot be observed at runtime (all checks are evaluated
+in declaration order), but it is important for the VCG because the
+uninterpreted-function model for referenced records requires that
+non-reference checks have already contributed their `fatal` knowledge
+before reference-based checks are proved.
+
 #### Types
 
 We model types as follows

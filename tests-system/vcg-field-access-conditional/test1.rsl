@@ -1,0 +1,14 @@
+package Test1
+
+type T {
+  x   Integer
+}
+
+type U {
+  ref optional T
+  low Integer
+}
+
+checks U {
+  (if ref != null then ref.x else 0) >= low, "potato"
+}
