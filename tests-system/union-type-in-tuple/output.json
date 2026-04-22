@@ -1,0 +1,40 @@
+{
+  "asr1": {
+    "rationale": "Derived from context"
+  },
+  "fr1": {
+    "derived_from": [
+      {
+        "item": "Test.sr1",
+        "version": 1
+      }
+    ],
+    "description": "Feature req linked to system req"
+  },
+  "fr2": {
+    "derived_from": [
+      {
+        "item": "Test.asr1",
+        "version": 1
+      }
+    ],
+    "description": "Feature req linked to assumed system req"
+  },
+  "fr3": {
+    "derived_from": [
+      {
+        "item": "Test.sr1",
+        "version": 1
+      },
+      {
+        "item": "Test.asr1",
+        "version": 2
+      }
+    ],
+    "description": "Feature req linked to both"
+  },
+  "sr1": {
+    "description": "System requirement 1"
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

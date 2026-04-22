@@ -1,0 +1,15 @@
+package Test
+
+SystemReq s1 {
+  description = "system req 1"
+}
+
+FeatReq f1 {
+  description  = "ok"
+  derived_from = s1 @ 1
+}
+
+FeatReq f2 {
+  description  = "bad version"
+  derived_from = s1 @ 0
+}
