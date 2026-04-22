@@ -1,0 +1,19 @@
+package Test
+
+AlphaReq alpha1 {
+  a = "alpha"
+}
+
+BetaReq beta1 {
+  b = "beta"
+}
+
+Req r1 {
+  description = "linked to alpha"
+  parent      = (alpha1, 1)
+}
+
+Req r2 {
+  description = "linked to beta"
+  parent      = (beta1, 2)
+}

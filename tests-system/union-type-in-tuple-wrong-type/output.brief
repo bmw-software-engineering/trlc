@@ -1,0 +1,2 @@
+union-type-in-tuple-wrong-type/test.trlc:9:18: trlc error: expected reference of type [SystemReq, AssumedSystemReq], but other1 is of type OtherReq
+Processed 1 model and 1 requirement file and found 1 error

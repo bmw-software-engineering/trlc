@@ -449,8 +449,13 @@ class Parser(Parser_Base):
             t_optional        = None
 
         # lobster-trace: LRM.Tuple_Field_Types
-        field_type = self.parse_qualified_name(self.default_scope,
-                                               ast.Type)
+        # S_BRA here means a union type '[T1, T2, ...]', not array bounds.
+        if self.peek("S_BRA"):
+            # lobster-trace: LRM.union_type
+            field_type = self.parse_union_type()
+        else:
+            field_type = self.parse_qualified_name(self.default_scope,
+                                                   ast.Type)
         comp = ast.Composite_Component(name        = field_name.value,
                                        description = field_description,
                                        location    = field_name.location,

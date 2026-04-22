@@ -1,0 +1,24 @@
+package Test
+
+TypeA alpha {
+  a = "hello"
+}
+
+TypeB beta {
+  b = "world"
+}
+
+Req r1 {
+  description = "with version"
+  link = alpha @ 1
+}
+
+Req r2 {
+  description = "with version"
+  link = beta @ 2
+}
+
+Req r3 {
+  description = "without version"
+  link = alpha
+}

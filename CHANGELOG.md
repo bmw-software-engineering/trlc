@@ -26,8 +26,12 @@ generated in the following situations:
 
 ### 2.0.5-dev
 
+* [TRLC, LRM] Allow union types as tuple field types:
+  `tuple Ref { item [TypeA, TypeB] separator @ version Integer }` now
+  permits a tuple field to reference objects of any of the listed record types.
+
 * [BAZEL] Fix cvc5.BUILD to use platform-aware binary path
-  (`bin/cvc5.exe` on Windows, `bin/cvc5` elsewhere). 
+  (`bin/cvc5.exe` on Windows, `bin/cvc5` elsewhere).
 
 * [Lint] Fix cascaded abstract types (#183)
 

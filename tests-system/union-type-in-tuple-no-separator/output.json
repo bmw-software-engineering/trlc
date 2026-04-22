@@ -1,0 +1,23 @@
+{
+  "alpha1": {
+    "a": "alpha"
+  },
+  "beta1": {
+    "b": "beta"
+  },
+  "r1": {
+    "description": "linked to alpha",
+    "parent": {
+      "item": "Test.alpha1",
+      "version": 1
+    }
+  },
+  "r2": {
+    "description": "linked to beta",
+    "parent": {
+      "item": "Test.beta1",
+      "version": 2
+    }
+  }
+}
+Processed 1 model and 1 requirement file and found no issues
