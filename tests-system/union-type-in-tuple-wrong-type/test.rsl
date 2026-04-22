@@ -1,0 +1,24 @@
+package Test
+
+type SystemReq {
+  description String
+}
+
+type AssumedSystemReq {
+  rationale String
+}
+
+type OtherReq {
+  text String
+}
+
+tuple SystemLevelReqId {
+  item      [SystemReq, AssumedSystemReq]
+  separator @
+  version   Integer
+}
+
+type FeatReq {
+  description  String
+  derived_from SystemLevelReqId
+}

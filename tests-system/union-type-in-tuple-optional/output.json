@@ -1,0 +1,30 @@
+{
+  "alpha": {
+    "a": "hello"
+  },
+  "beta": {
+    "b": "world"
+  },
+  "r1": {
+    "description": "with version",
+    "link": {
+      "ref": "Test.alpha",
+      "version": 1
+    }
+  },
+  "r2": {
+    "description": "with version",
+    "link": {
+      "ref": "Test.beta",
+      "version": 2
+    }
+  },
+  "r3": {
+    "description": "without version",
+    "link": {
+      "ref": "Test.alpha",
+      "version": null
+    }
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

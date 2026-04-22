@@ -1,0 +1,24 @@
+package Test
+
+SystemReq sr1 {
+  description = "System requirement 1"
+}
+
+AssumedSystemReq asr1 {
+  rationale = "Derived from context"
+}
+
+FeatReq fr1 {
+  description  = "Feature req linked to system req"
+  derived_from = [sr1 @ 1]
+}
+
+FeatReq fr2 {
+  description  = "Feature req linked to assumed system req"
+  derived_from = [asr1 @ 1]
+}
+
+FeatReq fr3 {
+  description  = "Feature req linked to both"
+  derived_from = [sr1 @ 1, asr1 @ 2]
+}
