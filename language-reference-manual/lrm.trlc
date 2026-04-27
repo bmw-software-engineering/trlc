@@ -529,7 +529,7 @@ section "Type declarations" {
                             '}'
 
       field_declaration ::=
-        described_name [ 'optional' ] qualified_name_FIELD_TYPE
+        described_name [ 'optional' ] ( qualified_name_FIELD_TYPE | union_type )
 
       separator_declaration ::=
         'separator' separator_symbol
@@ -544,7 +544,8 @@ section "Type declarations" {
     Static_Semantics Tuple_Field_Types {
       text = '''
       A field type names any valid visible and complete
-      type. *(Specifically you may not have a recursive
+      type. This includes union types (see union_type).
+      *(Specifically you may not have a recursive
       tuple reference.)*
       '''
     }

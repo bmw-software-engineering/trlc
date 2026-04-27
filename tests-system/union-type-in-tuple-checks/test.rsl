@@ -1,0 +1,24 @@
+package Test
+
+type SystemReq {
+  description String
+}
+
+type AssumedReq {
+  rationale String
+}
+
+tuple LevelRef {
+  item      [SystemReq, AssumedReq]
+  separator @
+  version   Integer
+}
+
+checks LevelRef {
+  version > 0, error "version must be positive", version
+}
+
+type FeatReq {
+  description  String
+  derived_from LevelRef
+}

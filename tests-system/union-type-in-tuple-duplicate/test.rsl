@@ -1,0 +1,20 @@
+package Test
+
+type TypeA {
+  a Integer
+}
+
+type TypeB {
+  b Integer
+}
+
+tuple BadRef {
+  item    [TypeA, TypeB, TypeA]
+  separator @
+  version Integer
+}
+
+type Req {
+  description String
+  link        BadRef
+}
