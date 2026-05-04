@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: Git tag being released
+        required: true
+        type: string
+      registry_fork:
+        description: GitHub fork used to open the BCR PR (owner/repo)
+        required: false
+        type: string
+        default: AAmbuj/bazel-central-registry
+  push:
+    tags:
+      - "trlc-*"
+
+permissions:
+  id-token: write
+  attestations: write
+  contents: write
+
+jobs:
+  release:
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.4.0
+    with:
+      release_files: archives/*.*
+      prerelease: false
+      draft: true
+      tag_name: ${{ inputs.tag_name || github.ref_name }}
+    permissions:
+      id-token: write
+      attestations: write
+      contents: write
+    secrets: {}
+
+  publish:
+    needs: release
+    uses: ./.github/workflows/publish.yml
+    with:
+      tag_name: ${{ inputs.tag_name || github.ref_name }}
+      registry_fork: ${{ inputs.registry_fork || 'AAmbuj/bazel-central-registry' }}
+    secrets:
+      BCR_PUBLISH_TOKEN: ${{ secrets.BCR_PUBLISH_TOKEN }}
+
+  finalize:
+    needs: publish
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Publish draft release
+        run: gh release edit "$TAG" --draft=false --repo "$GITHUB_REPOSITORY"
+        env:
+          TAG: ${{ inputs.tag_name || github.ref_name }}
+          GH_TOKEN: ${{ github.token }}

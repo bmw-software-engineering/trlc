@@ -72,3 +72,16 @@ Optional dependency (not installed automatically):
 * [Binary CVC5](https://github.com/cvc5/cvc5/releases/tag/cvc5-1.3.2)
   (An alternative to PyPI CVC5, make sure to rename the binary to
   `cvc5` and put it on your PATH).
+
+## Automated Release Flow
+
+Releases are automated through GitHub Actions:
+
+* Push a release tag using the format `trlc-X.Y.Z`.
+* Workflow `.github/workflows/release.yml` creates a draft GitHub release and uploads `trlc-{TAG}.tar.gz`.
+* Workflow `.github/workflows/publish.yml` opens a Bazel Central Registry PR through `publish-to-bcr`.
+* After BCR publish succeeds, the release is finalized (published), which triggers `.github/workflows/package.yml` to publish wheels to PyPI.
+
+Required repository secret:
+
+* `BCR_PUBLISH_TOKEN`: Classic PAT with `workflow` and `repo` scopes, with access to your BCR fork (default fork: `AAmbuj/bazel-central-registry`).

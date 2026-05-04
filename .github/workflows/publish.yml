@@ -1,0 +1,46 @@
+name: Publish to BCR
+
+on:
+  workflow_call:
+    inputs:
+      tag_name:
+        required: true
+        type: string
+      registry_fork:
+        required: false
+        type: string
+        default: AAmbuj/bazel-central-registry
+    secrets:
+      BCR_PUBLISH_TOKEN:
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: Git tag being released
+        required: true
+        type: string
+      registry_fork:
+        description: GitHub fork used to open the BCR PR (owner/repo)
+        required: false
+        type: string
+        default: AAmbuj/bazel-central-registry
+
+jobs:
+  publish:
+    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.2.0
+    with:
+      tag_name: ${{ inputs.tag_name }}
+      registry_fork: ${{ inputs.registry_fork }}
+      draft: true
+      attest: true
+      tag_prefix: "trlc-"
+      author_name: Ambuj Singh Kushwaha
+      author_email: ambujsingh7566180876@gmail.com
+      committer_name: github-actions[bot]
+      committer_email: 41898282+github-actions[bot]@users.noreply.github.com
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    secrets:
+      publish_token: ${{ secrets.BCR_PUBLISH_TOKEN }}
