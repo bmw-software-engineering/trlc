@@ -1,0 +1,19 @@
+package Test
+
+type AlphaReq {
+  a String
+}
+
+type BetaReq {
+  b String
+}
+
+tuple ReqRef {
+  item    [AlphaReq, BetaReq]
+  version Integer
+}
+
+type Req {
+  description String
+  parent      ReqRef
+}

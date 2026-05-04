@@ -27,6 +27,10 @@ generated in the following situations:
 
 ### 2.0.5-dev
 
+* [TRLC, LRM] Allow union types as tuple field types:
+  `tuple Ref { item [TypeA, TypeB] separator @ version Integer }` now
+  permits a tuple field to reference objects of any of the listed record types.
+
 
 
 ### 2.0.4
