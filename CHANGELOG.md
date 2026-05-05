@@ -27,7 +27,7 @@ generated in the following situations:
 
 ### 2.0.5-dev
 
-
+* [Lint] Fix cascaded abstract types (#183)
 
 ### 2.0.4
 * [TRLC_RST] Add tool to convert TRLC Requirements to Sphinx RST Files
