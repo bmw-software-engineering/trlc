@@ -1,0 +1,13 @@
+package Ant_house
+
+abstract type Ant {
+  x Integer
+}
+
+abstract type Fire_Ant extends Ant {
+  y Integer
+}
+
+type Ant_hill extends Fire_Ant {
+  desc String
+}
