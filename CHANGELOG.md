@@ -24,11 +24,6 @@ generated in the following situations:
 
 ## Changelog
 
-
-### 2.0.5-dev
-
-
-
 ### 2.0.5-dev
 
 * [BAZEL] Fix cvc5.BUILD to use platform-aware binary path
