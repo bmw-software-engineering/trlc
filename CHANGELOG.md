@@ -29,6 +29,11 @@ generated in the following situations:
 
 
 
+### 2.0.5
+
+* [BAZEL] Fix cvc5.BUILD to use platform-aware binary path
+  (`bin/cvc5.exe` on Windows, `bin/cvc5` elsewhere). 
+
 ### 2.0.4
 * [TRLC_RST] Add tool to convert TRLC Requirements to Sphinx RST Files
 
