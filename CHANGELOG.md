@@ -29,7 +29,10 @@ generated in the following situations:
 * [BAZEL] Fix cvc5.BUILD to use platform-aware binary path
   (`bin/cvc5.exe` on Windows, `bin/cvc5` elsewhere). 
 
+* [Lint] Fix cascaded abstract types (#183)
+
 ### 2.0.4
+
 * [TRLC_RST] Add tool to convert TRLC Requirements to Sphinx RST Files
 
 * [TRLC] Add support for Python 3.14.
