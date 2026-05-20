@@ -4,7 +4,7 @@ This is part of the [TRLC Tutorial](TUTORIAL.md).
 
 ## Tuples
 
-TRLC allows you to create used-defined algebraic datatypes, generally
+TRLC allows you to create user-defined algebraic datatypes, generally
 referred to as "tuples". For example:
 
 ```

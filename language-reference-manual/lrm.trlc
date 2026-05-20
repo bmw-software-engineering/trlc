@@ -227,7 +227,7 @@ section "Layout and file structure" {
   }
 
   Dynamic_Semantics Order_Of_Evaluation_Unordered {
-    text = '''After references are resolved, used-defined checks are
+    text = '''After references are resolved, user-defined checks are
               resolved on record objects. The order of record objects
               is unspecified.'''
   }
