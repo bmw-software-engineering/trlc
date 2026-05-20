@@ -130,7 +130,7 @@ class Node(metaclass=ABCMeta):
 
         This can be called for any :class:`Node` or
         :class:`Symbol_Table`, and can be very helpful for debugging
-        or understanding the parse tree. The dump methods will produce
+        or understanding the parse tree. The dump method will produce
         output like this::
 
             Symbol_Table
@@ -2717,7 +2717,7 @@ class Composite_Type(Concrete_Type, metaclass=ABCMeta):
     :attribute description: user-supplied description of the type or None
     :type: str
 
-    :attribute checks: used-defined checks for this type (excluding \
+    :attribute checks: user-defined checks for this type (excluding \
       inherited checks)
     :type: list[Check]
 
@@ -3472,7 +3472,7 @@ class Symbol_Table:
         """Retrieve an object from the table assuming its there
 
         This is intended for the API specifically where you want to
-        e.g. find some used-defined types you know are there.
+        e.g. find some user-defined types you know are there.
 
         :param mh: The message handler to use
         :type mh: Message_Handler
