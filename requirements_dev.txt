@@ -1,5 +1,6 @@
 pyvcg==1.0.9
 cvc5>=1.3.2
+bigtree
 
 # Development tools
 pycodestyle>=2.12
