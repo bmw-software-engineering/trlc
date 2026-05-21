@@ -684,9 +684,9 @@
         "bzlTransitiveDigest": "Z2EwAlnWwmyPNSF4pT+ZyT3/Csf4YVbyQPmxi3fBMEQ=",
         "usagesDigest": "NdWIbUWd8+sxdRoKNDJMBMA/5J8Byi51B38PPDpzpzI=",
         "recordedFileInputs": {
-          "@@//requirements_dev_lock.txt": "9f2937dbb1d703546e4883a77a095cea14ecc81ca95d300f3e0d7b16dadc1aeb",
+          "@@//requirements_dev_lock.txt": "8bde8fed2919cb7f77d55ba8cca6642e4c28945f880767a730c1eae4df770927",
           "@@//requirements_lock.txt": "cf537fbb9f326a91b6abc441d9bc47cc7e8cc04d8703b3a0c772df61fd9497c2",
-          "@@//tools/sphinx/requirements.txt": "20a31a0ec30dd03859de7242999335d00d60213df0858aa9d40ed06b3280e6a7",
+          "@@//tools/sphinx/requirements.txt": "d9094ed5c282d440f211c9f8eb5f8942a3c29ee134f78876e6c31f5813d7365e",
           "@@protobuf+//python/requirements.txt": "983be60d3cec4b319dcab6d48aeb3f5b2f7c3350f26b3a9e97486c37967c73c5",
           "@@rules_fuzzing+//fuzzing/requirements.txt": "ab04664be026b632a0d2a2446c4f65982b7654f5b6851d2f9d399a19b7242a5b",
           "@@rules_python+//tools/publish/requirements_darwin.txt": "095d4a4f3d639dce831cd493367631cd51b53665292ab20194bac2c0c6458fa8",
@@ -3382,7 +3382,7 @@
               "dep_template": "@trlc_dev_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
               "repo": "trlc_dev_dependencies_312",
-              "requirement": "idna==3.11 --hash=sha256:771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea --hash=sha256:795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
+              "requirement": "idna==3.15 --hash=sha256:048adeaf8c2d788c40fee287673ccaa74c24ffd8dcf09ffa555a2fbb59f10ac8 --hash=sha256:ca962446ea538f7092a95e057da437618e886f4d349216d2b1e294abfdb65fdc"
             }
           },
           "trlc_dev_dependencies_312_imagesize": {
@@ -3634,7 +3634,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_10_host//:python",
               "repo": "trlc_sphinx_dependencies_310",
-              "requirement": "idna==3.11 --hash=sha256:771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea --hash=sha256:795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
+              "requirement": "idna==3.15 --hash=sha256:048adeaf8c2d788c40fee287673ccaa74c24ffd8dcf09ffa555a2fbb59f10ac8 --hash=sha256:ca962446ea538f7092a95e057da437618e886f4d349216d2b1e294abfdb65fdc"
             }
           },
           "trlc_sphinx_dependencies_310_imagesize": {
@@ -3778,7 +3778,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_10_host//:python",
               "repo": "trlc_sphinx_dependencies_310",
-              "requirement": "urllib3==2.6.3 --hash=sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed --hash=sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4"
+              "requirement": "urllib3==2.7.0 --hash=sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c --hash=sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"
             }
           },
           "trlc_sphinx_dependencies_311_alabaster": {
@@ -3832,7 +3832,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
               "repo": "trlc_sphinx_dependencies_311",
-              "requirement": "idna==3.11 --hash=sha256:771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea --hash=sha256:795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
+              "requirement": "idna==3.15 --hash=sha256:048adeaf8c2d788c40fee287673ccaa74c24ffd8dcf09ffa555a2fbb59f10ac8 --hash=sha256:ca962446ea538f7092a95e057da437618e886f4d349216d2b1e294abfdb65fdc"
             }
           },
           "trlc_sphinx_dependencies_311_imagesize": {
@@ -3976,7 +3976,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
               "repo": "trlc_sphinx_dependencies_311",
-              "requirement": "urllib3==2.6.3 --hash=sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed --hash=sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4"
+              "requirement": "urllib3==2.7.0 --hash=sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c --hash=sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"
             }
           },
           "trlc_sphinx_dependencies_312_alabaster": {
@@ -4030,7 +4030,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
               "repo": "trlc_sphinx_dependencies_312",
-              "requirement": "idna==3.11 --hash=sha256:771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea --hash=sha256:795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
+              "requirement": "idna==3.15 --hash=sha256:048adeaf8c2d788c40fee287673ccaa74c24ffd8dcf09ffa555a2fbb59f10ac8 --hash=sha256:ca962446ea538f7092a95e057da437618e886f4d349216d2b1e294abfdb65fdc"
             }
           },
           "trlc_sphinx_dependencies_312_imagesize": {
@@ -4174,7 +4174,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
               "repo": "trlc_sphinx_dependencies_312",
-              "requirement": "urllib3==2.6.3 --hash=sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed --hash=sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4"
+              "requirement": "urllib3==2.7.0 --hash=sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c --hash=sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"
             }
           },
           "trlc_sphinx_dependencies_39_alabaster": {
@@ -4228,7 +4228,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_9_host//:python",
               "repo": "trlc_sphinx_dependencies_39",
-              "requirement": "idna==3.11 --hash=sha256:771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea --hash=sha256:795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"
+              "requirement": "idna==3.15 --hash=sha256:048adeaf8c2d788c40fee287673ccaa74c24ffd8dcf09ffa555a2fbb59f10ac8 --hash=sha256:ca962446ea538f7092a95e057da437618e886f4d349216d2b1e294abfdb65fdc"
             }
           },
           "trlc_sphinx_dependencies_39_imagesize": {
@@ -4372,7 +4372,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_9_host//:python",
               "repo": "trlc_sphinx_dependencies_39",
-              "requirement": "urllib3==2.6.3 --hash=sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed --hash=sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4"
+              "requirement": "urllib3==2.7.0 --hash=sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c --hash=sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"
             }
           },
           "pip_deps": {

@@ -135,6 +135,9 @@ class RequirementsDomain(Domain):
             (name, signature, "Requirement", self.env.docname, anchor, 0)
         )
 
+    def resolve_any_xref(self, env, fromdocname, builder, target, node, contnode):
+        return []
+
     def merge_domaindata(self, docnames, otherdata):
         self.data["requirements"].extend(otherdata["requirements"])
 
