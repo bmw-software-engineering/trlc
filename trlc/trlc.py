@@ -219,21 +219,21 @@ class Source_Manager:
         assert isinstance(file_content, str) or file_content is None
         # lobster-trace: LRM.Layout
 
-        ok = True
         try:
             if file_name.endswith(".rsl"):
                 self.register_rsl_file(file_name, file_content, primary)
             elif file_name.endswith(".trlc"):
                 self.register_trlc_file(file_name, file_content, primary)
             else:  # pragma: no cover
-                ok = False
                 self.mh.error(Location(os.path.basename(file_name)),
                               "is not a rsl or trlc file",
                               fatal = False)
-        except TRLC_Error:
-            ok = False
+                return False
 
-        return ok
+        except TRLC_Error:
+            return False
+
+        return True
 
     def register_directory(self, dir_name):
         """Schedule a directory tree for parsing.
