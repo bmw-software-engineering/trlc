@@ -1,0 +1,13 @@
+package Test4
+
+type T {
+  x Integer
+}
+
+type U {
+  ref optional T
+}
+
+checks U {
+  ref.x > 0, "potato"
+}

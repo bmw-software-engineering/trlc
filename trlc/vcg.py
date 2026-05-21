@@ -338,14 +338,24 @@ class VCG:
         for n_component in n_ctyp.all_components():
             self.tr_component_decl(n_component, self.start)
 
-        # Create paths for checks
-        for n_check in n_ctyp.iter_checks():
-            current_start = self.start
-            self.tr_check(n_check)
+        # Create paths for checks in two phases:
+        #  Phase A ("at declaration"): checks that do not follow any
+        #  record or union reference via field access. These are fully
+        #  self-contained and are analyzed first.
+        #  Phase B ("after references"): checks that dereference at
+        #  least one record or union reference. They run after Phase A
+        #  so that knowledge accumulated from Phase A fatal checks is
+        #  available.
+        for phase in (False, True):
+            for n_check in n_ctyp.iter_checks():
+                if n_check.uses_field_access != phase:
+                    continue
+                current_start = self.start
+                self.tr_check(n_check)
 
-            # Only fatal checks contribute to the total knowledge
-            if n_check.severity != "fatal":
-                self.start = current_start
+                # Only fatal checks contribute to the total knowledge
+                if n_check.severity != "fatal":
+                    self.start = current_start
 
         # Emit debug graph
         if self.debug:  # pragma: no cover
@@ -1509,13 +1519,10 @@ class VCG:
     def tr_field_access_expression(self, n_expr):
         assert isinstance(n_expr, Field_Access_Expression)
 
-        if self.functional:  # pragma: no cover
-            self.flag_unsupported(n_expr,
-                                  "functional evaluation of field access")
-
         prefix_value, prefix_valid = self.tr_expression(n_expr.n_prefix)
         prefix_typ = n_expr.n_prefix.typ
-        self.attach_validity_check(prefix_valid, n_expr.n_prefix)
+        if not self.functional:
+            self.attach_validity_check(prefix_valid, n_expr.n_prefix)
 
         if isinstance(prefix_typ, Tuple_Type):
             field_value = smt.Record_Access(prefix_value,

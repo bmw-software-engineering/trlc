@@ -1,0 +1,8 @@
+c, "potato"
+^ vcg-field-access-unary/test1.rsl:14: issue: expression could be null [vcg-evaluation-of-null]
+| example record_type triggering error:
+|   U bad_potato {
+|     ref = T_instance_0
+|     /* c is null */
+|   }
+Processed 2 models and 0 requirement files and found 1 warning

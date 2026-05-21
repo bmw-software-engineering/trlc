@@ -1,0 +1,17 @@
+package Test1
+
+T foo {
+  x = 1
+}
+
+T bar {
+  x = 2
+}
+
+U passing {
+  pair = (foo, bar)
+}
+
+U failing {
+  pair = (bar, foo)
+}

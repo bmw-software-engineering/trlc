@@ -1,0 +1,14 @@
+package Test2
+
+type T {
+  x Integer
+}
+
+type U {
+  ref T
+  y   Integer
+}
+
+checks U {
+  -(ref.x) < y, "potato"
+}
