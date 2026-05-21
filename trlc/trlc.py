@@ -379,7 +379,7 @@ class Source_Manager:
 
         return ok
 
-    def parse_rsl_files(self):
+    def parse_rsl_files(self) -> bool:
         # lobster-trace: LRM.Preamble
         # lobster-trace: LRM.RSL_File
 
@@ -433,7 +433,7 @@ class Source_Manager:
 
         return ok
 
-    def parse_trlc_files(self):
+    def parse_trlc_files(self) -> bool:
         # lobster-trace: LRM.TRLC_File
         # lobster-trace: LRM.Preamble
 
@@ -455,7 +455,7 @@ class Source_Manager:
 
         return ok
 
-    def resolve_record_references(self):
+    def resolve_record_references(self) -> bool:
         # lobster-trace: LRM.File_Parsing_References
         # lobster-trace: LRM.Markup_String_Late_Reference_Resolution
         # lobster-trace: LRM.Late_Reference_Checking
@@ -469,7 +469,7 @@ class Source_Manager:
 
         return ok
 
-    def perform_checks(self):
+    def perform_checks(self) -> bool:
         # lobster-trace: LRM.Order_Of_Evaluation_Unordered
         ok = True
         for package in self.stab.values(ast.Package):
