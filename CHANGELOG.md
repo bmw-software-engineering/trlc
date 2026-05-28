@@ -26,6 +26,8 @@ generated in the following situations:
 
 ### 2.0.5-dev
 
+* [TRLC_RST] Render `Markup_String` `[[references]]` as Sphinx cross-references in the RST renderer.
+
 * [TRLC] Add VCG support for field access on record/union references
   (two-phase check analysis, #156 step 2/2).
 

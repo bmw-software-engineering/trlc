@@ -13,6 +13,7 @@ from bigtree import Node, preorder_iter
 logger = logging.getLogger(__name__)
 
 RST_HEADLINE_SEPARATORS = ("=", "-", "^", "'")
+_MARKUP_REF_RE = re.compile(r"\[\[([^\]]+)\]\]")
 
 
 class TRLCParseError(Exception):
@@ -196,10 +197,56 @@ class TRLCRST:
                     trlc_obj = getattr(node, "trlc_obj", None)
 
                     if trlc_obj:
-                        description = trlc_obj.to_python_dict().get("description")
+                        desc_field = trlc_obj.field.get("description")
+                        if (
+                            isinstance(desc_field, trlc.ast.String_Literal)
+                            and desc_field.has_references
+                        ):
+                            description = TRLCRST._resolve_markup_references(
+                                desc_field.value, desc_field.references
+                            )
+                        else:
+                            description = trlc_obj.to_python_dict().get("description")
                         if description:
                             file.write(self._preprocess_description(description))
                     file.write("\n\n")
+
+    @staticmethod
+    def _resolve_markup_references(raw_value: str, references: list) -> str:
+        """Replace [[...]] markup references with RST cross-reference roles.
+
+        Each ``[[name]]`` or ``[[Package.name]]`` in *raw_value* is converted
+        to a ``:requirement:upstream-ref:`FQN``` RST role using the
+        fully-qualified name resolved from the supplied *references* list.
+        Comma-separated references inside one ``[[...]]`` block
+        (e.g. ``[[A, B]]``) are expanded to individual roles joined by
+        a comma.
+        """
+        if not references or "[[" not in raw_value:
+            return raw_value
+
+        ref_iter = iter(references)
+
+        def _replace(match):
+            inner = match.group(1)
+            count = inner.count(",") + 1
+            parts = []
+            for _ in range(count):
+                try:
+                    ref = next(ref_iter)
+                except StopIteration:
+                    break
+                if ref.target is not None:
+                    fqn = ref.target.fully_qualified_name()
+                    short = ref.target.name
+                    parts.append(
+                        f":requirement:upstream-ref:`{short} <{fqn}>`"
+                    )
+                else:
+                    parts.append(match.group(0))
+            return ", ".join(parts)
+
+        return _MARKUP_REF_RE.sub(_replace, raw_value)
 
     @staticmethod
     def _preprocess_description(description: str) -> str:
