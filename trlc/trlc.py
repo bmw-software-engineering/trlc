@@ -191,6 +191,22 @@ class Source_Manager:
                     if os.path.splitext(file_name)[1] in (".rsl",
                                                           ".trlc"))})
 
+    def register_include_files(self, file_names):
+        """Make a list of files available for automatic inclusion
+
+        :param file_names: list of files for automatic inclusion
+        :type file_names: list[str]
+        :raise AssertionError: if file_names is not a list
+        :raise AssertionError: if any item in file_names is not a string
+        :raise AssertionError: if any file does not exist
+        """
+        assert isinstance(file_names, list)
+        for file_name in file_names:
+            assert isinstance(file_name, str)
+            assert os.path.isfile(file_name)
+            if os.path.splitext(file_name)[1] in (".rsl", ".trlc"):
+                self.includes[os.path.abspath(file_name)] = file_name
+
     def register_file(self, file_name, file_content=None, primary=True):
         """Schedule a file for parsing.
 
@@ -587,6 +603,14 @@ def trlc():
                                 " directories are parsed only when needed."
                                 " Can be specified more than once."),
                           default=[])
+    og_input.add_argument("--include-file",
+                          action="append",
+                          dest="include_files",
+                          metavar="FILE",
+                          help=("Add a single file to the include set."
+                                " The file is parsed only when needed."
+                                " Can be specified more than once."),
+                          default=[])
 
     og_output = ap.add_argument_group("output options")
     og_output.add_argument("--version",
@@ -699,6 +723,12 @@ def trlc():
             ap.error("include path %s is not a directory" % path_name)
     for path_name in options.include_dirs:
         sm.register_include(path_name)
+
+    for file_name in options.include_files:
+        if not os.path.isfile(file_name):
+            ap.error("include file %s is not a file" % file_name)
+    if options.include_files:
+        sm.register_include_files(options.include_files)
 
     # Process input files, defaulting to the current directory if none
     # given.
