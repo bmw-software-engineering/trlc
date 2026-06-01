@@ -25,4 +25,6 @@
 * [Advaned tips & tricks](TUTORIAL-ADVANCED-TYPES.md): some more
   advanced tips and tricks for large organisations
 * [Python API](TUTORIAL-API.md): writing a custom check with the API
+* [Bazel Integration](TUTORIAL-BAZEL.md): using TRLC with Bazel
+* [BCR Release](TUTORIAL-BCR-RELEASE.md): automated publishing to the Bazel Central Registry
 * [CI Integration](TUTORIAL-CI.md): tips on how to integrate in your CI
