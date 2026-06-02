@@ -196,14 +196,27 @@ class Source_Manager:
 
         :param file_names: list of files for automatic inclusion
         :type file_names: list[str]
-        :raise AssertionError: if file_names is not a list
-        :raise AssertionError: if any item in file_names is not a string
-        :raise AssertionError: if any file does not exist
+        :raises TypeError: if file_names is not a list
+        :raises TypeError: if any item in file_names is not a string
+        :raises FileNotFoundError: if any file does not exist
         """
-        assert isinstance(file_names, list)
+
+        if not isinstance(file_names, list):
+            raise TypeError(
+                f"file_names must be a list, got {type(file_names).__name__}"
+            )
+
         for file_name in file_names:
-            assert isinstance(file_name, str)
-            assert os.path.isfile(file_name)
+            if not isinstance(file_name, str):
+                raise TypeError(
+                    f"file_name must be a string, got {type(file_name).__name__}"
+                )
+
+            if not os.path.isfile(file_name):
+                raise FileNotFoundError(
+                    f"File does not exist: {file_name}"
+                )
+
             if os.path.splitext(file_name)[1] in (".rsl", ".trlc"):
                 self.includes[os.path.abspath(file_name)] = file_name
 
@@ -596,9 +609,10 @@ def trlc():
                           action="store_true",
                           help=("Enter bazel-* directories, which are"
                                 " excluded by default."))
-    og_input.add_argument("-I",
+    og_input.add_argument("-I", "--include-dir",
                           action="append",
                           dest="include_dirs",
+                          metavar="DIR",
                           help=("Add include path. Files from these"
                                 " directories are parsed only when needed."
                                 " Can be specified more than once."),
