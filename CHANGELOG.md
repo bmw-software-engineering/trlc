@@ -24,7 +24,7 @@ generated in the following situations:
 
 ## Changelog
 
-### 2.0.5-dev
+### 2.0.5
 
 * [TRLC_RST] Render `Markup_String` `[[references]]` as Sphinx cross-references in the RST renderer.
 
