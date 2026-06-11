@@ -47,7 +47,7 @@ def _trlc_requirement_impl(ctx):
 
     return [
         DefaultInfo(
-            files = depset(ctx.files.srcs, transitive = transitive_reqs + transitive_spec + [own_specs])
+            files = depset(ctx.files.srcs, transitive = transitive_reqs + transitive_spec + [own_specs]),
         ),
         TrlcProviderInfo(
             spec = depset(transitive = [own_specs] + transitive_spec),
@@ -83,6 +83,29 @@ def trlc_requirements_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc.
 ################################
 # TRLC RST
 ################################
+
+def _trlc_image_stage_impl(ctx, image_files):
+    """Stage image files next to the rendered RST using package-relative paths.
+
+    For each image the package prefix is stripped so that the path written in
+    the ``image`` TRLC field (e.g. ``"diagrams/arch.png"``) matches exactly
+    the location of the staged file relative to the rendered ``.rst``.
+    """
+    package_prefix = ctx.label.package + "/"
+    outputs = []
+    for image in image_files:
+        if image.short_path.startswith(package_prefix):
+            relative_path = image.short_path[len(package_prefix):]
+        else:
+            relative_path = image.basename
+        output = ctx.actions.declare_file(relative_path)
+        ctx.actions.symlink(output = output, target_file = image)
+        outputs.append(output)
+    return outputs
+
+subrule_trlc_image_stage = subrule(
+    implementation = _trlc_image_stage_impl,
+)
 
 def _trlc_rst_impl(ctx):
     rendered_file = ctx.actions.declare_file("{}.rst".format(ctx.attr.name))
@@ -130,7 +153,9 @@ def _trlc_rst_impl(ctx):
         executable = ctx.executable._renderer,
     )
 
-    return [DefaultInfo(files = depset([rendered_file]))]
+    image_outputs = subrule_trlc_image_stage(ctx.files.image_srcs)
+
+    return [DefaultInfo(files = depset([rendered_file] + image_outputs))]
 
 _trlc_rst = rule(
     implementation = _trlc_rst_impl,
@@ -145,6 +170,11 @@ _trlc_rst = rule(
             doc = "Additional trlc_requirements targets needed for dependency resolution only. Their record objects are not rendered.",
         ),
         "title": attr.string(default = "Requirements"),
+        "image_srcs": attr.label_list(
+            allow_files = True,
+            default = [],
+            doc = "Image files to stage next to the rendered RST. The package-relative path of each file (e.g. 'diagrams/arch.png') must match the path written in a ``.. image::`` directive inside the requirement description field.",
+        ),
         "_renderer": attr.label(
             default = Label("//tools/trlc_rst:trlc_rst"),
             executable = True,
@@ -152,13 +182,15 @@ _trlc_rst = rule(
             cfg = "exec",
         ),
     },
+    subrules = [subrule_trlc_image_stage],
 )
 
-def trlc_rst(name, reqs, deps = [], title = "Requirements", **kwargs):
+def trlc_rst(name, reqs, deps = [], title = "Requirements", image_srcs = [], **kwargs):
     _trlc_rst(
         name = name,
         reqs = reqs,
         deps = deps,
         title = title,
+        image_srcs = image_srcs,
         **kwargs
     )

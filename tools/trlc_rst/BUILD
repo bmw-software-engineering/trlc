@@ -4,7 +4,7 @@ py_library(
     name = "trlc_rst_lib",
     srcs = ["trlc_rst.py"],
     imports = ["."],
-    visibility = ["//tools/trlc_rst/tests:__pkg__"],
+    visibility = ["//visibility:public"],
     deps = [
         "//trlc",
         requirement("bigtree"),

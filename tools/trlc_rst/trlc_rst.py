@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 RST_HEADLINE_SEPARATORS = ("=", "-", "^", "'")
 _MARKUP_REF_RE = re.compile(r"\[\[([^\]]+)\]\]")
+_RST_DIRECTIVE_RE = re.compile(r"^\.\. [a-zA-Z][\w-]*::")
+_MD_IMAGE_RE = re.compile(r"!\[([^\]]*)\]\(([^\)]+)\)")
 
 
 class TRLCParseError(Exception):
@@ -257,12 +259,23 @@ class TRLCRST:
         - *Italic text*: *text*
         - Inline code: ``code``
         - Hyperlinks: [text](url) converted to `text <url>`_
+        - Images: ![alt](path) converted to ``.. image:: path`` (with ``:alt:`` when alt is non-empty)
         - Code blocks: Line ending with :: followed by indented content
+        - RST directives: ``.. image::``, ``.. figure::``, etc. with options
         - Bullet lists: Lines starting with -
         - Numbered lists: Lines starting with 1., 2., etc.
         - Line breaks: Preserved between all content lines"""
         if not description:
             return description
+
+        # Convert Markdown-style images ![alt](path) to RST ``.. image::`` directives.
+        # Must run before the link regex so that [alt](path) inside ![alt](path)
+        # is not matched first.
+        def _md_image_sub(m):
+            alt, path = m.group(1), m.group(2)
+            return f".. image:: {path}\n   :alt: {alt}" if alt else f".. image:: {path}"
+
+        description = _MD_IMAGE_RE.sub(_md_image_sub, description)
 
         # Convert Markdown-style links [text](url) to RST-style `text <url>`_
         description = re.sub(r"\[([^\]]+)\]\(([^\)]+)\)", r"`\1 <\2>`_", description)
@@ -272,6 +285,8 @@ class TRLCRST:
         prev_was_list_item = False
         in_code_block = False
         code_block_base_indent = 0
+        in_directive = False
+        directive_base_indent = 0
 
         for i, line in enumerate(lines):
             stripped = line.strip()
@@ -287,6 +302,9 @@ class TRLCRST:
                         in_code_block = False
                         processed_lines.append("")
 
+                # Determine how to emit this line
+                skip_normal = False
+
                 if in_code_block:
                     # Preserve relative indentation within code blocks
                     # Example: If first code line has 16 spaces and current line has 20,
@@ -294,7 +312,22 @@ class TRLCRST:
                     original_indent = len(line) - len(line.lstrip())
                     relative_indent = original_indent - code_block_base_indent
                     processed_lines.append("      " + " " * relative_indent + stripped)
-                else:
+                    skip_normal = True
+                elif in_directive:
+                    original_indent = len(line) - len(line.lstrip())
+                    if original_indent > directive_base_indent:
+                        # Directive option or body content — preserve relative indentation
+                        # so that e.g. ``:width: 50%`` stays indented under ``.. image::``.
+                        relative_indent = original_indent - directive_base_indent
+                        processed_lines.append("   " + " " * relative_indent + stripped)
+                        prev_was_list_item = False
+                        skip_normal = True
+                    else:
+                        # Indentation dropped back — we have left the directive block.
+                        in_directive = False
+                        # Fall through to normal processing below.
+
+                if not skip_normal:
                     # Check if this is a list item (bullet or numbered)
                     is_list_item = normalized.startswith("-") or re.match(
                         r"^\d+\.", normalized
@@ -311,8 +344,15 @@ class TRLCRST:
                     # Add RST directive content indentation (3 spaces)
                     processed_lines.append("   " + normalized)
 
+                    # Check if line opens an RST directive (e.g. ``.. image:: path``).
+                    # Directive options/content follow immediately without a blank line,
+                    # so we enter directive mode and suppress the trailing blank.
+                    if _RST_DIRECTIVE_RE.match(normalized):
+                        in_directive = True
+                        directive_base_indent = len(line) - len(line.lstrip())
+
                     # Check if line ends with :: (code block marker)
-                    if normalized.endswith("::"):
+                    elif normalized.endswith("::"):
                         # Check if next line exists and is not empty
                         if i < len(lines) - 1 and lines[i + 1].strip():
                             # Add blank line after :: marker and enter code block mode
@@ -340,8 +380,9 @@ class TRLCRST:
                 # Preserve empty lines for paragraph separation
                 processed_lines.append("")
                 prev_was_list_item = False
-                # Exit code block on empty line
+                # Exit code block or directive on empty line
                 in_code_block = False
+                in_directive = False
 
         return "\n".join(processed_lines)
 
