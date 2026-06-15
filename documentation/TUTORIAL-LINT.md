@@ -16,13 +16,6 @@ feature.
 $ trlc --verify DIRECTORIES_OR_FILES
 ```
 
-If the API for CVC5 isn't avialable on your platform, then you can
-also download the CVC5 executables and ask TRLC to use them directly:
-
-```bash
-$ trlc --verify --use-cvc5-binary=path/to/cvc5.exe DIRECTORIES_OR_FILES
-```
-
 ## Sanity checks
 
 The linter can detect some questionable constructs, for example:
@@ -109,7 +102,6 @@ Verified 1 model(s) and 0 check(s) and found no issues
 Please keep in mind two limitations with the `--verify`
 feature:
 
-* It is harder to use and much slower on Windows
 * Under some circumstances the counter-examples generated are
   impossible to achieve, due to how the underlying technology (SMT
   Solvers) works. The current limitations are documented in the

@@ -29,7 +29,6 @@ try:
     from pyvcg import graph
     from pyvcg import vcg
     from pyvcg.driver.file_smtlib import SMTLIB_Generator
-    from pyvcg.driver.cvc5_smtlib import CVC5_File_Solver
     VCG_AVAILABLE = True
 except ImportError:  # pragma: no cover
     VCG_AVAILABLE = False
@@ -73,19 +72,15 @@ class Feedback:
 
 class VCG:
     # lobster-exclude: Not safety relevant
-    def __init__(self, mh, n_ctyp, debug, use_api=True, cvc5_binary=None):
+    def __init__(self, mh, n_ctyp, debug):
         assert VCG_AVAILABLE
         assert isinstance(mh, Message_Handler)
         assert isinstance(n_ctyp, Composite_Type)
         assert isinstance(debug, bool)
-        assert isinstance(use_api, bool)
-        assert use_api or isinstance(cvc5_binary, str)
 
-        self.mh       = mh
-        self.n_ctyp   = n_ctyp
-        self.debug    = debug
-        self.use_api  = use_api
-        self.cvc5_bin = cvc5_binary
+        self.mh     = mh
+        self.n_ctyp = n_ctyp
+        self.debug  = debug
 
         self.vc_name = "trlc-%s-%s" % (n_ctyp.n_package.name,
                                        n_ctyp.name)
@@ -384,10 +379,7 @@ class VCG:
                vc["feedback"] in nok_validity_checks:
                 continue
 
-            if self.use_api:
-                solver = CVC5_Solver()
-            else:
-                solver = CVC5_File_Solver(self.cvc5_bin)
+            solver = CVC5_Solver()
             for name, value in CVC5_OPTIONS.items():
                 solver.set_solver_option(name, value)
 

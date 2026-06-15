@@ -12,7 +12,6 @@ def trlc_system_test(test_dir):
     """
     srcs = native.glob([test_dir + "/**"])
 
-    # cvc5 binary is always included for tests with an output.smtlib golden file.
     # The "_test" suffix avoids a runfiles symlink collision with the source dir;
     # a test_suite alias under the plain name allows: bazel test //tests-system:<dir>
     test_target = test_dir + "_test"
@@ -24,10 +23,9 @@ def trlc_system_test(test_dir):
         args = [
             "tests-system",
             test_dir,
-            "$(rlocationpath //:cvc5)",
         ],
         deps = ["//trlc:trlc"],
-        data = list(srcs) + ["//:cvc5", "//:coverage"],
+        data = list(srcs) + ["//:coverage"],
     )
 
     native.test_suite(

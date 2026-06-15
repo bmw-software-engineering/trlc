@@ -18,8 +18,6 @@ load("@trlc//:trlc.bzl",
      "trlc_specification_test")
 ```
 
-It includes the pre-built CVC5 binary for Linux, macOS, and Windows.
-
 ---
 
 ## Public API

@@ -32,12 +32,8 @@ jobs:
         py-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
         include:
           - os: ubuntu-24.04
-            cvc5-plat: "linux"
-          - os: windows-2022
-            cvc5-plat: "windows"
           - os: macos-14
             brew: "/opt/homebrew"
-            cvc5-plat: "osx14"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -60,10 +56,6 @@ jobs:
         run: |
           brew install make
           echo "${{ matrix.brew }}/opt/make/libexec/gnubin" >> $GITHUB_PATH
-      - name: Fetch CVC5
-        run: |
-          util/fetch_cvc5.py ${{ matrix.cvc5-plat }}
-          echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
       - name: Executing unit tests
         run: |
           make unit-tests

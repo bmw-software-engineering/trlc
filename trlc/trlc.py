@@ -22,7 +22,6 @@ import argparse
 import json
 import os
 import re
-import subprocess
 import sys
 from fractions import Fraction
 
@@ -77,14 +76,12 @@ class Source_Manager:
                  parse_trlc     = True,
                  verify_mode    = False,
                  debug_vcg      = False,
-                 error_recovery = True,
-                 cvc5_binary    = None):
+                 error_recovery = True):
         assert isinstance(mh, Message_Handler)
         assert isinstance(lint_mode, bool)
         assert isinstance(parse_trlc, bool)
         assert isinstance(verify_mode, bool)
         assert isinstance(debug_vcg, bool)
-        assert isinstance(cvc5_binary, str) or cvc5_binary is None
 
         self.mh          = mh
         self.mh.sm       = self
@@ -102,7 +99,6 @@ class Source_Manager:
         self.verify_mode    = verify_mode
         self.debug_vcg      = debug_vcg
         self.error_recovery = error_recovery
-        self.cvc5_binary    = cvc5_binary
 
         self.exclude_patterns = []
         self.common_root      = None
@@ -512,8 +508,7 @@ class Source_Manager:
             linter = lint.Linter(mh            = self.mh,
                                  stab          = self.stab,
                                  verify_checks = self.verify_mode,
-                                 debug_vcg     = self.debug_vcg,
-                                 cvc5_binary   = self.cvc5_binary)
+                                 debug_vcg     = self.debug_vcg)
             ok &= linter.perform_sanity_checks()
         # Stop here if we're not processing TRLC files.
         if not self.parse_trlc:  # pragma: no cover
@@ -579,11 +574,6 @@ def trlc():
                                " checks. Does not yet support all language"
                                " constructs. Requires PyVCG to be "
                                " installed."))
-    og_lint.add_argument("--use-cvc5-binary",
-                         default=None,
-                         help=("[EXPERIMENTAL] Drive the given CVC5 solver"
-                               " with SMTLIB2 input instead of using the"
-                               " API."))
 
     og_input = ap.add_argument_group("input options")
     og_input.add_argument("--include-bazel-dirs",
@@ -680,27 +670,9 @@ def trlc():
         print(TRLC_VERSION)
         sys.exit(0)
 
-    if options.verify and not (options.use_cvc5_binary or
-                               VCG_API_AVAILABLE):  # pragma: no cover
+    if options.verify and not VCG_API_AVAILABLE:  # pragma: no cover
         ap.error("The --verify option requires the optional dependency"
-                 " CVC5 or use of the --use-cvc5-binary option")
-
-    if options.use_cvc5_binary:  # pragma: no cover
-        if not options.verify:
-            ap.error("The --use-cvc5-binary requires the --verify option")
-        try:
-            result = subprocess.run([options.use_cvc5_binary,
-                                     "--version"],
-                                    check          = True,
-                                    capture_output = True,
-                                    encoding       = "UTF-8")
-            if not result.stdout.startswith("This is cvc5"):
-                ap.error("selected binary does not appear to be CVC5")
-        except OSError as err:
-            ap.error("cannot run %s: %s" % (options.use_cvc5_binary,
-                                            str(err)))
-        except subprocess.CalledProcessError:
-            ap.error("cannot run %s" % options.use_cvc5_binary)
+                 " CVC5")
 
     mh = Message_Handler(options.brief,
                           not options.no_detailed_info,
@@ -715,8 +687,7 @@ def trlc():
                         parse_trlc     = not options.skip_trlc_files,
                         verify_mode    = options.verify,
                         debug_vcg      = options.debug_vcg,
-                        error_recovery = not options.no_error_recovery,
-                        cvc5_binary    = options.use_cvc5_binary)
+                        error_recovery = not options.no_error_recovery)
 
     if not options.include_bazel_dirs:  # pragma: no cover
         sm.exclude_patterns.append(re.compile("^bazel-.*$"))
