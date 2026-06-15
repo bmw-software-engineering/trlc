@@ -24,6 +24,11 @@ generated in the following situations:
 
 ## Changelog
 
+### 2.0.6-dev
+
+* [Sphinx] TRLC Plugin: fix parallel parsing: extension declareds parallel_read_safe -> only merge if worker actually
+  owns the document
+
 ### 2.0.5
 
 * [TRLC_RST] Render `Markup_String` `[[references]]` as Sphinx cross-references in the RST renderer.

@@ -139,7 +139,11 @@ class RequirementsDomain(Domain):
         return []
 
     def merge_domaindata(self, docnames, otherdata):
-        self.data["requirements"].extend(otherdata["requirements"])
+        existing_anchors = {anchor for _name, _sig, _typ, _docname, anchor, _prio in self.data["requirements"]}
+        for _name, _sig, _typ, docname, anchor, _prio in otherdata["requirements"]:
+            if docname in docnames and anchor not in existing_anchors:
+                self.data["requirements"].append((_name, _sig, _typ, docname, anchor, _prio))
+                existing_anchors.add(anchor)
 
 
 def setup(app: Sphinx):
