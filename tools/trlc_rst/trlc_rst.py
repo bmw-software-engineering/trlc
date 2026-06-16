@@ -380,9 +380,10 @@ class TRLCRST:
                 # Preserve empty lines for paragraph separation
                 processed_lines.append("")
                 prev_was_list_item = False
-                # Exit code block or directive on empty line
+                # Exit code block on empty line.
+                # Keep directive mode so blocks like ``.. list-table::`` can contain
+                # a blank separator line before their body rows.
                 in_code_block = False
-                in_directive = False
 
         return "\n".join(processed_lines)
 
