@@ -22,6 +22,7 @@ settings.json
 # OSX / VSCode ignores
 .DS_Store
 .idea
+.vscode
 
 # Build-System ignores
 bazel-*
