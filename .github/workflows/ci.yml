@@ -32,6 +32,7 @@ jobs:
         py-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
         include:
           - os: ubuntu-24.04
+          - os: windows-2022
           - os: macos-14
             brew: "/opt/homebrew"
     runs-on: ${{ matrix.os }}

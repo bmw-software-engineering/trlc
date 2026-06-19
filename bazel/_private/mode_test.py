@@ -65,9 +65,7 @@ def _run_mode(mode):
 
     args = ["trlc"]
 
-    if mode == "output":
-        args += ["--verify"]
-    elif mode == "output.smtlib":
+    if mode in ("output", "output.smtlib"):
         args += ["--verify"]
     elif mode == "output.brief":
         args += ["--no-lint", "--brief"]

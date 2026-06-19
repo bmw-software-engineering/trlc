@@ -12,14 +12,8 @@ the latest GNU make version.
   can install this from your package manager. On Debian the package is
   called `python3`.
 
-* You also need an executable `cvc5` binary on your PATH. Download the
-  appropriate version from
-  https://github.com/cvc5/cvc5/releases/tag/cvc5-1.3.2 and rename
-  it. You can also build CVC5 from source if there is no pre-built
-  release available for your platform.
-
-* You need to install the `cvc5` PyPI package, or build it from
-  source.
+* You need to install the `cvc5` Python package (PyPI), or build it
+  from source.
 
 * You need to install everything from
   [requirements.txt](../requirements.txt).

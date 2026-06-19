@@ -99,7 +99,7 @@ Verified 1 model(s) and 0 check(s) and found no issues
 
 ### Caveat
 
-Please keep in mind two limitations with the `--verify`
+Please keep in mind the following limitation with the `--verify`
 feature:
 
 * Under some circumstances the counter-examples generated are
