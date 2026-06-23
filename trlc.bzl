@@ -27,7 +27,7 @@ def trlc_specification_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc
                ["$(locations %s)" % req for req in reqs],
         main = main,
         deps = ["@trlc//trlc:trlc"],
-        data = ["@trlc//:cvc5"] + reqs,
+        data = reqs,
         **kwargs
     )
 
@@ -76,7 +76,7 @@ def trlc_requirements_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc.
                ["$(locations %s)" % req for req in reqs],
         main = main,
         deps = ["@trlc//trlc:trlc"],
-        data = ["@trlc//:cvc5"] + reqs,
+        data = reqs,
         **kwargs
     )
 

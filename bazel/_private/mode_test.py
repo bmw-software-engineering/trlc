@@ -6,7 +6,6 @@ macro via Bazel ``args`` on the ``py_test`` target:
   sys.argv[1]  root_dir   -- workspace-relative path of the test root,
                              e.g. "tests-system" or "tests-large-partial"
   sys.argv[2]  test_dir   -- subdirectory name within root_dir
-  sys.argv[3]  cvc5_rloc  -- runfiles-relative path of the cvc5 binary
 
 Available modes are discovered at runtime by listing the ``output*`` golden
 files present in the test directory.  An optional ``options`` file in the
@@ -27,7 +26,6 @@ import sys
 
 _ROOT_DIR = sys.argv[1]
 _TEST_DIR = sys.argv[2]
-_CVC5_RLOC = sys.argv[3]
 
 
 def _srcdir(*parts):
@@ -67,13 +65,8 @@ def _run_mode(mode):
 
     args = ["trlc"]
 
-    if mode == "output":
+    if mode in ("output", "output.smtlib"):
         args += ["--verify"]
-    elif mode == "output.smtlib":
-        # _CVC5_RLOC is a runfiles-relative path produced by
-        # $(rlocationpath //:cvc5); resolve it via TEST_SRCDIR directly.
-        cvc5 = os.path.join(os.environ["TEST_SRCDIR"], _CVC5_RLOC)
-        args += ["--verify", "--use-cvc5-binary", cvc5]
     elif mode == "output.brief":
         args += ["--no-lint", "--brief"]
     elif mode == "output.json":

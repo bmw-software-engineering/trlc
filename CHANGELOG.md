@@ -26,6 +26,11 @@ generated in the following situations:
 
 ### 2.0.6-dev
 
+* [TRLC, BAZEL] Removed the support for the CVC5 binary, and hence the
+  `--use-cvc5-binary` option is no longer available.
+  The option `--verify` now uses the CVC5 Python package
+  on all OS, and the CVC5 binary is no longer needed.
+
 * [Sphinx] TRLC Plugin: fix parallel parsing: extension declareds parallel_read_safe -> only merge if worker actually
   owns the document
 

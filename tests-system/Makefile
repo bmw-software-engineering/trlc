@@ -20,8 +20,7 @@ all: $(TARGETS) bulk/output bulk/output.brief bulk/output.json
 %/output.smtlib:
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
-		../trlc.py --verify --use-cvc5-binary=cvc5 \
-			$(file < $(dir $@)options) \
+		../trlc.py --verify $(file < $(dir $@)options) \
 			$(dir $@) > $@ 2>&1
 
 %/output.brief:

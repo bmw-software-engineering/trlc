@@ -15,7 +15,6 @@ Args forwarded via Bazel ``args`` to ``mode_test.py``:
 
     argv[1]  root_dir   "tests-large-partial"
     argv[2]  test_dir   plain string, e.g. "partial-1"
-    argv[3]  cvc5_rloc  $(rlocationpath //:cvc5)
 """
 
 def trlc_partial_test(test_name):
@@ -40,10 +39,9 @@ def trlc_partial_test(test_name):
         args = [
             "tests-large-partial",
             test_name,
-            "$(rlocationpath //:cvc5)",
         ],
         deps = ["//trlc:trlc"],
-        data = list(srcs) + native.glob(["large/**"]) + ["//:cvc5", "//:coverage"],
+        data = list(srcs) + native.glob(["large/**"]) + ["//:coverage"],
         size = "large",
     )
 

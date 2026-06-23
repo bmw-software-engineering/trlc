@@ -43,13 +43,6 @@ jobs:
           pip install bmw-lobster-core==0.14.4 bmw-lobster-tool-python==0.14.4
           pip install --no-deps bmw-lobster-tool-trlc
           sudo apt-get install -y graphviz
-      - name: Fetch CVC5
-        run: |
-          util/fetch_cvc5.py linux
-          echo "$GITHUB_WORKSPACE" >> $GITHUB_PATH
-      - name: Test CVC5
-        run: |
-          cvc5 --version
       - name: Generate docs
         run: |
           make docs

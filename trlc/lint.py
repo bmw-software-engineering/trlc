@@ -24,19 +24,17 @@ from trlc.vcg import VCG
 
 
 class Linter:
-    def __init__(self, mh, stab, verify_checks, debug_vcg, cvc5_binary):
+    def __init__(self, mh, stab, verify_checks, debug_vcg):
         # lobster-exclude: Not safety relevant
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, ast.Symbol_Table)
         assert isinstance(verify_checks, bool)
         assert isinstance(debug_vcg, bool)
-        assert isinstance(cvc5_binary, str) or cvc5_binary is None
 
         self.mh            = mh
         self.stab          = stab
         self.verify_checks = verify_checks
         self.debug_vcg     = debug_vcg
-        self.cvc5_binary   = cvc5_binary
 
         self.abstract_extensions = {}
         self.checked_types       = set()
@@ -162,9 +160,7 @@ class Linter:
         if self.verify_checks:
             vcg = VCG(mh          = self.mh,
                       n_ctyp      = n_tuple_type,
-                      debug       = self.debug_vcg,
-                      use_api     = self.cvc5_binary is None,
-                      cvc5_binary = self.cvc5_binary)
+                      debug       = self.debug_vcg)
             vcg.analyze()
 
     def verify_record_type(self, n_record_type):
@@ -191,9 +187,7 @@ class Linter:
         if self.verify_checks:
             vcg = VCG(mh          = self.mh,
                       n_ctyp      = n_record_type,
-                      debug       = self.debug_vcg,
-                      use_api     = self.cvc5_binary is None,
-                      cvc5_binary = self.cvc5_binary)
+                      debug       = self.debug_vcg)
             vcg.analyze()
 
     def verify_array_type(self, n_typ):
