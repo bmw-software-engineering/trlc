@@ -26,6 +26,8 @@ generated in the following situations:
 
 ### 3.0.0-dev
 
+* [TRLC] * Add support for nested (dotted) packages, e.g. `package com.bigcorp.safety`.
+
 * [TRLC_RST] Render soft-wrapped description lines as a single RST
   paragraph instead of splitting each line into its own paragraph.
   Insert a blank line to start a new paragraph.

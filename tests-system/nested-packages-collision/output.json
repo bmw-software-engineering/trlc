@@ -1,0 +1,3 @@
+package foo.bar
+        ^^^ nested-packages-collision/foo_bar.rsl:1: error: foo.bar is too similar to Foo.Bar, declared at FooBar.rsl:1
+Processed 3 models and 0 requirement files and found 1 error

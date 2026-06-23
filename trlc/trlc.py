@@ -347,6 +347,58 @@ class Source_Manager:
                     {(imported_pkg.name , kind)
                      for imported_pkg in parser.cu.imports}
 
+                # A wildcard import depends on the whole subtree rooted at
+                # the wildcard root, so the file-load closure pulls in every
+                # descendant package. The current package is excluded: a
+                # wildcard whose root covers the current package (see
+                # LRM.Wildcard_Self_Cover) must not make the package depend
+                # on itself, which would be reported as a spurious cycle.
+                # lobster-trace: LRM.Wildcard_Import
+                # lobster-trace: LRM.Wildcard_Self_Cover
+                if parser.cu.wildcard_roots:
+                    for root in parser.cu.wildcard_roots:
+                        for other in self.stab.values(ast.Package):
+                            if other.name == pkg_name:
+                                continue
+                            if other.name == root.name or \
+                               other.name.startswith(root.name + "."):
+                                graph[(pkg_name , kind)].add((other.name , kind))
+
+        # Build the package hierarchy for nested packages. Parents are
+        # always registered already (in the flat global table), so the
+        # iteration order does not matter; we sort by name purely for
+        # deterministic error output.
+        # lobster-trace: LRM.Parent_Package_Required
+        nested_packages = sorted(
+            (pkg for pkg in self.stab.values(ast.Package) if "." in pkg.name),
+            key=lambda p: p.name)
+        for pkg in nested_packages:
+            parent_name = pkg.name.rsplit(".", 1)[0]
+            leaf_name   = pkg.name.rsplit(".", 1)[1]
+            parent_pkg  = self.stab.lookup_sub_package(parent_name)
+            if not isinstance(parent_pkg, ast.Package):
+                ok = False
+                self.mh.error(
+                    location = pkg.location,
+                    message  = ("parent package %s of nested package %s"
+                                " has not been declared"
+                                % (parent_name, pkg.name)),
+                    fatal    = False)
+                continue
+            try:
+                parent_pkg.sub_packages.register_with_key(self.mh,
+                                                          pkg,
+                                                          leaf_name)
+            except TRLC_Error:
+                ok = False
+                continue
+            pkg.parent = parent_pkg
+            # Add an implicit dependency: foo.bar rsl depends on foo rsl
+            for kind in ("rsl", "trlc"):
+                node = (pkg.name, kind)
+                if node in graph:
+                    graph[node].add((parent_pkg.name, "rsl"))
+
         # Build closure for our files
         work_list = {(parser.cu.package.name , "rsl")
                      for parser in self.rsl_files.values()
@@ -404,10 +456,10 @@ class Source_Manager:
                 offender = rsl_map[sorted_work_list[0]]
                 names = {rsl_map[node].cu.package.name:
                          rsl_map[node].cu.location
-                         for node in sorted_work_list[1:]}
+                         for node in sorted_work_list}
                 self.mh.error(
                     location    = offender.cu.location,
-                    message     = ("circular inheritence between %s" %
+                    message     = ("circular inheritance between %s" %
                                    " | ".join(sorted(names))),
                     explanation = "\n".join(
                         sorted("%s is declared in %s" %
@@ -465,6 +517,33 @@ class Source_Manager:
 
         return ok
 
+    def verify_subpackage_distinctness(self) -> bool:
+        """Check that sub-package leaf names are sufficiently distinct from
+        types or objects declared in the same parent package.
+
+        Must run after RSL parsing, once every package's ``symbols`` table
+        is fully populated. Without this, the greedy qualified-name descent
+        (which consults ``sub_packages`` first) would silently shadow a
+        same-named member.
+
+        :rtype: bool
+        """
+        # lobster-trace: LRM.Subpackage_Member_Distinct
+        ok = True
+        for pkg in self.stab.values(ast.Package):
+            for child in pkg.sub_packages.table.values():
+                leaf_name   = child.name.rsplit(".", 1)[1]
+                simple_leaf = pkg.symbols.simplified_name(leaf_name)
+                if pkg.symbols.contains_raw(simple_leaf):
+                    ok = False
+                    self.mh.error(
+                        location = child.location,
+                        message  = ("sub-package %s clashes with a type or"
+                                    " object of the same name in package %s"
+                                    % (leaf_name, pkg.name)),
+                        fatal    = False)
+        return ok
+
     def perform_checks(self) -> bool:
         # lobster-trace: LRM.Order_Of_Evaluation_Unordered
         ok = True
@@ -497,6 +576,10 @@ class Source_Manager:
         # Parse RSL files (topologically sorted, in order to deal with
         # dependencies)
         ok &= self.parse_rsl_files()
+
+        # Now that all type declarations are known, check that sub-package
+        # names do not clash with members of their parent package.
+        ok &= self.verify_subpackage_distinctness()
 
         if not self.error_recovery and not ok:  # pragma: no cover
             self.callback_parse_end()

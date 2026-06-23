@@ -1,0 +1,4 @@
+import sub.*
+       ^^^ lint-wildcard-unused/foobar.rsl:2: issue: unused wildcard import sub.* [unused_imports]
+         | Consider deleting this import statement if not needed.
+Processed 3 models and 0 requirement files and found 1 warning

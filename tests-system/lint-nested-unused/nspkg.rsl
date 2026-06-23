@@ -1,0 +1,5 @@
+package ns.pkg
+
+type T {
+  v Integer
+}

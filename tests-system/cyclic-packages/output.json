@@ -1,4 +1,5 @@
-cyclic-packages/bar.rsl: error: circular inheritence between Baz | Bork
+cyclic-packages/bar.rsl: error: circular inheritance between Bar | Baz | Bork
+| Bar is declared in bar.rsl
 | Baz is declared in baz.rsl
 | Bork is declared in bork.rsl
 Processed 4 models and 0 requirement files and found 1 error

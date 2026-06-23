@@ -1,0 +1,10 @@
+package data
+import ns.pkg
+
+ns.pkg.Requirement R_001 {
+  description = "first requirement"
+}
+
+ns.pkg.Requirement R_002 {
+  description = "second requirement"
+}

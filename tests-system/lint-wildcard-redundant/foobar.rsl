@@ -1,0 +1,7 @@
+package foo.bar
+import sub.*
+import sub.deep
+
+type R {
+  x sub.deep.U
+}
