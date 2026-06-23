@@ -1,0 +1,5 @@
+package com.shared.si
+
+type Force {
+  v Integer
+}

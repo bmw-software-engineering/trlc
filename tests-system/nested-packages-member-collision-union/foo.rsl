@@ -1,0 +1,13 @@
+package foo
+
+type Alpha {
+  v Integer
+}
+
+type Beta {
+  v Integer
+}
+
+type Holder {
+  val [Alpha, Beta]
+}

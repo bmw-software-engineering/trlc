@@ -144,6 +144,10 @@ Finally note that a reference is always a reference. You cannot
 specify an entirely new record "inline". We plan to support something
 like this in a future release, but it will be distinct from records.
 
+For grouping packages into a hierarchy (`com.bigcorp.safety`) and
+importing whole subtrees at once, see
+[Subpackages](TUTORIAL-PACKAGE.md#subpackages).
+
 ## In-line references
 
 It is also possible to refer to other TRLC records directly in

@@ -1,0 +1,3 @@
+foo.bar.T OBJ {
+    ^^^ nested-packages-unimported/mydata.trlc:3: error: package must be imported before use
+Processed 2 models and 1 requirement file and found 1 error

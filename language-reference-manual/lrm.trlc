@@ -281,9 +281,14 @@ section "Preamble" {
 file_preamble ::= package_indication
                   { import_clause }
 
-package_indication ::= 'package' IDENTIFIER_name
+package_name ::= IDENTIFIER { '.' IDENTIFIER }
 
-import_clause ::= 'import' IDENTIFIER_name
+package_indication ::= 'package' package_name
+
+import_clause ::= 'import' package_name
+                | 'import' wildcard_import
+
+wildcard_import ::= package_name '.' '*'
 '''
   }
 
@@ -298,6 +303,68 @@ import_clause ::= 'import' IDENTIFIER_name
 
   Static_Semantics Self_Imports {
     text = '''A package may not import itself.'''
+  }
+
+  Static_Semantics Nested_Package_Names {
+    text = '''A package name may consist of multiple dot-separated
+              IDENTIFIER segments, forming a nested package hierarchy.
+              Each segment must be a valid IDENTIFIER. The full
+              dotted name is subject to the Sufficiently_Distinct rule.'''
+  }
+
+  Note Nested_Package_Name_Similarity {
+    text = '''When applying the Sufficiently_Distinct rule to nested package
+              names, dots are preserved in the simplified form. For example
+              `foo.bar` and `Foo.Bar` both simplify to `foo.bar` and
+              therefore clash. However `foobar` and `foo.bar` have different
+              simplified forms (`foobar` vs `foo.bar`) and do not clash.'''
+  }
+
+  Static_Semantics Parent_Package_Required {
+    text = '''A package `foo.bar` may only be declared if a package `foo`
+              has already been declared. More generally every prefix of a
+              nested package name must itself be a declared package.'''
+  }
+
+  Static_Semantics Nested_Visibility {
+    text = '''Importing a nested package `foo.bar` grants access to the
+              types declared in `foo.bar`. Importing the parent package
+              `foo` does not grant access to types in `foo.bar`.'''
+  }
+
+  Static_Semantics Wildcard_Import {
+    text = '''An import clause of the form `foo.*` is a wildcard import. It
+              grants access to the package `foo` and to every package that
+              is a descendant of `foo` in the nested package hierarchy. It
+              is equivalent to importing each of those packages
+              individually. A wildcard import `foo.*` is only legal if a
+              package `foo` has been declared; if `foo` has no descendants
+              the wildcard import is equivalent to importing `foo`.'''
+  }
+
+  Recommendation Wildcard_Trivial {
+    text = '''If a wildcard import `foo.*` is used but `foo` has no
+              sub-packages, the wildcard is equivalent to a plain
+              `import foo`. Prefer the explicit form to make the
+              import intent clear.'''
+  }
+
+  Static_Semantics Wildcard_Self_Cover {
+    text = '''A wildcard import whose root covers the current package (i.e.
+              the current package is the root or a descendant of it) is
+              permitted. The current package remains implicitly visible and
+              is not considered imported by the wildcard. An explicit
+              (non-wildcard) import of the current package remains illegal
+              (see Self_Imports).'''
+  }
+
+  Static_Semantics Subpackage_Member_Distinct {
+    text = '''Within a package, the leaf name of a direct sub-package must be
+              sufficiently distinct (see Sufficiently_Distinct) from the
+              name of any type or object declared in that package. This
+              avoids ambiguity in qualified-name resolution, which consults
+              sub-packages before members. The rule applies to all type
+              kinds: record types, union types, and enumeration types.'''
   }
 
 }
@@ -431,13 +498,15 @@ section "Qualified names" {
 
   Grammar Qualified_Name {
     bnf = '''
-      qualified_name ::= [ IDENTIFIER_package_name '.' ] IDENTIFIER_name
+      qualified_name ::= [ package_name '.' ] IDENTIFIER_name
     '''
   }
 
   Static_Semantics Valid_Qualifier {
     text = '''The package name of a qualified name must be the current
-              package or an imported package.'''
+              package or an imported package. For nested packages, the
+              full dotted package name must be imported; importing a
+              parent package does not give access to sub-packages.'''
   }
 
   Static_Semantics Valid_Name {
