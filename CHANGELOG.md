@@ -24,7 +24,7 @@ generated in the following situations:
 
 ## Changelog
 
-### 2.0.6-dev
+### 3.0.0-dev
 
 * [TRLC, BAZEL] Removed the support for the CVC5 binary, and hence the
   `--use-cvc5-binary` option is no longer available.
