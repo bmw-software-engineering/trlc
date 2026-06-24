@@ -473,7 +473,8 @@ class TRLCRST:
         - RST directives: ``.. image::``, ``.. figure::``, etc. with options
         - Bullet lists: Lines starting with -
         - Numbered lists: Lines starting with 1., 2., etc.
-        - Line breaks: Preserved between all content lines"""
+        - Soft wraps: Consecutive non-empty lines are joined into a single
+          RST paragraph; insert a blank line to start a new paragraph."""
         if not description:
             return description
 
@@ -573,16 +574,6 @@ class TRLCRST:
                             code_block_base_indent = len(next_line) - len(
                                 next_line.lstrip()
                             )
-
-                    # Add blank line after non-list lines to preserve line breaks
-                    # (unless next line is empty, we're at the end, or we're in a code block)
-                    elif (
-                        not is_list_item
-                        and not in_code_block
-                        and i < len(lines) - 1
-                        and lines[i + 1].strip()
-                    ):
-                        processed_lines.append("")
 
                     prev_was_list_item = is_list_item
             else:

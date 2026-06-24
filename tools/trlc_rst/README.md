@@ -60,7 +60,7 @@ The following formatting is supported in requirement `description` fields:
 | Code block | line ending with `::` followed by indented content | RST literal block |
 | Bullet list | lines starting with `-` | RST bullet list |
 | Numbered list | lines starting with `1.`, `2.`, … | RST enumerated list |
-| Line breaks | any non-empty line | separated by blank lines in RST |
+| Soft wraps | consecutive non-empty lines | joined into one RST paragraph; insert a blank line to start a new paragraph |
 
 ### Command-line Usage
 
