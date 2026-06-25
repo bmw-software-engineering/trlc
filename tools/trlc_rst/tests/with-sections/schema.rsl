@@ -1,5 +1,5 @@
 package T
 
 type Requirement {
-    description optional String
+    description optional Markup_String
 }
