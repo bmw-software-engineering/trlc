@@ -157,8 +157,8 @@ expressions. For example you can write:
 A ** 2 + B ** 2 == C ** 2
 ```
 
-For a full reference, please see the relevant section in the [language
-reference manual](language-reference-manual/LRM.md#expressions).
+For a full reference, please see section "Expressions" in the
+[language reference manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Null
 
