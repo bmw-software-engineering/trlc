@@ -105,4 +105,4 @@ feature:
 * Under some circumstances the counter-examples generated are
   impossible to achieve, due to how the underlying technology (SMT
   Solvers) works. The current limitations are documented in the
-  [release note](CHANGELOG.md).
+  [changelog](../CHANGELOG.md).
