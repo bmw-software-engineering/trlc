@@ -6,7 +6,7 @@ TRLC Python API
   :align: center
   :width: 420
 
-This is description for the end-user facing TRLC API.
+This is the description for the end-user facing TRLC API.
 
 First you need to create a source manager and feed it files::
 
