@@ -26,6 +26,8 @@ generated in the following situations:
 
 ### 3.0.0-dev
 
+* [Bazel] Fixed python setup to support other versions than 3.12
+
 * [TRLC_RST] Render soft-wrapped description lines as a single RST
   paragraph instead of splitting each line into its own paragraph.
   Insert a blank line to start a new paragraph.
