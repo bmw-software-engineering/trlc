@@ -24,6 +24,10 @@ generated in the following situations:
 
 ## Changelog
 
+
+### 3.0.1-dev
+
+
 ### 3.0.0
 
 * [Bazel] Fixed python setup to support other versions than 3.12
