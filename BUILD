@@ -22,12 +22,21 @@ py_binary(
     ],
 )
 
-# Run: bazel run //:requirements.update
-compile_pip_requirements(
-    name = "requirements",
-    src = "requirements.txt",
-    requirements_txt = "requirements_lock.txt",
-)
+# Run: bazel run //:requirements_3_XX.update  --@@rules_python+//python/config_settings:python_version=3.XX
+[
+    compile_pip_requirements(
+        name = "requirements_3_{}".format(version),
+        src = "requirements.txt",
+        python_version = "3.{}".format(version),
+        requirements_txt = "requirements_lock_3_{}.txt".format(version),
+    )
+    for version in [
+        "9",
+        "10",
+        "11",
+        "12",
+    ]
+]
 
 # Run: bazel run //:requirements_dev.update
 compile_pip_requirements(

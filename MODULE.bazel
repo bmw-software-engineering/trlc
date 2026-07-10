@@ -39,14 +39,14 @@ pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 [
     pip.parse(
         hub_name = "trlc_dependencies",
-        python_version = python_version,
-        requirements_lock = "//:requirements_lock.txt",
+        python_version = "3.{}".format(python_version),
+        requirements_lock = "//:requirements_lock_3_{}.txt".format(python_version),
     )
     for python_version in [
-        "3.9",
-        "3.10",
-        "3.11",
-        "3.12",
+        "9",
+        "10",
+        "11",
+        "12",
     ]
 ]
 
@@ -55,14 +55,14 @@ use_repo(pip, "trlc_dependencies")
 [
     pip.parse(
         hub_name = "trlc_sphinx_dependencies",
-        python_version = python_version,
-        requirements_lock = "//tools/sphinx:requirements.txt",
+        python_version = "3.{}".format(python_version),
+        requirements_lock = "//tools/sphinx:requirements_3_{}.txt".format(python_version),
     )
     for python_version in [
-        "3.9",
-        "3.10",
-        "3.11",
-        "3.12",
+        "9",
+        "10",
+        "11",
+        "12",
     ]
 ]
 
