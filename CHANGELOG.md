@@ -24,9 +24,11 @@ generated in the following situations:
 
 ## Changelog
 
-### 3.0.0-dev
+### 3.0.0
 
 * [Bazel] Fixed python setup to support other versions than 3.12
+
+* [TRLC_RST] Add CLI support for `--fields` and `--records` filtering.
 
 * [TRLC_RST] Render soft-wrapped description lines as a single RST
   paragraph instead of splitting each line into its own paragraph.
