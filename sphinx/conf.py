@@ -59,7 +59,8 @@ html_sidebars = {
     "**": ["globaltoc.html", "localtoc.html", "searchbox.html"]
 }
 
-html_static_path = ['_static']
+html_static_path = ['_static', '../documentation/assets']
+html_logo = '../documentation/assets/trlc-logo.svg'
 
 autodoc_default_options = {
     "show-inheritance" : True,
