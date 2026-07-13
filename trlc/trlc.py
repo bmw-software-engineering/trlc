@@ -191,6 +191,35 @@ class Source_Manager:
                     if os.path.splitext(file_name)[1] in (".rsl",
                                                           ".trlc"))})
 
+    def register_include_files(self, file_names):
+        """Make a list of files available for automatic inclusion
+
+        :param file_names: list of files for automatic inclusion
+        :type file_names: list[str]
+        :raises TypeError: if file_names is not a list
+        :raises TypeError: if any item in file_names is not a string
+        :raises FileNotFoundError: if any file does not exist
+        """
+
+        if not isinstance(file_names, list):
+            raise TypeError(
+                f"file_names must be a list, got {type(file_names).__name__}"
+            )
+
+        for file_name in file_names:
+            if not isinstance(file_name, str):
+                raise TypeError(
+                    f"file_name must be a string, got {type(file_name).__name__}"
+                )
+
+            if not os.path.isfile(file_name):
+                raise FileNotFoundError(
+                    f"File does not exist: {file_name}"
+                )
+
+            if os.path.splitext(file_name)[1] in (".rsl", ".trlc"):
+                self.includes[os.path.abspath(file_name)] = file_name
+
     def register_file(self, file_name, file_content=None, primary=True):
         """Schedule a file for parsing.
 
@@ -580,11 +609,20 @@ def trlc():
                           action="store_true",
                           help=("Enter bazel-* directories, which are"
                                 " excluded by default."))
-    og_input.add_argument("-I",
+    og_input.add_argument("-I", "--include-dir",
                           action="append",
                           dest="include_dirs",
+                          metavar="DIR",
                           help=("Add include path. Files from these"
                                 " directories are parsed only when needed."
+                                " Can be specified more than once."),
+                          default=[])
+    og_input.add_argument("--include-file",
+                          action="append",
+                          dest="include_files",
+                          metavar="FILE",
+                          help=("Add a single file to the include set."
+                                " The file is parsed only when needed."
                                 " Can be specified more than once."),
                           default=[])
 
@@ -699,6 +737,12 @@ def trlc():
             ap.error("include path %s is not a directory" % path_name)
     for path_name in options.include_dirs:
         sm.register_include(path_name)
+
+    for file_name in options.include_files:
+        if not os.path.isfile(file_name):
+            ap.error("include file %s is not a file" % file_name)
+    if options.include_files:
+        sm.register_include_files(options.include_files)
 
     # Process input files, defaulting to the current directory if none
     # given.

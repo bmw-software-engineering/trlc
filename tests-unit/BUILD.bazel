@@ -18,11 +18,18 @@ py_test(
     deps = ["//trlc:trlc"],
 )
 
+py_test(
+    name = "test_source_manager",
+    srcs = ["test_source_manager.py"],
+    deps = ["//trlc:trlc"],
+)
+
 test_suite(
     name = "unit_tests",
     tests = [
         ":test_ast_bysection",
         ":test_lexer",
         ":test_lexer_base",
+        ":test_source_manager",
     ],
 )
