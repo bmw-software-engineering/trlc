@@ -1,0 +1,3 @@
+package foo.baz
+
+enum Color { red green }

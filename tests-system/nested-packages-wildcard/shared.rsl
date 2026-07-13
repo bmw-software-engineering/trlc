@@ -1,0 +1,3 @@
+package com.shared
+
+enum Unit { kg newton }

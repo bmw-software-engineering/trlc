@@ -1,0 +1,6 @@
+package user
+import outer.inner
+
+outer.inner.Item IT_001 {
+  value = 42
+}

@@ -1,0 +1,6 @@
+package app
+import ns.pkg
+
+type R {
+  v Integer
+}

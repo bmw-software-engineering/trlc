@@ -1,0 +1,10 @@
+package app
+import lib.*
+
+lib.core.Base B_001 {
+  v = 1
+}
+
+lib.core.ext.Ext E_001 {
+  w = 2
+}

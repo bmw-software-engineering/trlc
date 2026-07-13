@@ -1,0 +1,11 @@
+package app
+import foo
+import foo.bar
+
+foo.T X_001 {
+  a = 1
+}
+
+foo.bar.T Y_001 {
+  b = 2
+}

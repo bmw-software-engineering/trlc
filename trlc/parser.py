@@ -346,6 +346,96 @@ class Parser(Parser_Base):
         else:
             return name, None, None
 
+    def parse_dotted_name(self):
+        # lobster-trace: LRM.Nested_Package_Names
+        # Consume IDENTIFIER { '.' IDENTIFIER } and return the full dotted
+        # name, the location of the first segment, and all tokens consumed.
+        self.match("IDENTIFIER")
+        parts          = [self.ct.value]
+        first_location = self.ct.location
+        tokens         = [self.ct]
+
+        while self.peek("DOT"):
+            self.match("DOT")
+            tokens.append(self.ct)
+            self.match("IDENTIFIER")
+            parts.append(self.ct.value)
+            tokens.append(self.ct)
+
+        return ".".join(parts), first_location, tokens
+
+    def parse_import_name(self):
+        """Parse an import target: a dotted package name with an optional
+        trailing ``.*`` wildcard.
+
+        Consumes ``IDENTIFIER { '.' IDENTIFIER } [ '.' '*' ]``. The ``*``
+        lexes as an ``OPERATOR`` token with value ``"*"``.
+
+        :returns: ``(full_name, first_location, tokens, is_wildcard)``
+        :rtype: tuple[str, Location, list[Token], bool]
+        """
+        # lobster-trace: LRM.Wildcard_Import
+        # lobster-trace: LRM.Nested_Package_Names
+        self.match("IDENTIFIER")
+        parts          = [self.ct.value]
+        first_location = self.ct.location
+        tokens         = [self.ct]
+        is_wildcard    = False
+
+        while self.peek("DOT"):
+            self.match("DOT")
+            t_dot = self.ct
+            if self.peek("OPERATOR") and self.nt.value == "*":
+                self.match("OPERATOR")
+                tokens.append(t_dot)
+                tokens.append(self.ct)
+                is_wildcard = True
+                break
+            tokens.append(t_dot)
+            self.match("IDENTIFIER")
+            parts.append(self.ct.value)
+            tokens.append(self.ct)
+
+        return ".".join(parts), first_location, tokens, is_wildcard
+
+    def descend_sub_packages(self, pkg, t_pkg):
+        # lobster-trace: LRM.Qualified_Name
+        # lobster-trace: LRM.Nested_Visibility
+        # Greedily consume `. segment` pairs, descending into sub-packages
+        # for as long as a segment names one. The first segment that is not
+        # a sub-package is the member name; we check that the package it
+        # belongs to is visible and mark the import used. Returns
+        # (leaf_package, t_member). If the dotted name ends on a package the
+        # trailing token (self.ct) is returned as the member, so the caller
+        # produces a sensible "unknown symbol" error.
+        #
+        # t_pkg is the token that named the current pkg; it is used as the
+        # location for the "package must be imported" error so the caret
+        # points at the offending package rather than the member.
+        while self.peek("DOT"):
+            self.match("DOT")
+            t_dot = self.ct
+            self.match("IDENTIFIER")
+            t_member = self.ct
+            child = pkg.sub_packages.lookup_sub_package(t_member.value)
+            if child is None:
+                pkg.set_ast_link(t_dot)
+                if not self.cu.is_visible(pkg):
+                    self.mh.error(t_pkg.location,
+                                  "package must be imported before use")
+                self.cu.mark_import_used(pkg)
+                return pkg, t_member
+            child.set_ast_link(t_dot)
+            child.set_ast_link(t_member)
+            pkg   = child
+            t_pkg = t_member
+
+        if not self.cu.is_visible(pkg):
+            self.mh.error(t_pkg.location,
+                          "package must be imported before use")
+        self.cu.mark_import_used(pkg)
+        return pkg, self.ct
+
     def parse_qualified_name(self,
                              scope,
                              required_subclass=None,
@@ -363,13 +453,8 @@ class Parser(Parser_Base):
         sym.set_ast_link(self.ct)
 
         if isinstance(sym, ast.Package):
-            if not self.cu.is_visible(sym):
-                self.mh.error(self.ct.location,
-                              "package must be imported before use")
-            self.match("DOT")
-            sym.set_ast_link(self.ct)
-            self.match("IDENTIFIER")
-            return sym.symbols.lookup(self.mh, self.ct, required_subclass)
+            pkg, t_member = self.descend_sub_packages(sym, self.ct)
+            return pkg.symbols.lookup(self.mh, t_member, required_subclass)
         else:
             # Easiest way to generate the correct error message
             return scope.lookup(self.mh, self.ct, required_subclass)
@@ -1793,16 +1878,11 @@ class Parser(Parser_Base):
             self.match("IDENTIFIER")
             t_name = self.ct
             if self.peek("DOT"):
-                self.match("DOT")
-                t_dot = self.ct
-                self.match("IDENTIFIER")
+                # Parse a (potentially nested) package prefix followed by
+                # the object name via a greedy sub-package descent.
                 the_pkg = self.stab.lookup(self.mh, t_name, ast.Package)
                 the_pkg.set_ast_link(t_name)
-                the_pkg.set_ast_link(t_dot)
-                if not self.cu.is_visible(the_pkg):
-                    self.mh.error(self.ct.location,
-                                  "package must be imported before use")
-                t_name = self.ct
+                the_pkg, t_name = self.descend_sub_packages(the_pkg, t_name)
             else:
                 the_pkg = self.cu.package
 
@@ -1969,26 +2049,28 @@ class Parser(Parser_Base):
         # needed
         self.match_kw("package")
         t_pkg = self.ct
-        self.match("IDENTIFIER")
+        pkg_name, pkg_location, pkg_tokens = self.parse_dotted_name()
 
         if kind == "rsl":
             declare_package = True
         else:
             # lobster-trace: LRM.Late_Package_Declarations
-            declare_package = not self.stab.contains(self.ct.value)
+            declare_package = not self.stab.contains(pkg_name)
 
         if declare_package:
             # lobster-trace: LRM.Package_Declaration
-            pkg = ast.Package(name          = self.ct.value,
-                              location      = self.ct.location,
+            pkg = ast.Package(name          = pkg_name,
+                              location      = pkg_location,
                               builtin_stab  = self.stab,
                               declared_late = kind == "trlc")
             self.stab.register(self.mh, pkg)
         else:
-            pkg = self.stab.lookup(self.mh, self.ct, ast.Package)
+            pkg = self.stab.lookup_direct(self.mh, pkg_name, pkg_location,
+                                          ast.Package)
 
         pkg.set_ast_link(t_pkg)
-        pkg.set_ast_link(self.ct)
+        for t in pkg_tokens:
+            pkg.set_ast_link(t)
 
         # lobster-trace: LRM.Current_Package
         self.cu.set_package(pkg)
@@ -2000,9 +2082,14 @@ class Parser(Parser_Base):
         if kind != "check":
             while self.peek_kw("import"):
                 self.match_kw("import")
-                pkg.set_ast_link(self.ct)
-                self.match("IDENTIFIER")
-                self.cu.add_import(self.mh, self.ct)
+                t_import_kw = self.ct
+                imp_name, imp_location, imp_tokens, imp_wildcard = \
+                    self.parse_import_name()
+                pkg.set_ast_link(t_import_kw)
+                for t in imp_tokens:
+                    pkg.set_ast_link(t)
+                self.cu.add_import(self.mh, imp_name, imp_location,
+                                   imp_wildcard)
 
     def parse_rsl_file(self):
         # lobster-trace: LRM.RSL_File

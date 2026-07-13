@@ -1,0 +1,3 @@
+package foo
+
+enum Level { A B C }

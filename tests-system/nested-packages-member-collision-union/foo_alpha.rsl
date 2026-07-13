@@ -1,0 +1,5 @@
+package foo.Alpha
+
+type Sub {
+  x Integer
+}

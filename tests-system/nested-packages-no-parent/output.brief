@@ -1,0 +1,2 @@
+nested-packages-no-parent/foo_bar.rsl:1:9: trlc error: parent package foo of nested package foo.bar has not been declared
+Processed 1 model and 0 requirement files and found 1 error

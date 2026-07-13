@@ -221,34 +221,104 @@ class Linter:
                           "be an optional %s instead." %
                           n_typ.element_type.name)
 
-    def markup_ref(self, item, string_literals):
-        for string_literal in string_literals:
-            for reference in string_literal.references:
-                if reference.package.name == item.name:
-                    return string_literal
+    def _find_import_location(self, cu, name, is_wildcard):
+        # lobster-exclude: Utility function
+        for raw_name, raw_loc, raw_wildcard in cu.raw_imports:
+            if raw_name == name and raw_wildcard == is_wildcard:
+                return raw_loc
         return None
 
+    def _import_in_markup(self, file, item, include_descendants = False):
+        # lobster-exclude: Utility function
+        # A package referenced in a markup string counts as used. For a
+        # wildcard root, a reference to any descendant package also counts.
+        for token in file.lexer.tokens:
+            literal = token.ast_link
+            if not isinstance(literal, ast.String_Literal):
+                continue
+            if not literal.has_references:
+                continue
+            for reference in literal.references:
+                if reference.package.name == item.name:
+                    return True
+                if include_descendants and \
+                   reference.package.name.startswith(item.name + "."):
+                    return True
+        return False
+
     def verify_imports(self):
+        # lobster-trace: LRM.Wildcard_Import
         for file in self.mh.sm.all_files.values():
             if not file.primary and not file.secondary:
                 continue
-            if not file.cu.imports:
+            cu = file.cu
+            if not cu.imports and not cu.wildcard_roots:
                 continue
-            for item in file.cu.imports:
-                import_tokens = [t for t in file.lexer.tokens
-                                 if t.value == item.name]
-                markup = self.markup_ref(item,
-                                         (m.ast_link for m in
-                                          file.lexer.tokens if
-                                          isinstance(m.ast_link,
-                                                     ast.String_Literal) and
-                                          m.ast_link.has_references))
-                if markup is not None:
-                    import_tokens.append(markup)
-                if len(import_tokens) == 1:
-                    import_tk = import_tokens[0]
-                    self.mh.check(import_tk.location,
-                                    "unused import %s" % import_tk.value,
-                                    "unused_imports",
-                                    "Consider deleting this import"
-                                    " statement if not needed.")
+
+            # Redundant explicit imports already covered by a wildcard import.
+            for item in cu.imports:
+                root = cu.covered_by_wildcard(item)
+                if root is None:
+                    continue
+                imp_location = self._find_import_location(cu, item.name, False)
+                if imp_location is not None:
+                    self.mh.check(imp_location,
+                                  "redundant import %s, already covered by"
+                                  " wildcard import %s.*"
+                                  % (item.name, root.name),
+                                  "unused_imports",
+                                  "Consider deleting this import statement.")
+
+            # Unused explicit imports.
+            for item in cu.imports:
+                if item in cu.referenced_imports:
+                    continue
+                # Skip the ones already reported as redundant above.
+                if cu.covered_by_wildcard(item) is not None:
+                    continue
+                if self._import_in_markup(file, item):
+                    continue
+                imp_location = self._find_import_location(cu, item.name, False)
+                if imp_location is not None:
+                    self.mh.check(imp_location,
+                                  "unused import %s" % item.name,
+                                  "unused_imports",
+                                  "Consider deleting this import statement if"
+                                  " not needed.")
+
+            # Unused wildcard imports (no package in the subtree referenced).
+            for root in cu.wildcard_roots:
+                if root in cu.referenced_imports:
+                    continue
+                if self._import_in_markup(file, root,
+                                          include_descendants = True):
+                    continue
+                imp_location = self._find_import_location(cu, root.name, True)
+                if imp_location is not None:
+                    self.mh.check(imp_location,
+                                  "unused wildcard import %s.*" % root.name,
+                                  "unused_imports",
+                                  "Consider deleting this import statement if"
+                                  " not needed.")
+
+            # Trivial wildcard imports (root has no sub-packages).
+            # lobster-trace: LRM.Wildcard_Trivial
+            for root in cu.wildcard_roots:
+                if not root.sub_packages.table:
+                    # Skip if already reported as unused (deleting is better
+                    # advice than replacing).
+                    if root not in cu.referenced_imports:
+                        continue
+                    if self._import_in_markup(file, root,
+                                              include_descendants = True):
+                        continue
+                    imp_location = self._find_import_location(
+                        cu, root.name, True)
+                    if imp_location is not None:
+                        self.mh.check(
+                            imp_location,
+                            "wildcard import %s.* is equivalent to import %s"
+                            " since %s has no sub-packages"
+                            % (root.name, root.name, root.name),
+                            "unused_imports",
+                            "Consider replacing with: import %s" % root.name)

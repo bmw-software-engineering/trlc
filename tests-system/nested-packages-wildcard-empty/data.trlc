@@ -1,0 +1,6 @@
+package app
+import foo.*
+
+foo.Req R_001 {
+  title = "x"
+}

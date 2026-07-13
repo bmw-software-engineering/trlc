@@ -1,0 +1,5 @@
+package outer.inner
+
+type Item {
+  value Integer
+}

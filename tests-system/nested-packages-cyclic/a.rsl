@@ -1,0 +1,5 @@
+package a
+
+import a.b
+
+type Root extends a.b.Leaf {}
