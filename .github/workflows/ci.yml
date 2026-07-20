@@ -11,10 +11,15 @@ permissions:
 
 jobs:
   lint:
-    name: PyLint
+    name: Bazel Lint
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelisk-cache: true
+          repository-cache: true
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
@@ -22,7 +27,7 @@ jobs:
           python3 -m pip install --no-deps bmw-lobster-core bmw-lobster-tool-trlc
       - name: Executing linter
         run: |
-          make lint
+          bazel test //:lint --test_output=errors
   test:
     name: TestSuite
     needs: lint
