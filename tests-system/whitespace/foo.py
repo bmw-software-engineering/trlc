@@ -3,7 +3,7 @@ with open("test.trlc", "r") as fd:
 
 txt += "\n\npackage"
 
-txt += b' \t\n\r\x0b\f'.decode("UTF-8")
+txt += b" \t\n\r\x0b\f".decode("UTF-8")
 
 txt += "Potato"
 

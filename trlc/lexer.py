@@ -37,15 +37,15 @@ def triple_quoted_string_value(raw_value):
 
     non_empty_lines = [line for line in lines if line.strip()]
 
-    value      = lines[0]
-    common_ws  = ""
+    value = lines[0]
+    common_ws = ""
     common_len = 0
     if len(non_empty_lines) >= 2:
         # The loop below cannot complete by construction
         for c in non_empty_lines[1]:  # pragma: no cover
             if c not in (" \t"):
                 break
-            common_ws  += c
+            common_ws += c
             common_len += 1
     else:
         return value
@@ -74,15 +74,13 @@ class Source_Reference(Location):
         assert isinstance(start_pos, int)
         assert isinstance(end_pos, int)
         assert 0 <= start_pos <= end_pos < lexer.length
-        super().__init__(lexer.file_name,
-                         start_line,
-                         start_col)
-        self.lexer     = lexer
+        super().__init__(lexer.file_name, start_line, start_col)
+        self.lexer = lexer
         self.start_pos = start_pos
-        self.end_pos   = end_pos
+        self.end_pos = end_pos
 
     def text(self):
-        return self.lexer.content[self.start_pos:self.end_pos + 1]
+        return self.lexer.content[self.start_pos : self.end_pos + 1]
 
     def context_lines(self):
         line = ""
@@ -105,13 +103,12 @@ class Source_Reference(Location):
         stripped_line = line.lstrip()
         stripped_offset = offset - (len(line) - len(stripped_line))
 
-        return [stripped_line,
-                " " * stripped_offset + "^" * min(tlen, maxtrail)]
+        return [stripped_line, " " * stripped_offset + "^" * min(tlen, maxtrail)]
 
     def get_end_location(self):
-        lines_in_between = self.lexer.content[
-            self.start_pos : self.end_pos + 1
-        ].count("\n")
+        lines_in_between = self.lexer.content[self.start_pos : self.end_pos + 1].count(
+            "\n"
+        )
         end_line = self.line_no + lines_in_between
 
         end_col = self.end_pos + 1
@@ -128,39 +125,38 @@ class Token_Base:
         assert isinstance(location, Location)
         assert isinstance(kind, str)
         self.location = location
-        self.kind     = kind
-        self.value    = value
+        self.kind = kind
+        self.value = value
 
 
 class Token(Token_Base):
     KIND = {
-        "COMMENT"    : "comment",
-        "IDENTIFIER" : "identifier",
-        "KEYWORD"    : "keyword",
-        "BRA"        : "opening parenthesis '('",
-        "KET"        : "closing parenthesis ')'",
-        "S_BRA"      : "opening bracket '['",
-        "S_KET"      : "closing bracket ']'",
-        "C_BRA"      : "opening brace '{'",
-        "C_KET"      : "closing brace '}'",
-        "COMMA"      : "comma ','",
-        "AT"         : "separtor '@'",
-        "SEMICOLON"  : "separator ';'",
-        "COLON"      : "separator ':'",
-        "DOT"        : ".",
-        "RANGE"      : "..",
-        "ASSIGN"     : "=",
-        "OPERATOR"   : "operator",
-        "ARROW"      : "->",
-        "INTEGER"    : "integer literal",
-        "DECIMAL"    : "decimal literal",
-        "STRING"     : "string literal",
+        "COMMENT": "comment",
+        "IDENTIFIER": "identifier",
+        "KEYWORD": "keyword",
+        "BRA": "opening parenthesis '('",
+        "KET": "closing parenthesis ')'",
+        "S_BRA": "opening bracket '['",
+        "S_KET": "closing bracket ']'",
+        "C_BRA": "opening brace '{'",
+        "C_KET": "closing brace '}'",
+        "COMMA": "comma ','",
+        "AT": "separtor '@'",
+        "SEMICOLON": "separator ';'",
+        "COLON": "separator ':'",
+        "DOT": ".",
+        "RANGE": "..",
+        "ASSIGN": "=",
+        "OPERATOR": "operator",
+        "ARROW": "->",
+        "INTEGER": "integer literal",
+        "DECIMAL": "decimal literal",
+        "STRING": "string literal",
     }
 
     def __init__(self, location, kind, value=None, ast_link=None):
         assert kind in Token.KIND
-        if kind in ("COMMENT", "IDENTIFIER",
-                    "KEYWORD", "OPERATOR", "STRING"):
+        if kind in ("COMMENT", "IDENTIFIER", "KEYWORD", "OPERATOR", "STRING"):
             assert isinstance(value, str)
         elif kind == "INTEGER":
             assert isinstance(value, int)
@@ -182,16 +178,16 @@ class Lexer_Base(metaclass=ABCMeta):
     def __init__(self, mh, content):
         assert isinstance(mh, Message_Handler)
         assert isinstance(content, str)
-        self.mh        = mh
-        self.content   = content
-        self.length    = len(self.content)
-        self.tokens    = []
+        self.mh = mh
+        self.content = content
+        self.length = len(self.content)
+        self.tokens = []
 
-        self.lexpos  = -3
+        self.lexpos = -3
         self.line_no = 0
-        self.col_no  = 0
-        self.cc  = None
-        self.nc  = None
+        self.col_no = 0
+        self.cc = None
+        self.nc = None
         self.nnc = None
 
         self.advance()
@@ -236,62 +232,64 @@ class Lexer_Base(metaclass=ABCMeta):
             self.col_no += 1
         self.cc = self.nc
         self.nc = self.nnc
-        self.nnc = (self.content[self.lexpos + 2]
-                    if self.lexpos + 2 < self.length
-                    else None)
+        self.nnc = (
+            self.content[self.lexpos + 2] if self.lexpos + 2 < self.length else None
+        )
 
 
 class TRLC_Lexer(Lexer_Base):
-    KEYWORDS = frozenset([
-        "abs",
-        "abstract",
-        "and",
-        "checks",
-        "else",
-        "elsif",
-        "enum",
-        "error",
-        "exists",
-        "extends",
-        "false",
-        "fatal",
-        "final",
-        "forall",
-        "freeze",
-        "if",
-        "implies",
-        "import",
-        "in",
-        "not",
-        "null",
-        "optional",
-        "or",
-        "package",
-        "section",
-        "separator",
-        "then",
-        "true",
-        "tuple",
-        "type",
-        "warning",
-        "xor"
-    ])
+    KEYWORDS = frozenset(
+        [
+            "abs",
+            "abstract",
+            "and",
+            "checks",
+            "else",
+            "elsif",
+            "enum",
+            "error",
+            "exists",
+            "extends",
+            "false",
+            "fatal",
+            "final",
+            "forall",
+            "freeze",
+            "if",
+            "implies",
+            "import",
+            "in",
+            "not",
+            "null",
+            "optional",
+            "or",
+            "package",
+            "section",
+            "separator",
+            "then",
+            "true",
+            "tuple",
+            "type",
+            "warning",
+            "xor",
+        ]
+    )
 
     PUNCTUATION = {
-        "(" : "BRA",
-        ")" : "KET",
-        "{" : "C_BRA",
-        "}" : "C_KET",
-        "[" : "S_BRA",
-        "]" : "S_KET",
-        "," : "COMMA",
-        "@" : "AT",
-        ":" : "COLON",
-        ";" : "SEMICOLON",
-        "/" : "OPERATOR",
-        "%" : "OPERATOR",
-        "+" : "OPERATOR",
-        "-" : "OPERATOR",
+        "(": "BRA",
+        ")": "KET",
+        "{": "C_BRA",
+        "}": "C_KET",
+        "[": "S_BRA",
+        "]": "S_KET",
+        ",": "COMMA",
+        "@": "AT",
+        ":": "COLON",
+        ";": "SEMICOLON",
+        "/": "OPERATOR",
+        "%": "OPERATOR",
+        "+": "OPERATOR",
+        "-": "OPERATOR",
     }
 
     def __init__(self, mh, file_name, file_content=None):
@@ -311,11 +309,13 @@ class TRLC_Lexer(Lexer_Base):
 
     def current_location(self):
         # lobster-exclude: Utility function
-        return Source_Reference(lexer      = self,
-                                start_line = self.line_no,
-                                start_col  = self.col_no,
-                                start_pos  = self.lexpos,
-                                end_pos    = self.lexpos)
+        return Source_Reference(
+            lexer=self,
+            start_line=self.line_no,
+            start_col=self.col_no,
+            start_pos=self.lexpos,
+            end_pos=self.lexpos,
+        )
 
     def file_location(self):
         # lobster-exclude: Utility function
@@ -329,9 +329,9 @@ class TRLC_Lexer(Lexer_Base):
         if self.cc is None:
             return None
 
-        start_pos  = self.lexpos
+        start_pos = self.lexpos
         start_line = self.line_no
-        start_col  = self.col_no
+        start_col = self.col_no
 
         if self.cc == "/" and self.nc == "/":
             # lobster-trace: LRM.Comments
@@ -349,8 +349,7 @@ class TRLC_Lexer(Lexer_Base):
         elif self.is_alpha(self.cc):
             # lobster-trace: LRM.Identifier
             kind = "IDENTIFIER"
-            while self.nc and (self.is_alnum(self.nc) or
-                               self.nc == "_"):
+            while self.nc and (self.is_alnum(self.nc) or self.nc == "_"):
                 self.advance()
 
         elif self.cc in TRLC_Lexer.PUNCTUATION:
@@ -395,8 +394,7 @@ class TRLC_Lexer(Lexer_Base):
             if self.nc == "=":
                 self.advance()
             else:
-                self.mh.lex_error(self.current_location(),
-                                  "malformed != operator")
+                self.mh.lex_error(self.current_location(), "malformed != operator")
 
         elif self.cc == "*":
             # lobster-trace: LRM.Single_Delimiters
@@ -421,30 +419,39 @@ class TRLC_Lexer(Lexer_Base):
                         quotes_seen = 0
                     if self.nc is None:
                         self.mh.lex_error(
-                            Source_Reference(lexer      = self,
-                                             start_line = start_line,
-                                             start_col  = start_col,
-                                             start_pos  = start_pos,
-                                             end_pos    = self.lexpos),
-                            "unterminated triple-quoted string")
+                            Source_Reference(
+                                lexer=self,
+                                start_line=start_line,
+                                start_col=start_col,
+                                start_pos=start_pos,
+                                end_pos=self.lexpos,
+                            ),
+                            "unterminated triple-quoted string",
+                        )
             else:
                 while self.nc != '"':
                     if self.nc is None:
                         self.mh.lex_error(
-                            Source_Reference(lexer      = self,
-                                             start_line = start_line,
-                                             start_col  = start_col,
-                                             start_pos  = start_pos,
-                                             end_pos    = self.lexpos),
-                            "unterminated string")
+                            Source_Reference(
+                                lexer=self,
+                                start_line=start_line,
+                                start_col=start_col,
+                                start_pos=start_pos,
+                                end_pos=self.lexpos,
+                            ),
+                            "unterminated string",
+                        )
                     elif self.nc == "\n":
                         self.mh.lex_error(
-                            Source_Reference(lexer      = self,
-                                             start_line = start_line,
-                                             start_col  = start_col,
-                                             start_pos  = start_pos,
-                                             end_pos    = self.lexpos),
-                            "double quoted strings cannot include newlines")
+                            Source_Reference(
+                                lexer=self,
+                                start_line=start_line,
+                                start_col=start_col,
+                                start_pos=start_pos,
+                                end_pos=self.lexpos,
+                            ),
+                            "double quoted strings cannot include newlines",
+                        )
 
                     self.advance()
                     if self.cc == "\\" and self.nc == '"':
@@ -458,12 +465,15 @@ class TRLC_Lexer(Lexer_Base):
                 self.advance()
                 if self.cc != "'":
                     self.mh.lex_error(
-                        Source_Reference(lexer      = self,
-                                         start_line = start_line,
-                                         start_col  = start_col,
-                                         start_pos  = start_pos,
-                                         end_pos    = self.lexpos),
-                        "malformed triple-quoted string")
+                        Source_Reference(
+                            lexer=self,
+                            start_line=start_line,
+                            start_col=start_col,
+                            start_pos=start_pos,
+                            end_pos=self.lexpos,
+                        ),
+                        "malformed triple-quoted string",
+                    )
             quotes_seen = 0
             while quotes_seen < 3:
                 self.advance()
@@ -473,12 +483,15 @@ class TRLC_Lexer(Lexer_Base):
                     quotes_seen = 0
                 if self.nc is None:
                     self.mh.lex_error(
-                        Source_Reference(lexer      = self,
-                                         start_line = start_line,
-                                         start_col  = start_col,
-                                         start_pos  = start_pos,
-                                         end_pos    = self.lexpos),
-                        "unterminated triple-quoted string")
+                        Source_Reference(
+                            lexer=self,
+                            start_line=start_line,
+                            start_col=start_col,
+                            start_pos=start_pos,
+                            end_pos=self.lexpos,
+                        ),
+                        "unterminated triple-quoted string",
+                    )
 
         elif self.is_numeric(self.cc):
             # lobster-trace: LRM.Integers
@@ -486,25 +499,25 @@ class TRLC_Lexer(Lexer_Base):
             kind = "INTEGER"
 
             if self.cc == "0" and self.nc == "b":
-                digits_allowed   = "01"
+                digits_allowed = "01"
                 digits_forbidden = "23456789abcdefABCDEF"
-                int_base         = 2
-                require_digit    = True
-                decimal_allowed  = False
+                int_base = 2
+                require_digit = True
+                decimal_allowed = False
                 self.advance()
             elif self.cc == "0" and self.nc == "x":
-                digits_allowed   = "0123456789abcdefABCDEF"
+                digits_allowed = "0123456789abcdefABCDEF"
                 digits_forbidden = ""
-                int_base         = 16
-                require_digit    = True
-                decimal_allowed  = False
+                int_base = 16
+                require_digit = True
+                decimal_allowed = False
                 self.advance()
             else:
-                digits_allowed   = "0123456789"
+                digits_allowed = "0123456789"
                 digits_forbidden = "abcdefABCDEF"
-                int_base         = 10
-                require_digit    = False
-                decimal_allowed  = True
+                int_base = 10
+                require_digit = False
+                decimal_allowed = True
 
             while self.nc:
                 if self.nc in digits_allowed:
@@ -513,22 +526,27 @@ class TRLC_Lexer(Lexer_Base):
 
                 elif self.nc in digits_forbidden:
                     self.mh.lex_error(
-                        Source_Reference(lexer      = self,
-                                         start_line = start_line,
-                                         start_col  = start_col,
-                                         start_pos  = self.lexpos + 1,
-                                         end_pos    = self.lexpos + 1),
-                        "%s is not a valid base %u digit" % (self.nc,
-                                                             int_base))
+                        Source_Reference(
+                            lexer=self,
+                            start_line=start_line,
+                            start_col=start_col,
+                            start_pos=self.lexpos + 1,
+                            end_pos=self.lexpos + 1,
+                        ),
+                        "%s is not a valid base %u digit" % (self.nc, int_base),
+                    )
 
                 elif require_digit:
                     self.mh.lex_error(
-                        Source_Reference(lexer      = self,
-                                         start_line = start_line,
-                                         start_col  = start_col,
-                                         start_pos  = self.lexpos + 1,
-                                         end_pos    = self.lexpos + 1),
-                        "base %u digit is required here" % int_base)
+                        Source_Reference(
+                            lexer=self,
+                            start_line=start_line,
+                            start_col=start_col,
+                            start_pos=self.lexpos + 1,
+                            end_pos=self.lexpos + 1,
+                        ),
+                        "base %u digit is required here" % int_base,
+                    )
 
                 elif self.nc == "_":
                     self.advance()
@@ -545,18 +563,23 @@ class TRLC_Lexer(Lexer_Base):
                         if int_base == 10:
                             msg = "decimal point is not allowed here"
                         else:
-                            msg = ("base %u integer may not contain a"
-                                   " decimal point" % int_base)
+                            msg = (
+                                "base %u integer may not contain a"
+                                " decimal point" % int_base
+                            )
                         self.mh.lex_error(
-                            Source_Reference(lexer      = self,
-                                             start_line = start_line,
-                                             start_col  = start_col,
-                                             start_pos  = self.lexpos,
-                                             end_pos    = self.lexpos),
-                            msg)
-                    decimal_allowed   = False
-                    require_digit     = True
-                    kind              = "DECIMAL"
+                            Source_Reference(
+                                lexer=self,
+                                start_line=start_line,
+                                start_col=start_col,
+                                start_pos=self.lexpos,
+                                end_pos=self.lexpos,
+                            ),
+                            msg,
+                        )
+                    decimal_allowed = False
+                    require_digit = True
+                    kind = "DECIMAL"
 
                 else:  # pragma: no cover
                     # This is actually a false
@@ -566,22 +589,28 @@ class TRLC_Lexer(Lexer_Base):
 
             if require_digit:
                 self.mh.lex_error(
-                    Source_Reference(lexer      = self,
-                                     start_line = start_line,
-                                     start_col  = start_col,
-                                     start_pos  = start_pos,
-                                     end_pos    = self.lexpos),
-                    "unfinished base %u integer" % int_base)
+                    Source_Reference(
+                        lexer=self,
+                        start_line=start_line,
+                        start_col=start_col,
+                        start_pos=start_pos,
+                        end_pos=self.lexpos,
+                    ),
+                    "unfinished base %u integer" % int_base,
+                )
 
         else:
-            self.mh.lex_error(self.current_location(),
-                              "unexpected character '%s'" % self.cc)
+            self.mh.lex_error(
+                self.current_location(), "unexpected character '%s'" % self.cc
+            )
 
-        sref = Source_Reference(lexer      = self,
-                                start_line = start_line,
-                                start_col  = start_col,
-                                start_pos  = start_pos,
-                                end_pos    = min(self.lexpos, self.length - 1))
+        sref = Source_Reference(
+            lexer=self,
+            start_line=start_line,
+            start_col=start_col,
+            start_pos=start_pos,
+            end_pos=min(self.lexpos, self.length - 1),
+        )
 
         if kind == "IDENTIFIER":
             value = sref.text()
@@ -634,7 +663,6 @@ class TRLC_Lexer(Lexer_Base):
 
 
 class Token_Stream(TRLC_Lexer):
-
     def token(self):
         tok = super().token()
         if tok is not None:

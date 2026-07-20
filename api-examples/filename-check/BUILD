@@ -9,7 +9,6 @@ test_suite(
     ],
 )
 
-
 # 1. Gather the RSL schema
 trlc_specification(
     name = "spec",

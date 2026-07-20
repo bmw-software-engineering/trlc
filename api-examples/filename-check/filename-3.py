@@ -24,13 +24,15 @@ failed = False
 for obj in symbols.iter_record_objects():
     values = obj.to_python_dict()
 
-    if values["illustration"] is not None and \
-       not os.path.isfile(values["illustration"]):
-
-        mh.error(location = obj.field["illustration"].location,
-                 message  = "is not a file",
-                 fatal    = False,
-                 user     = True)
+    if values["illustration"] is not None and not os.path.isfile(
+        values["illustration"]
+    ):
+        mh.error(
+            location=obj.field["illustration"].location,
+            message="is not a file",
+            fatal=False,
+            user=True,
+        )
 
         failed = True
 

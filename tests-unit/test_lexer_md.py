@@ -21,7 +21,9 @@ class ListHandler(Message_Handler):
         if not isinstance(fatal, bool):
             raise TypeError(f"expected bool fatal, got {type(fatal).__name__}")
         if extrainfo is not None and not isinstance(extrainfo, str):
-            raise TypeError(f"expected str or None extrainfo, got {type(extrainfo).__name__}")
+            raise TypeError(
+                f"expected str or None extrainfo, got {type(extrainfo).__name__}"
+            )
 
         self.messages.append((location, kind, message))
 
@@ -89,7 +91,9 @@ def make_record_type(record_name="ReqType"):
         False,
     )
 
-    package.symbols.table[trlc_ast.Symbol_Table.simplified_name(record_name)] = record_type
+    package.symbols.table[trlc_ast.Symbol_Table.simplified_name(record_name)] = (
+        record_type
+    )
 
     stab = trlc_ast.Symbol_Table()
     stab.table[trlc_ast.Symbol_Table.simplified_name(package.name)] = package
@@ -118,7 +122,9 @@ class TestLexerMd(unittest.TestCase):
         self.assertTrue(MD_Lexer._is_hr("<BR/> <HR>"))
         self.assertFalse(MD_Lexer._is_hr("<hrx>"))
 
-        self.assertEqual(MD_Lexer._heading_to_identifier("  Hello, world!  "), "Hello_world")
+        self.assertEqual(
+            MD_Lexer._heading_to_identifier("  Hello, world!  "), "Hello_world"
+        )
         self.assertEqual(MD_Lexer._heading_to_identifier("A---B__C"), "A_B_C")
 
     def test_table_helpers(self):
@@ -127,7 +133,9 @@ class TestLexerMd(unittest.TestCase):
         self.assertFalse(MD_Lexer._is_separator_row("| value |"))
 
         self.assertEqual(MD_Lexer._parse_table_row("| key | value |"), ("key", "value"))
-        self.assertEqual(MD_Lexer._parse_table_row("| key | value | extra |"), ("key", "value"))
+        self.assertEqual(
+            MD_Lexer._parse_table_row("| key | value | extra |"), ("key", "value")
+        )
         self.assertIsNone(MD_Lexer._parse_table_row("not a row"))
 
     def test_scalar_value_inference(self):
@@ -174,7 +182,9 @@ class TestLexerMd(unittest.TestCase):
 
     def test_array_value_and_bracket_error(self):
         lexer = MD_Lexer(self.mh, "test", "")
-        lexer._emit_value("DemoPkg.item_a @ 1 <br> DemoPkg.item_b via 2", Location("test"))
+        lexer._emit_value(
+            "DemoPkg.item_a @ 1 <br> DemoPkg.item_b via 2", Location("test")
+        )
         self.assertEqual(
             token_pairs(lexer),
             [
@@ -198,7 +208,10 @@ class TestLexerMd(unittest.TestCase):
         lexer._emit_value("[DemoPkg.item_a @ 1, DemoPkg.item_b @ 2]", Location("test"))
         self.assertEqual(token_pairs(lexer), [])
         self.assertEqual(len(self.mh.messages), 1)
-        self.assertEqual(self.mh.pop_message()[2], "bracket notation for tuple-reference arrays is not supported")
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "bracket notation for tuple-reference arrays is not supported",
+        )
 
     def test_type_aware_field_emission(self):
         _stab, record_type = make_record_type()
@@ -207,7 +220,12 @@ class TestLexerMd(unittest.TestCase):
         # Tuple-array field: fully qualified references
         lexer = MD_Lexer(self.mh, "test", "")
         lexer._emit_field_value("Hello there", Location("test"), record_type, "notes")
-        lexer._emit_field_value("DemoPkg.item_a @ 1, DemoPkg.item_b @ 2", Location("test"), record_type, "refs")
+        lexer._emit_field_value(
+            "DemoPkg.item_a @ 1, DemoPkg.item_b @ 2",
+            Location("test"),
+            record_type,
+            "refs",
+        )
         self.assertEqual(
             token_pairs(lexer),
             [
@@ -230,7 +248,9 @@ class TestLexerMd(unittest.TestCase):
 
         # Tuple-array field: unqualified (same-package) references
         lexer = MD_Lexer(self.mh, "test", "")
-        lexer._emit_field_value("item_a @ 1, item_b @ 2", Location("test"), record_type, "refs")
+        lexer._emit_field_value(
+            "item_a @ 1, item_b @ 2", Location("test"), record_type, "refs"
+        )
         self.assertEqual(
             token_pairs(lexer),
             [
@@ -248,7 +268,9 @@ class TestLexerMd(unittest.TestCase):
 
         # Tuple-array field: mixed array (qualified + unqualified)
         lexer = MD_Lexer(self.mh, "test", "")
-        lexer._emit_field_value("item_a @ 1, OtherPkg.item_b @ 2", Location("test"), record_type, "refs")
+        lexer._emit_field_value(
+            "item_a @ 1, OtherPkg.item_b @ 2", Location("test"), record_type, "refs"
+        )
         self.assertEqual(
             token_pairs(lexer),
             [

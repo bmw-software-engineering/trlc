@@ -280,7 +280,7 @@ class MD_Lexer(TRLC_Lexer):
         self._raw_content = content  # kept for Phase 2 reprocessing
         self._stab = None  # set by prepare_phase2() after RSL
         self._md_tokens = []
-        self._tok_index   = 0
+        self._tok_index = 0
 
         # Phase 1: emit only preamble tokens (# PackageName, import lines).
         # Phase 2 is triggered by Source_Manager after parse_rsl_files().
@@ -322,7 +322,7 @@ class MD_Lexer(TRLC_Lexer):
             if stripped.startswith("import "):
                 preamble.append(line)
                 continue
-            break   # first non-preamble line stops Phase 1
+            break  # first non-preamble line stops Phase 1
         self._process("\n".join(preamble))
 
     def prepare_phase2(self, stab):
@@ -372,8 +372,9 @@ class MD_Lexer(TRLC_Lexer):
     def _is_tuple_array_field(record_type_ast, field_name):
         """Return True when *field_name* is declared as an array of tuples."""
         typ = MD_Lexer._get_field_type(record_type_ast, field_name)
-        return (isinstance(typ, trlc_ast.Array_Type) and
-                isinstance(typ.element_type, trlc_ast.Tuple_Type))
+        return isinstance(typ, trlc_ast.Array_Type) and isinstance(
+            typ.element_type, trlc_ast.Tuple_Type
+        )
 
     @staticmethod
     def _is_string_field(record_type_ast, field_name):
@@ -381,8 +382,9 @@ class MD_Lexer(TRLC_Lexer):
         typ = MD_Lexer._get_field_type(record_type_ast, field_name)
         return typ is not None and isinstance(typ, trlc_ast.Builtin_String)
 
-    def _emit_field_value(self, raw_value, location,
-                          record_type_ast=None, field_name=None):
+    def _emit_field_value(
+        self, raw_value, location, record_type_ast=None, field_name=None
+    ):
         """Type-aware field value emission (used in Phase 2).
 
         Dispatch rules when RSL type info is available:
@@ -517,7 +519,7 @@ class MD_Lexer(TRLC_Lexer):
                 self._emit(location, "DOT")
 
     # Separator symbol token kinds (mirrors TRLC_Lexer.PUNCTUATION).
-    _SEPARATOR_PUNCTUATION = {'@': 'AT', ':': 'COLON', ';': 'SEMICOLON'}
+    _SEPARATOR_PUNCTUATION = {"@": "AT", ":": "COLON", ";": "SEMICOLON"}
 
     @staticmethod
     def _normalize_array_value(raw_value):
@@ -533,12 +535,12 @@ class MD_Lexer(TRLC_Lexer):
         ``"identifier <sep> integer, ..."``.
         """
         # Replace <br> and <BR> tags with newlines for uniform processing
-        normalized = re.sub(r'<[Bb][Rr]\s*/?>', '\n', raw_value)
+        normalized = re.sub(r"<[Bb][Rr]\s*/?>", "\n", raw_value)
 
         # Split on newlines and commas, trim each part
         parts = []
-        for line in normalized.split('\n'):
-            for item in line.split(','):
+        for line in normalized.split("\n"):
+            for item in line.split(","):
                 trimmed = item.strip()
                 if trimmed:
                     parts.append(trimmed)
@@ -548,48 +550,48 @@ class MD_Lexer(TRLC_Lexer):
         # - identifier separators: collapse multiple spaces to one
         normalized_parts = []
         for part in parts:
-            part = re.sub(r'\s*([@:;])\s*', r' \1 ', part)
-            part = re.sub(r' +', ' ', part.strip())
+            part = re.sub(r"\s*([@:;])\s*", r" \1 ", part)
+            part = re.sub(r" +", " ", part.strip())
             normalized_parts.append(part)
 
-        return ', '.join(normalized_parts)
+        return ", ".join(normalized_parts)
 
     # Tuple-reference pattern: package-qualified identifier, separator, integer.
     # The reference MUST contain at least one dot (Package.name) so that plain
     # free-text values are never falsely matched.
     # Separator is @, :, ; or a plain identifier.
     _TUPLE_REF_RE = re.compile(
-        r'^'
-        r'(?P<ref>[a-zA-Z_]\w*\.[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)'
-        r' '
-        r'(?P<sep>[@:;]|[a-zA-Z_]\w*)'
-        r' '
-        r'(?P<ver>\d+)'
-        r'$'
+        r"^"
+        r"(?P<ref>[a-zA-Z_]\w*\.[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)"
+        r" "
+        r"(?P<sep>[@:;]|[a-zA-Z_]\w*)"
+        r" "
+        r"(?P<ver>\d+)"
+        r"$"
     )
 
     # Like _TUPLE_REF_RE but the dot is optional, so unqualified same-package
     # references (e.g. ``item @ 1``) are also accepted.  Only safe in the
     # Phase 2 type-aware path where the field type is already known.
     _TUPLE_REF_FLEXIBLE_RE = re.compile(
-        r'^'
-        r'(?P<ref>[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)'
-        r' '
-        r'(?P<sep>[@:;]|[a-zA-Z_]\w*)'
-        r' '
-        r'(?P<ver>\d+)'
-        r'$'
+        r"^"
+        r"(?P<ref>[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)"
+        r" "
+        r"(?P<sep>[@:;]|[a-zA-Z_]\w*)"
+        r" "
+        r"(?P<ver>\d+)"
+        r"$"
     )
 
     # Chunk patterns for the multi-separator tuple scanner.
     # A numeric chunk: hex, binary, or decimal (integer or float).
     _TUPLE_NUM_RE = re.compile(
-        r'0[xX][0-9a-fA-F][0-9a-fA-F_]*'
-        r'|0[bB][01][01_]*'
-        r'|\d+(?:\.\d+)?'
+        r"0[xX][0-9a-fA-F][0-9a-fA-F_]*"
+        r"|0[bB][01][01_]*"
+        r"|\d+(?:\.\d+)?"
     )
     # A separator chunk: @, :, ; or a word identifier.
-    _TUPLE_SEP_RE = re.compile(r'[@:;]|[a-zA-Z_]\w*')
+    _TUPLE_SEP_RE = re.compile(r"[@:;]|[a-zA-Z_]\w*")
 
     @staticmethod
     def _looks_like_array(raw_value, allow_unqualified=False):
@@ -605,13 +607,13 @@ class MD_Lexer(TRLC_Lexer):
         type is confirmed as a tuple-reference array.
         """
         normalized = MD_Lexer._normalize_array_value(raw_value)
-        parts = [p.strip() for p in normalized.split(',') if p.strip()]
-        pattern = (MD_Lexer._TUPLE_REF_FLEXIBLE_RE if allow_unqualified
-                   else MD_Lexer._TUPLE_REF_RE)
-        return bool(parts) and all(
-            pattern.match(part)
-            for part in parts
+        parts = [p.strip() for p in normalized.split(",") if p.strip()]
+        pattern = (
+            MD_Lexer._TUPLE_REF_FLEXIBLE_RE
+            if allow_unqualified
+            else MD_Lexer._TUPLE_REF_RE
         )
+        return bool(parts) and all(pattern.match(part) for part in parts)
 
     @staticmethod
     def _looks_like_simple_tuple(raw_value):
@@ -627,7 +629,7 @@ class MD_Lexer(TRLC_Lexer):
 
         def skip_ws():
             nonlocal pos
-            while pos < n and value[pos] in (' ', '\t'):
+            while pos < n and value[pos] in (" ", "\t"):
                 pos += 1
 
         skip_ws()
@@ -671,14 +673,14 @@ class MD_Lexer(TRLC_Lexer):
 
         def skip_ws():
             nonlocal pos
-            while pos < n and value[pos] in (' ', '\t'):
+            while pos < n and value[pos] in (" ", "\t"):
                 pos += 1
 
         skip_ws()
         m = MD_Lexer._TUPLE_NUM_RE.match(value, pos)
         if not m:
             return False
-        chunks.append(('num', m.group()))
+        chunks.append(("num", m.group()))
         pos = m.end()
 
         while pos < n:
@@ -688,13 +690,13 @@ class MD_Lexer(TRLC_Lexer):
             m = MD_Lexer._TUPLE_SEP_RE.match(value, pos)
             if not m:
                 return False
-            chunks.append(('sep', m.group()))
+            chunks.append(("sep", m.group()))
             pos = m.end()
             skip_ws()
             m = MD_Lexer._TUPLE_NUM_RE.match(value, pos)
             if not m:
                 return False
-            chunks.append(('num', m.group()))
+            chunks.append(("num", m.group()))
             pos = m.end()
 
         if pos != n:
@@ -702,13 +704,13 @@ class MD_Lexer(TRLC_Lexer):
 
         # Must have at least one separator so bare numbers fall through to
         # the integer/decimal scalar checks in _emit_value.
-        has_sep = any(kind == 'sep' for kind, _ in chunks)
+        has_sep = any(kind == "sep" for kind, _ in chunks)
         if not has_sep:
             return False
 
         for kind, text in chunks:
-            if kind == 'num':
-                if '.' in text:
+            if kind == "num":
+                if "." in text:
                     self._emit(location, "DECIMAL", Fraction(text.replace("_", "")))
                 else:
                     self._emit(location, "INTEGER", self._parse_number(text))
@@ -774,7 +776,7 @@ class MD_Lexer(TRLC_Lexer):
         so the caller can skip further processing of this value.
         """
         value = raw_value.strip()
-        if not (value.startswith('[') and value.endswith(']')):
+        if not (value.startswith("[") and value.endswith("]")):
             return False
         inner = value[1:-1].strip()
         # Only reject if the content inside the brackets actually looks like
@@ -814,10 +816,13 @@ class MD_Lexer(TRLC_Lexer):
             return False
 
         normalized = self._normalize_array_value(raw_value)
-        parts = [p.strip() for p in normalized.split(',')]
+        parts = [p.strip() for p in normalized.split(",")]
         self._emit(location, "S_BRA")
-        pattern = (MD_Lexer._TUPLE_REF_FLEXIBLE_RE if allow_unqualified
-                   else MD_Lexer._TUPLE_REF_RE)
+        pattern = (
+            MD_Lexer._TUPLE_REF_FLEXIBLE_RE
+            if allow_unqualified
+            else MD_Lexer._TUPLE_REF_RE
+        )
 
         for idx, part in enumerate(parts):
             if idx > 0:
@@ -830,7 +835,7 @@ class MD_Lexer(TRLC_Lexer):
                 integer = int(match.group("ver"))
 
                 # Emit qualified identifier (Pkg.item → IDENTIFIER DOT IDENTIFIER)
-                ident_parts = qual_ident.split('.')
+                ident_parts = qual_ident.split(".")
                 for i, ident_part in enumerate(ident_parts):
                     self._emit(location, "IDENTIFIER", ident_part)
                     if i < len(ident_parts) - 1:
@@ -1003,8 +1008,8 @@ class MD_Lexer(TRLC_Lexer):
         imported_packages = []
 
         # ── Type tracking for Phase 2 ─────────────────────────────────── #
-        current_package_name    = None   # from # PackageName heading
-        current_record_type_ast = None   # resolved after type row found
+        current_package_name = None  # from # PackageName heading
+        current_record_type_ast = None  # resolved after type row found
 
         # ── Record tracking ───────────────────────────────────────────── #
         # When a ### heading is seen we buffer the name and then wait for
@@ -1042,8 +1047,9 @@ class MD_Lexer(TRLC_Lexer):
                 str_field_lines.pop()
             text = "\n".join(str_field_lines)
 
-            emit_as_scalar = ("\n" not in text and
-                              MD_Lexer._looks_like_scalar_value(text))
+            emit_as_scalar = "\n" not in text and MD_Lexer._looks_like_scalar_value(
+                text
+            )
 
             value_loc = str_field_loc
             if str_field_first_content_line is not None:
@@ -1057,25 +1063,32 @@ class MD_Lexer(TRLC_Lexer):
                 self._emit(str_field_loc, "IDENTIFIER", str_field_name)
                 self._emit(str_field_loc, "ASSIGN")
                 self._emit_field_value(
-                    text, value_loc,
-                    current_record_type_ast, str_field_name)
+                    text, value_loc, current_record_type_ast, str_field_name
+                )
             else:
                 # "type" row not yet seen – buffer until the record opens.
                 # Check if it looks like an array (but don't emit yet)
                 is_bracket = (
-                    not emit_as_scalar and
-                    text.strip().startswith('[') and
-                    text.strip().endswith(']') and
-                    '@' in text
+                    not emit_as_scalar
+                    and text.strip().startswith("[")
+                    and text.strip().endswith("]")
+                    and "@" in text
                 )
                 is_array = (
-                    not emit_as_scalar and
-                    not is_bracket and
-                    MD_Lexer._looks_like_array(text)
+                    not emit_as_scalar
+                    and not is_bracket
+                    and MD_Lexer._looks_like_array(text)
                 )
                 pending_string_fields.append(
-                    (str_field_name, value_loc, text,
-                     emit_as_scalar, is_array, is_bracket))
+                    (
+                        str_field_name,
+                        value_loc,
+                        text,
+                        emit_as_scalar,
+                        is_array,
+                        is_bracket,
+                    )
+                )
             in_string_field = False
             str_field_name = None
             str_field_lines = []
@@ -1147,9 +1160,7 @@ class MD_Lexer(TRLC_Lexer):
                     if str_field_first_content_line is None and stripped:
                         line_stripped = line.lstrip()
                         str_field_first_content_line = line_no
-                        str_field_first_content_col = (
-                            len(line) - len(line_stripped) + 1
-                        )
+                        str_field_first_content_col = len(line) - len(line_stripped) + 1
                     str_field_lines.append(line)
                     continue
 
@@ -1165,10 +1176,12 @@ class MD_Lexer(TRLC_Lexer):
                     self.mh.lex_error(loc, "package heading must be '# <PackageName>'")
                 package_name = parts[0]
                 if (
-                    not package_name or
-                    not MD_Lexer._is_alpha(package_name[0]) or
-                    any(not (MD_Lexer._is_alnum(ch) or ch == "_")
-                        for ch in package_name[1:])
+                    not package_name
+                    or not MD_Lexer._is_alpha(package_name[0])
+                    or any(
+                        not (MD_Lexer._is_alnum(ch) or ch == "_")
+                        for ch in package_name[1:]
+                    )
                 ):
                     self.mh.lex_error(loc, "invalid package name in markdown heading")
                 self._emit(loc, "KEYWORD", "#")
@@ -1249,7 +1262,8 @@ class MD_Lexer(TRLC_Lexer):
                     in_record = True
                     record_type_found = True
                     current_record_type_ast = self._resolve_record_type(
-                        type_name, package_name=current_package_name)
+                        type_name, package_name=current_package_name
+                    )
 
                     # Flush any properties that arrived before "type"
                     for bkey, bval, bline in pending_props:
@@ -1257,27 +1271,31 @@ class MD_Lexer(TRLC_Lexer):
                         self._emit(bloc, "IDENTIFIER", bkey)
                         self._emit(bloc, "ASSIGN")
                         self._emit_field_value(
-                            bval, bloc,
-                            current_record_type_ast, bkey)
+                            bval, bloc, current_record_type_ast, bkey
+                        )
                     pending_props = []
 
                     # Flush any #### string fields that arrived
                     # before "type"
-                    for (fname, floc, ftext, _fis_scalar,
-                         _fis_array, _fis_bracket) in pending_string_fields:
+                    for (
+                        fname,
+                        floc,
+                        ftext,
+                        _fis_scalar,
+                        _fis_array,
+                        _fis_bracket,
+                    ) in pending_string_fields:
                         self._emit(floc, "IDENTIFIER", fname)
                         self._emit(floc, "ASSIGN")
                         self._emit_field_value(
-                            ftext, floc,
-                            current_record_type_ast, fname)
+                            ftext, floc, current_record_type_ast, fname
+                        )
                     pending_string_fields.clear()
 
                 elif record_type_found:
                     self._emit(loc, "IDENTIFIER", key)
                     self._emit(loc, "ASSIGN")
-                    self._emit_field_value(
-                        value, loc,
-                        current_record_type_ast, key)
+                    self._emit_field_value(value, loc, current_record_type_ast, key)
 
                 else:
                     # Buffer: "type" has not appeared yet

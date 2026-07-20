@@ -7,4 +7,4 @@ pycodestyle>=2.12
 coverage>=7.2
 sphinx>=7.0
 build>=1.2.0
-pylint<4.0
+pylint>=3,<4.0

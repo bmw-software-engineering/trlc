@@ -35,9 +35,7 @@ tmp = ""
 with open(VERSION_FILE, "r") as fd:
     for raw_line in fd:
         if raw_line.startswith("VERSION_TUPLE"):
-            raw_line = 'VERSION_TUPLE = (%u, %u, %u)\n' % (major,
-                                                           minor,
-                                                           release)
+            raw_line = "VERSION_TUPLE = (%u, %u, %u)\n" % (major, minor, release)
         elif raw_line.startswith("VERSION_SUFFIX"):
             raw_line = 'VERSION_SUFFIX = "dev"\n'
 

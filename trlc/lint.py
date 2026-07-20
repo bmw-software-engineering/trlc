@@ -31,13 +31,13 @@ class Linter:
         assert isinstance(verify_checks, bool)
         assert isinstance(debug_vcg, bool)
 
-        self.mh            = mh
-        self.stab          = stab
+        self.mh = mh
+        self.stab = stab
         self.verify_checks = verify_checks
-        self.debug_vcg     = debug_vcg
+        self.debug_vcg = debug_vcg
 
         self.abstract_extensions = {}
-        self.checked_types       = set()
+        self.checked_types = set()
 
     def perform_sanity_checks(self):
         # lobster-exclude: Not safety relevant
@@ -57,7 +57,8 @@ class Linter:
                     self.mh.check(
                         n_typ.location,
                         f"abstract type {n_typ.name} does not have any extensions",
-                        "abstract_leaf_types")
+                        "abstract_leaf_types",
+                    )
 
         return ok
 
@@ -86,17 +87,18 @@ class Linter:
                     n_typ.location,
                     "union type with a single member is equivalent to a"
                     " plain record reference",
-                    "union_single_type")
+                    "union_single_type",
+                )
             # lobster-trace: LRM.Union_Type_No_Subtype_Relations
             for i, t_i in enumerate(n_typ.types):
                 for j, t_j in enumerate(n_typ.types):
-                    if i != j and t_i is not t_j and \
-                            t_i.is_subclass_of(t_j):
+                    if i != j and t_i is not t_j and t_i.is_subclass_of(t_j):
                         self.mh.check(
                             n_typ.location,
                             "%s is a subtype of %s which is already"
                             " in this union" % (t_i.name, t_j.name),
-                            "union_redundant_subtype")
+                            "union_redundant_subtype",
+                        )
             for member_type in n_typ.types:
                 self.verify_type(member_type)
 
@@ -105,29 +107,25 @@ class Linter:
 
         # Detect confusing separators
         # lobster-trace: LRM.Tuple_Based_Literal_Ambiguity
-        previous_was_int     = False
+        previous_was_int = False
         previous_was_bad_sep = False
-        bad_separator        = None
-        location             = None
+        bad_separator = None
+        location = None
         for n_item in n_tuple_type.iter_sequence():
             if previous_was_bad_sep:
                 assert isinstance(n_item, ast.Composite_Component)
                 if isinstance(n_item.n_typ, ast.Builtin_Integer):
                     explanation = [
-                        "For example 0%s100 would be a base %u literal" %
-                        (bad_separator,
-                         {"b" : 2, "x" : 16}[bad_separator]),
-                        "instead of the tuple segment 0 %s 100." %
-                        bad_separator
+                        "For example 0%s100 would be a base %u literal"
+                        % (bad_separator, {"b": 2, "x": 16}[bad_separator]),
+                        "instead of the tuple segment 0 %s 100." % bad_separator,
                     ]
                 else:
                     explanation = [
-                        "For example 0%s%s would be a lexer error" %
-                        (bad_separator,
-                         n_item.n_typ.get_example_value()),
-                        "instead of the tuple segment 0 %s %s." %
-                        (bad_separator,
-                         n_item.n_typ.get_example_value())
+                        "For example 0%s%s would be a lexer error"
+                        % (bad_separator, n_item.n_typ.get_example_value()),
+                        "instead of the tuple segment 0 %s %s."
+                        % (bad_separator, n_item.n_typ.get_example_value()),
                     ]
 
                 self.mh.check(
@@ -135,21 +133,25 @@ class Linter:
                     "%s separator after integer component"
                     " creates ambiguities" % bad_separator,
                     "separator_based_literal_ambiguity",
-                    "\n".join(explanation))
+                    "\n".join(explanation),
+                )
 
-            elif isinstance(n_item, ast.Composite_Component) and \
-               isinstance(n_item.n_typ, ast.Builtin_Integer):
+            elif isinstance(n_item, ast.Composite_Component) and isinstance(
+                n_item.n_typ, ast.Builtin_Integer
+            ):
                 previous_was_int = True
 
-            elif isinstance(n_item, ast.Separator) and \
-                 previous_was_int and \
-                 n_item.to_string() in ("x", "b"):
+            elif (
+                isinstance(n_item, ast.Separator)
+                and previous_was_int
+                and n_item.to_string() in ("x", "b")
+            ):
                 previous_was_bad_sep = True
-                bad_separator        = n_item.to_string()
-                location             = n_item.location
+                bad_separator = n_item.to_string()
+                location = n_item.location
 
             else:
-                previous_was_int     = False
+                previous_was_int = False
                 previous_was_bad_sep = False
 
         # Walk over components
@@ -158,9 +160,7 @@ class Linter:
 
         # Verify checks
         if self.verify_checks:
-            vcg = VCG(mh          = self.mh,
-                      n_ctyp      = n_tuple_type,
-                      debug       = self.debug_vcg)
+            vcg = VCG(mh=self.mh, n_ctyp=n_tuple_type, debug=self.debug_vcg)
             vcg.analyze()
 
     def verify_record_type(self, n_record_type):
@@ -185,9 +185,7 @@ class Linter:
 
         # Verify checks
         if self.verify_checks:
-            vcg = VCG(mh          = self.mh,
-                      n_ctyp      = n_record_type,
-                      debug       = self.debug_vcg)
+            vcg = VCG(mh=self.mh, n_ctyp=n_record_type, debug=self.debug_vcg)
             vcg.analyze()
 
     def verify_array_type(self, n_typ):
@@ -197,29 +195,30 @@ class Linter:
         if n_typ.upper_bound is None:
             pass
         elif n_typ.lower_bound > n_typ.upper_bound:
-            self.mh.check(n_typ.loc_upper,
-                          "upper bound must be at least %u" %
-                          n_typ.lower_bound,
-                          "impossible_array_types")
+            self.mh.check(
+                n_typ.loc_upper,
+                "upper bound must be at least %u" % n_typ.lower_bound,
+                "impossible_array_types",
+            )
         elif n_typ.upper_bound == 0:
-            self.mh.check(n_typ.loc_upper,
-                          "this array makes no sense",
-                          "impossible_array_types")
+            self.mh.check(
+                n_typ.loc_upper, "this array makes no sense", "impossible_array_types"
+            )
         elif n_typ.upper_bound == 1 and n_typ.lower_bound == 1:
-            self.mh.check(n_typ.loc_upper,
-                          "array of fixed size 1 "
-                          "should not be an array",
-                          "weird_array_types",
-                          "An array with a fixed size of 1 should not\n"
-                          "be an array at all.")
+            self.mh.check(
+                n_typ.loc_upper,
+                "array of fixed size 1 should not be an array",
+                "weird_array_types",
+                "An array with a fixed size of 1 should not\nbe an array at all.",
+            )
         elif n_typ.upper_bound == 1 and n_typ.lower_bound == 0:
-            self.mh.check(n_typ.loc_upper,
-                          "consider making this array an"
-                          " optional %s" % n_typ.element_type.name,
-                          "weird_array_types",
-                          "An array with 0 to 1 components should just\n"
-                          "be an optional %s instead." %
-                          n_typ.element_type.name)
+            self.mh.check(
+                n_typ.loc_upper,
+                "consider making this array an optional %s" % n_typ.element_type.name,
+                "weird_array_types",
+                "An array with 0 to 1 components should just\n"
+                "be an optional %s instead." % n_typ.element_type.name,
+            )
 
     def markup_ref(self, item, string_literals):
         for string_literal in string_literals:
@@ -235,20 +234,23 @@ class Linter:
             if not file.cu.imports:
                 continue
             for item in file.cu.imports:
-                import_tokens = [t for t in file.lexer.tokens
-                                 if t.value == item.name]
-                markup = self.markup_ref(item,
-                                         (m.ast_link for m in
-                                          file.lexer.tokens if
-                                          isinstance(m.ast_link,
-                                                     ast.String_Literal) and
-                                          m.ast_link.has_references))
+                import_tokens = [t for t in file.lexer.tokens if t.value == item.name]
+                markup = self.markup_ref(
+                    item,
+                    (
+                        m.ast_link
+                        for m in file.lexer.tokens
+                        if isinstance(m.ast_link, ast.String_Literal)
+                        and m.ast_link.has_references
+                    ),
+                )
                 if markup is not None:
                     import_tokens.append(markup)
                 if len(import_tokens) == 1:
                     import_tk = import_tokens[0]
-                    self.mh.check(import_tk.location,
-                                    "unused import %s" % import_tk.value,
-                                    "unused_imports",
-                                    "Consider deleting this import"
-                                    " statement if not needed.")
+                    self.mh.check(
+                        import_tk.location,
+                        "unused import %s" % import_tk.value,
+                        "unused_imports",
+                        "Consider deleting this import statement if not needed.",
+                    )

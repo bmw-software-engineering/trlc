@@ -1,4 +1,6 @@
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 
 # trlc.py is exposed for the test rule in trlc.bzl;
 # pyproject.toml is needed by pylint/ty via rules_lint.
@@ -59,4 +61,29 @@ filegroup(
     name = "coverage",
     srcs = ["coverage.cfg"],
     visibility = ["//visibility:public"],
+)
+
+sh_binary(
+    name = "clean-coverage",
+    srcs = ["//util:clean_coverage.sh"],
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+)
+
+# Lint-only target: covers all root-level scripts (same as `make lint`'s
+# trlc*.py and lobster-*.py globs).  trlc.py is excluded because it is
+# already linted via :trlc_binary.
+py_library(
+    name = "root_scripts_lib",
+    srcs = glob(
+        [
+            "trlc*.py",
+            "lobster-*.py",
+        ],
+        # trlc.py is already linted via :trlc_binary.
+        exclude = [
+            "trlc.py",
+        ],
+    ),
+    deps = ["//trlc"],
 )

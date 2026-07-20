@@ -31,7 +31,7 @@ from trlc.trlc import Source_Manager
 from trlc.errors import Message_Handler
 
 TEST_DIR = "tests-system"
-TARGET   = "system-tests.lobster"
+TARGET = "system-tests.lobster"
 
 
 def process(testname, mapping):
@@ -42,20 +42,21 @@ def process(testname, mapping):
     tag_file = os.path.join(test_dir, "tracing")
 
     item = Activity(
-        tag       = Tracing_Tag(namespace = "trlc-st",
-                                tag       = testname),
-        location  = File_Reference(filename = test_dir),
-        framework = "TRLCST",
-        kind      = "Test Directory")
+        tag=Tracing_Tag(namespace="trlc-st", tag=testname),
+        location=File_Reference(filename=test_dir),
+        framework="TRLCST",
+        kind="Test Directory",
+    )
     include_test = False
 
     if os.path.isfile(tag_file):
         include_test = True
         with open(tag_file, "r", encoding="UTF-8") as fd:
-            tags = [Tracing_Tag(namespace = "req",
-                                tag       = line.strip())
-                    for line in fd.read().splitlines()
-                    if line.strip()]
+            tags = [
+                Tracing_Tag(namespace="req", tag=line.strip())
+                for line in fd.read().splitlines()
+                if line.strip()
+            ]
         for tag in tags:
             item.add_tracing_target(tag)
 
@@ -68,12 +69,12 @@ def process(testname, mapping):
                 components.pop()
             except ValueError:
                 pass
-        requirement = mapping.get("-".join(components),
-                                  "_".join(item.capitalize()
-                                           for item in components))
+        requirement = mapping.get(
+            "-".join(components), "_".join(item.capitalize() for item in components)
+        )
         item.add_tracing_target(
-            Tracing_Tag(namespace = "req",
-                        tag       = "LRM.%s" % requirement))
+            Tracing_Tag(namespace="req", tag="LRM.%s" % requirement)
+        )
 
     if include_test:
         return [item]
@@ -83,10 +84,9 @@ def process(testname, mapping):
 
 
 def main():
-    sm = Source_Manager(mh = Message_Handler(),
-                        lint_mode   = False,
-                        parse_trlc  = True,
-                        verify_mode = False)
+    sm = Source_Manager(
+        mh=Message_Handler(), lint_mode=False, parse_trlc=True, verify_mode=False
+    )
     sm.register_directory("language-reference-manual")
     stab = sm.process()
     pkg_lrm = stab.lookup_assuming(sm.mh, "LRM")
@@ -95,8 +95,7 @@ def main():
         mapping[item.name.lower().replace("_", "-")] = item.name
 
     items = []
-    for dirent in sorted(os.scandir(TEST_DIR),
-                         key=lambda de: de.name):
+    for dirent in sorted(os.scandir(TEST_DIR), key=lambda de: de.name):
         if dirent.is_dir():
             if dirent.name == "htmlcov":
                 continue

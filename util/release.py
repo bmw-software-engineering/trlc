@@ -41,6 +41,7 @@ with open(VERSION_FILE, "w") as fd:
     fd.write(tmp)
 
 from trlc.version import TRLC_VERSION
+
 print(TRLC_VERSION)
 
 # Update last CHANGELOG entry and documentation to use the new
