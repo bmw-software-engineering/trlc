@@ -1,5 +1,6 @@
 load("@rules_python//python:defs.bzl", "py_binary", "py_test")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("@trlc_dev_dependencies//:requirements.bzl", "requirement")
 
@@ -68,7 +69,6 @@ filegroup(
 
 py_test(
     name = "style",
-    size = "small",
     srcs = glob([
         "trlc*.py",
         "lobster-*.py",
@@ -83,7 +83,6 @@ py_test(
 
 sh_test(
     name = "lint-pylint",
-    size = "small",
     srcs = ["//util:lint_check.sh"],
     data = [
         "pylint3.cfg",
@@ -100,4 +99,11 @@ test_suite(
         ":lint-pylint",
         ":style",
     ],
+)
+
+sh_binary(
+    name = "clean-coverage",
+    srcs = ["//util:clean_coverage.sh"],
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
 )

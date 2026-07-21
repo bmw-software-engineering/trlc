@@ -120,6 +120,7 @@ tracing: report.lobster
 	lobster-html-report report.lobster --out=docs/tracing.html
 	lobster-ci-report report.lobster
 
+# bazel equivalent: bazel run //:clean-coverage
 clean-coverage:
 	@rm -rf htmlcov
 	@find . -name '.coverage*' -type f -delete
