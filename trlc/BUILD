@@ -1,4 +1,11 @@
+load("@rules_python//python:defs.bzl", "py_library")
 load("@trlc_dependencies//:requirements.bzl", "requirement")
+
+filegroup(
+    name = "py_sources",
+    srcs = glob(["*.py"]),
+    visibility = ["//visibility:public"],
+)
 
 py_library(
     name = "trlc",

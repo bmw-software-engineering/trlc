@@ -1,10 +1,12 @@
 .PHONY: docs test style lint package
 
+# bazel equivalent: bazel test //:lint
 lint: style
 	@python3 -m pylint --rcfile=pylint3.cfg \
 		--reports=no \
 		trlc trlc*.py lobster-*.py
 
+# bazel equivalent: bazel test //:style
 style:
 	@python3 -m pycodestyle trlc trlc*.py lobster-*.py
 
@@ -118,6 +120,7 @@ tracing: report.lobster
 	lobster-html-report report.lobster --out=docs/tracing.html
 	lobster-ci-report report.lobster
 
+# bazel equivalent: bazel run //:clean-coverage
 clean-coverage:
 	@rm -rf htmlcov
 	@find . -name '.coverage*' -type f -delete

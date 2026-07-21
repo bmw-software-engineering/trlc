@@ -1,4 +1,8 @@
+load("@rules_python//python:defs.bzl", "py_binary", "py_test")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load("@trlc_dev_dependencies//:requirements.bzl", "requirement")
 
 # trlc.py is exposed for the test rule in trlc.bzl;
 # pyproject.toml is needed by pylint/ty via rules_lint.
@@ -56,7 +60,50 @@ alias(
 )
 
 filegroup(
-    name = "coverage",
+    name = "coverage_cfg",
     srcs = ["coverage.cfg"],
+    visibility = ["//visibility:public"],
+)
+
+# LINTING & CODE QUALITY
+
+py_test(
+    name = "style",
+    srcs = glob([
+        "trlc*.py",
+        "lobster-*.py",
+    ]) + [
+        "//trlc:py_sources",
+        "//util:pycodestyle_runner.py",
+    ],
+    data = ["setup.cfg"],
+    main = "pycodestyle_runner.py",
+    deps = [requirement("pycodestyle")],
+)
+
+sh_test(
+    name = "lint-pylint",
+    srcs = ["//util:lint_check.sh"],
+    data = [
+        "pylint3.cfg",
+        "//trlc:py_sources",
+    ] + glob([
+        "trlc*.py",
+        "lobster-*.py",
+    ]),
+)
+
+test_suite(
+    name = "lint",
+    tests = [
+        ":lint-pylint",
+        ":style",
+    ],
+)
+
+sh_binary(
+    name = "clean-coverage",
+    srcs = ["//util:clean_coverage.sh"],
+    tags = ["manual"],
     visibility = ["//visibility:public"],
 )
