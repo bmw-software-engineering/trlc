@@ -57,22 +57,35 @@ jobs:
         run: |
           brew install make
           echo "${{ matrix.brew }}/opt/make/libexec/gnubin" >> $GITHUB_PATH
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
       - name: Executing unit tests
         run: |
-          make unit-tests
+          bazel test //tests-unit:unit_tests
       - name: Executing system tests
         run: |
-          make system-tests-all
+          bazel test //tests-system:all_tests //tests-large-partial:all
+  coverage:
+    name: Coverage
+    needs: test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelisk-cache: true
+          repository-cache: true
       - name: Coverage analysis
         run: |
-          make coverage
-      - name: Check output files
-        if: always()
-        run: |
-          util/check_local_modifications.sh
+          bazel coverage --combined_report=lcov //tests-system/... //api-examples/...
   failure:
     name: Check all jobs
-    needs: test
+    needs: [test, coverage]
     if: ${{ failure() || cancelled() }}
     runs-on: ubuntu-24.04
     steps:

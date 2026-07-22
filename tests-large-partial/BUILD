@@ -1,4 +1,3 @@
-load("@rules_python//python:defs.bzl", "py_binary")
 load("//bazel/_private:partial_test.bzl", "trlc_partial_test")
 
 # ---------------------------------------------------------------------------
@@ -16,5 +15,17 @@ _TESTS = [
 
 test_suite(
     name = "partial_tests",
+    tests = [":" + t for t in _TESTS],
+)
+
+# Aliases matching the Makefile `fast` and `all` targets.
+# All partial tests are considered fast (no bulk-equivalent exclusions).
+test_suite(
+    name = "fast",
+    tests = [":" + t for t in _TESTS],
+)
+
+test_suite(
+    name = "all",
     tests = [":" + t for t in _TESTS],
 )

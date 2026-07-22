@@ -43,6 +43,12 @@ jobs:
           pip install bmw-lobster-core==0.14.4 bmw-lobster-tool-python==0.14.4
           pip install --no-deps bmw-lobster-tool-trlc
           sudo apt-get install -y graphviz
+      - name: Install Bazel
+        uses: bazel-contrib/setup-bazel@0.14.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
       - name: Generate docs
         run: |
           make docs
@@ -50,8 +56,10 @@ jobs:
           PYTHONPATH: "."
       - name: Building code coverage report
         run: |
-          make system-tests unit-tests
-          make coverage
+          bazel test //tests-system:fast //tests-large-partial:fast
+          bazel test //tests-unit:unit_tests
+          coverage combine -q
+          coverage html --rcfile=coverage.cfg
           mv htmlcov docs
       - name: Building linter slides
         uses: xu-cheng/latex-action@v3
