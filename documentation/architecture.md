@@ -14,26 +14,19 @@ is a good place to start.
 Most of these are checked with `make lint`. Generally normal Python,
 with some changes:
 
-* Class names follow Ada naming convention (e.g. LASER_Is_An_Acronym)
-* Methods are lowercase with underscores (e.g. eat_potato)
-* Just use simple `%` string formatting
-* Horizontal alignment where reasonable, for example
+* Use regular Python spacing (no horizontal alignment), for example
 
   ```python
   x = {
-    "potatos" : 12,
-    "cats"    : 3,
+    "potatos": 12,
+    "cats": 3,
   }
   ```
 
-* Asserts for the types of all parameters (except self), for all
-  functions or methods, all the time, e.g:
-
-  ```python
-  def do_something(self, other, thing=None):
-      assert isinstance(thing, str) or thing is None
-	  assert isinstance(other, Some_Object)
-  ```
+* Do not use `assert` statements for runtime behavior checks in
+  production code paths. Use explicit validation and proper error
+  handling through the existing TRLC error/message interfaces, or
+  raise exceptions.
 
 * Never assume anything in conditions, always deal with all cases. In
   practice this means the final else clause in an if statement that
