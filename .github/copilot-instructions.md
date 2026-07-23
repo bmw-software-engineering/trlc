@@ -55,6 +55,34 @@ Repo is migrating Make→Bazel: prefer Bazel; use Make only if no Bazel target e
   requires a breaking change.
 - Keep error messages and diagnostics stable where feasible (many tests assert exact output).
 
+### Problem signaling with Message_Handler
+
+- Use `Message_Handler` for all user-visible diagnostics in parser, lexer,
+  checker, and related tooling code. Do not introduce ad-hoc `print(...)`
+  based error/warning output.
+- Prefer the dedicated API methods:
+  - `mh.error(location, message, explanation=None, fatal=True, user=False)`
+    for errors. Use `fatal=False` only when recovery is intentional.
+  - `mh.warning(location, message, explanation=None, user=False)` for
+    non-fatal warnings.
+  - `mh.check(location, message, check, explanation=None)` for lint/check
+    style findings that need a check category.
+  - `mh.lex_error(location, message)` for lexer-originated fatal errors.
+  - `mh.ice_loc(location, message)` only for internal-compiler-error paths.
+- For user-facing diagnostics, do not leave `explanation` as `None` unless
+  there is truly no actionable guidance possible.
+- Prefer explanations that help users fix the issue: describe what went
+  wrong, why it is invalid in this context, and the concrete next step.
+- Keep explanations specific and stable (avoid vague text like "invalid"
+  without remediation guidance).
+- Always pass a precise `Location` so diagnostics include source context.
+- When an issue originates elsewhere, include
+  `mh.cross_file_reference(other_location)` in the explanation text to add
+  traceable cross-file context.
+- Keep diagnostic wording concise and stable; many tests assert exact output.
+- Count semantics are handled by `Message_Handler` (`warnings`, `errors`,
+  `suppressed`); do not duplicate manual counters in new code.
+
 ### Language and checker behavior
 
 - If language semantics change, update both:
