@@ -130,10 +130,10 @@ class Source_Manager:
             return location.to_string(False)
         elif location.line_no is None:
             return os.path.relpath(location.file_name,
-                                   self.common_root)
+                                   self.common_root).replace("\\", "/")
         else:
             return "%s:%u" % (os.path.relpath(location.file_name,
-                                              self.common_root),
+                                              self.common_root).replace("\\", "/"),
                               location.line_no)
 
     def update_common_root(self, file_name):
@@ -791,18 +791,23 @@ def trlc():
             else:
                 return "[Excluded]"
 
-        for filename in sorted(sm.rsl_files):
+        def display_path(path):
+            if os.path.isabs(path):
+                path = os.path.relpath(path, os.getcwd())
+            return path.replace("\\", "/")
+
+        for filename in sorted(sm.rsl_files, key=display_path):
             parser = sm.rsl_files[filename]
             print("> %s Model %s (Package %s)" %
                   (get_status(parser),
-                   filename,
+                   display_path(filename),
                    parser.cu.package.name), file=mh.out)
         if not options.skip_trlc_files:
-            for filename in sorted(sm.trlc_files):
+            for filename in sorted(sm.trlc_files, key=display_path):
                 parser = sm.trlc_files[filename]
                 print("> %s Requirements %s (Package %s)" %
                       (get_status(parser),
-                       filename,
+                       display_path(filename),
                        parser.cu.package.name), file=mh.out)
 
     if ok:
