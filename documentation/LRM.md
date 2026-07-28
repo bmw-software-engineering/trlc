@@ -1,7 +1,6 @@
 # TRLC LRM
 
-* [Version 3.3](https://bmw-software-engineering.github.io/trlc/lrm.html) (Development)
-* [Version 3.2](https://bmw-software-engineering.github.io/trlc/lrm-3.2.html) (Current Stable)
+* [Version 3.3](https://bmw-software-engineering.github.io/trlc/lrm.html) (Current Stable)
 * [Version 3.1](https://bmw-software-engineering.github.io/trlc/lrm-3.1.html)
 * [Version 3.0](https://bmw-software-engineering.github.io/trlc/lrm-3.0.html)
 * [Version 2.9](https://bmw-software-engineering.github.io/trlc/lrm-2.9.html)
