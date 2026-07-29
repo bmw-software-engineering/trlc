@@ -1,0 +1,11 @@
+package Test3
+
+type T {
+  x     Integer
+  ref   T
+  extra Integer
+}
+
+checks T {
+  ref.x + extra > 0, fatal "potato"
+}

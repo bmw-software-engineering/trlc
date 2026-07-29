@@ -1,0 +1,20 @@
+package Test1
+
+T1 foo {
+  x = 5
+}
+
+T2 bar {
+  x = -1
+}
+
+U with_a {
+  ref = foo
+}
+
+U with_b {
+  ref = bar
+}
+
+U no_ref {
+}

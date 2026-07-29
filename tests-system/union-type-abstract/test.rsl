@@ -1,0 +1,18 @@
+package Test
+
+abstract type Base {
+  x Integer
+}
+
+type ConcreteA extends Base {
+  y Integer
+}
+
+type TypeB {
+  z Integer
+}
+
+type Req {
+  description String
+  parent      [Base, TypeB]
+}

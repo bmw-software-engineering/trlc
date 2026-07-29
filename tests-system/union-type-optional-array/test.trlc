@@ -1,0 +1,23 @@
+package Test
+
+TypeA a1 {
+  a = 1
+}
+
+TypeB b1 {
+  b = 2
+}
+
+Req r1 {
+  description = "has parents"
+  parents = [a1, b1]
+}
+
+Req r2 {
+  description = "empty parents"
+  parents = []
+}
+
+Req r3 {
+  description = "no parents"
+}

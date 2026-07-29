@@ -1,0 +1,2 @@
+union-type-wrong-type/test.trlc:9:12: trlc error: expected reference of type [TypeA, TypeB], but o1 is of type OtherType
+Processed 1 model and 1 requirement file and found 1 error

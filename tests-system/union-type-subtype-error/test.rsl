@@ -1,0 +1,19 @@
+package Test
+
+type TypeA {
+  a Integer
+}
+
+type TypeB extends TypeA {
+  b Integer
+}
+
+type TypeC {
+  c Integer
+}
+
+// Error: TypeB is a subtype of TypeA, both cannot appear in the same union
+type Req {
+  description String
+  parent      [TypeA, TypeB, TypeC]
+}

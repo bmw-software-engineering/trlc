@@ -1,0 +1,19 @@
+{
+  "Engine": {
+    "description": "Main propulsion unit",
+    "name": "Engine"
+  },
+  "Gearbox": {
+    "description": "Transmission unit",
+    "name": "Gearbox"
+  },
+  "Powertrain": {
+    "name": "Powertrain",
+    "priority": 1
+  },
+  "Wheel": {
+    "description": "Wheel assembly",
+    "name": "Wheel"
+  }
+}
+Processed 2 models and 2 requirement files and found no issues

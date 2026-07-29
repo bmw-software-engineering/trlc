@@ -1,0 +1,6 @@
+package DepsExt
+
+type System {
+    name     String
+    priority Integer
+}

@@ -1,0 +1,23 @@
+package Test
+
+SystemReq sr1 {
+  description = "System requirement 1"
+}
+
+CodebeamerReq cr1 {
+  title = "CB requirement 1"
+}
+
+Requirement r1 {
+  description = "Linked to system req"
+  parent = sr1
+}
+
+Requirement r2 {
+  description = "Linked to codebeamer req"
+  parent = cr1
+}
+
+Requirement r3 {
+  description = "No parent"
+}

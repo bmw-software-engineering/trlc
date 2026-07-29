@@ -1,0 +1,5 @@
+parent != null and parent.description != null, "need description"
+                          ^^^^^^^^^^^ union-type-field-partial/test.rsl:17: issue: field description exists only in 1 of 2 members of union type [TypeA, TypeB]; accessing it on other members returns null [union_partial_field_access]
+Req r2 {
+    ^^ union-type-field-partial/test.trlc:16: check error: need description
+Processed 1 model and 1 requirement file and found 1 warning and 1 error

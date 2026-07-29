@@ -1,0 +1,14 @@
+package Test
+
+type SystemReq {
+  description String
+}
+
+type CodebeamerReq {
+  title String
+}
+
+type Requirement {
+  description String
+  parent optional [SystemReq, CodebeamerReq]
+}

@@ -1,0 +1,24 @@
+package Test1
+
+type T {
+  x Integer
+}
+
+tuple P {
+  first  T
+  second T
+}
+
+checks P {
+  first.x < second.x, fatal "potato"
+}
+
+type U {
+  pair P
+  c    optional Boolean
+}
+
+checks U {
+  pair.first.x >= 0, fatal "kitten"
+  c, "potato"
+}

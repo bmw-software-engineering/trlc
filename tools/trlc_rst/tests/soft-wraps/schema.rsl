@@ -1,0 +1,5 @@
+package T
+
+type Requirement {
+    description optional String
+}

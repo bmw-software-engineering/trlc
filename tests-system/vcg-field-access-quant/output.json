@@ -1,0 +1,5 @@
+U failing {
+  ^^^^^^^ vcg-field-access-quant/test2.trlc:20: check error: potato
+U passing {
+  ^^^^^^^ vcg-field-access-quant/test2.trlc:15: error: check c (test2.rsl:15) evaluates to null
+Processed 2 models and 1 requirement file and found 2 errors

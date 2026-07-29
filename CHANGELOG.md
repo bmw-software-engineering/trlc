@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 3.1 of [TRLC language reference
+Up to date with version 3.3 of [TRLC language reference
 manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
@@ -25,9 +25,74 @@ generated in the following situations:
 ## Changelog
 
 
-### 2.0.4-dev
+### 3.0.1-dev
 
 
+### 3.0.0
+
+* [Bazel] Fixed python setup to support other versions than 3.12
+
+* [TRLC_RST] Add CLI support for `--fields` and `--records` filtering.
+
+* [TRLC_RST] Render soft-wrapped description lines as a single RST
+  paragraph instead of splitting each line into its own paragraph.
+  Insert a blank line to start a new paragraph.
+
+* [TRLC, BAZEL] Removed the support for the CVC5 binary, and hence the
+  `--use-cvc5-binary` option is no longer available.
+  The option `--verify` now uses the CVC5 Python package
+  on all OS, and the CVC5 binary is no longer needed.
+
+* [Sphinx] TRLC Plugin: fix parallel parsing: extension declareds parallel_read_safe -> only merge if worker actually
+  owns the document
+
+### 2.0.5
+
+* [TRLC_RST] Render `Markup_String` `[[references]]` as Sphinx cross-references in the RST renderer.
+
+* [TRLC] Add VCG support for field access on record/union references
+  (two-phase check analysis, #156 step 2/2).
+
+* [TRLC, API] Fix various typos in the documentation.
+
+* [TRLC, LRM] Allow union types as tuple field types:
+  `tuple Ref { item [TypeA, TypeB] separator @ version Integer }` now
+  permits a tuple field to reference objects of any of the listed record types.
+
+* [BAZEL] Fix cvc5.BUILD to use platform-aware binary path
+  (`bin/cvc5.exe` on Windows, `bin/cvc5` elsewhere).
+
+* [Lint] Fix cascaded abstract types (#183)
+
+### 2.0.4
+
+* [TRLC_RST] Add tool to convert TRLC Requirements to Sphinx RST Files
+
+* [TRLC] Add support for Python 3.14.
+
+* [TRLC, LRM] Add union type syntax for record attributes:
+  `parent [TypeA, TypeB]` allows an attribute to reference objects of any of the listed record types.
+
+* [LRM] Refactor `Abstract_Type` requirement
+
+* [TRLC] Rework system tests as Bazel-native golden-file tests: each
+  test directory is now a single `py_test` with one method per output
+  mode (`output`, `output.brief`, `output.json`, `output.smtlib`),
+  selectable via `--test_filter`.
+
+* [TRLC] Add `--log FILE PREFIX` to write all output to FILE
+  and strip PREFIX from file paths (used by Bazel system test actions).
+
+* [TRLC] `Message_Handler` now accepts `out_path` to open and manage
+  its own output file; use as a context manager to ensure it is closed.
+
+* [TRLC] Update Bazel CVC5 version to 1.3.2.
+
+* [BAZEL] Update Rules Python to 1.1.0
+
+* [BAZEL] Add Rules Lint for Formatting and Linting
+
+* [BAZEL] Update Bazel to 8.5.1
 
 ### 2.0.3
 

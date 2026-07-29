@@ -1,0 +1,4 @@
+vcg-field-access-union/test1.trlc:19:3: trlc check error: potato
+vcg-field-access-union/test1.trlc:15:3: trlc check error: wibble
+vcg-field-access-union/test2.trlc:26:3: trlc check error: wibble
+Processed 2 models and 2 requirement files and found 3 errors

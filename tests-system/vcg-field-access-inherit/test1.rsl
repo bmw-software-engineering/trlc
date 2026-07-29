@@ -1,0 +1,18 @@
+package Test1
+
+type T {
+  ref   T
+  x     Integer
+}
+
+checks T {
+  ref.x >= 0, fatal "potato"
+}
+
+type T_Ext extends T {
+  extra Integer
+}
+
+checks T_Ext {
+  extra > 0, fatal "potato"
+}

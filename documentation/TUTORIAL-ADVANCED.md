@@ -83,6 +83,51 @@ Another advantage is that if a reference asks for a
 `Requirement` or a `System_Requirement`. With the previous solution of
 copying the type this was not possible.
 
+## Union types
+
+Sometimes extending from a common base type is not possible. That´s why TRLC implements *union types* for record attributes. Instead of specifying a single type, you can list more types:
+
+```
+type System_Requirement {
+  description String
+}
+
+type Codebeamer_Requirement {
+  title String
+}
+
+type Software_Requirement {
+  description  String
+  derived_from [System_Requirement, Codebeamer_Requirement]
+}
+```
+
+The `derived_from` attribute now accepts a reference to either a
+`System_Requirement` or a `Codebeamer_Requirement`. Subclasses of
+any listed type are also accepted.
+
+You can also use cross-package types in union type declarations:
+
+```
+type Software_Requirement {
+  description  String
+  parent optional [Base.System_Requirement, Codebeamer.Requirement]
+}
+```
+
+A union type may also be used with `optional`, and with arrays:
+
+```
+  parents optional [System_Requirement, Codebeamer_Requirement] [0..*]
+```
+
+Note: field access (e.g. `derived_from.description`) is supported on
+union-typed attributes when the accessed field exists in at least one
+member type with a consistent type. If the field exists in only
+some members, accessing it returns `null` for instances of the
+remaining types. You can also check for null and compare references
+for equality.
+
 ## Additional rules
 
 Type extensions can only be used to add fields. There is no way of

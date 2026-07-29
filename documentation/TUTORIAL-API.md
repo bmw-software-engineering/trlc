@@ -62,7 +62,7 @@ from trlc.trlc import Source_Manager
 import sys
 ```
 
-Next we need create an instance of the source manager:
+Next we need to create an instance of the source manager:
 
 ```python
 mh = Message_Handler()
@@ -88,7 +88,7 @@ them. The
 method parses all files, and on success returns a
 [Symbol_Table](https://bmw-software-engineering.github.io/trlc/manual/ast.html#trlc.ast.Symbol_Table)
 containing everything (types, checks, requirements, etc.). If there is
-an error (used defined check or syntax error) then nothing is
+an error (user defined check or syntax error) then nothing is
 returned. I.e. once the API lets you have the symbol table you know
 that everything is well formed and validated.
 
@@ -100,7 +100,7 @@ if symbols is None:
 ```
 
 Finally, lets do something simple to see what happens. Here we just
-iterate overt all the objects and print them.
+iterate over all the objects and print them.
 
 ```python
 for obj in symbols.iter_record_objects():

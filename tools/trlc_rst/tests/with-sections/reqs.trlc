@@ -1,0 +1,11 @@
+package T
+
+section "Functional" {
+    Requirement REQ_001 {
+        description = "The system shall process inputs correctly"
+    }
+
+    Requirement REQ_002 {
+        description = "The system shall produce correct outputs"
+    }
+}

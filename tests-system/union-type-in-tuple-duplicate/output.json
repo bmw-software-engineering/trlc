@@ -1,0 +1,4 @@
+item    [TypeA, TypeB, TypeA]
+                       ^^^^^ union-type-in-tuple-duplicate/test.rsl:12: error: duplicate type TypeA in union
+{}
+Processed 1 model and 1 requirement file and found 1 error

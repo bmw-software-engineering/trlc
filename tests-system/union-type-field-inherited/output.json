@@ -1,0 +1,17 @@
+{
+  "item_a": {
+    "description": "hello",
+    "y": 1
+  },
+  "item_b": {
+    "description": "world",
+    "z": 2
+  },
+  "r1": {
+    "parent": "Test.item_a"
+  },
+  "r2": {
+    "parent": "Test.item_b"
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

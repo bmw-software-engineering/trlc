@@ -1,0 +1,19 @@
+package Test
+
+TypeA a1 {
+  a = 1
+}
+
+TypeB b1 {
+  b = 2
+}
+
+Req r1 {
+  description = "Links to TypeA"
+  parent = a1
+}
+
+Req r2 {
+  description = "Links to TypeB"
+  parent = b1
+}

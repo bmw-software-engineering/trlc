@@ -1,0 +1,16 @@
+package Test2
+
+type T {
+  x   Integer
+}
+
+type U {
+  c   optional Boolean
+  ref optional T
+}
+
+checks U {
+  ref != null, fatal "potato"
+  ref.x > 0, "wibble"
+  c, "potato"
+}

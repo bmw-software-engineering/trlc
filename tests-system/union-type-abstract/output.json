@@ -1,0 +1,18 @@
+{
+  "ca1": {
+    "x": 1,
+    "y": 2
+  },
+  "r1": {
+    "description": "ConcreteA extends Base, accepted",
+    "parent": "Test.ca1"
+  },
+  "r2": {
+    "description": "TypeB direct member, accepted",
+    "parent": "Test.tb1"
+  },
+  "tb1": {
+    "z": 3
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

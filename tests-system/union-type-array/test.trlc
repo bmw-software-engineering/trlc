@@ -1,0 +1,18 @@
+package Test
+
+TypeA a1 {
+  a = 1
+}
+
+TypeA a2 {
+  a = 2
+}
+
+TypeB b1 {
+  b = 10
+}
+
+Req r1 {
+  description = "Mixed parents"
+  parents = [a1, b1, a2]
+}

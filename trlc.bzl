@@ -1,7 +1,8 @@
 TrlcProviderInfo = provider(
     fields = {
-        "spec": "Holds the specification files (*.rsl) for the `reqs`",
-        "reqs": "Holds the requirement files (*.trlc)",
+        "spec": "Holds the specification files (*.rsl) including transitive",
+        "reqs": "Holds only the direct requirement files (*.trlc) from srcs",
+        "deps": "Holds only the transitive requirement files (*.trlc) from deps",
     },
 )
 
@@ -22,10 +23,12 @@ def trlc_specification_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc
     native.py_test(
         name = name,
         srcs = srcs,
-        args = ["--use-cvc5-binary $(location @trlc//:cvc5)", "--verify", "--skip-trlc-files"],
+        args = ["--verify", "--skip-trlc-files"] +
+               ["$(locations %s)" % req for req in reqs],
         main = main,
         deps = ["@trlc//trlc:trlc"],
-        data = ["@trlc//:cvc5"] + reqs,
+        data = reqs,
+        **kwargs
     )
 
 def _trlc_requirement_impl(ctx):
@@ -35,16 +38,21 @@ def _trlc_requirement_impl(ctx):
         trlc_provider = dep[TrlcProviderInfo]
         transitive_spec.append(trlc_provider.spec)
         transitive_reqs.append(trlc_provider.reqs)
+        transitive_reqs.append(trlc_provider.deps)
 
-    own_specs = ctx.files.spec if hasattr(ctx.files, "spec") else []
+    own_specs = depset(transitive = [
+        spec_target[DefaultInfo].files
+        for spec_target in ctx.attr.spec
+    ])
 
     return [
         DefaultInfo(
-            files = depset(ctx.files.srcs, transitive = transitive_reqs + transitive_spec + [depset(own_specs)])
+            files = depset(ctx.files.srcs, transitive = transitive_reqs + transitive_spec + [own_specs]),
         ),
         TrlcProviderInfo(
-            spec = depset(own_specs, transitive = transitive_spec),
-            reqs = depset(ctx.files.srcs, transitive = transitive_reqs),
+            spec = depset(transitive = [own_specs] + transitive_spec),
+            reqs = depset(ctx.files.srcs),
+            deps = depset(transitive = transitive_reqs),
         ),
     ]
 
@@ -64,8 +72,125 @@ def trlc_requirements_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc.
     native.py_test(
         name = name,
         srcs = srcs,
-        args = ["--use-cvc5-binary $(location @trlc//:cvc5)", "--verify"],
+        args = ["--verify"] +
+               ["$(locations %s)" % req for req in reqs],
         main = main,
         deps = ["@trlc//trlc:trlc"],
-        data = ["@trlc//:cvc5"] + reqs,
+        data = reqs,
+        **kwargs
+    )
+
+################################
+# TRLC RST
+################################
+
+def _trlc_image_stage_impl(ctx, image_files):
+    """Stage image files next to the rendered RST using package-relative paths.
+
+    For each image the package prefix is stripped so that the path written in
+    the ``image`` TRLC field (e.g. ``"diagrams/arch.png"``) matches exactly
+    the location of the staged file relative to the rendered ``.rst``.
+    """
+    package_prefix = ctx.label.package + "/"
+    outputs = []
+    for image in image_files:
+        if image.short_path.startswith(package_prefix):
+            relative_path = image.short_path[len(package_prefix):]
+        else:
+            relative_path = image.basename
+        output = ctx.actions.declare_file(relative_path)
+        ctx.actions.symlink(output = output, target_file = image)
+        outputs.append(output)
+    return outputs
+
+subrule_trlc_image_stage = subrule(
+    implementation = _trlc_image_stage_impl,
+)
+
+def _trlc_rst_impl(ctx):
+    rendered_file = ctx.actions.declare_file("{}.rst".format(ctx.attr.name))
+
+    all_inputs = depset(transitive = [
+        req[DefaultInfo].files
+        for req in ctx.attr.reqs
+    ] + [
+        dep[DefaultInfo].files
+        for dep in ctx.attr.deps
+    ])
+
+    source_files = depset(transitive = [
+        req[TrlcProviderInfo].reqs
+        for req in ctx.attr.reqs
+    ])
+
+    dep_files = depset(transitive = [
+        req[TrlcProviderInfo].spec
+        for req in ctx.attr.reqs
+    ] + [
+        req[TrlcProviderInfo].deps
+        for req in ctx.attr.reqs
+    ] + [
+        dep[TrlcProviderInfo].reqs
+        for dep in ctx.attr.deps
+    ] + [
+        dep[TrlcProviderInfo].spec
+        for dep in ctx.attr.deps
+    ] + [
+        dep[TrlcProviderInfo].deps
+        for dep in ctx.attr.deps
+    ])
+
+    args = ctx.actions.args()
+    args.add("--output", rendered_file.path)
+    args.add("--title", ctx.attr.title)
+    args.add_all("--dep-files", dep_files)
+    args.add_all("--source-files", source_files)
+
+    ctx.actions.run(
+        inputs = all_inputs,
+        outputs = [rendered_file],
+        arguments = [args],
+        executable = ctx.executable._renderer,
+    )
+
+    image_outputs = subrule_trlc_image_stage(ctx.files.image_srcs)
+
+    return [DefaultInfo(files = depset([rendered_file] + image_outputs))]
+
+_trlc_rst = rule(
+    implementation = _trlc_rst_impl,
+    attrs = {
+        "reqs": attr.label_list(
+            providers = [TrlcProviderInfo],
+            doc = "trlc_requirements targets whose record objects are rendered.",
+        ),
+        "deps": attr.label_list(
+            providers = [TrlcProviderInfo],
+            default = [],
+            doc = "Additional trlc_requirements targets needed for dependency resolution only. Their record objects are not rendered.",
+        ),
+        "title": attr.string(default = "Requirements"),
+        "image_srcs": attr.label_list(
+            allow_files = True,
+            default = [],
+            doc = "Image files to stage next to the rendered RST. The package-relative path of each file (e.g. 'diagrams/arch.png') must match the path written in a ``.. image::`` directive inside the requirement description field.",
+        ),
+        "_renderer": attr.label(
+            default = Label("//tools/trlc_rst:trlc_rst"),
+            executable = True,
+            allow_files = True,
+            cfg = "exec",
+        ),
+    },
+    subrules = [subrule_trlc_image_stage],
+)
+
+def trlc_rst(name, reqs, deps = [], title = "Requirements", image_srcs = [], **kwargs):
+    _trlc_rst(
+        name = name,
+        reqs = reqs,
+        deps = deps,
+        title = title,
+        image_srcs = image_srcs,
+        **kwargs
     )

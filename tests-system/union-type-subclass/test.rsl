@@ -1,0 +1,18 @@
+package Test
+
+type TypeA {
+  a Integer
+}
+
+type TypeB extends TypeA {
+  b Integer
+}
+
+type TypeC {
+  c Integer
+}
+
+type Req {
+  description String
+  parent      [TypeA, TypeC]
+}

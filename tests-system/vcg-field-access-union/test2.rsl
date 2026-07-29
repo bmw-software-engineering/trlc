@@ -1,0 +1,20 @@
+package Test2
+
+type T1 {
+  x           Integer
+  description optional String
+}
+
+type T2 {
+  x Integer
+}
+
+type U {
+  ref     optional [T1, T2]
+  minimum Integer
+}
+
+checks U {
+  minimum >= 0, fatal "potato"
+  ref != null implies ref.x >= minimum, "wibble"
+}

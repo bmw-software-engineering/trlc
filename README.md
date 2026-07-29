@@ -32,6 +32,7 @@ The Python implementation can be used for several purposes:
 ### For normal users
 
 * [Tutorial](documentation/TUTORIAL.md) (read this as a first introduction)
+* [Bazel integration](documentation/TUTORIAL-BAZEL.md) (how to use TRLC inside a Bazel build)
 * [User manual: TRLC linter](documentation/linter.md) (the user manual for the TRLC static analysis and linter)
 * [Release Notes](CHANGELOG.md) (read this to find out whats new)
 * [License](LICENSE)
@@ -55,15 +56,19 @@ The Python implementation can be used for several purposes:
 * [Requirements Coverage Report](https://bmw-software-engineering.github.io/trlc/tracing.html)
 * [Code Coverage Report](https://bmw-software-engineering.github.io/trlc/htmlcov/index.html)
 
+### Tools Available
+
+* [TRLC_RST](tools/trlc_rst/README.md) Convert TRLC Requirements for Sphinx Build
+
 ## Dependencies
 
 ### Run-time
-* 3.8 <= Python3 < 3.14
+* 3.8 <= Python3 <= 3.14
 * [PyVCG](https://pypi.org/project/PyVCG)
-* [PyPI CVC5](https://pypi.org/project/cvc5)
+* [PyPI CVC5](https://pypi.org/project/cvc5)(GNU/Linux only)
   (required when using the `--verify` option)
 
-Optional dependency (not installed automatically):
-* [Binary CVC5](https://github.com/cvc5/cvc5/releases/tag/cvc5-1.0.8)
-  (An alternative to PyPI CVC5, make sure to rename the binary to
-  `cvc5` and put it on your PATH).
+## Acknowledgements
+
+Special thanks to [Florian Schanda](https://github.com/florianschanda)
+for his many valuable contributions to this repository.

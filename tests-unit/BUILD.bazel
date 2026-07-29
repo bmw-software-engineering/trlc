@@ -1,0 +1,28 @@
+load("@rules_python//python:defs.bzl", "py_test")
+
+py_test(
+    name = "test_ast_bysection",
+    srcs = ["test_ast_bysection.py"],
+    deps = ["//trlc:trlc"],
+)
+
+py_test(
+    name = "test_lexer",
+    srcs = ["test_lexer.py"],
+    deps = ["//trlc:trlc"],
+)
+
+py_test(
+    name = "test_lexer_base",
+    srcs = ["test_lexer_base.py"],
+    deps = ["//trlc:trlc"],
+)
+
+test_suite(
+    name = "unit_tests",
+    tests = [
+        ":test_ast_bysection",
+        ":test_lexer",
+        ":test_lexer_base",
+    ],
+)

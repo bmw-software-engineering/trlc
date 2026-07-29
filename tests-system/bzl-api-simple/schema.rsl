@@ -1,0 +1,12 @@
+package Simple
+
+type Requirement {
+    id          String
+    description String
+    priority    Integer
+}
+
+checks Requirement {
+    len(description) > 0, "description must not be empty"
+    priority > 0, "priority must be positive"
+}

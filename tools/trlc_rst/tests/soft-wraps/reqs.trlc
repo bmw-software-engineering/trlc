@@ -1,0 +1,9 @@
+package T
+
+Requirement REQ_soft_wraps {
+    description = '''
+        The system shall do X
+        when condition Y is met
+        and Z is configured.
+    '''
+}

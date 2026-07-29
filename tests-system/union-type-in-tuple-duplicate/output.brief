@@ -1,0 +1,2 @@
+union-type-in-tuple-duplicate/test.rsl:12:26: trlc error: duplicate type TypeA in union
+Processed 1 model and 1 requirement file and found 1 error

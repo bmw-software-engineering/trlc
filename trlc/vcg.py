@@ -29,7 +29,6 @@ try:
     from pyvcg import graph
     from pyvcg import vcg
     from pyvcg.driver.file_smtlib import SMTLIB_Generator
-    from pyvcg.driver.cvc5_smtlib import CVC5_File_Solver
     VCG_AVAILABLE = True
 except ImportError:  # pragma: no cover
     VCG_AVAILABLE = False
@@ -73,19 +72,15 @@ class Feedback:
 
 class VCG:
     # lobster-exclude: Not safety relevant
-    def __init__(self, mh, n_ctyp, debug, use_api=True, cvc5_binary=None):
+    def __init__(self, mh, n_ctyp, debug):
         assert VCG_AVAILABLE
         assert isinstance(mh, Message_Handler)
         assert isinstance(n_ctyp, Composite_Type)
         assert isinstance(debug, bool)
-        assert isinstance(use_api, bool)
-        assert use_api or isinstance(cvc5_binary, str)
 
-        self.mh       = mh
-        self.n_ctyp   = n_ctyp
-        self.debug    = debug
-        self.use_api  = use_api
-        self.cvc5_bin = cvc5_binary
+        self.mh     = mh
+        self.n_ctyp = n_ctyp
+        self.debug  = debug
 
         self.vc_name = "trlc-%s-%s" % (n_ctyp.n_package.name,
                                        n_ctyp.name)
@@ -338,14 +333,24 @@ class VCG:
         for n_component in n_ctyp.all_components():
             self.tr_component_decl(n_component, self.start)
 
-        # Create paths for checks
-        for n_check in n_ctyp.iter_checks():
-            current_start = self.start
-            self.tr_check(n_check)
+        # Create paths for checks in two phases:
+        #  Phase A ("at declaration"): checks that do not follow any
+        #  record or union reference via field access. These are fully
+        #  self-contained and are analyzed first.
+        #  Phase B ("after references"): checks that dereference at
+        #  least one record or union reference. They run after Phase A
+        #  so that knowledge accumulated from Phase A fatal checks is
+        #  available.
+        for phase in (False, True):
+            for n_check in n_ctyp.iter_checks():
+                if n_check.uses_field_access != phase:
+                    continue
+                current_start = self.start
+                self.tr_check(n_check)
 
-            # Only fatal checks contribute to the total knowledge
-            if n_check.severity != "fatal":
-                self.start = current_start
+                # Only fatal checks contribute to the total knowledge
+                if n_check.severity != "fatal":
+                    self.start = current_start
 
         # Emit debug graph
         if self.debug:  # pragma: no cover
@@ -374,10 +379,7 @@ class VCG:
                vc["feedback"] in nok_validity_checks:
                 continue
 
-            if self.use_api:
-                solver = CVC5_Solver()
-            else:
-                solver = CVC5_File_Solver(self.cvc5_bin)
+            solver = CVC5_Solver()
             for name, value in CVC5_OPTIONS.items():
                 solver.set_solver_option(name, value)
 
@@ -497,17 +499,21 @@ class VCG:
             else:
                 return '"%s"' % value
 
-        elif isinstance(n_typ, Record_Type):
+        elif isinstance(n_typ, (Record_Type, Union_Type)):
+            # lobster-trace: LRM.Union_Type_Equality
             if value < 0:
                 instance_id = value * -2 - 1
             else:
                 instance_id = value * 2
-            if n_typ.n_package is self.n_ctyp.n_package:
-                return "%s_instance_%i" % (n_typ.name, instance_id)
+            if isinstance(n_typ, Record_Type):
+                if n_typ.n_package is self.n_ctyp.n_package:
+                    return "%s_instance_%i" % (n_typ.name, instance_id)
+                else:
+                    return "%s.%s_instance_%i" % (n_typ.n_package.name,
+                                                  n_typ.name,
+                                                  instance_id)
             else:
-                return "%s.%s_instance_%i" % (n_typ.n_package.name,
-                                              n_typ.name,
-                                              instance_id)
+                return "instance_%i" % instance_id
 
         elif isinstance(n_typ, Tuple_Type):
             parts = []
@@ -723,10 +729,12 @@ class VCG:
 
             return self.arrays[n_type]
 
-        elif isinstance(n_type, Record_Type):
-            # Record references are modelled as a free integer. If we
-            # access their field then we use an uninterpreted
-            # function. Some of these have special meaning:
+        elif isinstance(n_type, (Record_Type, Union_Type)):
+            # lobster-trace: LRM.union_type
+            # Record and union references are modelled as a free
+            # integer. If we access their field then we use an
+            # uninterpreted function. Some of these have special
+            # meaning:
             #   0             - the null reference
             #   1             - the self reference
             #   anything else - uninterpreted
@@ -1465,16 +1473,48 @@ class VCG:
 
         return value, smt.Boolean_Literal(True)
 
+    def _ensure_record_deref(self, type_key, sort_name, uf_name,
+                             components):
+        """Lazily create an SMT record sort and uninterpreted function
+        for dereferencing integer-encoded references.
+
+        :param type_key: cache key; always the canonical sort_name string
+        :param sort_name: name for the SMT Record sort
+        :param uf_name: name for the UF mapping integer to sort
+        :param components: iterable of (field_name, smt_sort, needs_valid)
+        :returns: (record_sort, to_record_uf)
+        """
+        if type_key in self.records:
+            return self.records[type_key], self.uf_records[type_key]
+
+        record_sort = smt.Record(sort_name)
+        for field_name, field_sort, needs_valid in components:
+            record_sort.add_component(field_name + ".value", field_sort)
+            if needs_valid:
+                record_sort.add_component(field_name + ".valid",
+                                          smt.BUILTIN_BOOLEAN)
+        self.records[type_key] = record_sort
+        self.preamble.add_statement(
+            smt.Record_Declaration(
+                record_sort,
+                sort_name))
+
+        to_record_uf = smt.Function(
+            uf_name, record_sort,
+            smt.Bound_Variable(smt.BUILTIN_INTEGER, "ref"))
+        self.preamble.add_statement(
+            smt.Function_Declaration(to_record_uf))
+        self.uf_records[type_key] = to_record_uf
+
+        return record_sort, to_record_uf
+
     def tr_field_access_expression(self, n_expr):
         assert isinstance(n_expr, Field_Access_Expression)
 
-        if self.functional:  # pragma: no cover
-            self.flag_unsupported(n_expr,
-                                  "functional evaluation of field access")
-
         prefix_value, prefix_valid = self.tr_expression(n_expr.n_prefix)
         prefix_typ = n_expr.n_prefix.typ
-        self.attach_validity_check(prefix_valid, n_expr.n_prefix)
+        if not self.functional:
+            self.attach_validity_check(prefix_valid, n_expr.n_prefix)
 
         if isinstance(prefix_typ, Tuple_Type):
             field_value = smt.Record_Access(prefix_value,
@@ -1485,49 +1525,56 @@ class VCG:
             else:
                 field_valid = smt.Boolean_Literal(True)
 
-        elif isinstance(prefix_typ, Record_Type):
-            # We need a sort for the record instance + a UF to convert
-            # the int values into instances of this sort.
-            if prefix_typ in self.records:
-                record_sort  = self.records[prefix_typ]
-                to_record_uf = self.uf_records[prefix_typ]
+        elif isinstance(prefix_typ, (Record_Type, Union_Type)):
+            # lobster-trace: LRM.Union_Type_Field_Access
+            # lobster-trace: LRM.Union_Type_Partial_Field_Access
+            # lobster-trace: LRM.Union_Type_Partial_Field_Null
+            # Both Record_Type and Union_Type are represented as
+            # integers. We create a record sort with accessible
+            # fields and a UF to dereference the integer.
+            if isinstance(prefix_typ, Record_Type):
+                components = [
+                    (c.name, self.tr_type(c.n_typ), c.optional)
+                    for c in prefix_typ.all_components()
+                ]
+                sort_name = "%s.%s" % (prefix_typ.n_package.name,
+                                       prefix_typ.name)
+                uf_name = "access.%s.%s" % (prefix_typ.n_package.name,
+                                            prefix_typ.name)
             else:
-                record_sort = smt.Record(prefix_typ.n_package.name +
-                                         "." + prefix_typ.name)
-                for n_component in prefix_typ.all_components():
-                    record_sort.add_component(n_component.name + ".value",
-                                              self.tr_type(n_component.n_typ))
-                    if n_component.optional:
-                        record_sort.add_component(n_component.name + ".valid",
-                                                  smt.BUILTIN_BOOLEAN)
-                self.records[prefix_typ] = record_sort
-                self.preamble.add_statement(
-                    smt.Record_Declaration(
-                        record_sort,
-                        "record %s from %s" % (
-                            prefix_typ.name,
-                            prefix_typ.location.to_string())))
+                field_map = prefix_typ.get_field_map()
+                union_id = "_".join(t.fully_qualified_name()
+                                    for t in prefix_typ.types)
+                components = [
+                    (name,
+                     self.tr_type(info["n_typ"]),
+                     info["count"] != info["total"] or
+                     info["optional_in_any"])
+                    for name, info in field_map.items()
+                    if info["n_typ"] is not None
+                ]
+                sort_name = "union." + union_id
+                uf_name = "access.union." + union_id
 
-                to_record_uf = smt.Function(
-                    "access.%s.%s" %
-                    (prefix_typ.n_package.name, prefix_typ.name),
-                    record_sort,
-                    smt.Bound_Variable(smt.BUILTIN_INTEGER, "ref"))
-                self.preamble.add_statement(
-                    smt.Function_Declaration(to_record_uf))
+            _, to_record_uf = self._ensure_record_deref(
+                sort_name, sort_name, uf_name, components)
+            dereference = smt.Function_Application(to_record_uf,
+                                                   prefix_value)
 
-                self.uf_records[prefix_typ] = to_record_uf
-
-            # We can now apply the magic int to the UF to get a record
-            # value
-            dereference = smt.Function_Application(to_record_uf, prefix_value)
-
-            # We can now perform the access on the record value
+            # Perform the field access on the dereferenced record
             field_value = smt.Record_Access(dereference,
                                             n_expr.n_field.name + ".value")
-            if n_expr.n_field.optional:
-                field_valid = smt.Record_Access(dereference,
-                                                n_expr.n_field.name + ".valid")
+            if isinstance(prefix_typ, Union_Type):
+                info = prefix_typ.get_field_map()[n_expr.n_field.name]
+                has_valid = (info["count"] != info["total"] or
+                             info["optional_in_any"])
+            else:
+                has_valid = n_expr.n_field.optional
+
+            if has_valid:
+                field_valid = smt.Record_Access(
+                    dereference,
+                    n_expr.n_field.name + ".valid")
             else:
                 field_valid = smt.Boolean_Literal(True)
 

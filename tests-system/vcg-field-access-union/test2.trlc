@@ -1,0 +1,29 @@
+package Test2
+
+T1 foo {
+  x           = 10
+  description = "hello"
+}
+
+T2 bar {
+  x = 5
+}
+
+T2 baz {
+  x = 1
+}
+
+U pass_a {
+  ref     = foo
+  minimum = 5
+}
+
+U pass_b {
+  ref     = bar
+  minimum = 3
+}
+
+U fail_b {
+  ref     = baz
+  minimum = 3
+}

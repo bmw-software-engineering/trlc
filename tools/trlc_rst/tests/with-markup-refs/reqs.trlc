@@ -1,0 +1,9 @@
+package T
+
+Requirement REQ_001 {
+    description = "See also [[REQ_002]]."
+}
+
+Requirement REQ_002 {
+    description = "Base requirement."
+}

@@ -1,0 +1,5 @@
+package PkgB
+
+type Item {
+  value Integer
+}

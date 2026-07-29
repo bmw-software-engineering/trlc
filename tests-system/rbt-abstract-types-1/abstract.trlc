@@ -1,0 +1,5 @@
+package Ant_house
+
+Ant willy{
+    desc = "It is forbidden to create an object of an abstract type"
+}

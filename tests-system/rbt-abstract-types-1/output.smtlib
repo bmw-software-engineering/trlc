@@ -1,0 +1,5 @@
+abstract type Ant {
+              ^^^ rbt-abstract-types-1/abstract.rsl:4: issue: abstract type Ant does not have any extensions [abstract_leaf_types]
+Ant willy{
+^^^ rbt-abstract-types-1/abstract.trlc:3: error: cannot declare object of abstract record type Ant
+Processed 1 model and 1 requirement file and found 1 warning and 1 error

@@ -2,7 +2,7 @@ x, "potato"
 ^ lint-vcg-decimal/test1.rsl:12: issue: expression could be null [vcg-evaluation-of-null]
 | example record_type triggering error:
 |   T bad_potato {
-|     a = -1.0
+|     a = 1.0
 |     b = 0.0
 |     /* x is null */
 |   }

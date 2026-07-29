@@ -1,0 +1,10 @@
+Requirements
+============
+.. requirement:definition:: T.REQ_paragraph_breaks
+
+   The system shall do X
+   when condition Y is met.
+
+   This is a separate paragraph that
+   must not be merged with the first.
+

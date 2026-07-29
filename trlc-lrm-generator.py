@@ -60,6 +60,7 @@ class BNF_Token:
         "SYMBOL",          # 'potato'
         "S_BRA", "S_KET",  # []
         "C_BRA", "C_KET",  # {}
+        "BRA", "KET",      # ()
         "RULE_END",        # two or more newlines
     )
 
@@ -163,6 +164,12 @@ class BNF_Lexer:
 
         elif self.cc == "}":
             kind = "C_KET"
+
+        elif self.cc == "(":
+            kind = "BRA"
+
+        elif self.cc == ")":
+            kind = "KET"
 
         elif self.cc == "|":
             kind = "ALTERNATIVE"
@@ -317,6 +324,18 @@ class BNF_Zero_Or_More(BNF_Expansion):
         return "{ %s }" % str(self.expansion)
 
 
+class BNF_Group(BNF_Expansion):
+    """Parenthesised grouping: ( expansion )"""
+    def __init__(self, location, expansion):
+        super().__init__(location)
+        assert isinstance(expansion, BNF_Expansion)
+
+        self.expansion = expansion
+
+    def __str__(self):
+        return "( %s )" % str(self.expansion)
+
+
 class BNF_String(BNF_Expansion):
     def __init__(self, members):
         assert isinstance(members, list) and len(members) >= 2
@@ -401,7 +420,8 @@ class BNF_Parser:
         assert isinstance(n_exp, BNF_Expansion)
 
         if isinstance(n_exp, (BNF_Zero_Or_More,
-                              BNF_Optional)):
+                              BNF_Optional,
+                              BNF_Group)):
             self.sem_expansion(n_exp.expansion)
 
         elif isinstance(n_exp, (BNF_String,
@@ -549,7 +569,7 @@ class BNF_Parser:
 
     def parse_string(self):
         rv = [self.parse_fragment()]
-        while self.nt.kind in ("C_BRA", "S_BRA",
+        while self.nt.kind in ("C_BRA", "S_BRA", "BRA",
                                "TERMINAL",
                                "NONTERMINAL",
                                "SYMBOL"):
@@ -574,6 +594,12 @@ class BNF_Parser:
             rv = self.parse_expansion()
             self.match("S_KET")
             return BNF_Optional(loc, rv)
+
+        elif self.peek("BRA"):
+            self.match("BRA")
+            rv = self.parse_expansion()
+            self.match("KET")
+            return BNF_Group(loc, rv)
 
         elif self.peek("TERMINAL"):
             self.match("TERMINAL")
@@ -1133,6 +1159,11 @@ def write_expansion(fd, n_exp, bnf_parser):
         fd.write("{ ")
         write_expansion(fd, n_exp.expansion, bnf_parser)
         fd.write(" }")
+
+    elif isinstance(n_exp, BNF_Group):
+        fd.write("( ")
+        write_expansion(fd, n_exp.expansion, bnf_parser)
+        fd.write(" )")
 
     else:
         assert isinstance(n_exp, BNF_Literal)

@@ -1,0 +1,3 @@
+parent != null and parent.value == parent.value, "always true"
+               ^^^ union-type-field-vcg-cross-pkg/test.rsl:11: issue: expression is always true [vcg-always-true]
+Processed 3 models and 1 requirement file and found 1 warning

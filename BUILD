@@ -1,8 +1,12 @@
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 
-# This is additionally exposed for the test rule in trlc.bzl
+# trlc.py is exposed for the test rule in trlc.bzl;
+# pyproject.toml is needed by pylint/ty via rules_lint.
 exports_files(
-    ["trlc.py"],
+    [
+        "trlc.py",
+        "pyproject.toml",
+    ],
     visibility = ["//visibility:public"],
 )
 
@@ -11,8 +15,6 @@ py_binary(
     srcs = [
         "trlc.py",
     ],
-    args = ["--use-cvc5-binary $(location //:cvc5)"],
-    data = ["//:cvc5"],
     main = "trlc.py",
     visibility = ["//visibility:public"],
     deps = [
@@ -20,19 +22,41 @@ py_binary(
     ],
 )
 
-alias(
-    name = "cvc5",
-    actual = select({
-        "@bazel_tools//src/conditions:windows": "@cvc5_windows//:cvc5",
-        "@bazel_tools//src/conditions:darwin": "@cvc5_mac//:cvc5",
-        "//conditions:default": "@cvc5_linux//:cvc5",
-    }),
-    visibility = ["//visibility:public"],
+# Run: bazel run //:requirements_3_XX.update  --@@rules_python+//python/config_settings:python_version=3.XX
+[
+    compile_pip_requirements(
+        name = "requirements_3_{}".format(version),
+        src = "requirements.txt",
+        python_version = "3.{}".format(version),
+        requirements_txt = "requirements_lock_3_{}.txt".format(version),
+    )
+    for version in [
+        "9",
+        "10",
+        "11",
+        "12",
+    ]
+]
+
+# Run: bazel run //:requirements_dev.update
+compile_pip_requirements(
+    name = "requirements_dev",
+    src = "requirements_dev.txt",
+    requirements_txt = "requirements_dev_lock.txt",
 )
 
-# Run bazel run //:requirements.update
-compile_pip_requirements(
-    name = "requirements",
-    src = "requirements.txt",
-    requirements_txt = "requirements.txt.bazel",
+alias(
+    name = "format.check",
+    actual = "//third_party/format:format.check",
+)
+
+alias(
+    name = "format.fix",
+    actual = "//third_party/format:format",
+)
+
+filegroup(
+    name = "coverage",
+    srcs = ["coverage.cfg"],
+    visibility = ["//visibility:public"],
 )

@@ -1,0 +1,14 @@
+package Test
+
+type TypeA {
+  a Integer
+}
+
+type TypeB {
+  b Integer
+}
+
+type Req {
+  description String
+  parents     optional [TypeA, TypeB] [0 .. *]
+}

@@ -1,0 +1,10 @@
+package Test
+
+OtherReq other1 {
+  text = "I am not a system req"
+}
+
+FeatReq bad {
+  description  = "wrong type in union tuple field"
+  derived_from = other1 @ 1
+}

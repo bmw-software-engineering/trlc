@@ -1,0 +1,13 @@
+package Simple
+
+Requirement REQ_001 {
+    id          = "REQ_001"
+    description = "The system shall process inputs correctly"
+    priority    = 1
+}
+
+Requirement REQ_002 {
+    id          = "REQ_002"
+    description = "The system shall produce correct outputs"
+    priority    = 2
+}

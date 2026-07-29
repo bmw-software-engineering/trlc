@@ -1,0 +1,14 @@
+package Test
+
+TypeA a1 {
+  a = 42
+}
+
+Req r1 {
+  description = "Has parent"
+  parent = a1
+}
+
+Req r2 {
+  description = "No parent"
+}

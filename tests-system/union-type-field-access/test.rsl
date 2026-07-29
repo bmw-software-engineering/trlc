@@ -1,0 +1,18 @@
+package Test
+
+type TypeA {
+  a Integer
+}
+
+type TypeB {
+  a Integer
+}
+
+type Req {
+  description String
+  parent      optional [TypeA, TypeB]
+}
+
+checks Req {
+  parent.a == 1, "must link to a=1"
+}

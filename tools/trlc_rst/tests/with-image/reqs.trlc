@@ -1,0 +1,13 @@
+package T
+
+Requirement REQ_with_image {
+    description = '''
+        The system shall render images.
+
+        ![Architecture overview](diagrams/arch.png)
+    '''
+}
+
+Requirement REQ_no_image {
+    description = "The system shall process inputs."
+}

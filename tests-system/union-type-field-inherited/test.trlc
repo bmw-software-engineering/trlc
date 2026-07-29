@@ -1,0 +1,19 @@
+package Test
+
+TypeA item_a {
+  description = "hello"
+  y = 1
+}
+
+TypeB item_b {
+  description = "world"
+  z = 2
+}
+
+Req r1 {
+  parent = item_a
+}
+
+Req r2 {
+  parent = item_b
+}

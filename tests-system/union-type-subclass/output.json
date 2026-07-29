@@ -1,0 +1,25 @@
+{
+  "a1": {
+    "a": 1
+  },
+  "b1": {
+    "a": 2,
+    "b": 20
+  },
+  "c1": {
+    "c": 100
+  },
+  "r1": {
+    "description": "TypeA (direct member)",
+    "parent": "Test.a1"
+  },
+  "r2": {
+    "description": "TypeB (subclass of TypeA, which is a union member)",
+    "parent": "Test.b1"
+  },
+  "r3": {
+    "description": "TypeC (direct member)",
+    "parent": "Test.c1"
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

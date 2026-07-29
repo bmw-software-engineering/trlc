@@ -1,0 +1,3 @@
+parent      [TypeA]
+            ^ union-type-single-error/test.rsl:9: issue: union type with a single member is equivalent to a plain record reference [union_single_type]
+Processed 1 model and 1 requirement file and found 1 warning

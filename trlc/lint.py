@@ -24,19 +24,17 @@ from trlc.vcg import VCG
 
 
 class Linter:
-    def __init__(self, mh, stab, verify_checks, debug_vcg, cvc5_binary):
+    def __init__(self, mh, stab, verify_checks, debug_vcg):
         # lobster-exclude: Not safety relevant
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, ast.Symbol_Table)
         assert isinstance(verify_checks, bool)
         assert isinstance(debug_vcg, bool)
-        assert isinstance(cvc5_binary, str) or cvc5_binary is None
 
         self.mh            = mh
         self.stab          = stab
         self.verify_checks = verify_checks
         self.debug_vcg     = debug_vcg
-        self.cvc5_binary   = cvc5_binary
 
         self.abstract_extensions = {}
         self.checked_types       = set()
@@ -52,13 +50,13 @@ class Linter:
                     ok = False
 
         # Complain about abstract types without extensions
+        # lobster-trace: LRM.Abstract_Type_Not_Extended
         for package in self.stab.values(ast.Package):
             for n_typ in package.symbols.values(ast.Record_Type):
                 if n_typ.is_abstract and not self.abstract_extensions[n_typ]:
                     self.mh.check(
                         n_typ.location,
-                        "abstract type %s does not have any extensions" %
-                        n_typ.name,
+                        f"abstract type {n_typ.name} does not have any extensions",
                         "abstract_leaf_types")
 
         return ok
@@ -80,6 +78,27 @@ class Linter:
 
         elif isinstance(n_typ, ast.Array_Type):
             self.verify_array_type(n_typ)
+
+        elif isinstance(n_typ, ast.Union_Type):
+            # lobster-trace: LRM.Union_Type_Minimum_Members
+            if len(n_typ.types) == 1:
+                self.mh.check(
+                    n_typ.location,
+                    "union type with a single member is equivalent to a"
+                    " plain record reference",
+                    "union_single_type")
+            # lobster-trace: LRM.Union_Type_No_Subtype_Relations
+            for i, t_i in enumerate(n_typ.types):
+                for j, t_j in enumerate(n_typ.types):
+                    if i != j and t_i is not t_j and \
+                            t_i.is_subclass_of(t_j):
+                        self.mh.check(
+                            n_typ.location,
+                            "%s is a subtype of %s which is already"
+                            " in this union" % (t_i.name, t_j.name),
+                            "union_redundant_subtype")
+            for member_type in n_typ.types:
+                self.verify_type(member_type)
 
     def verify_tuple_type(self, n_tuple_type):
         assert isinstance(n_tuple_type, ast.Tuple_Type)
@@ -141,9 +160,7 @@ class Linter:
         if self.verify_checks:
             vcg = VCG(mh          = self.mh,
                       n_ctyp      = n_tuple_type,
-                      debug       = self.debug_vcg,
-                      use_api     = self.cvc5_binary is None,
-                      cvc5_binary = self.cvc5_binary)
+                      debug       = self.debug_vcg)
             vcg.analyze()
 
     def verify_record_type(self, n_record_type):
@@ -154,10 +171,13 @@ class Linter:
         if n_record_type.is_abstract:
             if n_record_type not in self.abstract_extensions:
                 self.abstract_extensions[n_record_type] = set()
-        elif n_record_type.parent and n_record_type.parent.is_abstract:
-            if n_record_type.parent not in self.abstract_extensions:
-                self.abstract_extensions[n_record_type.parent] = set()
-            self.abstract_extensions[n_record_type.parent].add(n_record_type)
+        elif n_record_type.parent:
+            ancestor = n_record_type.parent
+            while ancestor is not None and ancestor.is_abstract:
+                if ancestor not in self.abstract_extensions:
+                    self.abstract_extensions[ancestor] = set()
+                self.abstract_extensions[ancestor].add(n_record_type)
+                ancestor = ancestor.parent
 
         # Walk over components
         for n_component in n_record_type.components.values():
@@ -167,9 +187,7 @@ class Linter:
         if self.verify_checks:
             vcg = VCG(mh          = self.mh,
                       n_ctyp      = n_record_type,
-                      debug       = self.debug_vcg,
-                      use_api     = self.cvc5_binary is None,
-                      cvc5_binary = self.cvc5_binary)
+                      debug       = self.debug_vcg)
             vcg.analyze()
 
     def verify_array_type(self, n_typ):

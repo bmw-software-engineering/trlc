@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # TRLC - Treat Requirements Like Code
-# Copyright (C) 2022-2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+# Copyright (C) 2022-2023, 2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 #
 # This file is part of the TRLC Python Reference Implementation.
 #
@@ -18,7 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with TRLC. If not, see <https://www.gnu.org/licenses/>.
 
-import sys
 from fractions import Fraction
 from abc import ABCMeta, abstractmethod
 
@@ -641,20 +640,3 @@ class Token_Stream(TRLC_Lexer):
         if tok is not None:
             self.tokens.append(tok)
         return tok
-
-
-def sanity_test():
-    # lobster-exclude: Developer test function
-    mh    = Message_Handler()
-    lexer = TRLC_Lexer(mh, sys.argv[1])
-
-    while True:
-        token  = lexer.token()
-        if token is None:
-            break
-        mh.warning(token.location,
-                   str(token))
-
-
-if __name__ == "__main__":
-    sanity_test()

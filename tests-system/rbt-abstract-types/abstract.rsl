@@ -1,0 +1,11 @@
+package Ant_house
+
+//Expectation: No warning and no error
+//Hence, this test also verifies the non-error scenario of Abstract_Type_Not_Extended
+abstract type Ant {
+  x Integer
+}
+
+type Ant_hill extends Ant {
+  desc String
+}

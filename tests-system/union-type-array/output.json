@@ -1,0 +1,20 @@
+{
+  "a1": {
+    "a": 1
+  },
+  "a2": {
+    "a": 2
+  },
+  "b1": {
+    "b": 10
+  },
+  "r1": {
+    "description": "Mixed parents",
+    "parents": [
+      "Test.a1",
+      "Test.b1",
+      "Test.a2"
+    ]
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

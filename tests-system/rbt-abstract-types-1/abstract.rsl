@@ -1,0 +1,6 @@
+package Ant_house
+
+//Expectation: An error is emitted because an object of this abstract type is created in trlc
+abstract type Ant {
+  desc String
+}

@@ -1,0 +1,21 @@
+{
+  "cr1": {
+    "title": "CB requirement 1"
+  },
+  "r1": {
+    "description": "Linked to system req",
+    "parent": "Test.sr1"
+  },
+  "r2": {
+    "description": "Linked to codebeamer req",
+    "parent": "Test.cr1"
+  },
+  "r3": {
+    "description": "No parent",
+    "parent": null
+  },
+  "sr1": {
+    "description": "System requirement 1"
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

@@ -1,0 +1,19 @@
+package Test
+
+type TypeA {
+  x Integer
+}
+
+type TypeB {
+  y Integer
+}
+
+type Req {
+  description String
+  left        [TypeA, TypeB]
+  right       [TypeA, TypeB]
+}
+
+checks Req {
+  left == right, "left and right must be equal"
+}

@@ -1,0 +1,24 @@
+{
+  "a1": {
+    "a": 1
+  },
+  "b1": {
+    "b": 2
+  },
+  "r1": {
+    "description": "has parents",
+    "parents": [
+      "Test.a1",
+      "Test.b1"
+    ]
+  },
+  "r2": {
+    "description": "empty parents",
+    "parents": []
+  },
+  "r3": {
+    "description": "no parents",
+    "parents": null
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

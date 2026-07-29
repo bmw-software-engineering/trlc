@@ -22,7 +22,6 @@ import argparse
 import json
 import os
 import re
-import subprocess
 import sys
 from fractions import Fraction
 
@@ -77,14 +76,12 @@ class Source_Manager:
                  parse_trlc     = True,
                  verify_mode    = False,
                  debug_vcg      = False,
-                 error_recovery = True,
-                 cvc5_binary    = None):
+                 error_recovery = True):
         assert isinstance(mh, Message_Handler)
         assert isinstance(lint_mode, bool)
         assert isinstance(parse_trlc, bool)
         assert isinstance(verify_mode, bool)
         assert isinstance(debug_vcg, bool)
-        assert isinstance(cvc5_binary, str) or cvc5_binary is None
 
         self.mh          = mh
         self.mh.sm       = self
@@ -102,7 +99,6 @@ class Source_Manager:
         self.verify_mode    = verify_mode
         self.debug_vcg      = debug_vcg
         self.error_recovery = error_recovery
-        self.cvc5_binary    = cvc5_binary
 
         self.exclude_patterns = []
         self.common_root      = None
@@ -219,21 +215,21 @@ class Source_Manager:
         assert isinstance(file_content, str) or file_content is None
         # lobster-trace: LRM.Layout
 
-        ok = True
         try:
             if file_name.endswith(".rsl"):
                 self.register_rsl_file(file_name, file_content, primary)
             elif file_name.endswith(".trlc"):
                 self.register_trlc_file(file_name, file_content, primary)
             else:  # pragma: no cover
-                ok = False
                 self.mh.error(Location(os.path.basename(file_name)),
                               "is not a rsl or trlc file",
                               fatal = False)
-        except TRLC_Error:
-            ok = False
+                return False
 
-        return ok
+        except TRLC_Error:
+            return False
+
+        return True
 
     def register_directory(self, dir_name):
         """Schedule a directory tree for parsing.
@@ -379,7 +375,7 @@ class Source_Manager:
 
         return ok
 
-    def parse_rsl_files(self):
+    def parse_rsl_files(self) -> bool:
         # lobster-trace: LRM.Preamble
         # lobster-trace: LRM.RSL_File
 
@@ -433,7 +429,7 @@ class Source_Manager:
 
         return ok
 
-    def parse_trlc_files(self):
+    def parse_trlc_files(self) -> bool:
         # lobster-trace: LRM.TRLC_File
         # lobster-trace: LRM.Preamble
 
@@ -455,7 +451,7 @@ class Source_Manager:
 
         return ok
 
-    def resolve_record_references(self):
+    def resolve_record_references(self) -> bool:
         # lobster-trace: LRM.File_Parsing_References
         # lobster-trace: LRM.Markup_String_Late_Reference_Resolution
         # lobster-trace: LRM.Late_Reference_Checking
@@ -469,7 +465,7 @@ class Source_Manager:
 
         return ok
 
-    def perform_checks(self):
+    def perform_checks(self) -> bool:
         # lobster-trace: LRM.Order_Of_Evaluation_Unordered
         ok = True
         for package in self.stab.values(ast.Package):
@@ -512,8 +508,7 @@ class Source_Manager:
             linter = lint.Linter(mh            = self.mh,
                                  stab          = self.stab,
                                  verify_checks = self.verify_mode,
-                                 debug_vcg     = self.debug_vcg,
-                                 cvc5_binary   = self.cvc5_binary)
+                                 debug_vcg     = self.debug_vcg)
             ok &= linter.perform_sanity_checks()
         # Stop here if we're not processing TRLC files.
         if not self.parse_trlc:  # pragma: no cover
@@ -579,11 +574,6 @@ def trlc():
                                " checks. Does not yet support all language"
                                " constructs. Requires PyVCG to be "
                                " installed."))
-    og_lint.add_argument("--use-cvc5-binary",
-                         default=None,
-                         help=("[EXPERIMENTAL] Drive the given CVC5 solver"
-                               " with SMTLIB2 input instead of using the"
-                               " API."))
 
     og_input = ap.add_argument_group("input options")
     og_input.add_argument("--include-bazel-dirs",
@@ -636,6 +626,14 @@ def trlc():
                            action="store_true",
                            help=("If there are no errors, produce a summary"
                                  " naming every file processed."))
+    og_output.add_argument("--log",
+                           nargs    = '+',
+                           metavar  = ("FILE", "PREFIX"),
+                           default  = None,
+                           help     = ("Write all output to FILE, optionally"
+                                       " strip PREFIX from file paths in"
+                                       " messages. Intended for use as a"
+                                       " Bazel build action."))
     og_output.add_argument("--error-on-warnings",
                            action="store_true",
                            help=("If there are warnings, return status code"
@@ -662,33 +660,24 @@ def trlc():
                     metavar="DIR|FILE")
     options = ap.parse_args()
 
+    if options.log:
+        if len(options.log) > 2:
+            ap.error("--log accepts at most 2 values: FILE and optionally PREFIX")
+        if len(options.log) == 1:
+            options.log.append(None)
+
     if options.version:  # pragma: no cover
         print(TRLC_VERSION)
         sys.exit(0)
 
-    if options.verify and not (options.use_cvc5_binary or
-                               VCG_API_AVAILABLE):  # pragma: no cover
+    if options.verify and not VCG_API_AVAILABLE:  # pragma: no cover
         ap.error("The --verify option requires the optional dependency"
-                 " CVC5 or use of the --use-cvc5-binary option")
+                 " CVC5")
 
-    if options.use_cvc5_binary:  # pragma: no cover
-        if not options.verify:
-            ap.error("The --use-cvc5-binary requires the --verify option")
-        try:
-            result = subprocess.run([options.use_cvc5_binary,
-                                     "--version"],
-                                    check          = True,
-                                    capture_output = True,
-                                    encoding       = "UTF-8")
-            if not result.stdout.startswith("This is cvc5"):
-                ap.error("selected binary does not appear to be CVC5")
-        except OSError as err:
-            ap.error("cannot run %s: %s" % (options.use_cvc5_binary,
-                                            str(err)))
-        except subprocess.CalledProcessError:
-            ap.error("cannot run %s" % options.use_cvc5_binary)
-
-    mh = Message_Handler(options.brief, not options.no_detailed_info)
+    mh = Message_Handler(options.brief,
+                          not options.no_detailed_info,
+                          out_path     = options.log[0] if options.log else None,
+                          strip_prefix = options.log[1] if options.log else None)
 
     if options.no_user_warnings:  # pragma: no cover
         mh.suppress(Kind.USER_WARNING)
@@ -698,8 +687,7 @@ def trlc():
                         parse_trlc     = not options.skip_trlc_files,
                         verify_mode    = options.verify,
                         debug_vcg      = options.debug_vcg,
-                        error_recovery = not options.no_error_recovery,
-                        cvc5_binary    = options.use_cvc5_binary)
+                        error_recovery = not options.no_error_recovery)
 
     if not options.include_bazel_dirs:  # pragma: no cover
         sm.exclude_patterns.append(re.compile("^bazel-.*$"))
@@ -731,6 +719,7 @@ def trlc():
         ok &= sm.register_directory(".")
 
     if not ok:
+        mh.close()
         return 1
 
     if sm.process() is None:
@@ -747,7 +736,7 @@ def trlc():
                     if isinstance(tmp[obj.name][key], Fraction):
                         tmp[obj.name][key] = float(tmp[obj.name][key])
 
-            print(json.dumps(tmp, indent=2, sort_keys=True))
+            print(json.dumps(tmp, indent=2, sort_keys=True), file=mh.out)
 
     total_models = len(sm.rsl_files)
     parsed_models = len([item
@@ -791,7 +780,7 @@ def trlc():
     if mh.suppressed:  # pragma: no cover
         summary += " with %u supressed messages" % mh.suppressed
 
-    print(summary)
+    print(summary, file=mh.out)
 
     if options.show_file_list and ok:  # pragma: no cover
         def get_status(parser):
@@ -807,21 +796,24 @@ def trlc():
             print("> %s Model %s (Package %s)" %
                   (get_status(parser),
                    filename,
-                   parser.cu.package.name))
+                   parser.cu.package.name), file=mh.out)
         if not options.skip_trlc_files:
             for filename in sorted(sm.trlc_files):
                 parser = sm.trlc_files[filename]
                 print("> %s Requirements %s (Package %s)" %
                       (get_status(parser),
                        filename,
-                       parser.cu.package.name))
+                       parser.cu.package.name), file=mh.out)
 
     if ok:
-        if options.error_on_warnings and mh.warnings \
-           or mh.errors:  # pragma: no cover
-            return 1
-        return 0
-    return 1
+        if (options.error_on_warnings and mh.warnings) or mh.errors:  # pragma: no cover
+            rv = 1
+        else:
+            rv = 0
+    else:
+        rv = 1
+    mh.close()
+    return rv
 
 
 def main():

@@ -1,0 +1,23 @@
+package Test2
+
+T foo {
+  x = 5
+}
+
+T bar {
+  x = 10
+}
+
+T baz {
+  x = 20
+}
+
+U passing {
+  items = [foo, bar]
+  limit = 15
+}
+
+U failing {
+  items = [foo, bar, baz]
+  limit = 15
+}

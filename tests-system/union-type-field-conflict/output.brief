@@ -1,0 +1,2 @@
+union-type-field-conflict/test.rsl:16:10: trlc error: field x has conflicting types in members of union type [TypeA, TypeB]
+Processed 1 model and 1 requirement file and found 1 error

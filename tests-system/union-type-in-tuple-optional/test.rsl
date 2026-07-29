@@ -1,0 +1,20 @@
+package Test
+
+type TypeA {
+  a String
+}
+
+type TypeB {
+  b String
+}
+
+tuple OptRef {
+  ref       [TypeA, TypeB]
+  separator @
+  version   optional Integer
+}
+
+type Req {
+  description String
+  link        OptRef
+}

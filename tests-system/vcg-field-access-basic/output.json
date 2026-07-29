@@ -1,0 +1,3 @@
+T bar {
+  ^^^ vcg-field-access-basic/test3.trlc:9: check error: potato
+Processed 3 models and 1 requirement file and found 1 error

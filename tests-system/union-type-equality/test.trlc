@@ -1,0 +1,21 @@
+package Test
+
+TypeA a1 {
+  x = 1
+}
+
+TypeB b1 {
+  y = 2
+}
+
+Req r1 {
+  description = "same"
+  left = a1
+  right = a1
+}
+
+Req r2 {
+  description = "different"
+  left = a1
+  right = b1
+}

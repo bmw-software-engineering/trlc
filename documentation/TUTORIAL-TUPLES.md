@@ -4,7 +4,7 @@ This is part of the [TRLC Tutorial](TUTORIAL.md).
 
 ## Tuples
 
-TRLC allows you to create used-defined algebraic datatypes, generally
+TRLC allows you to create user-defined algebraic datatypes, generally
 referred to as "tuples". For example:
 
 ```
@@ -29,8 +29,23 @@ Requirement potato {
 }
 ```
 
-Tuples can contain any kind of data, including other tuples; but it is
-not possible to have array fields or create recursive tuples.
+Tuples can contain any kind of data, including other tuples and union
+types; but it is not possible to have array fields or create recursive
+tuples.
+
+A field in a tuple may also use the union type syntax to accept
+references to any of several record types:
+
+```
+tuple LevelRef {
+   item    [SystemRequirement, AssumedRequirement]
+   separator @
+   version Integer
+}
+```
+
+This follows the same rules as union type fields on record types (see
+[Advanced Types](TUTORIAL-ADVANCED-TYPES.md)).
 
 ## Syntactic sugar
 

@@ -1,0 +1,3 @@
+parent.description != null, "need description"
+                   ^^ union-type-field-inherited/test.rsl:20: issue: expression is always true [vcg-always-true]
+Processed 1 model and 1 requirement file and found 1 warning

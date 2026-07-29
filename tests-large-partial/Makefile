@@ -1,12 +1,13 @@
-TARGETS=$(addsuffix .output, $(basename $(wildcard *.scenario)))
+TESTS=$(wildcard */options)
+TARGETS=$(patsubst %/options,%/output,$(TESTS))
 
 all: $(TARGETS)
 fast: $(TARGETS)
 
-%.output: %.scenario
+%/output: %/options
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
-		../trlc.py --verify $(file < $<) \
+		../trlc.py $(file < $<) \
 		> $@ 2>&1
 
 rebuild-canned-tests:
