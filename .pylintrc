@@ -27,7 +27,14 @@ disable=
  too-many-return-statements,
  too-many-statements,
  unused-wildcard-import,
- wildcard-import
+ wildcard-import,
+ E203,
+ W504,
+ E221,
+ E251,
+ E129,
+ E266,
+ E127
 
 [REPORTS]
 output-format=text
