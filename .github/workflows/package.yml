@@ -22,9 +22,6 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install build
-      - name: Remove Bazel BUILD file # This should be no problem on Linux but necessary on Windows bacause of case-insensitive file-system.
-        run: |
-          rm BUILD
       - name: Rewrite relative README links to absolute for PyPI
         run: |
           python -c "
