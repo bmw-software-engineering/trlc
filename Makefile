@@ -1,7 +1,7 @@
 .PHONY: docs test style lint package
 
 lint: style
-	@python3 -m pylint --rcfile=pylint3.cfg \
+	@python3 -m pylint --rcfile=.pylintrc \
 		--reports=no \
 		trlc trlc*.py lobster-*.py
 
