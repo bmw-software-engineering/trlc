@@ -1,0 +1,6 @@
+package pizza_hq
+
+type Pizza_Order {
+  topping  String
+  size     Integer
+}
