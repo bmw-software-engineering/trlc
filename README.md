@@ -58,7 +58,8 @@ The Python implementation can be used for several purposes:
 
 ### Tools Available
 
-* [TRLC_RST](tools/trlc_rst/README.md) Convert TRLC Requirements for Sphinx Build
+* [TRLC_RST](tools/trlc_rst/README.md): Convert TRLC Requirements for Sphinx Build
+* [Converters](https://github.com/NewTec-GmbH/pyTRLCConverter): Multiple converters from TRLC to other file formats. The tool suite is maintained by [NewTec GmbH](https://www.newtec.de/).
 
 ## Dependencies
 
