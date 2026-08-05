@@ -1,0 +1,6 @@
+package hello_pkg
+
+type Greeting {
+  message  String
+  priority Integer
+}

@@ -27,6 +27,10 @@ generated in the following situations:
 
 ### 3.0.1-dev
 
+* [TRLC] Add experimental feature to parse markdown files and interpret their content as trlc objects.
+For more details see: https://github.com/bmw-software-engineering/trlc/issues/226
+
+* [Bazel] Update the trlc bazel target to support trlc markdown feature.
 
 ### 3.0.0
 
