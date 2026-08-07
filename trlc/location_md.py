@@ -36,12 +36,10 @@ class MD_Location(Location):
         file_name,
         line_no,
         col_no,
-        source_line="",
         token_text="",
         mh=None,
     ):
         super().__init__(file_name, line_no, col_no)
-        self._source_line = source_line
         self._token_text = token_text
         self._full_text = f'"""{self._token_text}"""'
 
@@ -51,15 +49,6 @@ class MD_Location(Location):
             self.lexer = TRLC_Lexer(mh, file_name, self._full_text)
             self.start_pos = 0
             self.end_pos = len(self._full_text) - 1
-
-    def context_lines(self):
-        if not self._source_line:
-            return []
-        col = self.col_no if self.col_no else 1
-        stripped = self._source_line.lstrip()
-        leading = len(self._source_line) - len(stripped)
-        caret_col = max(col - 1 - leading, 0)
-        return [stripped, " " * caret_col + "^"]
 
     def text(self):
         return self._full_text

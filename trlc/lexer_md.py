@@ -74,7 +74,7 @@ from fractions import Fraction
 
 from trlc.lexer import Token, TRLC_Lexer
 from trlc.errors import Location, Message_Handler
-from trlc.lexer_md_location import MD_Location
+from trlc.location_md import MD_Location
 
 
 class MD_Source_Reference(Location):
