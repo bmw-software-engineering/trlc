@@ -25,7 +25,7 @@ generated in the following situations:
 ## Changelog
 
 
-### 3.0.1-dev
+### 3.0.1
 
 * [TRLC] Add experimental feature to parse markdown files and interpret their content as trlc objects.
 For more details see: https://github.com/bmw-software-engineering/trlc/issues/226
