@@ -31,7 +31,15 @@ class MD_Location(Location):
     treat markdown strings like regular TRLC string literals.
     """
 
-    def __init__(self, file_name, line_no, col_no, source_line="", token_text="", mh=None):
+    def __init__(
+        self,
+        file_name,
+        line_no,
+        col_no,
+        source_line="",
+        token_text="",
+        mh=None,
+    ):
         super().__init__(file_name, line_no, col_no)
         self._source_line = source_line
         self._token_text = token_text
