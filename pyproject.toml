@@ -1,3 +1,48 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm", "wheel", "toml"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trlc"
+version = "3.0.1dev"
+description = "Treat Requirements Like Code"
+readme = "README.md"
+requires-python = ">=3.8, <3.15"
+authors = [
+    { name = "Bayerische Motoren Werke Aktiengesellschaft (BMW AG)", email = "philipp.wullstein-kammler@bmw.de" }
+]
+license = "GPL-3.0"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Topic :: Documentation",
+    "Topic :: Software Development"
+]
+
+dependencies = [
+    "pyvcg==1.0.9",
+    "cvc5>=1.3.2",
+    "bigtree"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pycodestyle>=2.12",
+    "coverage>=7.2",
+    "sphinx>=7.0",
+    "build>=1.2.0",
+    "pylint<4.0"
+]
+
+[project.urls]
+documentation = "https://github.com/bmw-software-engineering/trlc#documentation"
+repository = "https://github.com/bmw-software-engineering/trlc"
+tracker = "https://github.com/bmw-software-engineering/trlc/issues"
+
+[project.scripts]
+trlc = "trlc:trlc.main"
+
 [tool.ty.rules]
 # ty is Astral's Python type checker (fast, Rust-based)
 # Add per-rule overrides here as needed, e.g.:
@@ -50,3 +95,9 @@ good-names = ["i", "j", "k", "c", "f", "fd", "zf", "n", "ap", "rv", "mh", "sm", 
 
 [tool.pylint.format]
 max-line-length = 88
+
+[tool.setuptools]
+packages = ["trlc"]
+
+[tool.setuptools.package-data]
+trlc = ["pyproject.toml"]

@@ -22,7 +22,16 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install build
-      - name:
+      - name: Rewrite relative README links to absolute for PyPI
+        run: |
+          python -c "
+          import re, pathlib
+          tag = '${{ github.event.release.tag_name }}'
+          base = 'https://github.com/bmw-software-engineering/trlc/tree/' + tag + '/'
+          readme = pathlib.Path('README.md')
+          readme.write_text(re.sub(r'\]\(\.\/', '](' + base, readme.read_text()))
+          "
+      - name: Build package
         run: |
           make package
       - name: Archive wheel files
