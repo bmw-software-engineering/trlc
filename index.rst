@@ -1,7 +1,12 @@
 TRLC Python API
 ===============
 
-This is description for the end-user facing TRLC API.
+.. image:: documentation/assets/trlc-logo.svg
+  :alt: TRLC logo
+  :align: center
+  :width: 420
+
+This is the description for the end-user facing TRLC API.
 
 First you need to create a source manager and feed it files::
 
