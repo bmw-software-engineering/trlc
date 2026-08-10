@@ -7,3 +7,5 @@ build:lint --output_groups=+rules_lint_human
 # --instrumentation_filter restricts instrumentation to the trlc library only.
 coverage --combined_report=lcov
 coverage --instrumentation_filter="//trlc[/:]"
+
+test --test_output=all

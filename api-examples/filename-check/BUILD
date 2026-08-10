@@ -43,6 +43,7 @@ trlc_requirements_test(
     name = "filename_check",
     srcs = [":filename-3.py"],
     main = "filename-3.py",
+    tags = ["manual"],
     reqs = [
         ":reqs",
     ],

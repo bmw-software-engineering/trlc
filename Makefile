@@ -30,22 +30,21 @@ unit-tests:
                 --branch --rcfile=coverage.cfg \
                 --data-file .coverage \
                 -m unittest discover -s tests-unit -v
+	bazel test //tests-unit:unit_tests
 
-# bazel equivalent: bazel test //tests-system:fast
+# bazel equivalent: bazel test //tests-system:fast //tests-large-partial:fast
 system-tests:
 	mkdir -p docs
 	coverage run -p --rcfile=coverage.cfg --branch --data-file .coverage \
 		./trlc-lrm-generator.py
-	make -C tests-system -B -j8 fast
-	make -C tests-large-partial -B -j8 fast
+	bazel test //tests-system:fast //tests-large-partial:fast
 
-# bazel equivalent: bazel test //tests-system:all_tests
+# bazel equivalent: bazel test //tests-system:all_tests //tests-large-partial:all
 system-tests-all:
 	mkdir -p docs
 	coverage run -p --rcfile=coverage.cfg --branch --data-file .coverage \
 		./trlc-lrm-generator.py
-	make -C tests-system -B -j8 all
-	make -C tests-large-partial -B -j8 all
+	bazel test //tests-system:all_tests //tests-large-partial:all
 
 docs:
 	rm -rf docs

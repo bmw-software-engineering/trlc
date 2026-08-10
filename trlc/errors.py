@@ -67,7 +67,8 @@ class Location:
         :rtype: str
 
         """
-        rv = self.file_name
+        # Normalize separators so diagnostics are stable across platforms.
+        rv = self.file_name.replace("\\", "/")
         if self.line_no:
             rv += ":%u" % self.line_no
             if self.col_no and include_column:
@@ -231,8 +232,10 @@ class Message_Handler:
 
         def _loc_str(include_column=True):
             loc = location.to_string(include_column)
-            if self.strip_prefix and loc.startswith(self.strip_prefix):
-                loc = loc[len(self.strip_prefix):]
+            if self.strip_prefix:
+                prefix = self.strip_prefix.replace("\\", "/")
+                if loc.startswith(prefix):
+                    loc = loc[len(prefix):]
             return loc
 
         if self.brief:

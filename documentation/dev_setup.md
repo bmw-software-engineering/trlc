@@ -69,16 +69,19 @@ the latest GNU make version.
   scoop install coreutils
   ```
 
-## Important make targets
+## Important commands
 
 * `make lint` to run pycodestyle and pylint.
 
-* `make test` to run most tests and show coverage analysis.
+* `bazel test //:fast` to run the default test set: unit tests, the fast
+  system tests, and the fast large partial tests.
 
-* `make test-all` to run all tests. This is the same as above, except
-  we also include a massive test that takes a long time to
-  run. Generally this is not worth it, but maybe do it once before you
-  push.
+* `bazel test //:all_tests` to run the full test set. This is the same as
+  above, except we also include the slow large partial test. Generally this
+  is not worth it, but maybe do it once before you push.
+
+* `make coverage` to build the HTML and terminal coverage reports after
+  running the coverage-producing test commands.
 
 * `make tracing` to build just the LOBSTER report.
 
