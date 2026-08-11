@@ -1,0 +1,16 @@
+package Kitchen
+
+import PlatformRequirements
+import ReqSpec
+
+ReqSpec.FeatReq SupportForScheduledBrewing {
+    version = 1
+    safety = ReqSpec.Asil.B
+    derived_from = [ PlatformRequirements.InterProcessKitchen@1, PlatformRequirements.SupportForScheduledBrewings@1, PlatformRequirements.SafeKitchen@1 ]
+}
+
+ReqSpec.FeatReq SupportForAutoRefill {
+    version = 2
+    safety = ReqSpec.Asil.QM
+    derived_from = [ PlatformRequirements.InterProcessKitchen@1, PlatformRequirements.SupportForAutoRefill@1 ]
+}

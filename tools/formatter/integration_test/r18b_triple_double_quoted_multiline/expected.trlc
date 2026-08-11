@@ -1,0 +1,8 @@
+package Demo
+
+Type.Rec MultilineReq {
+    description = """The component shall provide
+a valid interface
+to the system."""
+    version = 1
+}

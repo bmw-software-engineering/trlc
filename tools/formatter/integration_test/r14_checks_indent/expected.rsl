@@ -1,0 +1,11 @@
+package TestPkg
+
+checks Requirement {
+    not matches(description, "(shall|should)"),
+        warning "The description must include shall or should",
+        description
+}
+
+checks PlatformReq {
+    rationale != null implies len(rationale) >= 5, "rationale too short"
+}

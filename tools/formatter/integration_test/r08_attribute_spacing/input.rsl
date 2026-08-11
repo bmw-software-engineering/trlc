@@ -1,0 +1,5 @@
+ 
+type Demo {
+name             String
+value			Integer
+}

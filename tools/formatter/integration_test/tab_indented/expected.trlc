@@ -1,0 +1,13 @@
+package Kitchen
+
+import ReqSpec
+
+ReqSpec.FeatReq SupportForScheduledBrewing {
+    version = 1
+    safety = ReqSpec.Asil.B
+}
+
+ReqSpec.FeatReq SupportForAutoRefill {
+    version = 2
+    safety = ReqSpec.Asil.QM
+}

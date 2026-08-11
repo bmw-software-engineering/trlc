@@ -1,7 +1,7 @@
 module(
     name = "trlc",
-    compatibility_level = 1,
     version = "0.0.0",
+    compatibility_level = 1,
 )
 
 bazel_dep(
@@ -14,24 +14,65 @@ bazel_dep(
     version = "8.2.1.1",
     dev_dependency = True,
 )
-
 bazel_dep(
     name = "aspect_rules_lint",
     version = "2.2.0",
     dev_dependency = True,
 )
 
-python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+# Patch aspect_rules_lint to add TRLC (.trlc / .rsl) support in the format shell script.
+single_version_override(
+    module_name = "aspect_rules_lint",
+    patch_strip = 1,
+    patches = [
+        "//third_party/format:add_trlc_support.patch",
+    ],
+)
 
+##################################################
+### Setup TRLC Formatter
+##################################################
+bazel_dep(
+    name = "bazel_skylib",
+    version = "1.8.2",
+    dev_dependency = True,
+)
+bazel_dep(
+    name = "aspect_rules_js",
+    version = "2.9.2",
+    dev_dependency = True,
+)
+bazel_dep(
+    name = "rules_multirun",
+    version = "0.13.0",
+    dev_dependency = True,
+)
+
+npm = use_extension(
+    "@aspect_rules_js//npm:extensions.bzl",
+    "npm",
+    dev_dependency = True,
+)
+npm.npm_translate_lock(
+    name = "npm_trlc",
+    data = [
+        "//tools/formatter:package.json",
+    ],
+    npmrc = "//tools/formatter:.npmrc",
+    pnpm_lock = "//tools/formatter:pnpm-lock.yaml",
+    update_pnpm_lock = False,
+)
+use_repo(npm, "npm_trlc")
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(python_version = "3.9")
 python.toolchain(python_version = "3.10")
 python.toolchain(python_version = "3.11")
 python.toolchain(
+    configure_coverage_tool = True,
     is_default = True,
     python_version = "3.12",
-    configure_coverage_tool = True,
 )
-
 use_repo(python, "python_versions")
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
@@ -74,12 +115,9 @@ pip_dev = use_extension(
     "pip",
     dev_dependency = True,
 )
-
 pip_dev.parse(
     hub_name = "trlc_dev_dependencies",
     python_version = "3.12",
     requirements_lock = "//:requirements_dev_lock.txt",
 )
-
 use_repo(pip_dev, "trlc_dev_dependencies")
-
