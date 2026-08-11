@@ -1,0 +1,4 @@
+type Child
+  extends Parent {
+name String
+}

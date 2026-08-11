@@ -1,0 +1,67 @@
+package Kitchen
+
+import PlatformRequirements
+import ReqSpec
+
+ReqSpec.FeatReq SupportForScheduledBrewing {
+    description = "The kitchen framework shall provide API to support a schedule-based brewing operation."
+    safety = ReqSpec.Asil.B
+    derived_from = [ PlatformRequirements.CrossModuleMessaging@1, PlatformRequirements.ScheduledOperationSupport@1, PlatformRequirements.FailSafeOperation@1 ]
+    version = 1
+}
+
+ReqSpec.FeatReq SupportForAutoRefill {
+    description = "The kitchen framework shall provide API to support an auto-refill operation."
+    safety = ReqSpec.Asil.QM
+    derived_from = [ PlatformRequirements.CrossModuleMessaging@1, PlatformRequirements.SupportForAutoRefill@1 ]
+    version = 1
+}
+
+ReqSpec.FeatReq SupportForOnDemandGrinding {
+    description = "The kitchen framework shall provide API to support an on-demand grinding operation."
+    safety = ReqSpec.Asil.QM
+    derived_from = [ PlatformRequirements.CrossModuleMessaging@1, PlatformRequirements.SupportForOnDemandGrinding@1 ]
+    version = 1
+}
+
+ReqSpec.FeatReq ApplianceInterfaces {
+    description = "An appliance interface consists of a combination of any number of the following elements: Temperature-Events, Grind-Methods, Button-Signals."
+    safety = ReqSpec.Asil.B
+    derived_from = [ PlatformRequirements.CrossModuleMessaging@1, PlatformRequirements.SupportForAutoRefill@1, PlatformRequirements.ScheduledOperationSupport@1, PlatformRequirements.FailSafeOperation@1, PlatformRequirements.SupportForOnDemandGrinding@1 ]
+    version = 1
+}
+
+ReqSpec.FeatReq TemperatureEvent {
+    description = "A temperature-event is part of an appliance interface and has a name and a data type. The producer can assign a value to it. Consumers can subscribe to value-changed events of the element or poll unseen, cached events."
+    safety = ReqSpec.Asil.B
+    derived_from = [ PlatformRequirements.CrossModuleMessaging@1, PlatformRequirements.ScheduledOperationSupport@1 ]
+    version = 1
+}
+
+ReqSpec.FeatReq GrindMethod {
+    description = "A grind-method is part of an appliance interface and has a name, a specified application routine with a given set of parameters and a return type. When a controller issues a call to the method with the required parameters, it shall invoke the application routine with the provided parameters, and return its result to the controller. A method call shall be possible both synchronously and asynchronously."
+    safety = ReqSpec.Asil.B
+    derived_from = [ PlatformRequirements.CrossModuleMessaging@1, PlatformRequirements.SupportForOnDemandGrinding@1, PlatformRequirements.FailSafeOperation@1 ]
+    version = 1
+}
+
+ReqSpec.FeatReq WaterLevelField {
+    description = "A water-level-field is a component of an appliance interface and is defined by a name and a data type, along with dedicated getter and setter methods. The producer has the ability to assign a value to the field. Consumers can either subscribe to receive notifications when the field's value changes or poll the cached values of fields that have not yet been seen. Additionally, consumers can retrieve the current value of the field using the getter method or update the field's value through the setter method."
+    safety = ReqSpec.Asil.B
+    derived_from = [ PlatformRequirements.CrossModuleMessaging@1, PlatformRequirements.SupportForOnDemandGrinding@1, PlatformRequirements.FailSafeOperation@1 ]
+    version = 1
+}
+
+ReqSpec.FeatReq ButtonPressSignal {
+    description = "A button-press-signal is part of an appliance interface and has a name. A client can trigger the signal. The controller offering the trigger can wait for the signal to be triggered or check if the signal was triggered. Signals can not transport data."
+    safety = ReqSpec.Asil.QM
+    derived_from = [ PlatformRequirements.CrossModuleMessaging@1, PlatformRequirements.SupportForOnDemandGrinding@1 ]
+    version = 1
+}
+
+ReqSpec.FeatReq SensorActuatorPattern {
+    description = "Sensor readings shall be cached based on the producer-consumer pattern."
+    safety = ReqSpec.Asil.B
+    derived_from = [ PlatformRequirements.CrossModuleMessaging@1, PlatformRequirements.ScheduledOperationSupport@1, PlatformRequirements.FailSafeOperation@1 ]
+    version = 1
+}
