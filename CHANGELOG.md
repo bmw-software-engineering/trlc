@@ -24,6 +24,9 @@ generated in the following situations:
 
 ## Changelog
 
+### 3.0.1 post
+
+* [TRLC_RST] Fix trlc_rst rendering plain-String description fields as broken field lists
 
 ### 3.0.1
 
