@@ -1,0 +1,9 @@
+package ReqSpec
+
+import Processes
+import Roles
+
+abstract type Requirement {
+    description     String
+    version         Integer
+}

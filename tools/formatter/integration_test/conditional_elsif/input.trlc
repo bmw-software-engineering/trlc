@@ -1,0 +1,5 @@
+package TestPkg
+
+checks T {
+(if x>100 then x<1000 elsif x>10 then x<100 else x<10),"range check"
+}

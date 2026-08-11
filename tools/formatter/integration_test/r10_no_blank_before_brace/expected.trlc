@@ -1,0 +1,13 @@
+package Kitchen
+
+import ReqSpec
+
+ReqSpec.FeatReq SupportForScheduledBrewing {
+    description = "The framework provides API."
+    version = 1
+}
+
+ReqSpec.FeatReq SupportForAutoRefill {
+    version = 1
+    safety = ReqSpec.Asil.QM
+}

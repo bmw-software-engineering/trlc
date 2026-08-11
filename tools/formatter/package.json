@@ -1,0 +1,24 @@
+{
+    "name": "trlc-formatting",
+    "version": "1.0.0",
+    "type": "module",
+    "pnpm": {
+        "onlyBuiltDependencies": []
+    },
+    "main": "tools/formatter/src/index.js",
+    "scripts": {
+        "test:unit": "node --test src/printer.unit.test.js"
+    },
+    "keywords": [
+        "prettier",
+        "prettier-plugin",
+        "trlc",
+        "rsl"
+    ],
+    "dependencies": {
+        "prettier": "^3.8.1"
+    },
+    "peerDependencies": {
+        "prettier": "^3.0.0"
+    }
+}

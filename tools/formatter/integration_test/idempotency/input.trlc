@@ -1,0 +1,16 @@
+package Kitchen
+
+import ReqSpec
+import PlatformReq
+
+ReqSpec.FeatReq SupportForButtonEvents {
+  version = 1
+  safety = ReqSpec.Asil.B
+  derived_from = [PlatformReq.CrossModuleMessaging@1, PlatformReq.FailSafeOperation@1]
+}
+
+ReqSpec.FeatReq SupportForStandbyMode {
+  version = 2
+  safety = ReqSpec.Asil.QM
+  derived_from = [PlatformReq.AutoRefillMode@1]
+}

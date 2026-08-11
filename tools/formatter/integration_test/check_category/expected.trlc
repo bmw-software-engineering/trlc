@@ -1,0 +1,7 @@
+package TestPkg
+
+checks Requirement {
+    x > 0,
+        warning "must be positive",
+        Criticalness
+}

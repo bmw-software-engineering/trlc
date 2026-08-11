@@ -1,0 +1,11 @@
+package ReqSpec
+
+abstract type Requirement {
+    String optional     description
+    Integer optional    version
+    Asil optional       safety
+}
+
+type FeatReq extends Requirement {
+    String optional     derived_from
+}

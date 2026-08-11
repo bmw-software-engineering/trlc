@@ -57,6 +57,11 @@ alias(
     actual = "//third_party/format:format",
 )
 
+alias(
+    name = "trlc_formatter",
+    actual = "//tools/formatter:prettier_trlc_formatter",
+)
+
 filegroup(
     name = "coverage",
     srcs = ["coverage.cfg"],

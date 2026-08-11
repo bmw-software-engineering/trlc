@@ -1,0 +1,13 @@
+package ReqSpec
+
+enum Asil {
+    QM
+    B
+    D
+}
+
+abstract type Requirement {
+    description     String
+    version         Integer
+    freeze status = Status.valid
+}

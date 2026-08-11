@@ -1,0 +1,14 @@
+package TestPkg
+
+abstract type Requirement {
+  description String
+  version Integer
+  status Status
+  freeze status=Status.valid
+}
+
+abstract type SafetyRequirement {
+  description String
+  safety Asil
+  freeze safety=Asil.B
+}
