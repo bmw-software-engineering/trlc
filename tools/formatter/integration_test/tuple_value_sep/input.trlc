@@ -1,0 +1,5 @@
+package TestPkg
+
+SomeType.Coord obj {
+coord =  1  @  2
+}

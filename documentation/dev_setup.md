@@ -91,7 +91,7 @@ the latest GNU make version.
 # Check formatting — exits non-zero if any file would change
 bazel run //:format.check
 
-# Apply formatting in-place: ruff and buildifier
+# Apply formatting in-place: ruff, buildifier and TRLC formatter
 bazel run //:format.fix
 ```
 
@@ -163,3 +163,57 @@ genhtml "$(bazel info output_path)/_coverage/_coverage_report.dat" -o htmlcov
 
 The `coverage` namespace in `.bazelrc` sets `--combined_report=lcov` and
 `--instrumentation_filter=//trlc[/:]` so only the trlc library is measured.
+
+## Formatter development
+
+The TRLC formatter is a Prettier plugin in `tools/formatter/`.  It uses a
+pure-JavaScript recursive-descent + Pratt expression parser — no native C
+extension, no tree-sitter binding, and no `node-gyp` step.
+
+### Prerequisites
+
+The formatter is pure JavaScript, so no C toolchain or native addon build is
+needed.  Bazel resolves all npm dependencies from `pnpm-lock.yaml` automatically.
+
+For running unit tests locally outside Bazel you need Node.js (≥ 18):
+
+```bash
+cd tools/formatter
+npm install
+```
+
+### Running formatter tests
+
+```bash
+# Unit tests (fast, JS only, node:test runner)
+bazel test //tools/formatter:unit_test
+
+# Integration tests (full pipeline: run prettier, diff against expected)
+bazel test //tools/formatter/integration_test:all
+```
+
+### Check / fix TRLC source formatting
+
+```bash
+# Check — exits 123 if any .trlc/.rsl file needs reformatting
+bazel run //tools/formatter:cmd-format-trlc-check
+
+# Fix — rewrites all .trlc/.rsl files in-place
+bazel run //tools/formatter:cmd-format-trlc
+```
+
+### Updating the parser
+
+The TRLC grammar is encoded in the hand-written parser in
+`tools/formatter/src/trlc-parser-impl.js` and tokenizer in
+`tools/formatter/src/trlc-lexer.js`.  When the TRLC language gains a new
+construct:
+
+1. Add the new token kind(s) to `trlc-lexer.js` if needed.
+2. Add the corresponding parse rule(s) to `trlc-parser-impl.js`.
+3. Add the printer handler to the `NODE_PRINTERS` map in
+   `tools/formatter/src/printer.js`.
+4. Run the formatter tests to verify nothing regressed:
+   ```bash
+   bazel test //tools/formatter:unit_test //tools/formatter/integration_test:all
+   ```

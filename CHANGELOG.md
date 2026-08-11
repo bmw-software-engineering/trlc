@@ -24,6 +24,14 @@ generated in the following situations:
 
 ## Changelog
 
+## 3.0.1 post
+
+* [Formatter] Added `tools/formatter/` — a [Prettier](https://prettier.io/)
+  plugin that formats `.trlc` and `.rsl` files. The formatter uses a
+  pure-JavaScript recursive-descent + Pratt expression parser and requires no
+  native C extension or tree-sitter binding. Produces deterministic,
+  diff-friendly output. Integrated into the `bazel run //:format.fix` /
+  `bazel run //:format.check` pipelines via `aspect_rules_lint`.
 
 ### 3.0.1
 

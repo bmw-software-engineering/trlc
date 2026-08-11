@@ -1,0 +1,5 @@
+package TestPkg
+
+checks Requirement {
+len( description )>=10,"too short"
+}

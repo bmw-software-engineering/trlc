@@ -1,0 +1,20 @@
+package ReqSpec
+
+abstract type Requirement {
+  description String
+
+  version Integer
+
+}
+
+type FeatReq extends Requirement {
+  derived_from String
+
+}
+
+enum Status {
+  valid
+
+  invalid
+
+}

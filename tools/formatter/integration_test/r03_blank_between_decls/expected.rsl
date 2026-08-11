@@ -1,0 +1,19 @@
+package ReqSpec
+
+abstract type Requirement {
+    description     String
+    version         Integer
+}
+
+type FeatReq extends Requirement {
+    derived_from    String
+}
+
+type CompReq extends FeatReq {
+    component   String
+}
+
+enum Status {
+    valid
+    invalid
+}

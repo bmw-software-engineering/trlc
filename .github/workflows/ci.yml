@@ -70,9 +70,25 @@ jobs:
         if: always()
         run: |
           util/check_local_modifications.sh
+  formatter:
+    name: TRLC Formatter
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Bazel
+        uses: bazel-contrib/setup-bazel@0.14.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+      - name: Unit tests
+        run: bazel test //tools/formatter:unit_test
+      - name: Integration tests
+        run: bazel test //tools/formatter/integration_test:all
+
   failure:
     name: Check all jobs
-    needs: test
+    needs: [test, formatter]
     if: ${{ failure() || cancelled() }}
     runs-on: ubuntu-24.04
     steps:

@@ -1,0 +1,4 @@
+type Demo {
+    name        String
+    version     Integer
+}
