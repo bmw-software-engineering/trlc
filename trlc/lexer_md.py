@@ -70,6 +70,7 @@ Values in the property table are interpreted as follows (in order):
   * Anything else                    → STRING token
 """
 
+import re
 from fractions import Fraction
 
 from trlc.lexer import Token, TRLC_Lexer
@@ -407,6 +408,151 @@ class MD_Lexer(TRLC_Lexer):
             if idx < len(parts) - 1:
                 self._emit(location, "DOT")
 
+    # Separator symbol token kinds (mirrors TRLC_Lexer.PUNCTUATION).
+    _SEPARATOR_PUNCTUATION = {'@': 'AT', ':': 'COLON', ';': 'SEMICOLON'}
+
+    @staticmethod
+    def _normalize_array_value(raw_value):
+        """Normalize array value by converting various separators to comma format.
+
+        Handles:
+        - <br> tags (converted to newlines, then normalized)
+        - Multiple spaces around @, :, ; separators (normalized to single space)
+        - Identifier separators (multiple spaces collapsed to single space)
+        - Newlines (preserved initially for multiline detection, then normalized)
+
+        Returns normalized string with tuple refs as
+        ``"identifier <sep> integer, ..."``.
+        """
+        # Replace <br> and <BR> tags with newlines for uniform processing
+        normalized = re.sub(r'<[Bb][Rr]\s*/?>', '\n', raw_value)
+
+        # Split on newlines and commas, trim each part
+        parts = []
+        for line in normalized.split('\n'):
+            for item in line.split(','):
+                trimmed = item.strip()
+                if trimmed:
+                    parts.append(trimmed)
+
+        # Normalize whitespace around each part:
+        # - punctuation separators (@, :, ;) get exactly one space each side
+        # - identifier separators: collapse multiple spaces to one
+        normalized_parts = []
+        for part in parts:
+            part = re.sub(r'\s*([@:;])\s*', r' \1 ', part)
+            part = re.sub(r' +', ' ', part.strip())
+            normalized_parts.append(part)
+
+        return ', '.join(normalized_parts)
+
+    # Tuple-reference pattern: package-qualified identifier, separator, integer.
+    # The reference MUST contain at least one dot (Package.name) so that plain
+    # free-text values are never falsely matched.
+    # Separator is @, :, ; or a plain identifier.
+    _TUPLE_REF_RE = re.compile(
+        r'^'
+        r'(?P<ref>[a-zA-Z_]\w*\.[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)'
+        r' '
+        r'(?P<sep>[@:;]|[a-zA-Z_]\w*)'
+        r' '
+        r'(?P<ver>\d+)'
+        r'$'
+    )
+
+    @staticmethod
+    def _looks_like_array(raw_value):
+        """Check if value looks like tuple-reference array without emitting.
+
+        Expected format (separator may be @, :, ;, or any identifier)::
+
+          identifier[.identifier]* sep integer
+          [, identifier[.identifier]* sep integer]*
+        """
+        normalized = MD_Lexer._normalize_array_value(raw_value)
+        parts = [p.strip() for p in normalized.split(',') if p.strip()]
+        return bool(parts) and all(
+            MD_Lexer._TUPLE_REF_RE.match(part)
+            for part in parts
+        )
+
+    def _check_bracket_array(self, raw_value, location):
+        """Detect bracket notation for tuple arrays and emit a clear error.
+
+        Bracket syntax like ``[Pkg.item @ 1, Pkg.item @ 2]`` is not supported
+        because brackets conflict with Markdown URL syntax.
+
+        Returns True when bracket array syntax was detected (error was emitted),
+        so the caller can skip further processing of this value.
+        """
+        value = raw_value.strip()
+        if not (value.startswith('[') and value.endswith(']')):
+            return False
+        inner = value[1:-1].strip()
+        # Only reject if the content inside the brackets actually looks like
+        # tuple references – avoids false positives on URLs containing '@'
+        if not MD_Lexer._looks_like_array(inner):
+            return False
+        self.mh.error(
+            location,
+            "bracket notation for tuple-reference arrays is not supported",
+            explanation=(
+                "Use comma-separated or newline-separated tuple references "
+                "without brackets instead, e.g. "
+                "'Pkg.item_a @ 1, Pkg.item_b @ 2'"
+            ),
+            fatal=False,
+        )
+        return True
+
+    def _maybe_emit_array(self, raw_value, location):
+        """Try to emit array tokens for package-qualified tuple-reference format.
+
+        Recognises values of the form::
+
+          Package.item sep integer [, Package.item sep integer]*
+
+        The reference must be package-qualified (contain at least one dot)
+        so that plain free-text values (e.g. ``Revision : 12``) are never
+        misinterpreted as tuple-reference arrays.
+
+        Returns True if array was emitted, False for STRING fallback.
+        """
+        if not self._looks_like_array(raw_value):
+            return False
+
+        normalized = self._normalize_array_value(raw_value)
+        parts = [p.strip() for p in normalized.split(',')]
+        self._emit(location, "S_BRA")
+
+        for idx, part in enumerate(parts):
+            if idx > 0:
+                self._emit(location, "COMMA")
+
+            match = MD_Lexer._TUPLE_REF_RE.match(part)
+            if match:
+                qual_ident = match.group("ref")
+                sep = match.group("sep")
+                integer = int(match.group("ver"))
+
+                # Emit qualified identifier (Pkg.item → IDENTIFIER DOT IDENTIFIER)
+                ident_parts = qual_ident.split('.')
+                for i, ident_part in enumerate(ident_parts):
+                    self._emit(location, "IDENTIFIER", ident_part)
+                    if i < len(ident_parts) - 1:
+                        self._emit(location, "DOT")
+
+                # Emit separator: @→AT, :→COLON, ;→SEMICOLON, word→IDENTIFIER
+                sep_kind = MD_Lexer._SEPARATOR_PUNCTUATION.get(sep, "IDENTIFIER")
+                sep_val = sep if sep_kind == "IDENTIFIER" else None
+                self._emit(location, sep_kind, sep_val)
+
+                # Emit version integer
+                self._emit(location, "INTEGER", integer)
+
+        self._emit(location, "S_KET")
+        return True
+
     def _emit_value(self, raw_value, location):
         """Emit one or more tokens representing a property value.
 
@@ -414,6 +560,14 @@ class MD_Lexer(TRLC_Lexer):
         module docstring.
         """
         value = raw_value.strip()
+
+        # Bracket array notation is not supported – emit a clear error
+        if self._check_bracket_array(raw_value, location):
+            return
+
+        # Array of tuple references (before other checks)
+        if self._maybe_emit_array(raw_value, location):
+            return
 
         # Boolean / null keywords
         if value in MD_Lexer.KEYWORDS:
@@ -553,14 +707,18 @@ class MD_Lexer(TRLC_Lexer):
         str_field_name = None
         str_field_loc = None
         str_field_lines = []
+        str_field_first_content_line = None
+        str_field_first_content_col = 1
         # #### fields seen before the "type" row are buffered here, then
         # emitted inside the record after C_BRA (mirrors pending_props).
-        pending_string_fields = []  # [(name, loc, text, emit_as_scalar)]
+        # Tuple: (name, loc, text, emit_as_scalar, is_array, is_bracket)
+        pending_string_fields = []
 
         # ── Helpers (closures) ────────────────────────────────────────── #
 
         def flush_string_field():
             nonlocal in_string_field, str_field_name, str_field_lines
+            nonlocal str_field_first_content_line, str_field_first_content_col
             if not in_string_field:
                 return
             # Strip leading and trailing blank lines
@@ -573,21 +731,47 @@ class MD_Lexer(TRLC_Lexer):
             emit_as_scalar = ("\n" not in text and
                               MD_Lexer._looks_like_scalar_value(text))
 
+            value_loc = str_field_loc
+            if str_field_first_content_line is not None:
+                value_loc = self._loc(
+                    str_field_first_content_line,
+                    str_field_first_content_col,
+                )
+
             if in_record:
                 # Record already open – emit directly inside the block.
                 self._emit(str_field_loc, "IDENTIFIER", str_field_name)
                 self._emit(str_field_loc, "ASSIGN")
                 if emit_as_scalar:
-                    self._emit_value(text, str_field_loc)
-                else:
-                    self._emit(str_field_loc, "STRING", text)
+                    self._emit_value(text, value_loc)
+                elif self._check_bracket_array(text, value_loc):
+                    # Bracket notation detected – error already emitted; skip
+                    pass
+                elif not self._maybe_emit_array(text, value_loc):
+                    # Array detection failed – emit as string
+                    self._emit(value_loc, "STRING", text)
             else:
                 # "type" row not yet seen – buffer until the record opens.
+                # Check if it looks like an array (but don't emit yet)
+                is_bracket = (
+                    not emit_as_scalar and
+                    text.strip().startswith('[') and
+                    text.strip().endswith(']') and
+                    '@' in text
+                )
+                is_array = (
+                    not emit_as_scalar and
+                    not is_bracket and
+                    MD_Lexer._looks_like_array(text)
+                )
                 pending_string_fields.append(
-                    (str_field_name, str_field_loc, text, emit_as_scalar))
+                    (str_field_name, value_loc, text,
+                     emit_as_scalar, is_array, is_bracket))
             in_string_field = False
             str_field_name = None
             str_field_lines = []
+            str_field_first_content_line = None
+            str_field_first_content_col = 1
 
         def flush_record(loc):
             nonlocal in_record, pending_name, pending_props
@@ -651,6 +835,12 @@ class MD_Lexer(TRLC_Lexer):
                     flush_string_field()
                     # fall through to table-row handling
                 else:
+                    if str_field_first_content_line is None and stripped:
+                        line_stripped = line.lstrip()
+                        str_field_first_content_line = line_no
+                        str_field_first_content_col = (
+                            len(line) - len(line_stripped) + 1
+                        )
                     str_field_lines.append(line)
                     continue
 
@@ -708,6 +898,8 @@ class MD_Lexer(TRLC_Lexer):
                 self._validate_identifier(str_field_name, line_no, _h_level + 1, line)
                 str_field_loc = loc
                 str_field_lines = []
+                str_field_first_content_line = None
+                str_field_first_content_col = 1
                 in_string_field = True
                 continue
 
@@ -755,13 +947,22 @@ class MD_Lexer(TRLC_Lexer):
                         self._emit_value(bval, bloc)
                     pending_props = []
 
-                    # Flush any #### string fields that arrived before "type"
-                    for fname, floc, ftext, fis_scalar in pending_string_fields:
+                    # Flush any #### string fields that arrived
+                    # before "type"
+                    for (fname, floc, ftext, fis_scalar,
+                         fis_array, fis_bracket) in pending_string_fields:
                         self._emit(floc, "IDENTIFIER", fname)
                         self._emit(floc, "ASSIGN")
                         if fis_scalar:
                             self._emit_value(ftext, floc)
+                        elif fis_bracket:
+                            # Bracket notation – emit error, skip value
+                            self._check_bracket_array(ftext, floc)
+                        elif fis_array:
+                            # Emit array tokens
+                            self._maybe_emit_array(ftext, floc)
                         else:
+                            # Not scalar, not array → emit as STRING
                             self._emit(floc, "STRING", ftext)
                     pending_string_fields.clear()
 
