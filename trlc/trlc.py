@@ -518,6 +518,23 @@ class Source_Manager:
             self.callback_parse_end()
             return None
 
+        # ─────────────────────────────────────────────────────────────
+        # Phase 2: reprocess markdown files with RSL types available
+        # ─────────────────────────────────────────────────────────────
+        for _md_fname in sorted(self.trlc_files):
+            if not _md_fname.endswith(MARKDOWN_EXTENSION):
+                continue
+            _md_parser = self.trlc_files[_md_fname]
+            if not (_md_parser.primary or _md_parser.secondary):
+                continue
+            if _md_fname in self.files_with_preamble_errors:
+                continue
+            _md_lexer = getattr(_md_parser, "lexer", None)
+            if isinstance(_md_lexer, MD_Lexer):
+                _md_lexer.prepare_phase2(self.stab)  # Rebuild tokens with types
+                _md_parser.ct = None                 # Reset parser cursor
+                _md_parser.advance()                 # Prime first body token
+
         # Perform sanity checks (enabled by default). We only do this
         # if there were no errors so far.
         if self.lint_mode and ok:
