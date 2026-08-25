@@ -277,9 +277,9 @@ class MD_Lexer(TRLC_Lexer):
         # Initialise TRLC_Lexer to satisfy Parser lexer type checks.
         super().__init__(mh, file_name, "")
 
-        self._raw_content = content       # kept for Phase 2 reprocessing
-        self._stab        = None          # set by prepare_phase2() after RSL
-        self._md_tokens   = []
+        self._raw_content = content  # kept for Phase 2 reprocessing
+        self._stab = None  # set by prepare_phase2() after RSL
+        self._md_tokens = []
         self._tok_index   = 0
 
         # Phase 1: emit only preamble tokens (# PackageName, import lines).
@@ -332,12 +332,12 @@ class MD_Lexer(TRLC_Lexer):
         fully populated.  After this returns, the caller must re-prime the
         parser token cursor (set ct=None and call advance() once).
         """
-        self._stab      = stab
+        self._stab = stab
         self._md_tokens = []
         self._tok_index = 0
         self._process(self._raw_content)  # full reprocessing with types
         self._tok_index = self._preamble_end_index  # skip preamble
-        self.tokens     = self._md_tokens
+        self.tokens = self._md_tokens
 
     def _resolve_record_type(self, type_name, package_name=None):
         """Look up the Record_Type AST node in the stab for *type_name*."""
@@ -349,12 +349,12 @@ class MD_Lexer(TRLC_Lexer):
             pkg_name, local_name = package_name, type_name
         else:
             return None
-        pkg_simple  = trlc_ast.Symbol_Table.simplified_name(pkg_name)
-        pkg         = self._stab.table.get(pkg_simple)
+        pkg_simple = trlc_ast.Symbol_Table.simplified_name(pkg_name)
+        pkg = self._stab.table.get(pkg_simple)
         if not isinstance(pkg, trlc_ast.Package):
             return None
-        type_simple  = trlc_ast.Symbol_Table.simplified_name(local_name)
-        record_type  = pkg.symbols.table.get(type_simple)
+        type_simple = trlc_ast.Symbol_Table.simplified_name(local_name)
+        record_type = pkg.symbols.table.get(type_simple)
         if isinstance(record_type, trlc_ast.Record_Type):
             return record_type
         return None
@@ -364,7 +364,7 @@ class MD_Lexer(TRLC_Lexer):
         """Return the declared type of *field_name*, or None."""
         if record_type_ast is None:
             return None
-        simple    = trlc_ast.Symbol_Table.simplified_name(field_name)
+        simple = trlc_ast.Symbol_Table.simplified_name(field_name)
         component = record_type_ast.components.table.get(simple)
         return component.n_typ if component is not None else None
 
@@ -399,7 +399,9 @@ class MD_Lexer(TRLC_Lexer):
             if self._is_tuple_array_field(record_type_ast, field_name):
                 if self._check_bracket_array(raw_value, location):
                     return
-                if not self._maybe_emit_array(raw_value, location):
+                if not self._maybe_emit_array(
+                    raw_value, location, allow_unqualified=True
+                ):
                     self._emit(location, "STRING", raw_value.strip())
                 return
         self._emit_value(raw_value, location)
@@ -468,13 +470,13 @@ class MD_Lexer(TRLC_Lexer):
         if not MD_Lexer._is_alpha(name[0]):
             self.mh.lex_error(
                 self._source_ref(loc_line, heading_prefix_len + 1, source_line),
-                "unexpected character '%s'" % name[0],
+                f"unexpected character '{name[0]}'",
             )
         for i, ch in enumerate(name[1:], 1):
             if not (MD_Lexer._is_alnum(ch) or ch == "_"):
                 self.mh.lex_error(
                     self._source_ref(loc_line, heading_prefix_len + 1 + i, source_line),
-                    "unexpected character '%s'" % ch,
+                    f"unexpected character '{ch}'",
                 )
 
     @staticmethod
@@ -566,6 +568,19 @@ class MD_Lexer(TRLC_Lexer):
         r'$'
     )
 
+    # Like _TUPLE_REF_RE but the dot is optional, so unqualified same-package
+    # references (e.g. ``item @ 1``) are also accepted.  Only safe in the
+    # Phase 2 type-aware path where the field type is already known.
+    _TUPLE_REF_FLEXIBLE_RE = re.compile(
+        r'^'
+        r'(?P<ref>[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)'
+        r' '
+        r'(?P<sep>[@:;]|[a-zA-Z_]\w*)'
+        r' '
+        r'(?P<ver>\d+)'
+        r'$'
+    )
+
     # Chunk patterns for the multi-separator tuple scanner.
     # A numeric chunk: hex, binary, or decimal (integer or float).
     _TUPLE_NUM_RE = re.compile(
@@ -577,18 +592,24 @@ class MD_Lexer(TRLC_Lexer):
     _TUPLE_SEP_RE = re.compile(r'[@:;]|[a-zA-Z_]\w*')
 
     @staticmethod
-    def _looks_like_array(raw_value):
+    def _looks_like_array(raw_value, allow_unqualified=False):
         """Check if value looks like tuple-reference array without emitting.
 
         Expected format (separator may be @, :, ;, or any identifier)::
 
           identifier[.identifier]* sep integer
           [, identifier[.identifier]* sep integer]*
+
+        When *allow_unqualified* is True, unqualified same-package references
+        (e.g. ``item @ 1``) are also accepted.  Only pass True when the field
+        type is confirmed as a tuple-reference array.
         """
         normalized = MD_Lexer._normalize_array_value(raw_value)
         parts = [p.strip() for p in normalized.split(',') if p.strip()]
+        pattern = (MD_Lexer._TUPLE_REF_FLEXIBLE_RE if allow_unqualified
+                   else MD_Lexer._TUPLE_REF_RE)
         return bool(parts) and all(
-            MD_Lexer._TUPLE_REF_RE.match(part)
+            pattern.match(part)
             for part in parts
         )
 
@@ -772,8 +793,12 @@ class MD_Lexer(TRLC_Lexer):
         )
         return True
 
-    def _maybe_emit_array(self, raw_value, location):
-        """Try to emit array tokens for package-qualified tuple-reference format.
+    def _maybe_emit_array(self, raw_value, location, allow_unqualified=False):
+        """Try to emit array tokens for tuple-reference format.
+
+        When *allow_unqualified* is True, unqualified same-package references
+        (e.g. ``item @ 1``) are also accepted.  Only safe when the field type
+        is confirmed as a tuple-reference array (Phase 2 path).
 
         Recognises values of the form::
 
@@ -785,18 +810,20 @@ class MD_Lexer(TRLC_Lexer):
 
         Returns True if array was emitted, False for STRING fallback.
         """
-        if not self._looks_like_array(raw_value):
+        if not self._looks_like_array(raw_value, allow_unqualified=allow_unqualified):
             return False
 
         normalized = self._normalize_array_value(raw_value)
         parts = [p.strip() for p in normalized.split(',')]
         self._emit(location, "S_BRA")
+        pattern = (MD_Lexer._TUPLE_REF_FLEXIBLE_RE if allow_unqualified
+                   else MD_Lexer._TUPLE_REF_RE)
 
         for idx, part in enumerate(parts):
             if idx > 0:
                 self._emit(location, "COMMA")
 
-            match = MD_Lexer._TUPLE_REF_RE.match(part)
+            match = pattern.match(part)
             if match:
                 qual_ident = match.group("ref")
                 sep = match.group("sep")
@@ -1063,8 +1090,8 @@ class MD_Lexer(TRLC_Lexer):
                 if pending_name is not None and not record_type_found:
                     self.mh.error(
                         pending_name_loc,
-                        "record heading '%s' has no 'type' property in its "
-                        "property table; record will be skipped" % pending_name,
+                        f"record heading '{pending_name}' has no 'type' property"
+                        " in its property table; record will be skipped",
                         fatal=False,
                     )
                 pending_name = None

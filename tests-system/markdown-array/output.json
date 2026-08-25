@@ -38,6 +38,28 @@
       }
     ]
   },
+  "REQ_MIXED": {
+    "description": "Mixed: unqualified and fully qualified in one array",
+    "refs": [
+      {
+        "item": "MdArrayTest.item_a",
+        "version": 1
+      },
+      {
+        "item": "MdArrayTest.item_b",
+        "version": 2
+      }
+    ]
+  },
+  "REQ_QUALIFIED_SAME_PKG": {
+    "description": "Qualified with own package name \u2014 also valid",
+    "refs": [
+      {
+        "item": "MdArrayTest.item_a",
+        "version": 1
+      }
+    ]
+  },
   "REQ_TABLE_B_COMMA": {
     "description": "Test comma-separated tuples in table using @",
     "refs": [
@@ -64,6 +86,28 @@
       }
     ]
   },
+  "REQ_UNQUAL_MULTI": {
+    "description": "Multiple unqualified references, comma-separated",
+    "refs": [
+      {
+        "item": "MdArrayTest.item_a",
+        "version": 1
+      },
+      {
+        "item": "MdArrayTest.item_b",
+        "version": 2
+      }
+    ]
+  },
+  "REQ_UNQUAL_SINGLE": {
+    "description": "Single unqualified reference (same package, no prefix)",
+    "refs": [
+      {
+        "item": "MdArrayTest.item_a",
+        "version": 1
+      }
+    ]
+  },
   "item_a": {
     "description": "Item A"
   },
@@ -74,4 +118,4 @@
     "description": "Item C"
   }
 }
-Processed 1 model and 6 requirement files and found no issues
+Processed 1 model and 7 requirement files and found no issues

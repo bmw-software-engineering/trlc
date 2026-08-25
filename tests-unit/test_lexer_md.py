@@ -12,11 +12,16 @@ class ListHandler(Message_Handler):
         self.messages = []
 
     def emit(self, location, kind, message, fatal=True, extrainfo=None):
-        assert isinstance(location, Location)
-        assert isinstance(kind, Kind)
-        assert isinstance(message, str)
-        assert isinstance(fatal, bool)
-        assert isinstance(extrainfo, str) or extrainfo is None
+        if not isinstance(location, Location):
+            raise TypeError(f"expected Location, got {type(location).__name__}")
+        if not isinstance(kind, Kind):
+            raise TypeError(f"expected Kind, got {type(kind).__name__}")
+        if not isinstance(message, str):
+            raise TypeError(f"expected str message, got {type(message).__name__}")
+        if not isinstance(fatal, bool):
+            raise TypeError(f"expected bool fatal, got {type(fatal).__name__}")
+        if extrainfo is not None and not isinstance(extrainfo, str):
+            raise TypeError(f"expected str or None extrainfo, got {type(extrainfo).__name__}")
 
         self.messages.append((location, kind, message))
 
@@ -24,7 +29,8 @@ class ListHandler(Message_Handler):
             raise TRLC_Error(location, kind, message)
 
     def pop_message(self):
-        assert self.messages
+        if not self.messages:
+            raise AssertionError("pop_message called with no messages")
         message, self.messages = self.messages[0], self.messages[1:]
         return message
 
@@ -126,7 +132,6 @@ class TestLexerMd(unittest.TestCase):
 
     def test_scalar_value_inference(self):
         lexer = MD_Lexer(self.mh, "test", "")
-        lexer._md_tokens = []
 
         lexer._emit_value("true", Location("test"))
         lexer._emit_value("42", Location("test"))
@@ -169,8 +174,6 @@ class TestLexerMd(unittest.TestCase):
 
     def test_array_value_and_bracket_error(self):
         lexer = MD_Lexer(self.mh, "test", "")
-        lexer._md_tokens = []
-
         lexer._emit_value("DemoPkg.item_a @ 1 <br> DemoPkg.item_b via 2", Location("test"))
         self.assertEqual(
             token_pairs(lexer),
@@ -192,7 +195,6 @@ class TestLexerMd(unittest.TestCase):
         )
 
         lexer = MD_Lexer(self.mh, "test", "")
-        lexer._md_tokens = []
         lexer._emit_value("[DemoPkg.item_a @ 1, DemoPkg.item_b @ 2]", Location("test"))
         self.assertEqual(token_pairs(lexer), [])
         self.assertEqual(len(self.mh.messages), 1)
@@ -200,12 +202,12 @@ class TestLexerMd(unittest.TestCase):
 
     def test_type_aware_field_emission(self):
         _stab, record_type = make_record_type()
-        lexer = MD_Lexer(self.mh, "test", "")
-        lexer._md_tokens = []
 
+        # String field: value stored as-is, no array heuristics applied
+        # Tuple-array field: fully qualified references
+        lexer = MD_Lexer(self.mh, "test", "")
         lexer._emit_field_value("Hello there", Location("test"), record_type, "notes")
         lexer._emit_field_value("DemoPkg.item_a @ 1, DemoPkg.item_b @ 2", Location("test"), record_type, "refs")
-
         self.assertEqual(
             token_pairs(lexer),
             [
@@ -225,6 +227,49 @@ class TestLexerMd(unittest.TestCase):
                 ("S_KET", None),
             ],
         )
+
+        # Tuple-array field: unqualified (same-package) references
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("item_a @ 1, item_b @ 2", Location("test"), record_type, "refs")
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("IDENTIFIER", "item_a"),
+                ("AT", None),
+                ("INTEGER", 1),
+                ("COMMA", None),
+                ("IDENTIFIER", "item_b"),
+                ("AT", None),
+                ("INTEGER", 2),
+                ("S_KET", None),
+            ],
+        )
+
+        # Tuple-array field: mixed array (qualified + unqualified)
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("item_a @ 1, OtherPkg.item_b @ 2", Location("test"), record_type, "refs")
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("IDENTIFIER", "item_a"),
+                ("AT", None),
+                ("INTEGER", 1),
+                ("COMMA", None),
+                ("IDENTIFIER", "OtherPkg"),
+                ("DOT", None),
+                ("IDENTIFIER", "item_b"),
+                ("AT", None),
+                ("INTEGER", 2),
+                ("S_KET", None),
+            ],
+        )
+
+        # Heuristic fallback (_emit_value): unqualified must NOT be treated as array
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_value("item_a @ 1", Location("test"))
+        self.assertEqual(token_pairs(lexer), [("STRING", "item_a @ 1")])
 
     def test_process_preamble_section_and_record(self):
         content = "\n".join(
