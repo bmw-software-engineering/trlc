@@ -75,6 +75,13 @@ For more details see: https://github.com/bmw-software-engineering/trlc/issues/22
 
 * [Lint] Fix cascaded abstract types (#183)
 
+* [TRLC] Add `--include-dir` as a long-form alias for `-I`, making
+  include path flags consistent and self-documenting.
+
+* [TRLC, API] Add `--include-file` CLI flag and `register_include_files()`
+  API method to add individual files to the include set without requiring
+  a full directory processing.
+
 ### 2.0.4
 
 * [TRLC_RST] Add tool to convert TRLC Requirements to Sphinx RST Files

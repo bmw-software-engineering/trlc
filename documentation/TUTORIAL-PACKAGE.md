@@ -119,16 +119,27 @@ Often when running TRLC you are not really interested in the entire
 repository, but only one or two files.
 
 **If** you have sectioned everything nicely with packages (i.e. not
-just have one giganting package with 100k requirements) then TRLC
-offers an alternative way of running it with the `-I` switch.
+just have one gigantic package with 100k requirements) then TRLC
+offers an alternative way of running it with the `--include-dir` switch.
 
 For example:
 
 ```bash
-$ trlc -I global myfile.trlc
+$ trlc --include-dir global myfile.trlc
 ```
 
 Would discover trlc files in `global` and analyse their dependencies
 and then only pull in the files that are required to understand
 `myfile.trlc`. This can massively improve performance, if the
 interconnections between the packages are not too dense.
+
+`-I` is an older alternative to the `--include-dir` flag.
+
+If the exact file paths needed to run TRLC are already identified,
+we can use the `--include-file` switch to mention their paths directly.
+
+For example:
+
+```bash
+$ trlc --include-file global/foo.rsl --include-file dep.trlc myfile.trlc
+```

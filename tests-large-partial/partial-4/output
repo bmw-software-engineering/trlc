@@ -1,0 +1,4 @@
+Processed 2 models and 1 requirement file and found no issues
+> [Included] Model ../tests-system/simple/bar.rsl (Package bar)
+> [Included] Model ../tests-system/simple/foo.rsl (Package foo)
+> [Primary]  Requirements ../tests-system/simple/instances.trlc (Package instances)

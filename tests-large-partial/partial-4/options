@@ -1,0 +1,1 @@
+--verify --show-file-list --include-file ../tests-system/simple/foo.rsl --include-file ../tests-system/simple/bar.rsl ../tests-system/simple/instances.trlc
