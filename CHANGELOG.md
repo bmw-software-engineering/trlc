@@ -28,6 +28,10 @@ generated in the following situations:
 
 * [TRLC_RST] Fix trlc_rst rendering plain-String description fields as broken field lists
 
+* [TRLC] Add support for tuple-reference arrays in `.trlc.md` files.
+  Supports comma, `<br>`, and newline separation, and all LRM separator
+  kinds (`@`, `:`, `;`, identifier). Bracket notation is not supported.
+
 ### 3.0.1
 
 * [TRLC] Add experimental feature to parse markdown files and interpret their content as trlc objects.

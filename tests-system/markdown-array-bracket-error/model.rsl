@@ -1,0 +1,49 @@
+package MdArrayTest
+
+type Item {
+  description String
+}
+
+tuple ItemRefAt {
+  item      Item
+  separator @
+  version   Integer
+}
+
+tuple ItemRefColon {
+  item      Item
+  separator :
+  version   Integer
+}
+
+tuple ItemRefSemicolon {
+  item      Item
+  separator ;
+  version   Integer
+}
+
+tuple ItemRefWord {
+  item      Item
+  separator via
+  version   Integer
+}
+
+type RequirementAt {
+  description String
+  refs        ItemRefAt [1 .. *]
+}
+
+type RequirementColon {
+  description String
+  refs        ItemRefColon [1 .. *]
+}
+
+type RequirementSemicolon {
+  description String
+  refs        ItemRefSemicolon [1 .. *]
+}
+
+type RequirementWord {
+  description String
+  refs        ItemRefWord [1 .. *]
+}

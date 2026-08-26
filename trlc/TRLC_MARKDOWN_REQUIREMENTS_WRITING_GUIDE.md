@@ -59,6 +59,49 @@ You can continue writing text on multiple lines.
 - Keep the first table row as a header row (`Property | Value`).
 - Use `<hr>` and `<hr><br><hr>` only for readability.
 
+## Tuple-Reference Arrays
+
+Fields declared as an array of tuples can be written directly in Markdown.
+
+**Supported layouts:**
+
+```md
+// Table cell — comma-separated, fully qualified
+| refs | Pkg.item_a @ 1 , Pkg.item_b @ 2 |
+
+// Table cell — <br>-separated
+| refs | Pkg.item_a @ 1 <br> Pkg.item_b @ 2 |
+
+// Field block — one per line (flexible whitespace around separator)
+#### refs
+Pkg.item_a @ 1
+Pkg.item_b @ 2
+Pkg.item_c         @         3
+
+// Field block — comma-separated
+#### refs
+Pkg.item_a @ 1, Pkg.item_b @ 2
+
+// Unqualified — same-package item, package prefix may be omitted
+#### refs
+item_a @ 1
+item_b @ 2
+
+// Mixed — qualified (cross-package) and unqualified (same-package) in one array
+#### refs
+item_a @ 1, OtherPkg.item_b @ 2
+```
+
+All LRM separator kinds are supported: `@`, `:`, `;`, and plain identifier (e.g. `covers`).
+
+**Rules:**
+
+- References may be **fully qualified** (`Pkg.item_name sep version`) or **unqualified** (`item_name sep version`).
+  - Use the unqualified form when the item is defined in the **same package** as the current file (`# PackageName` heading).
+  - Use the qualified form when referencing an item from a **different package**.
+  - Both forms can be mixed in the same array.
+- Do **not** use bracket notation `[...]` — it conflicts with Markdown URL syntax and produces an error.
+
 ## Troubleshooting
 
 ### Error: unexpected character in heading
@@ -75,3 +118,14 @@ You can continue writing text on multiple lines.
 
 - Cause: value does not match scalar pattern, or body is multi-line.
 - Fix: keep typed scalar values on a single line under `#### FieldName`.
+
+### Error: bracket notation for tuple-reference arrays is not supported
+
+- Cause: array value written with `[...]` (e.g. `[Pkg.item @ 1]`).
+- Fix: remove the brackets and use comma or newline separation instead.
+
+### Array field parsed as plain string
+
+- Cause: the field type is not a tuple-reference array in the RSL model, so the value is stored as a string.
+- Fix: check that the RSL field is declared as an array of a tuple type (e.g. `refs ItemRef [1 .. *]`).
+

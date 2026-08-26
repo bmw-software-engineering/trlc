@@ -1,0 +1,10 @@
+markdown-array-bracket-error/req_field_ac_err.trlc.md:13:1: error: bracket notation for tuple-reference arrays is not supported
+| Use comma-separated or newline-separated tuple references without brackets instead, e.g. 'Pkg.item_a @ 1, Pkg.item_b @ 2'
+markdown-array-bracket-error/req_field_ac_err.trlc.md:25:1: error: bracket notation for tuple-reference arrays is not supported
+| Use comma-separated or newline-separated tuple references without brackets instead, e.g. 'Pkg.item_a @ 1, Pkg.item_b @ 2'
+markdown-array-bracket-error/req_table_a_err.trlc.md:11:1: error: bracket notation for tuple-reference arrays is not supported
+| Use comma-separated or newline-separated tuple references without brackets instead, e.g. 'Pkg.item_a @ 1, Pkg.item_b @ 2'
+markdown-array-bracket-error/req_field_ac_err.trlc.md:15:1: error: expected opening bracket '[', encountered closing brace '}' instead
+markdown-array-bracket-error/req_field_ac_err.trlc.md:27:1: error: expected opening bracket '[', encountered closing brace '}' instead
+markdown-array-bracket-error/req_table_a_err.trlc.md:13:1: error: expected opening bracket '[', encountered closing brace '}' instead
+Processed 1 model and 3 requirement files and found 6 errors

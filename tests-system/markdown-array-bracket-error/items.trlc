@@ -1,0 +1,13 @@
+package MdArrayTest
+
+Item item_a {
+  description = "Item A"
+}
+
+Item item_b {
+  description = "Item B"
+}
+
+Item item_c {
+  description = "Item C"
+}
