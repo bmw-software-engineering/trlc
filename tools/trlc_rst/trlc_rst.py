@@ -225,12 +225,12 @@ class TRLCRST:
                     file.write("\n")
 
     @staticmethod
-    def _is_markup_field(trlc_obj, field_name: str) -> bool:
-        """Return True when *field_name* is a ``Markup_String`` field."""
+    def _is_string_field(trlc_obj, field_name: str) -> bool:
+        """Return True when *field_name* holds a scalar ``String``/``Markup_String`` value."""
         if trlc_obj is None:
             return False
         field_node = trlc_obj.field.get(field_name)
-        return isinstance(field_node, trlc.ast.String_Literal) and field_node.has_references
+        return isinstance(field_node, trlc.ast.String_Literal)
 
     def _field_value(self, trlc_obj, field_name: str) -> str | None:
         """Return the rendered value of *field_name* on *trlc_obj*.
@@ -251,8 +251,9 @@ class TRLCRST:
     def _render_record_block(self, fqn: str, trlc_obj, fields: list[tuple[str, str]]) -> list:
         """Render one record as a ``requirement:definition`` directive block.
 
-        ``Markup_String`` fields are rendered as preprocessed prose paragraphs.
-        All other fields are rendered as ``:Label: value`` field-list entries.
+        Scalar ``String``/``Markup_String`` fields are rendered as preprocessed
+        prose paragraphs (block content). All other fields (lists, enums, ...)
+        are rendered as ``:Label: value`` field-list entries.
 
         Returns a list of RST lines (with a trailing blank line).
         """
@@ -264,7 +265,7 @@ class TRLCRST:
             value = self._field_value(trlc_obj, field_name)
             if value is None or value == "":
                 continue
-            if self._is_markup_field(trlc_obj, field_name):
+            if self._is_string_field(trlc_obj, field_name):
                 block_values.append(value)
             else:
                 field_list.append((label, value))

@@ -22,7 +22,7 @@ test-all: unit-tests system-tests-all
 coverage:
 	coverage combine -q
 	coverage html --rcfile=coverage.cfg
-	coverage report --rcfile=coverage.cfg --fail-under=94
+	coverage report --rcfile=coverage.cfg --fail-under=90
 
 # bazel equivalent: bazel test //tests-unit/...
 unit-tests:

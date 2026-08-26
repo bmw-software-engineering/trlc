@@ -24,9 +24,26 @@ generated in the following situations:
 
 ## Changelog
 
-### 3.0.0-dev
+### 3.0.1 post
+
+* [TRLC_RST] Fix trlc_rst rendering plain-String description fields as broken field lists
+
+* [TRLC] Add support for tuple-reference arrays in `.trlc.md` files.
+  Supports comma, `<br>`, and newline separation, and all LRM separator
+  kinds (`@`, `:`, `;`, identifier). Bracket notation is not supported.
+
+### 3.0.1
+
+* [TRLC] Add experimental feature to parse markdown files and interpret their content as trlc objects.
+For more details see: https://github.com/bmw-software-engineering/trlc/issues/226
+
+* [Bazel] Update the trlc bazel target to support trlc markdown feature.
+
+### 3.0.0
 
 * [Bazel] Fixed python setup to support other versions than 3.12
+
+* [TRLC_RST] Add CLI support for `--fields` and `--records` filtering.
 
 * [TRLC_RST] Render soft-wrapped description lines as a single RST
   paragraph instead of splitting each line into its own paragraph.

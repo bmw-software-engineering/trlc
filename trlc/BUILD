@@ -1,3 +1,4 @@
+load("@rules_python//python:defs.bzl", "py_library")
 load("@trlc_dependencies//:requirements.bzl", "requirement")
 
 py_library(
@@ -8,11 +9,14 @@ py_library(
         "ast.py",
         "errors.py",
         "lexer.py",
+        "lexer_md.py",
         "lint.py",
+        "location_md.py",
         "math.py",
         "nested.py",
         "parser.py",
         "trlc.py",
+        "trlc_markdown_parser.py",
         "vcg.py",
         "version.py",
     ],

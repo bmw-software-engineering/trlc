@@ -28,7 +28,9 @@ from fractions import Fraction
 from trlc import ast, lint
 from trlc.errors import Kind, Location, Message_Handler, TRLC_Error
 from trlc.lexer import Token_Stream
+from trlc.lexer_md import MD_Lexer
 from trlc.parser import Parser
+from trlc.trlc_markdown_parser import TrlcMarkdownParser
 from trlc.version import BUGS_URL, TRLC_VERSION
 
 # pylint: disable=unused-import
@@ -37,6 +39,8 @@ try:
     VCG_API_AVAILABLE = True
 except ImportError:  # pragma: no cover
     VCG_API_AVAILABLE = False
+
+MARKDOWN_EXTENSION = ".trlc.md"
 
 
 class Source_Manager:
@@ -154,6 +158,17 @@ class Source_Manager:
         assert isinstance(file_content, str) or file_content is None
         assert isinstance(primary_file, bool)
 
+        if file_name.endswith(MARKDOWN_EXTENSION):
+            lexer = MD_Lexer(self.mh, file_name, file_content)
+            return TrlcMarkdownParser(
+                mh             = self.mh,
+                stab           = self.stab,
+                file_name      = file_name,
+                lint_mode      = self.lint_mode,
+                error_recovery = self.error_recovery,
+                primary_file   = primary_file,
+                lexer          = lexer)
+
         lexer = Token_Stream(self.mh, file_name, file_content)
 
         return Parser(mh             = self.mh,
@@ -198,7 +213,7 @@ class Source_Manager:
         :type file_name: str
         :raise AssertionError: if the file does not exist
         :raise AssertionError: if the file is registed more than once
-        :raise TRLC_Error: if the file is not a rsl/trlc file
+        :raise TRLC_Error: if the file is not a rsl, trlc or trlc.md file
 
         :param file_content: content of the file
         :type file_content: str
@@ -218,11 +233,11 @@ class Source_Manager:
         try:
             if file_name.endswith(".rsl"):
                 self.register_rsl_file(file_name, file_content, primary)
-            elif file_name.endswith(".trlc"):
+            elif file_name.endswith(".trlc") or file_name.endswith(MARKDOWN_EXTENSION):
                 self.register_trlc_file(file_name, file_content, primary)
             else:  # pragma: no cover
                 self.mh.error(Location(os.path.basename(file_name)),
-                              "is not a rsl or trlc file",
+                              "is not a rsl, trlc or trlc.md file",
                               fatal = False)
                 return False
 
@@ -262,7 +277,8 @@ class Source_Manager:
 
             for file_name in sorted(files):
                 if os.path.splitext(file_name)[1] in (".rsl",
-                                                      ".trlc"):
+                                                      ".trlc") or \
+                        file_name.endswith(MARKDOWN_EXTENSION):
                     ok &= self.register_file(os.path.join(path, file_name))
         return ok
 
@@ -501,6 +517,23 @@ class Source_Manager:
         if not self.error_recovery and not ok:  # pragma: no cover
             self.callback_parse_end()
             return None
+
+        # ─────────────────────────────────────────────────────────────
+        # Phase 2: reprocess markdown files with RSL types available
+        # ─────────────────────────────────────────────────────────────
+        for _md_fname in sorted(self.trlc_files):
+            if not _md_fname.endswith(MARKDOWN_EXTENSION):
+                continue
+            _md_parser = self.trlc_files[_md_fname]
+            if not (_md_parser.primary or _md_parser.secondary):
+                continue
+            if _md_fname in self.files_with_preamble_errors:
+                continue
+            _md_lexer = getattr(_md_parser, "lexer", None)
+            if isinstance(_md_lexer, MD_Lexer):
+                _md_lexer.prepare_phase2(self.stab)  # Rebuild tokens with types
+                _md_parser.ct = None                 # Reset parser cursor
+                _md_parser.advance()                 # Prime first body token
 
         # Perform sanity checks (enabled by default). We only do this
         # if there were no errors so far.
