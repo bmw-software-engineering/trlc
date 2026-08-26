@@ -1,0 +1,5 @@
+package sub
+
+type T {
+  v Integer
+}

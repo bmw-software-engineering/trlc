@@ -1,0 +1,5 @@
+package foo.Level.A
+
+type Sub {
+  y Integer
+}

@@ -1,0 +1,2 @@
+nested-packages-member-collision-enum-deep/foo_level.rsl:1:9: trlc error: sub-package Level clashes with a type or object of the same name in package foo
+Processed 3 models and 0 requirement files and found 1 error

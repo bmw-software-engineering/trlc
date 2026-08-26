@@ -1,0 +1,6 @@
+package mydata
+import foo.bar
+
+foo.bar.Req REQ_001 {
+  title = "first requirement"
+}

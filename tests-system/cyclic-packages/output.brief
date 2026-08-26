@@ -1,2 +1,2 @@
-cyclic-packages/bar.rsl: trlc error: circular inheritence between Baz | Bork
+cyclic-packages/bar.rsl: trlc error: circular inheritance between Bar | Baz | Bork
 Processed 4 models and 0 requirement files and found 1 error

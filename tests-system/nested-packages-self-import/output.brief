@@ -1,0 +1,2 @@
+nested-packages-self-import/foo_bar.rsl:2:8: trlc error: package foo.bar cannot import itself
+Processed 2 models and 0 requirement files and found 1 error

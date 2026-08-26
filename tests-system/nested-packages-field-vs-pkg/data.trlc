@@ -1,0 +1,6 @@
+package app
+import a.b
+
+a.b.R R_001 {
+  c = (3, 4)
+}

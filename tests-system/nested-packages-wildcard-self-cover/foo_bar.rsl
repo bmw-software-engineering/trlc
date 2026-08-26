@@ -1,0 +1,11 @@
+package foo.bar
+
+// The wildcard root foo covers the current package foo.bar (self-cover).
+// This is permitted: it is not an illegal self-import, and the package
+// must not be made to depend on itself. The reference to a sibling below
+// keeps the wildcard import "used", so the linter stays quiet.
+import foo.*
+
+type R {
+  c foo.baz.Color
+}

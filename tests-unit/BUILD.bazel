@@ -18,11 +18,18 @@ py_test(
     deps = ["//trlc:trlc"],
 )
 
+py_test(
+    name = "test_nested_packages",
+    srcs = ["test_nested_packages.py"],
+    deps = ["//trlc:trlc"],
+)
+
 test_suite(
     name = "unit_tests",
     tests = [
         ":test_ast_bysection",
         ":test_lexer",
         ":test_lexer_base",
+        ":test_nested_packages",
     ],
 )

@@ -1,0 +1,3 @@
+package foo.Bar
+        ^^^ nested-packages-member-collision/foo_bar.rsl:1: error: sub-package Bar clashes with a type or object of the same name in package foo
+Processed 2 models and 0 requirement files and found 1 error
