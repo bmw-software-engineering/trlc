@@ -30,7 +30,8 @@ Adopt the following style over time in production code:
 - Do not use horizontal alignment for assignments, dict colons, or
   similar layout; use regular Python spacing instead.
 - Prefer smaller files and split toward one file per class where practical.
-- Format code according to Black-compatible conventions.
+- Format code according to Black-compatible conventions; enforced via Ruff
+  (`bazel run //:format.fix`) for Python and Buildifier for Starlark/BUILD files.
 - Class names shall no longer follow the Ada naming convention, but
   shall be in PascalCase (e.g., `MyClass`).
 - Function and method names shall be in snake_case (e.g., `my_function`).

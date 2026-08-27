@@ -46,16 +46,16 @@ def main():
 
     auth = requests.auth.HTTPBasicAuth(username, token)
 
-    api_endpoint = "https://api.github.com/repos/%s/%s/releases" % \
-        ("bmw-software-engineering", "trlc")
+    api_endpoint = "https://api.github.com/repos/%s/%s/releases" % (
+        "bmw-software-engineering",
+        "trlc",
+    )
 
     tag_name = "trlc-%s" % TRLC_VERSION
     rel_name = "Release %s" % TRLC_VERSION
     rel_body = "### %s\n\n%s" % (TRLC_VERSION, util.changelog.current_section())
 
-    data = {"tag_name" : tag_name,
-            "name"     : rel_name,
-            "body"     : rel_body}
+    data = {"tag_name": tag_name, "name": rel_name, "body": rel_body}
 
     r = requests.post(api_endpoint, auth=auth, data=json.dumps(data))
     print(r)

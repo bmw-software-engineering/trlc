@@ -14,20 +14,22 @@ with open("README.md", "r") as fd:
 fixes = []
 for match in re.finditer(r"\[(.*)\]\((.*)\)", long_description):
     if not match.group(2).startswith("http"):
-        fixes.append((match.span(0)[0], match.span(0)[1],
-                      "[%s](%s/blob/main/%s)" % (match.group(1),
-                                                 version.GITHUB_PROJECT,
-                                                 match.group(2))))
+        fixes.append(
+            (
+                match.span(0)[0],
+                match.span(0)[1],
+                "[%s](%s/blob/main/%s)"
+                % (match.group(1), version.GITHUB_PROJECT, match.group(2)),
+            )
+        )
 
 for begin, end, text in reversed(fixes):
-    long_description = (long_description[:begin] +
-                        text +
-                        long_description[end:])
+    long_description = long_description[:begin] + text + long_description[end:]
 
 project_urls = {
-    "Bug Tracker"   : version.BUGS_URL,
-    "Documentation" : version.DOCS_URL,
-    "Source Code"   : version.CODE_URL,
+    "Bug Tracker": version.BUGS_URL,
+    "Documentation": version.DOCS_URL,
+    "Source Code": version.CODE_URL,
 }
 
 setuptools.setup(

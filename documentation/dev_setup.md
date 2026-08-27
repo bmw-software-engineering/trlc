@@ -71,8 +71,6 @@ the latest GNU make version.
 
 ## Important make targets
 
-* `make lint` to run pycodestyle and pylint.
-
 * `make test` to run most tests and show coverage analysis.
 
 * `make test-all` to run all tests. This is the same as above, except
@@ -98,7 +96,10 @@ bazel run //:format.fix
 ## Code Linting
 
 ```bash
-# Run all linters (pylint + ty) over every Python target
+# Run all linters (pylint + ty) over the trlc library, main binary, and root scripts
+bazel build --config=lint //trlc //:trlc_binary //:root_scripts_lib
+
+# Or lint everything (broader, matches all targets with lint aspects)
 bazel build --config=lint //...
 ```
 
@@ -159,6 +160,9 @@ bazel coverage //tests-system/...
 
 # Render as HTML (requires lcov / genhtml)
 genhtml "$(bazel info output_path)/_coverage/_coverage_report.dat" -o htmlcov
+
+# Remove local coverage artifacts
+bazel run //:clean-coverage
 ```
 
 The `coverage` namespace in `.bazelrc` sets `--combined_report=lcov` and

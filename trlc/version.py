@@ -21,8 +21,9 @@
 VERSION_TUPLE = (3, 0, 1)
 VERSION_SUFFIX = ""
 
-TRLC_VERSION = ("%u.%u.%u" % VERSION_TUPLE) + \
-    ("-%s" % VERSION_SUFFIX if VERSION_SUFFIX else "")
+TRLC_VERSION = ("%u.%u.%u" % VERSION_TUPLE) + (
+    "-%s" % VERSION_SUFFIX if VERSION_SUFFIX else ""
+)
 
 FULL_NAME = "TRLC %s" % TRLC_VERSION
 

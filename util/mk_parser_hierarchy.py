@@ -17,13 +17,13 @@ import trlc.errors
 
 DOC_BASE = "https://github.com/bmw-software-engineering/trlc/blob/main/trlc/"
 
+
 def is_ignored(cls):
     if cls is object:
         return True
-    elif issubclass(cls, (trlc.ast.Node,
-                          trlc.errors.Message_Handler,
-                          numbers.Rational,
-                          type)):
+    elif issubclass(
+        cls, (trlc.ast.Node, trlc.errors.Message_Handler, numbers.Rational, type)
+    ):
         return True
     else:
         return False
@@ -48,7 +48,10 @@ def main():
                 doc = ""
             else:
                 doc = c.__doc__.split("\n\n", 1)[0]
-            print('"%s" [href="%s", shape=none, fontcolor="#0969da", tooltip="%s"];' % (name, url, doc))
+            print(
+                '"%s" [href="%s", shape=none, fontcolor="#0969da", tooltip="%s"];'
+                % (name, url, doc)
+            )
             for b in c.__bases__:
                 if is_ignored(b):
                     continue

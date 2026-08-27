@@ -31,12 +31,12 @@ class Markup_Token(Token_Base):
     # lobster-trace: LRM.Markup_String_Format
 
     KIND = {
-        "CHARACTER"          : "character",
-        "REFLIST_BEGIN"      : "[[",
-        "REFLIST_END"        : "]]",
-        "REFLIST_COMMA"      : ",",
-        "REFLIST_DOT"        : ".",
-        "REFLIST_IDENTIFIER" : "identifier",
+        "CHARACTER": "character",
+        "REFLIST_BEGIN": "[[",
+        "REFLIST_END": "]]",
+        "REFLIST_COMMA": ",",
+        "REFLIST_DOT": ".",
+        "REFLIST_IDENTIFIER": "identifier",
     }
 
     def __init__(self, location, kind, value):
@@ -63,19 +63,20 @@ class Markup_Lexer(Nested_Lexer):
         if self.cc is None:
             return None
 
-        start_pos  = self.lexpos
+        start_pos = self.lexpos
         start_line = self.line_no
-        start_col  = self.col_no
+        start_col = self.col_no
 
         if self.cc == "[" and self.nc == "[":
             kind = "REFLIST_BEGIN"
             self.advance()
             if self.in_reflist:
-                self.mh.lex_error(self.source_location(start_line,
-                                                       start_col,
-                                                       start_pos,
-                                                       start_pos + 1),
-                                  "cannot nest reference lists")
+                self.mh.lex_error(
+                    self.source_location(
+                        start_line, start_col, start_pos, start_pos + 1
+                    ),
+                    "cannot nest reference lists",
+                )
             else:
                 self.in_reflist = True
 
@@ -85,11 +86,12 @@ class Markup_Lexer(Nested_Lexer):
             if self.in_reflist:
                 self.in_reflist = False
             else:
-                self.mh.lex_error(self.source_location(start_line,
-                                                       start_col,
-                                                       start_pos,
-                                                       start_pos + 1),
-                                  "opening [[ for this ]] found")
+                self.mh.lex_error(
+                    self.source_location(
+                        start_line, start_col, start_pos, start_pos + 1
+                    ),
+                    "opening [[ for this ]] found",
+                )
 
         elif not self.in_reflist:
             kind = "CHARACTER"
@@ -102,26 +104,19 @@ class Markup_Lexer(Nested_Lexer):
 
         elif self.is_alpha(self.cc):
             kind = "REFLIST_IDENTIFIER"
-            while self.nc and (self.is_alnum(self.nc) or
-                               self.nc == "_"):
+            while self.nc and (self.is_alnum(self.nc) or self.nc == "_"):
                 self.advance()
 
         else:
-            self.mh.lex_error(self.source_location(start_line,
-                                                   start_col,
-                                                   start_pos,
-                                                   start_pos),
-                              "unexpected character '%s'" % self.cc)
+            self.mh.lex_error(
+                self.source_location(start_line, start_col, start_pos, start_pos),
+                "unexpected character '%s'" % self.cc,
+            )
 
-        loc = self.source_location(start_line,
-                                   start_col,
-                                   start_pos,
-                                   self.lexpos)
+        loc = self.source_location(start_line, start_col, start_pos, self.lexpos)
 
         # pylint: disable=possibly-used-before-assignment
-        return Markup_Token(loc,
-                            kind,
-                            self.content[start_pos:self.lexpos + 1])
+        return Markup_Token(loc, kind, self.content[start_pos : self.lexpos + 1])
 
 
 class Parser_Base:
@@ -131,11 +126,11 @@ class Parser_Base:
         assert isinstance(eoc_name, str)
         assert isinstance(token_map, dict)
         assert isinstance(keywords, frozenset)
-        self.mh    = mh
+        self.mh = mh
         self.lexer = lexer
 
-        self.eoc_name          = eoc_name
-        self.language_tokens   = token_map
+        self.eoc_name = eoc_name
+        self.language_tokens = token_map
         self.language_keywords = keywords
 
         self.ct = None
@@ -158,79 +153,90 @@ class Parser_Base:
             self.advance()
 
     def peek(self, kind):
-        assert kind in self.language_tokens, \
-            "%s is not a valid token" % kind
+        assert kind in self.language_tokens, "%s is not a valid token" % kind
         return self.nt is not None and self.nt.kind == kind
 
     def peek_eof(self):
         return self.nt is None
 
     def peek_kw(self, value):
-        assert value in self.language_keywords, \
-            "%s is not a valid keyword" % value
+        assert value in self.language_keywords, "%s is not a valid keyword" % value
         return self.peek("KEYWORD") and self.nt.value == value
 
     def match(self, kind):
         # lobster-trace: LRM.Matching_Value_Types
 
-        assert kind in self.language_tokens, \
-            "%s is not a valid token" % kind
+        assert kind in self.language_tokens, "%s is not a valid token" % kind
         if self.nt is None:
             if self.ct is None:
-                self.mh.error(self.lexer.file_location(),
-                              "expected %s, encountered %s instead" %
-                              (self.language_tokens[kind], self.eoc_name))
+                self.mh.error(
+                    self.lexer.file_location(),
+                    "expected %s, encountered %s instead"
+                    % (self.language_tokens[kind], self.eoc_name),
+                )
             else:
-                self.mh.error(self.ct.location,
-                              "expected %s, encountered %s instead" %
-                              (self.language_tokens[kind], self.eoc_name))
+                self.mh.error(
+                    self.ct.location,
+                    "expected %s, encountered %s instead"
+                    % (self.language_tokens[kind], self.eoc_name),
+                )
         elif self.nt.kind != kind:
-            self.mh.error(self.nt.location,
-                          "expected %s, encountered %s instead" %
-                          (self.language_tokens[kind],
-                           self.language_tokens[self.nt.kind]))
+            self.mh.error(
+                self.nt.location,
+                "expected %s, encountered %s instead"
+                % (self.language_tokens[kind], self.language_tokens[self.nt.kind]),
+            )
         self.advance()
 
     def match_eof(self):
         if self.nt is not None:
-            self.mh.error(self.nt.location,
-                          "expected %s, encountered %s instead" %
-                          (self.eoc_name,
-                           self.language_tokens[self.nt.kind]))
+            self.mh.error(
+                self.nt.location,
+                "expected %s, encountered %s instead"
+                % (self.eoc_name, self.language_tokens[self.nt.kind]),
+            )
 
     def match_kw(self, value):
-        assert value in self.language_keywords, \
-            "%s is not a valid keyword" % value
+        assert value in self.language_keywords, "%s is not a valid keyword" % value
         if self.nt is None:
             if self.ct is None:
-                self.mh.error(self.lexer.file_location(),
-                              "expected keyword %s, encountered %s instead" %
-                              (value, self.eoc_name))
+                self.mh.error(
+                    self.lexer.file_location(),
+                    "expected keyword %s, encountered %s instead"
+                    % (value, self.eoc_name),
+                )
             else:
-                self.mh.error(self.ct.location,
-                              "expected keyword %s, encountered %s instead" %
-                              (value, self.eoc_name))
+                self.mh.error(
+                    self.ct.location,
+                    "expected keyword %s, encountered %s instead"
+                    % (value, self.eoc_name),
+                )
         elif self.nt.kind != "KEYWORD":
-            self.mh.error(self.nt.location,
-                          "expected keyword %s, encountered %s instead" %
-                          (value,
-                           self.language_tokens[self.nt.kind]))
+            self.mh.error(
+                self.nt.location,
+                "expected keyword %s, encountered %s instead"
+                % (value, self.language_tokens[self.nt.kind]),
+            )
         elif self.nt.value != value:
-            self.mh.error(self.nt.location,
-                          "expected keyword %s,"
-                          " encountered keyword %s instead" %
-                          (value, self.nt.value))
+            self.mh.error(
+                self.nt.location,
+                "expected keyword %s,"
+                " encountered keyword %s instead" % (value, self.nt.value),
+            )
         self.advance()
 
 
 class Markup_Parser(Parser_Base):
     def __init__(self, parent, literal):
         assert isinstance(parent, Parser)
-        super().__init__(parent.mh, Markup_Lexer(parent.mh, literal),
-                         eoc_name  = "end-of-string",
-                         token_map = Markup_Token.KIND,
-                         keywords  = frozenset())
-        self.parent     = parent
+        super().__init__(
+            parent.mh,
+            Markup_Lexer(parent.mh, literal),
+            eoc_name="end-of-string",
+            token_map=Markup_Token.KIND,
+            keywords=frozenset(),
+        )
+        self.parent = parent
         self.references = literal.references
 
     def parse_all_references(self):
@@ -260,23 +266,22 @@ class Markup_Parser(Parser_Base):
         self.match("REFLIST_IDENTIFIER")
         if self.peek("REFLIST_DOT"):
             package = self.parent.stab.lookup_direct(
-                mh                = self.mh,
-                name              = self.ct.value,
-                error_location    = self.ct.location,
-                required_subclass = ast.Package)
+                mh=self.mh,
+                name=self.ct.value,
+                error_location=self.ct.location,
+                required_subclass=ast.Package,
+            )
             if not self.parent.cu.is_visible(package):
-                self.mh.error(self.ct.location,
-                              "package must be imported before use")
+                self.mh.error(self.ct.location, "package must be imported before use")
 
             self.match("REFLIST_DOT")
             self.match("REFLIST_IDENTIFIER")
         else:
             package = self.parent.cu.package
 
-        ref = ast.Record_Reference(location = self.ct.location,
-                                   name     = self.ct.value,
-                                   typ      = None,
-                                   package  = package)
+        ref = ast.Record_Reference(
+            location=self.ct.location, name=self.ct.value, typ=None, package=package
+        )
         self.references.append(ref)
 
 
@@ -285,14 +290,16 @@ class Parser(Parser_Base):
     ADDING_OPERATOR = ("+", "-")
     MULTIPLYING_OPERATOR = ("*", "/", "%")
 
-    def __init__(self,
-                 mh,
-                 stab,
-                 file_name,
-                 lint_mode,
-                 error_recovery,
-                 primary_file=True,
-                 lexer=None):
+    def __init__(
+        self,
+        mh,
+        stab,
+        file_name,
+        lint_mode,
+        error_recovery,
+        primary_file=True,
+        lexer=None,
+    ):
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, ast.Symbol_Table)
         assert isinstance(file_name, str)
@@ -301,33 +308,39 @@ class Parser(Parser_Base):
         assert isinstance(primary_file, bool)
         assert isinstance(lexer, TRLC_Lexer) or lexer is None
         if lexer:
-            super().__init__(mh, lexer,
-                             eoc_name  = "end-of-file",
-                             token_map = Token.KIND,
-                             keywords  = TRLC_Lexer.KEYWORDS)
+            super().__init__(
+                mh,
+                lexer,
+                eoc_name="end-of-file",
+                token_map=Token.KIND,
+                keywords=TRLC_Lexer.KEYWORDS,
+            )
         else:
-            super().__init__(mh, TRLC_Lexer(mh, file_name),
-                             eoc_name  = "end-of-file",
-                             token_map = Token.KIND,
-                             keywords  = TRLC_Lexer.KEYWORDS)
+            super().__init__(
+                mh,
+                TRLC_Lexer(mh, file_name),
+                eoc_name="end-of-file",
+                token_map=Token.KIND,
+                keywords=TRLC_Lexer.KEYWORDS,
+            )
 
-        self.lint_mode      = lint_mode
+        self.lint_mode = lint_mode
         self.error_recovery = error_recovery
 
         self.stab = stab
-        self.cu   = ast.Compilation_Unit(file_name)
+        self.cu = ast.Compilation_Unit(file_name)
 
-        self.primary   = primary_file
+        self.primary = primary_file
         self.secondary = False
         # Controls if the file is actually fully parsed: primary means
         # it was selected on the command-line and secondary means it
         # was selected by dependency analysis.
 
-        self.builtin_bool    = stab.lookup_assuming(self.mh, "Boolean")
-        self.builtin_int     = stab.lookup_assuming(self.mh, "Integer")
+        self.builtin_bool = stab.lookup_assuming(self.mh, "Boolean")
+        self.builtin_int = stab.lookup_assuming(self.mh, "Integer")
         self.builtin_decimal = stab.lookup_assuming(self.mh, "Decimal")
-        self.builtin_str     = stab.lookup_assuming(self.mh, "String")
-        self.builtin_mstr    = stab.lookup_assuming(self.mh, "Markup_String")
+        self.builtin_str = stab.lookup_assuming(self.mh, "String")
+        self.builtin_mstr = stab.lookup_assuming(self.mh, "Markup_String")
 
         self.section = []
         self.default_scope = ast.Scope()
@@ -346,10 +359,7 @@ class Parser(Parser_Base):
         else:
             return name, None, None
 
-    def parse_qualified_name(self,
-                             scope,
-                             required_subclass=None,
-                             match_ident=True):
+    def parse_qualified_name(self, scope, required_subclass=None, match_ident=True):
         # lobster-trace: LRM.Qualified_Name
         # lobster-trace: LRM.Valid_Qualifier
         # lobster-trace: LRM.Valid_Name
@@ -364,8 +374,7 @@ class Parser(Parser_Base):
 
         if isinstance(sym, ast.Package):
             if not self.cu.is_visible(sym):
-                self.mh.error(self.ct.location,
-                              "package must be imported before use")
+                self.mh.error(self.ct.location, "package must be imported before use")
             self.match("DOT")
             sym.set_ast_link(self.ct)
             self.match("IDENTIFIER")
@@ -391,10 +400,12 @@ class Parser(Parser_Base):
         t_enum = self.ct
         name, description, t_description = self.parse_described_name()
 
-        enum = ast.Enumeration_Type(name        = name.value,
-                                    description = description,
-                                    location    = name.location,
-                                    package     = self.cu.package)
+        enum = ast.Enumeration_Type(
+            name=name.value,
+            description=description,
+            location=name.location,
+            package=self.cu.package,
+        )
         self.cu.package.symbols.register(self.mh, enum)
         enum.set_ast_link(t_enum)
         enum.set_ast_link(name)
@@ -406,10 +417,12 @@ class Parser(Parser_Base):
         empty = True
         while not self.peek("C_KET"):
             name, description, t_description = self.parse_described_name()
-            lit = ast.Enumeration_Literal_Spec(name        = name.value,
-                                               description = description,
-                                               location    = name.location,
-                                               enum        = enum)
+            lit = ast.Enumeration_Literal_Spec(
+                name=name.value,
+                description=description,
+                location=name.location,
+                enum=enum,
+            )
             lit.set_ast_link(name)
             if t_description:
                 lit.set_ast_link(self.ct)
@@ -420,16 +433,13 @@ class Parser(Parser_Base):
 
         if empty:
             # lobster-trace: LRM.No_Empty_Enumerations
-            self.mh.error(enum.location,
-                          "empty enumerations are not permitted")
+            self.mh.error(enum.location, "empty enumerations are not permitted")
 
         return enum
 
-    def parse_tuple_field(self,
-                          n_tuple,
-                          optional_allowed,
-                          optional_reason,
-                          optional_required):
+    def parse_tuple_field(
+        self, n_tuple, optional_allowed, optional_reason, optional_required
+    ):
         assert isinstance(n_tuple, ast.Tuple_Type)
         assert isinstance(optional_allowed, bool)
         assert isinstance(optional_reason, str)
@@ -440,13 +450,13 @@ class Parser(Parser_Base):
 
         if optional_required or self.peek_kw("optional"):
             self.match_kw("optional")
-            t_optional        = self.ct
+            t_optional = self.ct
             field_is_optional = True
             if not optional_allowed:
                 self.mh.error(self.ct.location, optional_reason)
         else:
             field_is_optional = False
-            t_optional        = None
+            t_optional = None
 
         # lobster-trace: LRM.Tuple_Field_Types
         # S_BRA here means a union type '[T1, T2, ...]', not array bounds.
@@ -454,14 +464,15 @@ class Parser(Parser_Base):
             # lobster-trace: LRM.union_type
             field_type = self.parse_union_type()
         else:
-            field_type = self.parse_qualified_name(self.default_scope,
-                                                   ast.Type)
-        comp = ast.Composite_Component(name        = field_name.value,
-                                       description = field_description,
-                                       location    = field_name.location,
-                                       member_of   = n_tuple,
-                                       n_typ       = field_type,
-                                       optional    = field_is_optional)
+            field_type = self.parse_qualified_name(self.default_scope, ast.Type)
+        comp = ast.Composite_Component(
+            name=field_name.value,
+            description=field_description,
+            location=field_name.location,
+            member_of=n_tuple,
+            n_typ=field_type,
+            optional=field_is_optional,
+        )
         comp.set_ast_link(field_name)
         if t_descr:
             comp.set_ast_link(t_descr)
@@ -476,10 +487,12 @@ class Parser(Parser_Base):
         t_tuple = self.ct
         name, description, t_descr = self.parse_described_name()
 
-        n_tuple = ast.Tuple_Type(name        = name.value,
-                                 description = description,
-                                 location    = name.location,
-                                 package     = self.cu.package)
+        n_tuple = ast.Tuple_Type(
+            name=name.value,
+            description=description,
+            location=name.location,
+            package=self.cu.package,
+        )
 
         n_tuple.set_ast_link(t_tuple)
         n_tuple.set_ast_link(name)
@@ -490,12 +503,13 @@ class Parser(Parser_Base):
 
         n_field = self.parse_tuple_field(
             n_tuple,
-            optional_allowed  = False,
-            optional_reason   = "first field may not be optional",
-            optional_required = False)
+            optional_allowed=False,
+            optional_reason="first field may not be optional",
+            optional_required=False,
+        )
         n_tuple.components.register(self.mh, n_field)
 
-        has_separators    = False
+        has_separators = False
         optional_required = False
         separator_allowed = True
 
@@ -506,13 +520,15 @@ class Parser(Parser_Base):
                 t_sep = self.ct
                 if not separator_allowed:
                     # lobster-trace: LRM.Tuple_Separators_All_Or_None
-                    self.mh.error(self.ct.location,
-                                  "either all fields must be separated,"
-                                  " or none")
-                if self.peek("IDENTIFIER") or \
-                   self.peek("AT") or \
-                   self.peek("COLON") or \
-                   self.peek("SEMICOLON"):
+                    self.mh.error(
+                        self.ct.location, "either all fields must be separated, or none"
+                    )
+                if (
+                    self.peek("IDENTIFIER")
+                    or self.peek("AT")
+                    or self.peek("COLON")
+                    or self.peek("SEMICOLON")
+                ):
                     self.advance()
                     sep = ast.Separator(self.ct)
                     sep.set_ast_link(t_sep)
@@ -523,10 +539,10 @@ class Parser(Parser_Base):
             # lobster-trace: LRM.Tuple_Optional_Requires_Separators
             n_field = self.parse_tuple_field(
                 n_tuple,
-                optional_allowed  = has_separators,
-                optional_reason   = ("optional only permitted in tuples"
-                                     " with separators"),
-                optional_required = optional_required)
+                optional_allowed=has_separators,
+                optional_reason=("optional only permitted in tuples with separators"),
+                optional_required=optional_required,
+            )
             n_tuple.components.register(self.mh, n_field)
             # lobster-trace: LRM.Tuple_Optional_Fields
             optional_required |= n_field.optional
@@ -539,13 +555,15 @@ class Parser(Parser_Base):
         if has_separators:
             # lobster-trace: LRM.Restricted_Tuple_Nesting
             for n_field in n_tuple.components.values():
-                if isinstance(n_field.n_typ, ast.Tuple_Type) and \
-                   n_field.n_typ.has_separators():
+                if (
+                    isinstance(n_field.n_typ, ast.Tuple_Type)
+                    and n_field.n_typ.has_separators()
+                ):
                     self.mh.error(
                         n_field.location,
                         "tuple type %s, which contains separators,"
-                        " may not contain another tuple with separators"
-                        % n_tuple.name)
+                        " may not contain another tuple with separators" % n_tuple.name,
+                    )
 
         # Late registration to avoid recursion in tuples
         # lobster-trace: LRM.Tuple_Field_Types
@@ -566,16 +584,13 @@ class Parser(Parser_Base):
         t_s_bra = self.ct
 
         union_type_entries = []  # list of (Record_Type, Location)
-        first_type = self.parse_qualified_name(self.default_scope,
-                                               ast.Record_Type)
+        first_type = self.parse_qualified_name(self.default_scope, ast.Record_Type)
         first_type.set_ast_link(self.ct)
         union_type_entries.append((first_type, self.ct.location))
 
         while self.peek("COMMA"):
             self.match("COMMA")
-            next_type = self.parse_qualified_name(
-                self.default_scope,
-                ast.Record_Type)
+            next_type = self.parse_qualified_name(self.default_scope, ast.Record_Type)
             next_type.set_ast_link(self.ct)
             union_type_entries.append((next_type, self.ct.location))
 
@@ -586,16 +601,12 @@ class Parser(Parser_Base):
         for t, loc in union_type_entries:
             fqn = t.fully_qualified_name()
             if fqn in seen:
-                self.mh.error(loc,
-                              "duplicate type %s in union" % t.name,
-                              fatal=False)
+                self.mh.error(loc, "duplicate type %s in union" % t.name, fatal=False)
             else:
                 seen[fqn] = loc
 
         union_types = [t for t, _ in union_type_entries]
-        c_typ = ast.Union_Type(
-            location = t_s_bra.location,
-            types    = union_types)
+        c_typ = ast.Union_Type(location=t_s_bra.location, types=union_types)
         c_typ.set_ast_link(t_s_bra)
         c_typ.set_ast_link(t_s_ket)
         return c_typ
@@ -616,8 +627,7 @@ class Parser(Parser_Base):
         if self.peek("S_BRA"):
             c_typ = self.parse_union_type()
         else:
-            c_typ = self.parse_qualified_name(self.default_scope,
-                                              ast.Type)
+            c_typ = self.parse_qualified_name(self.default_scope, ast.Type)
             c_typ.set_ast_link(self.ct)
 
         if self.peek("S_BRA"):
@@ -630,37 +640,40 @@ class Parser(Parser_Base):
             self.match("RANGE")
             t_range = self.ct
             a_loc = self.ct.location
-            a_hi  = None
+            a_hi = None
             if self.peek("INTEGER"):
                 self.match("INTEGER")
                 a_hi = self.ct.value
             elif self.peek("OPERATOR") and self.nt.value == "*":
                 self.match("OPERATOR")
             else:
-                self.mh.error(self.nt.location,
-                              "expected INTEGER or * for upper bound")
+                self.mh.error(self.nt.location, "expected INTEGER or * for upper bound")
             t_hi = self.ct
             loc_hi = self.ct.location
             self.match("S_KET")
             t_s_ket = self.ct
-            c_typ = ast.Array_Type(location     = a_loc,
-                                   element_type = c_typ,
-                                   lower_bound  = a_lo,
-                                   upper_bound  = a_hi,
-                                   loc_lower    = loc_lo,
-                                   loc_upper    = loc_hi)
+            c_typ = ast.Array_Type(
+                location=a_loc,
+                element_type=c_typ,
+                lower_bound=a_lo,
+                upper_bound=a_hi,
+                loc_lower=loc_lo,
+                loc_upper=loc_hi,
+            )
             c_typ.set_ast_link(t_s_bra)
             c_typ.set_ast_link(t_lo)
             c_typ.set_ast_link(t_range)
             c_typ.set_ast_link(t_hi)
             c_typ.set_ast_link(t_s_ket)
 
-        c_comp = ast.Composite_Component(name        = c_name.value,
-                                         description = c_descr,
-                                         location    = c_name.location,
-                                         member_of   = n_record,
-                                         n_typ       = c_typ,
-                                         optional    = c_optional)
+        c_comp = ast.Composite_Component(
+            name=c_name.value,
+            description=c_descr,
+            location=c_name.location,
+            member_of=n_record,
+            n_typ=c_typ,
+            optional=c_optional,
+        )
         c_comp.set_ast_link(c_name)
         if t_descr:
             c_comp.set_ast_link(t_descr)
@@ -670,17 +683,17 @@ class Parser(Parser_Base):
         return c_comp
 
     def parse_record_declaration(self):
-        t_abstract  = None
-        t_final     = None
+        t_abstract = None
+        t_final = None
         is_abstract = False
-        is_final    = False
+        is_final = False
         if self.peek_kw("abstract"):
             self.match_kw("abstract")
-            t_abstract  = self.ct
+            t_abstract = self.ct
             is_abstract = True
         elif self.peek_kw("final"):
             self.match_kw("final")
-            t_final  = self.ct
+            t_final = self.ct
             is_final = True
 
         self.match_kw("type")
@@ -690,30 +703,33 @@ class Parser(Parser_Base):
         if self.peek_kw("extends"):
             self.match_kw("extends")
             t_extends = self.ct
-            root_record = self.parse_qualified_name(self.default_scope,
-                                                    ast.Record_Type)
+            root_record = self.parse_qualified_name(self.default_scope, ast.Record_Type)
             root_record.set_ast_link(t_extends)
             root_record.set_ast_link(self.ct)
         else:
             root_record = None
 
-        if self.lint_mode and \
-           root_record and root_record.is_final and \
-           not is_final:
-            self.mh.check(name.location,
-                          "consider clarifying that this record is final",
-                          "clarify_final",
-                          ("Parent record %s is final, making this record\n"
-                           "also final. Marking it explicitly as final\n"
-                           "clarifies this to casual readers." %
-                           root_record.fully_qualified_name()))
+        if self.lint_mode and root_record and root_record.is_final and not is_final:
+            self.mh.check(
+                name.location,
+                "consider clarifying that this record is final",
+                "clarify_final",
+                (
+                    "Parent record %s is final, making this record\n"
+                    "also final. Marking it explicitly as final\n"
+                    "clarifies this to casual readers."
+                    % root_record.fully_qualified_name()
+                ),
+            )
 
-        record = ast.Record_Type(name        = name.value,
-                                 description = description,
-                                 location    = name.location,
-                                 package     = self.cu.package,
-                                 n_parent    = root_record,
-                                 is_abstract = is_abstract)
+        record = ast.Record_Type(
+            name=name.value,
+            description=description,
+            location=name.location,
+            package=self.cu.package,
+            n_parent=root_record,
+            is_abstract=is_abstract,
+        )
         self.cu.package.symbols.register(self.mh, record)
         if is_abstract:
             record.set_ast_link(t_abstract)
@@ -731,16 +747,16 @@ class Parser(Parser_Base):
                 self.match_kw("freeze")
                 t_freeze = self.ct
                 self.match("IDENTIFIER")
-                n_comp = record.components.lookup(self.mh,
-                                                  self.ct,
-                                                  ast.Composite_Component)
+                n_comp = record.components.lookup(
+                    self.mh, self.ct, ast.Composite_Component
+                )
                 if record.is_frozen(n_comp):
                     n_value = record.get_freezing_expression(n_comp)
                     self.mh.error(
                         self.ct.location,
-                        "duplicate freezing of %s, previously frozen at %s" %
-                        (n_comp.name,
-                         self.mh.cross_file_reference(n_value.location)))
+                        "duplicate freezing of %s, previously frozen at %s"
+                        % (n_comp.name, self.mh.cross_file_reference(n_value.location)),
+                    )
                 n_comp.set_ast_link(t_freeze)
                 n_comp.set_ast_link(self.ct)
                 self.match("ASSIGN")
@@ -753,9 +769,10 @@ class Parser(Parser_Base):
             else:
                 n_comp = self.parse_record_component(record)
                 if record.is_final:
-                    self.mh.error(n_comp.location,
-                                  "cannot declare new components in"
-                                  " final record type")
+                    self.mh.error(
+                        n_comp.location,
+                        "cannot declare new components in final record type",
+                    )
                 else:
                     record.components.register(self.mh, n_comp)
 
@@ -777,60 +794,64 @@ class Parser(Parser_Base):
         if self.peek_kw("and"):
             while self.peek_kw("and"):
                 self.match_kw("and")
-                t_op  = self.ct
+                t_op = self.ct
                 a_op = ast.Binary_Operator.LOGICAL_AND
                 t_op.ast_link = a_op
                 n_rhs = self.parse_relation(scope)
                 n_lhs = ast.Binary_Expression(
-                    mh       = self.mh,
-                    location = t_op.location,
-                    typ      = self.builtin_bool,
-                    operator = a_op,
-                    n_lhs    = n_lhs,
-                    n_rhs    = n_rhs)
+                    mh=self.mh,
+                    location=t_op.location,
+                    typ=self.builtin_bool,
+                    operator=a_op,
+                    n_lhs=n_lhs,
+                    n_rhs=n_rhs,
+                )
 
         elif self.peek_kw("or"):
             while self.peek_kw("or"):
                 self.match_kw("or")
-                t_op  = self.ct
+                t_op = self.ct
                 a_op = ast.Binary_Operator.LOGICAL_OR
                 t_op.ast_link = a_op
                 n_rhs = self.parse_relation(scope)
                 n_lhs = ast.Binary_Expression(
-                    mh       = self.mh,
-                    location = t_op.location,
-                    typ      = self.builtin_bool,
-                    operator = a_op,
-                    n_lhs    = n_lhs,
-                    n_rhs    = n_rhs)
+                    mh=self.mh,
+                    location=t_op.location,
+                    typ=self.builtin_bool,
+                    operator=a_op,
+                    n_lhs=n_lhs,
+                    n_rhs=n_rhs,
+                )
 
         elif self.peek_kw("xor"):
             self.match_kw("xor")
-            t_op  = self.ct
+            t_op = self.ct
             a_op = ast.Binary_Operator.LOGICAL_XOR
             t_op.ast_link = a_op
             n_rhs = self.parse_relation(scope)
             n_lhs = ast.Binary_Expression(
-                mh       = self.mh,
-                location = t_op.location,
-                typ      = self.builtin_bool,
-                operator = a_op,
-                n_lhs    = n_lhs,
-                n_rhs    = n_rhs)
+                mh=self.mh,
+                location=t_op.location,
+                typ=self.builtin_bool,
+                operator=a_op,
+                n_lhs=n_lhs,
+                n_rhs=n_rhs,
+            )
 
         elif self.peek_kw("implies"):
             self.match_kw("implies")
-            t_op  = self.ct
+            t_op = self.ct
             a_op = ast.Binary_Operator.LOGICAL_IMPLIES
             t_op.ast_link = a_op
             n_rhs = self.parse_relation(scope)
             n_lhs = ast.Binary_Expression(
-                mh       = self.mh,
-                location = t_op.location,
-                typ      = self.builtin_bool,
-                operator = a_op,
-                n_lhs    = n_lhs,
-                n_rhs    = n_rhs)
+                mh=self.mh,
+                location=t_op.location,
+                typ=self.builtin_bool,
+                operator=a_op,
+                n_lhs=n_lhs,
+                n_rhs=n_rhs,
+            )
 
         return n_lhs
 
@@ -838,30 +859,32 @@ class Parser(Parser_Base):
         # lobster-trace: LRM.Relation
         # lobster-trace: LRM.Operators
         assert isinstance(scope, ast.Scope)
-        relop_mapping = {"==" : ast.Binary_Operator.COMP_EQ,
-                         "!=" : ast.Binary_Operator.COMP_NEQ,
-                         "<"  : ast.Binary_Operator.COMP_LT,
-                         "<=" : ast.Binary_Operator.COMP_LEQ,
-                         ">"  : ast.Binary_Operator.COMP_GT,
-                         ">=" : ast.Binary_Operator.COMP_GEQ}
+        relop_mapping = {
+            "==": ast.Binary_Operator.COMP_EQ,
+            "!=": ast.Binary_Operator.COMP_NEQ,
+            "<": ast.Binary_Operator.COMP_LT,
+            "<=": ast.Binary_Operator.COMP_LEQ,
+            ">": ast.Binary_Operator.COMP_GT,
+            ">=": ast.Binary_Operator.COMP_GEQ,
+        }
         assert set(relop_mapping) == set(Parser.COMPARISON_OPERATOR)
 
         n_lhs = self.parse_simple_expression(scope)
 
-        if self.peek("OPERATOR") and \
-           self.nt.value in Parser.COMPARISON_OPERATOR:
+        if self.peek("OPERATOR") and self.nt.value in Parser.COMPARISON_OPERATOR:
             self.match("OPERATOR")
-            t_op  = self.ct
+            t_op = self.ct
             a_op = relop_mapping[t_op.value]
             t_op.ast_link = a_op
             n_rhs = self.parse_simple_expression(scope)
             return ast.Binary_Expression(
-                mh       = self.mh,
-                location = t_op.location,
-                typ      = self.builtin_bool,
-                operator = a_op,
-                n_lhs    = n_lhs,
-                n_rhs    = n_rhs)
+                mh=self.mh,
+                location=t_op.location,
+                typ=self.builtin_bool,
+                operator=a_op,
+                n_lhs=n_lhs,
+                n_rhs=n_rhs,
+            )
 
         elif self.peek_kw("not") or self.peek_kw("in"):
             if self.peek_kw("not"):
@@ -881,52 +904,57 @@ class Parser(Parser_Base):
                 n_b = self.parse_simple_expression(scope)
                 n_b.set_ast_link(self.ct)
                 n_a.set_ast_link(t_n_a)
-                rv  = ast.Range_Test(
-                    mh       = self.mh,
-                    location = t_in.location,
-                    typ      = self.builtin_bool,
-                    n_lhs    = n_lhs,
-                    n_lower  = n_a,
-                    n_upper  = n_b)
+                rv = ast.Range_Test(
+                    mh=self.mh,
+                    location=t_in.location,
+                    typ=self.builtin_bool,
+                    n_lhs=n_lhs,
+                    n_lower=n_a,
+                    n_upper=n_b,
+                )
                 rv.set_ast_link(t_range)
                 rv.set_ast_link(t_in)
 
             elif isinstance(n_a.typ, ast.Builtin_String):
                 rv = ast.Binary_Expression(
-                    mh       = self.mh,
-                    location = t_in.location,
-                    typ      = self.builtin_bool,
-                    operator = ast.Binary_Operator.STRING_CONTAINS,
-                    n_lhs    = n_lhs,
-                    n_rhs    = n_a)
+                    mh=self.mh,
+                    location=t_in.location,
+                    typ=self.builtin_bool,
+                    operator=ast.Binary_Operator.STRING_CONTAINS,
+                    n_lhs=n_lhs,
+                    n_rhs=n_a,
+                )
                 rv.set_ast_link(t_in)
 
             elif isinstance(n_a.typ, ast.Array_Type):
                 a_op = ast.Binary_Operator.ARRAY_CONTAINS
                 t_in.ast_link = a_op
                 rv = ast.Binary_Expression(
-                    mh       = self.mh,
-                    location = t_in.location,
-                    typ      = self.builtin_bool,
-                    operator = a_op,
-                    n_lhs    = n_lhs,
-                    n_rhs    = n_a)
+                    mh=self.mh,
+                    location=t_in.location,
+                    typ=self.builtin_bool,
+                    operator=a_op,
+                    n_lhs=n_lhs,
+                    n_rhs=n_a,
+                )
 
             else:
                 self.mh.error(
                     n_a.location,
                     "membership test only defined for Strings and Arrays,"
-                    " not for %s" % n_a.typ.name)
+                    " not for %s" % n_a.typ.name,
+                )
 
             if t_not is not None:
                 a_unary_op = ast.Unary_Operator.LOGICAL_NOT
                 t_not.ast_link = a_unary_op
                 rv = ast.Unary_Expression(
-                    mh        = self.mh,
-                    location  = t_not.location,
-                    typ       = self.builtin_bool,
-                    operator  = a_unary_op,
-                    n_operand = rv)
+                    mh=self.mh,
+                    location=t_not.location,
+                    typ=self.builtin_bool,
+                    operator=a_unary_op,
+                    n_operand=rv,
+                )
 
             return rv
 
@@ -938,15 +966,12 @@ class Parser(Parser_Base):
         # lobster-trace: LRM.Operators
         # lobster-trace: LRM.Unary_Minus_Parsing
         assert isinstance(scope, ast.Scope)
-        un_add_map = {"+" : ast.Unary_Operator.PLUS,
-                      "-" : ast.Unary_Operator.MINUS}
-        bin_add_map = {"+" : ast.Binary_Operator.PLUS,
-                       "-" : ast.Binary_Operator.MINUS}
+        un_add_map = {"+": ast.Unary_Operator.PLUS, "-": ast.Unary_Operator.MINUS}
+        bin_add_map = {"+": ast.Binary_Operator.PLUS, "-": ast.Binary_Operator.MINUS}
         assert set(un_add_map) == set(Parser.ADDING_OPERATOR)
         assert set(bin_add_map) == set(Parser.ADDING_OPERATOR)
 
-        if self.peek("OPERATOR") and \
-           self.nt.value in Parser.ADDING_OPERATOR:
+        if self.peek("OPERATOR") and self.nt.value in Parser.ADDING_OPERATOR:
             self.match("OPERATOR")
             t_unary = self.ct
             a_unary = un_add_map[t_unary.value]
@@ -958,41 +983,45 @@ class Parser(Parser_Base):
         n_lhs = self.parse_term(scope)
         if t_unary:
             # pylint: disable=possibly-used-before-assignment
-            if self.lint_mode and \
-               isinstance(n_lhs, ast.Binary_Expression) and \
-               not has_explicit_brackets:
-                self.mh.check(t_unary.location,
-                              "expression means -(%s), place explicit "
-                              "brackets to clarify intent" %
-                              n_lhs.to_string(),
-                              "unary_minus_precedence")
+            if (
+                self.lint_mode
+                and isinstance(n_lhs, ast.Binary_Expression)
+                and not has_explicit_brackets
+            ):
+                self.mh.check(
+                    t_unary.location,
+                    "expression means -(%s), place explicit "
+                    "brackets to clarify intent" % n_lhs.to_string(),
+                    "unary_minus_precedence",
+                )
 
             n_lhs = ast.Unary_Expression(
-                mh        = self.mh,
-                location  = t_unary.location,
-                typ       = n_lhs.typ,
-                operator  = a_unary,
-                n_operand = n_lhs)
+                mh=self.mh,
+                location=t_unary.location,
+                typ=n_lhs.typ,
+                operator=a_unary,
+                n_operand=n_lhs,
+            )
 
         if isinstance(n_lhs.typ, ast.Builtin_String):
             rtyp = self.builtin_str
         else:
             rtyp = n_lhs.typ
 
-        while self.peek("OPERATOR") and \
-              self.nt.value in Parser.ADDING_OPERATOR:
+        while self.peek("OPERATOR") and self.nt.value in Parser.ADDING_OPERATOR:
             self.match("OPERATOR")
-            t_op  = self.ct
+            t_op = self.ct
             a_op = bin_add_map[t_op.value]
             t_op.ast_link = a_op
             n_rhs = self.parse_term(scope)
             n_lhs = ast.Binary_Expression(
-                mh       = self.mh,
-                location = t_op.location,
-                typ      = rtyp,
-                operator = a_op,
-                n_lhs    = n_lhs,
-                n_rhs    = n_rhs)
+                mh=self.mh,
+                location=t_op.location,
+                typ=rtyp,
+                operator=a_op,
+                n_lhs=n_lhs,
+                n_rhs=n_rhs,
+            )
 
         return n_lhs
 
@@ -1000,26 +1029,28 @@ class Parser(Parser_Base):
         # lobster-trace: LRM.Term
         # lobster-trace: LRM.Operators
         assert isinstance(scope, ast.Scope)
-        mul_map = {"*" : ast.Binary_Operator.TIMES,
-                   "/" : ast.Binary_Operator.DIVIDE,
-                   "%" : ast.Binary_Operator.REMAINDER}
+        mul_map = {
+            "*": ast.Binary_Operator.TIMES,
+            "/": ast.Binary_Operator.DIVIDE,
+            "%": ast.Binary_Operator.REMAINDER,
+        }
         assert set(mul_map) == set(Parser.MULTIPLYING_OPERATOR)
 
         n_lhs = self.parse_factor(scope)
-        while self.peek("OPERATOR") and \
-              self.nt.value in Parser.MULTIPLYING_OPERATOR:
+        while self.peek("OPERATOR") and self.nt.value in Parser.MULTIPLYING_OPERATOR:
             self.match("OPERATOR")
-            t_op  = self.ct
+            t_op = self.ct
             a_op = mul_map[t_op.value]
             t_op.ast_link = a_op
             n_rhs = self.parse_factor(scope)
             n_lhs = ast.Binary_Expression(
-                mh       = self.mh,
-                location = t_op.location,
-                typ      = n_lhs.typ,
-                operator = a_op,
-                n_lhs    = n_lhs,
-                n_rhs    = n_rhs)
+                mh=self.mh,
+                location=t_op.location,
+                typ=n_lhs.typ,
+                operator=a_op,
+                n_lhs=n_lhs,
+                n_rhs=n_rhs,
+            )
 
         return n_lhs
 
@@ -1029,49 +1060,51 @@ class Parser(Parser_Base):
 
         if self.peek_kw("not"):
             self.match_kw("not")
-            t_op      = self.ct
+            t_op = self.ct
             n_operand = self.parse_primary(scope)
             a_not = ast.Unary_Operator.LOGICAL_NOT
             t_op.ast_link = a_not
             return ast.Unary_Expression(
-                mh        = self.mh,
-                location  = t_op.location,
-                typ       = self.builtin_bool,
-                operator  = a_not,
-                n_operand = n_operand)
+                mh=self.mh,
+                location=t_op.location,
+                typ=self.builtin_bool,
+                operator=a_not,
+                n_operand=n_operand,
+            )
 
         elif self.peek_kw("abs"):
             self.match_kw("abs")
-            t_op      = self.ct
+            t_op = self.ct
             n_operand = self.parse_primary(scope)
             a_abs = ast.Unary_Operator.ABSOLUTE_VALUE
             t_op.ast_link = a_abs
             return ast.Unary_Expression(
-                mh        = self.mh,
-                location  = t_op.location,
-                typ       = n_operand.typ,
-                operator  = a_abs,
-                n_operand = n_operand)
+                mh=self.mh,
+                location=t_op.location,
+                typ=n_operand.typ,
+                operator=a_abs,
+                n_operand=n_operand,
+            )
 
         else:
             n_lhs = self.parse_primary(scope)
             if self.peek("OPERATOR") and self.nt.value == "**":
                 self.match("OPERATOR")
-                t_op  = self.ct
+                t_op = self.ct
                 n_rhs = self.parse_primary(scope)
                 rhs_value = n_rhs.evaluate(self.mh, None, None)
                 a_binary = ast.Binary_Operator.POWER
                 t_op.ast_link = a_binary
                 n_lhs = ast.Binary_Expression(
-                    mh       = self.mh,
-                    location = t_op.location,
-                    typ      = n_lhs.typ,
-                    operator = a_binary,
-                    n_lhs    = n_lhs,
-                    n_rhs    = n_rhs)
+                    mh=self.mh,
+                    location=t_op.location,
+                    typ=n_lhs.typ,
+                    operator=a_binary,
+                    n_lhs=n_lhs,
+                    n_rhs=n_rhs,
+                )
                 if rhs_value.value < 0:
-                    self.mh.error(n_rhs.location,
-                                  "exponent must not be negative")
+                    self.mh.error(n_rhs.location, "exponent must not be negative")
             return n_lhs
 
     def parse_primary(self, scope):
@@ -1147,25 +1180,27 @@ class Parser(Parser_Base):
         if scope.contains(t_qv.value):
             # lobster-trace: LRM.Quantification_Naming_Scope
             pdef = scope.lookup(self.mh, t_qv)
-            self.mh.error(t_qv.location,
-                          "shadows %s %s from %s" %
-                          (pdef.__class__.__name__,
-                           pdef.name,
-                           self.mh.cross_file_reference(pdef.location)))
+            self.mh.error(
+                t_qv.location,
+                "shadows %s %s from %s"
+                % (
+                    pdef.__class__.__name__,
+                    pdef.name,
+                    self.mh.cross_file_reference(pdef.location),
+                ),
+            )
         self.match_kw("in")
         t_in = self.ct
         self.match("IDENTIFIER")
         field = scope.lookup(self.mh, self.ct, ast.Composite_Component)
-        n_source = ast.Name_Reference(self.ct.location,
-                                      field)
+        n_source = ast.Name_Reference(self.ct.location, field)
         n_source.set_ast_link(self.ct)
         if not isinstance(field.n_typ, ast.Array_Type):
             # lobster-trace: LRM.Quantification_Object
-            self.mh.error(self.ct.location,
-                          "you can only quantify over arrays")
-        n_var = ast.Quantified_Variable(t_qv.value,
-                                        t_qv.location,
-                                        field.n_typ.element_type)
+            self.mh.error(self.ct.location, "you can only quantify over arrays")
+        n_var = ast.Quantified_Variable(
+            t_qv.value, t_qv.location, field.n_typ.element_type
+        )
         n_var.set_ast_link(t_qv)
         self.match("ARROW")
         t_arrow = self.ct
@@ -1177,13 +1212,14 @@ class Parser(Parser_Base):
         scope.pop()
 
         quantified_expression = ast.Quantified_Expression(
-            mh         = self.mh,
-            location   = loc,
-            typ        = self.builtin_bool,
-            universal  = universal,
-            n_variable = n_var,
-            n_source   = n_source,
-            n_expr     = n_expr)
+            mh=self.mh,
+            location=loc,
+            typ=self.builtin_bool,
+            universal=universal,
+            n_variable=n_var,
+            n_source=n_source,
+            n_expr=n_expr,
+        )
 
         quantified_expression.set_ast_link(t_quantified)
         quantified_expression.set_ast_link(t_in)
@@ -1203,12 +1239,10 @@ class Parser(Parser_Base):
         t_then = self.ct
         if_expr = self.parse_expression(scope)
         if if_expr.typ is None:
-            self.mh.error(if_expr.location,
-                          "null is not permitted here")
+            self.mh.error(if_expr.location, "null is not permitted here")
         if_action = ast.Action(self.mh, t_if, if_cond, if_expr)
 
-        rv = ast.Conditional_Expression(location  = t_if.location,
-                                        if_action = if_action)
+        rv = ast.Conditional_Expression(location=t_if.location, if_action=if_action)
         if_action.set_ast_link(t_if)
         if_action.set_ast_link(t_then)
 
@@ -1235,8 +1269,7 @@ class Parser(Parser_Base):
         # lobster-trace: LRM.Builtin_Functions
         # lobster-trace: LRM.Builtin_Type_Conversion_Functions
         assert isinstance(scope, ast.Scope)
-        assert isinstance(n_name, (ast.Builtin_Function,
-                                   ast.Builtin_Numeric_Type))
+        assert isinstance(n_name, (ast.Builtin_Function, ast.Builtin_Numeric_Type))
         assert isinstance(t_name, Token)
 
         # Parse the arguments.
@@ -1261,50 +1294,55 @@ class Parser(Parser_Base):
         # Enforce arity
         if isinstance(n_name, ast.Builtin_Function):
             required_arity = n_name.arity
-            precise        = not n_name.arity_at_least
+            precise = not n_name.arity_at_least
         else:
             required_arity = 1
-            precise        = True
+            precise = True
 
         if precise:
             if required_arity != len(parameters):
-                self.mh.error(t_name.location,
-                              "function requires %u parameters" %
-                              n_name.arity)
+                self.mh.error(
+                    t_name.location, "function requires %u parameters" % n_name.arity
+                )
         else:
             if required_arity > len(parameters):
-                self.mh.error(t_name.location,
-                              "function requires at least %u parameters" %
-                              n_name.arity)
+                self.mh.error(
+                    t_name.location,
+                    "function requires at least %u parameters" % n_name.arity,
+                )
 
         # Enforce types
         if n_name.name == "len":
             if isinstance(parameters[0].typ, ast.Builtin_String):
                 return ast.Unary_Expression(
-                    mh        = self.mh,
-                    location  = t_name.location,
-                    typ       = self.builtin_int,
-                    operator  = ast.Unary_Operator.STRING_LENGTH,
-                    n_operand = parameters[0])
+                    mh=self.mh,
+                    location=t_name.location,
+                    typ=self.builtin_int,
+                    operator=ast.Unary_Operator.STRING_LENGTH,
+                    n_operand=parameters[0],
+                )
             else:
                 return ast.Unary_Expression(
-                    mh        = self.mh,
-                    location  = t_name.location,
-                    typ       = self.builtin_int,
-                    operator  = ast.Unary_Operator.ARRAY_LENGTH,
-                    n_operand = parameters[0])
+                    mh=self.mh,
+                    location=t_name.location,
+                    typ=self.builtin_int,
+                    operator=ast.Unary_Operator.ARRAY_LENGTH,
+                    n_operand=parameters[0],
+                )
 
-        elif n_name.name in ("startswith",
-                             "endswith"):
+        elif n_name.name in ("startswith", "endswith"):
             return ast.Binary_Expression(
-                mh       = self.mh,
-                location = t_name.location,
-                typ      = self.builtin_bool,
-                operator = (ast.Binary_Operator.STRING_STARTSWITH
-                            if "startswith" in n_name.name
-                            else ast.Binary_Operator.STRING_ENDSWITH),
-                n_lhs    = parameters[0],
-                n_rhs    = parameters[1])
+                mh=self.mh,
+                location=t_name.location,
+                typ=self.builtin_bool,
+                operator=(
+                    ast.Binary_Operator.STRING_STARTSWITH
+                    if "startswith" in n_name.name
+                    else ast.Binary_Operator.STRING_ENDSWITH
+                ),
+                n_lhs=parameters[0],
+                n_rhs=parameters[1],
+            )
 
         elif n_name.name == "matches":
             parameters[1].ensure_type(self.mh, ast.Builtin_String)
@@ -1315,46 +1353,47 @@ class Parser(Parser_Base):
                 assert isinstance(value.typ, ast.Builtin_String)
                 re.compile(value.value)
             except re.error as err:
-                self.mh.error(value.location,
-                              str(err))
+                self.mh.error(value.location, str(err))
             return ast.Binary_Expression(
-                mh       = self.mh,
-                location = t_name.location,
-                typ      = self.builtin_bool,
-                operator = ast.Binary_Operator.STRING_REGEX,
-                n_lhs    = parameters[0],
-                n_rhs    = parameters[1])
+                mh=self.mh,
+                location=t_name.location,
+                typ=self.builtin_bool,
+                operator=ast.Binary_Operator.STRING_REGEX,
+                n_lhs=parameters[0],
+                n_rhs=parameters[1],
+            )
 
         elif n_name.name == "oneof":
             return ast.OneOf_Expression(
-                mh       = self.mh,
-                location = t_name.location,
-                typ      = self.builtin_bool,
-                choices  = parameters)
+                mh=self.mh,
+                location=t_name.location,
+                typ=self.builtin_bool,
+                choices=parameters,
+            )
 
         elif isinstance(n_name, ast.Builtin_Numeric_Type):
             parameters[0].ensure_type(self.mh, ast.Builtin_Numeric_Type)
             if isinstance(n_name, ast.Builtin_Integer):
                 return ast.Unary_Expression(
-                    mh        = self.mh,
-                    location  = t_name.location,
-                    typ       = self.builtin_int,
-                    operator  = ast.Unary_Operator.CONVERSION_TO_INT,
-                    n_operand = parameters[0])
+                    mh=self.mh,
+                    location=t_name.location,
+                    typ=self.builtin_int,
+                    operator=ast.Unary_Operator.CONVERSION_TO_INT,
+                    n_operand=parameters[0],
+                )
             elif isinstance(n_name, ast.Builtin_Decimal):
                 return ast.Unary_Expression(
-                    mh        = self.mh,
-                    location  = t_name.location,
-                    typ       = self.builtin_decimal,
-                    operator  = ast.Unary_Operator.CONVERSION_TO_DECIMAL,
-                    n_operand = parameters[0])
+                    mh=self.mh,
+                    location=t_name.location,
+                    typ=self.builtin_decimal,
+                    operator=ast.Unary_Operator.CONVERSION_TO_DECIMAL,
+                    n_operand=parameters[0],
+                )
             else:
-                self.mh.ice_loc(t_name.location,
-                                "unexpected type conversion")
+                self.mh.ice_loc(t_name.location, "unexpected type conversion")
 
         else:
-            self.mh.ice_loc(t_name.location,
-                            "unexpected builtin")
+            self.mh.ice_loc(t_name.location, "unexpected builtin")
 
     def parse_name(self, scope):
         # lobster-trace: LRM.Names
@@ -1385,13 +1424,11 @@ class Parser(Parser_Base):
         if self.peek("BRA"):
             # If we follow our name with brackets
             # immediately, we have a builtin function call.
-            n_name = self.stab.lookup(self.mh,
-                                        self.ct)
-            if not isinstance(n_name, (ast.Builtin_Function,
-                                        ast.Builtin_Numeric_Type)):
-                self.mh.error(self.ct.location,
-                                "not a valid builtin function "
-                                "or numeric type")
+            n_name = self.stab.lookup(self.mh, self.ct)
+            if not isinstance(n_name, (ast.Builtin_Function, ast.Builtin_Numeric_Type)):
+                self.mh.error(
+                    self.ct.location, "not a valid builtin function or numeric type"
+                )
         else:
             n_name = self.parse_qualified_name(scope, match_ident=False)
 
@@ -1402,62 +1439,60 @@ class Parser(Parser_Base):
             self.match("DOT")
             n_name.set_ast_link(self.ct)
             self.match("IDENTIFIER")
-            lit = n_name.literals.lookup(self.mh,
-                                         self.ct,
-                                         ast.Enumeration_Literal_Spec)
-            enum_lit = ast.Enumeration_Literal(location = self.ct.location,
-                                               literal  = lit)
+            lit = n_name.literals.lookup(self.mh, self.ct, ast.Enumeration_Literal_Spec)
+            enum_lit = ast.Enumeration_Literal(location=self.ct.location, literal=lit)
             enum_lit.set_ast_link(self.ct)
             return enum_lit
 
         # Anything that remains is either a function call or an actual
         # name. Let's just enforce this for sanity.
-        if not isinstance(n_name, (ast.Builtin_Function,
-                                   ast.Builtin_Numeric_Type,
-                                   ast.Composite_Component,
-                                   ast.Quantified_Variable,
-                                   )):
-            self.mh.error(self.ct.location,
-                          "%s %s is not a valid name" %
-                          (n_name.__class__.__name__,
-                           n_name.name))
+        if not isinstance(
+            n_name,
+            (
+                ast.Builtin_Function,
+                ast.Builtin_Numeric_Type,
+                ast.Composite_Component,
+                ast.Quantified_Variable,
+            ),
+        ):
+            self.mh.error(
+                self.ct.location,
+                "%s %s is not a valid name" % (n_name.__class__.__name__, n_name.name),
+            )
 
         # Right now function calls and type conversions must be
         # top-level, so let's get these out of the way as well.
-        if isinstance(n_name, (ast.Builtin_Function,
-                               ast.Builtin_Numeric_Type)):
+        if isinstance(n_name, (ast.Builtin_Function, ast.Builtin_Numeric_Type)):
             # lobster-trace: LRM.Builtin_Functions
             # lobster-trace: LRM.Builtin_Type_Conversion_Functions
             return self.parse_builtin(scope, n_name, self.ct)
 
-        assert isinstance(n_name, (ast.Composite_Component,
-                                   ast.Quantified_Variable))
+        assert isinstance(n_name, (ast.Composite_Component, ast.Quantified_Variable))
 
         # We now process the potentially recursive part:
         #        | name '.' IDENTIFIER
         #        | name '[' expression ']'
-        n_name = ast.Name_Reference(location = self.ct.location,
-                                    entity   = n_name)
+        n_name = ast.Name_Reference(location=self.ct.location, entity=n_name)
         n_name.set_ast_link(self.ct)
         while self.peek("DOT") or self.peek("S_BRA"):
             if self.peek("DOT"):
-                if not isinstance(n_name.typ, (ast.Tuple_Type,
-                                               ast.Record_Type,
-                                               ast.Union_Type)):
+                if not isinstance(
+                    n_name.typ, (ast.Tuple_Type, ast.Record_Type, ast.Union_Type)
+                ):
                     # lobster-trace: LRM.Valid_Index_Prefixes
-                    self.mh.error(n_name.location,
-                                  "expression '%s' has type %s, "
-                                  "which is not a tuple, record, or union" %
-                                  (n_name.to_string(),
-                                   n_name.typ.name))
+                    self.mh.error(
+                        n_name.location,
+                        "expression '%s' has type %s, "
+                        "which is not a tuple, record, or union"
+                        % (n_name.to_string(), n_name.typ.name),
+                    )
 
                 self.match("DOT")
                 t_dot = self.ct
                 self.match("IDENTIFIER")
                 t_field = self.ct
 
-                is_union_access = isinstance(n_name.typ,
-                                             ast.Union_Type)
+                is_union_access = isinstance(n_name.typ, ast.Union_Type)
                 is_universal = True
 
                 if is_union_access:
@@ -1470,15 +1505,15 @@ class Parser(Parser_Base):
                         self.mh.error(
                             t_field.location,
                             "field %s does not exist in any member"
-                            " of union type %s" %
-                            (field_name, n_name.typ.name))
+                            " of union type %s" % (field_name, n_name.typ.name),
+                        )
                     info = field_map[field_name]
                     if info["n_typ"] is None:
                         self.mh.error(
                             t_field.location,
                             "field %s has conflicting types in"
-                            " members of union type %s" %
-                            (field_name, n_name.typ.name))
+                            " members of union type %s" % (field_name, n_name.typ.name),
+                        )
                     is_universal = info["count"] == info["total"]
                     # lobster-trace: LRM.Union_Type_Partial_Field_Access
                     if self.lint_mode and not is_universal:
@@ -1487,36 +1522,39 @@ class Parser(Parser_Base):
                             "field %s exists only in %u of %u"
                             " members of union type %s;"
                             " accessing it on other members"
-                            " returns null" %
-                            (field_name,
-                             info["count"],
-                             info["total"],
-                             n_name.typ.name),
-                            "union_partial_field_access")
+                            " returns null"
+                            % (
+                                field_name,
+                                info["count"],
+                                info["total"],
+                                n_name.typ.name,
+                            ),
+                            "union_partial_field_access",
+                        )
                     n_field = info["component"]
                 else:
                     n_field = n_name.typ.components.lookup(
-                        self.mh,
-                        t_field,
-                        ast.Composite_Component)
+                        self.mh, t_field, ast.Composite_Component
+                    )
 
                 n_field.set_ast_link(t_field)
                 n_name = ast.Field_Access_Expression(
-                    mh              = self.mh,
-                    location        = t_field.location,
-                    n_prefix        = n_name,
-                    n_field         = n_field,
-                    is_union_access = is_union_access,
-                    is_universal    = is_universal)
+                    mh=self.mh,
+                    location=t_field.location,
+                    n_prefix=n_name,
+                    n_field=n_field,
+                    is_union_access=is_union_access,
+                    is_universal=is_universal,
+                )
                 n_name.set_ast_link(t_dot)
 
             elif self.peek("S_BRA"):
                 if not isinstance(n_name.typ, ast.Array_Type):
-                    self.mh.error(n_name.location,
-                                  "expression '%s' has type %s, "
-                                  "which is not an array" %
-                                  (n_name.to_string(),
-                                   n_name.typ.name))
+                    self.mh.error(
+                        n_name.location,
+                        "expression '%s' has type %s, "
+                        "which is not an array" % (n_name.to_string(), n_name.typ.name),
+                    )
 
                 self.match("S_BRA")
                 t_bracket = self.ct
@@ -1527,12 +1565,13 @@ class Parser(Parser_Base):
                 self.ct.ast_link = a_binary
 
                 n_name = ast.Binary_Expression(
-                    mh       = self.mh,
-                    location = t_bracket.location,
-                    typ      = n_name.typ.element_type,
-                    operator = a_binary,
-                    n_lhs    = n_name,
-                    n_rhs    = n_index)
+                    mh=self.mh,
+                    location=t_bracket.location,
+                    typ=n_name.typ.element_type,
+                    operator=a_binary,
+                    n_lhs=n_name,
+                    n_rhs=n_index,
+                )
 
         return n_name
 
@@ -1544,11 +1583,8 @@ class Parser(Parser_Base):
         self.match("IDENTIFIER")
         # lobster-trace: LRM.Applicable_Types
         # lobster-trace: LRM.Applicable_Components
-        n_ctype = self.cu.package.symbols.lookup(self.mh,
-                                                 self.ct,
-                                                 ast.Composite_Type)
-        n_check_block = ast.Check_Block(location = self.ct.location,
-                                        n_typ    = n_ctype)
+        n_ctype = self.cu.package.symbols.lookup(self.mh, self.ct, ast.Composite_Type)
+        n_check_block = ast.Check_Block(location=self.ct.location, n_typ=n_ctype)
         n_check_block.set_ast_link(t_checks)
         n_ctype.set_ast_link(self.ct)
         scope = ast.Scope()
@@ -1560,8 +1596,7 @@ class Parser(Parser_Base):
         while not self.peek("C_KET"):
             c_expr = self.parse_expression(scope)
             if not isinstance(c_expr.typ, ast.Builtin_Boolean):
-                self.mh.error(c_expr.location,
-                              "check expression must be Boolean")
+                self.mh.error(c_expr.location, "check expression must be Boolean")
 
             self.match("COMMA")
             t_first_comma = self.ct
@@ -1569,8 +1604,7 @@ class Parser(Parser_Base):
                 self.match("KEYWORD")
                 t_severity = self.ct
                 if self.ct.value not in ("warning", "error", "fatal"):
-                    self.mh.error(self.ct.location,
-                                  "expected warning|error|fatal")
+                    self.mh.error(self.ct.location, "expected warning|error|fatal")
                 c_sev = self.ct.value
             else:
                 c_sev = "error"
@@ -1578,13 +1612,15 @@ class Parser(Parser_Base):
             self.match("STRING")
             if "\n" in self.ct.value:
                 # lobster-trace: LRM.No_Newlines_In_Message
-                self.mh.error(self.ct.location,
-                              "error message must not contain a newline",
-                              fatal = False)
+                self.mh.error(
+                    self.ct.location,
+                    "error message must not contain a newline",
+                    fatal=False,
+                )
             t_msg = self.ct
 
             has_extrainfo = False
-            has_anchor    = False
+            has_anchor = False
             if self.peek("COMMA"):
                 self.match("COMMA")
                 t_second_comma = self.ct
@@ -1593,9 +1629,11 @@ class Parser(Parser_Base):
                 elif self.peek("STRING"):
                     has_extrainfo = True
                 else:
-                    self.mh.error(self.nt.location,
-                                  "expected either a details string or"
-                                  " identifier to anchor the check message")
+                    self.mh.error(
+                        self.nt.location,
+                        "expected either a details string or"
+                        " identifier to anchor the check message",
+                    )
 
             if has_extrainfo:
                 self.match("STRING")
@@ -1613,18 +1651,20 @@ class Parser(Parser_Base):
             if has_anchor:
                 self.match("IDENTIFIER")
                 t_anchor = self.ct
-                c_anchor = n_ctype.components.lookup(self.mh,
-                                                     self.ct,
-                                                     ast.Composite_Component)
+                c_anchor = n_ctype.components.lookup(
+                    self.mh, self.ct, ast.Composite_Component
+                )
             else:
                 c_anchor = None
 
-            n_check = ast.Check(n_type    = n_ctype,
-                                n_expr    = c_expr,
-                                n_anchor  = c_anchor,
-                                severity  = c_sev,
-                                t_message = t_msg,
-                                extrainfo = c_extrainfo)
+            n_check = ast.Check(
+                n_type=n_ctype,
+                n_expr=c_expr,
+                n_anchor=c_anchor,
+                severity=c_sev,
+                t_message=t_msg,
+                extrainfo=c_extrainfo,
+            )
 
             # pylint: disable=possibly-used-before-assignment
             # pylint: disable=used-before-assignment
@@ -1657,9 +1697,11 @@ class Parser(Parser_Base):
         self.match_kw("section")
         t_section = self.ct
         self.match("STRING")
-        sec = ast.Section(name     = self.ct.value,
-                          location = self.ct.location,
-                          parent = self.section[-1] if self.section else None)
+        sec = ast.Section(
+            name=self.ct.value,
+            location=self.ct.location,
+            parent=self.section[-1] if self.section else None,
+        )
         sec.set_ast_link(self.ct)
         sec.set_ast_link(t_section)
         self.section.append(sec)
@@ -1677,8 +1719,7 @@ class Parser(Parser_Base):
         if self.ct.value in ("true", "false"):
             return ast.Boolean_Literal(self.ct, self.builtin_bool)
         else:
-            self.mh.error(self.ct.location,
-                          "expected boolean literal (true or false)")
+            self.mh.error(self.ct.location, "expected boolean literal (true or false)")
 
     def parse_value(self, typ):
         # lobster-trace: LRM.Tuple_Syntax_Correct_Form
@@ -1687,13 +1728,14 @@ class Parser(Parser_Base):
         if isinstance(typ, ast.Builtin_Numeric_Type):
             # lobster-trace: LRM.Integer_Values
             # lobster-trace: LRM.Decimal_Values
-            if self.peek("OPERATOR") and \
-               self.nt.value in Parser.ADDING_OPERATOR:
+            if self.peek("OPERATOR") and self.nt.value in Parser.ADDING_OPERATOR:
                 self.match("OPERATOR")
                 t_op = self.ct
-                e_op = (ast.Unary_Operator.PLUS
-                        if t_op.value == "+"
-                        else ast.Unary_Operator.MINUS)
+                e_op = (
+                    ast.Unary_Operator.PLUS
+                    if t_op.value == "+"
+                    else ast.Unary_Operator.MINUS
+                )
                 t_op.ast_link = e_op
             else:
                 t_op = None
@@ -1710,11 +1752,13 @@ class Parser(Parser_Base):
                 assert False
 
             if t_op:
-                rv = ast.Unary_Expression(mh        = self.mh,
-                                          location  = t_op.location,
-                                          typ       = rv.typ,
-                                          operator  = e_op,
-                                          n_operand = rv)
+                rv = ast.Unary_Expression(
+                    mh=self.mh,
+                    location=t_op.location,
+                    typ=rv.typ,
+                    operator=e_op,
+                    n_operand=rv,
+                )
 
             return rv
 
@@ -1736,8 +1780,7 @@ class Parser(Parser_Base):
 
         elif isinstance(typ, ast.Array_Type):
             self.match("S_BRA")
-            rv = ast.Array_Aggregate(self.ct.location,
-                                     typ)
+            rv = ast.Array_Aggregate(self.ct.location, typ)
             rv.set_ast_link(self.ct)
             while not self.peek("S_KET"):
                 array_elem = self.parse_value(typ.element_type)
@@ -1748,46 +1791,42 @@ class Parser(Parser_Base):
                 elif self.peek("S_KET") or self.nt is None:
                     break
                 else:
-                    self.mh.error(self.ct.location,
-                                  "comma separating array elements is "
-                                  "missing",
-                                  fatal = False)
+                    self.mh.error(
+                        self.ct.location,
+                        "comma separating array elements is missing",
+                        fatal=False,
+                    )
 
             self.match("S_KET")
             rv.set_ast_link(self.ct)
 
             if len(rv.value) < typ.lower_bound:
-                self.mh.error(self.ct.location,
-                              "this array requires at least %u elements "
-                              "(only %u provided)" %
-                              (typ.lower_bound,
-                               len(rv.value)),
-                              fatal=False)
+                self.mh.error(
+                    self.ct.location,
+                    "this array requires at least %u elements "
+                    "(only %u provided)" % (typ.lower_bound, len(rv.value)),
+                    fatal=False,
+                )
             if typ.upper_bound and len(rv.value) > typ.upper_bound:
-                self.mh.error(rv.value[typ.upper_bound].location,
-                              "this array requires at most %u elements "
-                              "(%u provided)" %
-                              (typ.upper_bound,
-                               len(rv.value)),
-                              fatal=False)
+                self.mh.error(
+                    rv.value[typ.upper_bound].location,
+                    "this array requires at most %u elements "
+                    "(%u provided)" % (typ.upper_bound, len(rv.value)),
+                    fatal=False,
+                )
 
             return rv
 
         elif isinstance(typ, ast.Enumeration_Type):
-            enum = self.parse_qualified_name(self.default_scope,
-                                             ast.Enumeration_Type)
+            enum = self.parse_qualified_name(self.default_scope, ast.Enumeration_Type)
             enum.set_ast_link(self.ct)
             if enum != typ:
-                self.mh.error(self.ct.location,
-                              "expected %s" % typ.name)
+                self.mh.error(self.ct.location, "expected %s" % typ.name)
             self.match("DOT")
             enum.set_ast_link(self.ct)
             self.match("IDENTIFIER")
-            lit = enum.literals.lookup(self.mh,
-                                       self.ct,
-                                       ast.Enumeration_Literal_Spec)
-            return ast.Enumeration_Literal(self.ct.location,
-                                           lit)
+            lit = enum.literals.lookup(self.mh, self.ct, ast.Enumeration_Literal_Spec)
+            return ast.Enumeration_Literal(self.ct.location, lit)
 
         elif isinstance(typ, (ast.Record_Type, ast.Union_Type)):
             self.match("IDENTIFIER")
@@ -1800,16 +1839,16 @@ class Parser(Parser_Base):
                 the_pkg.set_ast_link(t_name)
                 the_pkg.set_ast_link(t_dot)
                 if not self.cu.is_visible(the_pkg):
-                    self.mh.error(self.ct.location,
-                                  "package must be imported before use")
+                    self.mh.error(
+                        self.ct.location, "package must be imported before use"
+                    )
                 t_name = self.ct
             else:
                 the_pkg = self.cu.package
 
-            rv = ast.Record_Reference(location = t_name.location,
-                                      name     = t_name.value,
-                                      typ      = typ,
-                                      package  = the_pkg)
+            rv = ast.Record_Reference(
+                location=t_name.location, name=t_name.value, typ=typ, package=the_pkg
+            )
             rv.set_ast_link(t_name)
 
             # We can do an early lookup if the target is known
@@ -1838,8 +1877,7 @@ class Parser(Parser_Base):
                         next_is_optional = True
 
                 elif n_item.token.kind == "IDENTIFIER":
-                    if self.peek("IDENTIFIER") and \
-                       self.nt.value == n_item.token.value:
+                    if self.peek("IDENTIFIER") and self.nt.value == n_item.token.value:
                         self.match("IDENTIFIER")
                         n_item.set_ast_link(self.ct)
                     else:
@@ -1863,17 +1901,17 @@ class Parser(Parser_Base):
                 else:
                     self.match("COMMA")
                     rv.set_ast_link(self.ct)
-                rv.assign(n_field.name,
-                          self.parse_value(n_field.n_typ))
+                rv.assign(n_field.name, self.parse_value(n_field.n_typ))
 
             self.match("KET")
             rv.set_ast_link(self.ct)
             return rv
 
         else:
-            self.mh.ice_loc(self.ct.location,
-                            "logic error: unexpected type %s" %
-                            typ.__class__.__name__)
+            self.mh.ice_loc(
+                self.ct.location,
+                "logic error: unexpected type %s" % typ.__class__.__name__,
+            )
 
     def parse_markup_string(self):
         # lobster-trace: LRM.Markup_String_Values
@@ -1893,22 +1931,23 @@ class Parser(Parser_Base):
         # lobster-trace: LRM.Evaluation_Of_Checks
         # lobster-trace: LRM.Single_Value_Assignment
 
-        r_typ = self.parse_qualified_name(self.default_scope,
-                                          ast.Record_Type)
+        r_typ = self.parse_qualified_name(self.default_scope, ast.Record_Type)
         r_typ.set_ast_link(self.ct)
         # lobster-trace: LRM.Abstract_Types
         if r_typ.is_abstract:
-            self.mh.error(self.ct.location,
-                          "cannot declare object of abstract record type %s" %
-                          r_typ.name)
+            self.mh.error(
+                self.ct.location,
+                "cannot declare object of abstract record type %s" % r_typ.name,
+            )
 
         self.match("IDENTIFIER")
         obj = ast.Record_Object(
-            name      = self.ct.value,
-            location  = self.ct.location,
-            n_typ     = r_typ,
-            section   = self.section.copy() if self.section else None,
-            n_package = self.cu.package)
+            name=self.ct.value,
+            location=self.ct.location,
+            n_typ=r_typ,
+            section=self.section.copy() if self.section else None,
+            n_package=self.cu.package,
+        )
         self.cu.package.symbols.register(self.mh, obj)
         obj.set_ast_link(self.ct)
 
@@ -1916,19 +1955,18 @@ class Parser(Parser_Base):
         obj.set_ast_link(self.ct)
         while not self.peek("C_KET"):
             self.match("IDENTIFIER")
-            comp = r_typ.components.lookup(self.mh,
-                                           self.ct,
-                                           ast.Composite_Component)
+            comp = r_typ.components.lookup(self.mh, self.ct, ast.Composite_Component)
             if obj.is_component_implicit_null(comp):
-                self.mh.error(self.ct.location,
-                              "component '%s' already assigned at line %i" %
-                              (comp.name,
-                               obj.field[comp.name].location.line_no))
+                self.mh.error(
+                    self.ct.location,
+                    "component '%s' already assigned at line %i"
+                    % (comp.name, obj.field[comp.name].location.line_no),
+                )
             comp.set_ast_link(self.ct)
             if r_typ.is_frozen(comp):
-                self.mh.error(self.ct.location,
-                              "cannot overwrite frozen component %s" %
-                              comp.name)
+                self.mh.error(
+                    self.ct.location, "cannot overwrite frozen component %s" % comp.name
+                )
             self.match("ASSIGN")
             comp.set_ast_link(self.ct)
             value = self.parse_value(comp.n_typ)
@@ -1944,9 +1982,9 @@ class Parser(Parser_Base):
                 elif not comp.optional:
                     self.mh.error(
                         obj.location,
-                        "required component %s (see %s) is not defined" %
-                        (comp.name,
-                         self.mh.cross_file_reference(comp.location)))
+                        "required component %s (see %s) is not defined"
+                        % (comp.name, self.mh.cross_file_reference(comp.location)),
+                    )
 
         self.match("C_KET")
         obj.set_ast_link(self.ct)
@@ -1979,10 +2017,12 @@ class Parser(Parser_Base):
 
         if declare_package:
             # lobster-trace: LRM.Package_Declaration
-            pkg = ast.Package(name          = self.ct.value,
-                              location      = self.ct.location,
-                              builtin_stab  = self.stab,
-                              declared_late = kind == "trlc")
+            pkg = ast.Package(
+                name=self.ct.value,
+                location=self.ct.location,
+                builtin_stab=self.stab,
+                declared_late=kind == "trlc",
+            )
             self.stab.register(self.mh, pkg)
         else:
             pkg = self.stab.lookup(self.mh, self.ct, ast.Package)
@@ -2025,12 +2065,14 @@ class Parser(Parser_Base):
                 # relevant keyword
                 self.skip_until_newline()
                 while not self.peek_eof():
-                    if self.peek_kw("checks") or \
-                       self.peek_kw("type") or \
-                       self.peek_kw("abstract") or \
-                       self.peek_kw("final") or \
-                       self.peek_kw("tuple") or \
-                       self.peek_kw("enum"):
+                    if (
+                        self.peek_kw("checks")
+                        or self.peek_kw("type")
+                        or self.peek_kw("abstract")
+                        or self.peek_kw("final")
+                        or self.peek_kw("tuple")
+                        or self.peek_kw("enum")
+                    ):
                         break
                     self.advance()
                     self.skip_until_newline()
@@ -2068,14 +2110,13 @@ class Parser(Parser_Base):
                     elif not self.peek("IDENTIFIER"):
                         pass
                     elif self.stab.contains(self.nt.value):
-                        n_sym = self.stab.lookup_assuming(self.mh,
-                                                          self.nt.value)
+                        n_sym = self.stab.lookup_assuming(self.mh, self.nt.value)
                         if isinstance(n_sym, ast.Package):
                             break
                     elif self.cu.package.symbols.contains(self.nt.value):
                         n_sym = self.cu.package.symbols.lookup_assuming(
-                            self.mh,
-                            self.nt.value)
+                            self.mh, self.nt.value
+                        )
                         if isinstance(n_sym, ast.Record_Type):
                             break
                     self.advance()

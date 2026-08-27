@@ -22,7 +22,7 @@
 
 
 def current_section():
-    """ Get most recent (i.e. first) section of the changelog """
+    """Get most recent (i.e. first) section of the changelog"""
     tmp = ""
     relevant_log = ""
     mode = "searching for changelog"
@@ -47,7 +47,7 @@ def current_section():
 
 
 def set_current_title(new_title):
-    """ Update last CHANGELOG entry to the given title. """
+    """Update last CHANGELOG entry to the given title."""
     assert isinstance(new_title, str)
 
     tmp = ""
@@ -69,7 +69,7 @@ def set_current_title(new_title):
 
 
 def add_new_section(new_title):
-    """ Add new CHANGELOG entry with the given title. """
+    """Add new CHANGELOG entry with the given title."""
     assert isinstance(new_title, str)
 
     tmp = ""

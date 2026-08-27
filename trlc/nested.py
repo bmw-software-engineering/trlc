@@ -48,35 +48,43 @@ class Nested_Lexer(Lexer_Base):
 
         if self.origin_multi_string:
             loc = Source_Reference(
-                lexer      = self.origin_location.lexer,
-                start_line = self.origin_location.line_no + (start_line - 1),
-                start_col  = (self.origin_location.col_no + self.base_offset
-                              if start_line == 1
-                              else start_col),
-                start_pos  = (self.origin_location.start_pos +
-                              self.base_offset +
-                              begin),
-                end_pos    = (self.origin_location.start_pos +
-                              self.base_offset +
-                              end))
+                lexer=self.origin_location.lexer,
+                start_line=self.origin_location.line_no + (start_line - 1),
+                start_col=(
+                    self.origin_location.col_no + self.base_offset
+                    if start_line == 1
+                    else start_col
+                ),
+                start_pos=(self.origin_location.start_pos + self.base_offset + begin),
+                end_pos=(self.origin_location.start_pos + self.base_offset + end),
+            )
 
         else:
             escapes_to_start = self.content[0:begin].count('"')
-            escapes_to_end = escapes_to_start + \
-                self.content[begin:end + 1].count('"')
+            escapes_to_end = escapes_to_start + self.content[begin : end + 1].count('"')
             assert start_line == 1
             loc = Source_Reference(
-                lexer      = self.origin_location.lexer,
-                start_line = self.origin_location.line_no,
-                start_col  = (self.origin_location.col_no +
-                              self.base_offset +
-                              begin + escapes_to_start),
-                start_pos  = (self.origin_location.start_pos +
-                              self.base_offset +
-                              begin + escapes_to_start),
-                end_pos    = (self.origin_location.start_pos +
-                              self.base_offset +
-                              end + escapes_to_end))
+                lexer=self.origin_location.lexer,
+                start_line=self.origin_location.line_no,
+                start_col=(
+                    self.origin_location.col_no
+                    + self.base_offset
+                    + begin
+                    + escapes_to_start
+                ),
+                start_pos=(
+                    self.origin_location.start_pos
+                    + self.base_offset
+                    + begin
+                    + escapes_to_start
+                ),
+                end_pos=(
+                    self.origin_location.start_pos
+                    + self.base_offset
+                    + end
+                    + escapes_to_end
+                ),
+            )
 
         return loc
 

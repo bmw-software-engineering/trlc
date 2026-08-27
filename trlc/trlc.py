@@ -36,6 +36,7 @@ from trlc.version import BUGS_URL, TRLC_VERSION
 # pylint: disable=unused-import
 try:
     import cvc5
+
     VCG_API_AVAILABLE = True
 except ImportError:  # pragma: no cover
     VCG_API_AVAILABLE = False
@@ -75,40 +76,44 @@ class Source_Manager:
     :type debug_vcg: bool
 
     """
-    def __init__(self, mh,
-                 lint_mode      = True,
-                 parse_trlc     = True,
-                 verify_mode    = False,
-                 debug_vcg      = False,
-                 error_recovery = True):
+
+    def __init__(
+        self,
+        mh,
+        lint_mode=True,
+        parse_trlc=True,
+        verify_mode=False,
+        debug_vcg=False,
+        error_recovery=True,
+    ):
         assert isinstance(mh, Message_Handler)
         assert isinstance(lint_mode, bool)
         assert isinstance(parse_trlc, bool)
         assert isinstance(verify_mode, bool)
         assert isinstance(debug_vcg, bool)
 
-        self.mh          = mh
-        self.mh.sm       = self
-        self.stab        = ast.Symbol_Table.create_global_table(mh)
-        self.includes    = {}
-        self.rsl_files   = {}
-        self.trlc_files  = {}
-        self.all_files   = {}
-        self.dep_graph   = {}
+        self.mh = mh
+        self.mh.sm = self
+        self.stab = ast.Symbol_Table.create_global_table(mh)
+        self.includes = {}
+        self.rsl_files = {}
+        self.trlc_files = {}
+        self.all_files = {}
+        self.dep_graph = {}
 
         self.files_with_preamble_errors = set()
 
-        self.lint_mode      = lint_mode
-        self.parse_trlc     = parse_trlc
-        self.verify_mode    = verify_mode
-        self.debug_vcg      = debug_vcg
+        self.lint_mode = lint_mode
+        self.parse_trlc = parse_trlc
+        self.verify_mode = verify_mode
+        self.debug_vcg = debug_vcg
         self.error_recovery = error_recovery
 
         self.exclude_patterns = []
-        self.common_root      = None
+        self.common_root = None
 
         self.progress_current = 0
-        self.progress_final   = 0
+        self.progress_final = 0
 
     def callback_parse_begin(self):
         pass
@@ -133,12 +138,12 @@ class Source_Manager:
         if self.common_root is None:
             return location.to_string(False)
         elif location.line_no is None:
-            return os.path.relpath(location.file_name,
-                                   self.common_root)
+            return os.path.relpath(location.file_name, self.common_root)
         else:
-            return "%s:%u" % (os.path.relpath(location.file_name,
-                                              self.common_root),
-                              location.line_no)
+            return "%s:%u" % (
+                os.path.relpath(location.file_name, self.common_root),
+                location.line_no,
+            )
 
     def update_common_root(self, file_name):
         assert isinstance(file_name, str)
@@ -147,8 +152,7 @@ class Source_Manager:
             self.common_root = os.path.dirname(os.path.abspath(file_name))
         else:
             new_root = os.path.dirname(os.path.abspath(file_name))
-            for n, (char_a, char_b) in enumerate(zip(self.common_root,
-                                                     new_root)):
+            for n, (char_a, char_b) in enumerate(zip(self.common_root, new_root)):
                 if char_a != char_b:
                     self.common_root = self.common_root[0:n]
                     break
@@ -161,23 +165,26 @@ class Source_Manager:
         if file_name.endswith(MARKDOWN_EXTENSION):
             lexer = MD_Lexer(self.mh, file_name, file_content)
             return TrlcMarkdownParser(
-                mh             = self.mh,
-                stab           = self.stab,
-                file_name      = file_name,
-                lint_mode      = self.lint_mode,
-                error_recovery = self.error_recovery,
-                primary_file   = primary_file,
-                lexer          = lexer)
+                mh=self.mh,
+                stab=self.stab,
+                file_name=file_name,
+                lint_mode=self.lint_mode,
+                error_recovery=self.error_recovery,
+                primary_file=primary_file,
+                lexer=lexer,
+            )
 
         lexer = Token_Stream(self.mh, file_name, file_content)
 
-        return Parser(mh             = self.mh,
-                      stab           = self.stab,
-                      file_name      = file_name,
-                      lint_mode      = self.lint_mode,
-                      error_recovery = self.error_recovery,
-                      primary_file   = primary_file,
-                      lexer          = lexer)
+        return Parser(
+            mh=self.mh,
+            stab=self.stab,
+            file_name=file_name,
+            lint_mode=self.lint_mode,
+            error_recovery=self.error_recovery,
+            primary_file=primary_file,
+            lexer=lexer,
+        )
 
     def register_include(self, dir_name):
         """Make contents of a directory available for automatic inclusion
@@ -199,12 +206,15 @@ class Source_Manager:
                     del dirs[n]
 
             self.includes.update(
-                {os.path.abspath(full_name): full_name
-                 for full_name in
-                   (os.path.join(path, file_name)
-                    for file_name in files
-                    if os.path.splitext(file_name)[1] in (".rsl",
-                                                          ".trlc"))})
+                {
+                    os.path.abspath(full_name): full_name
+                    for full_name in (
+                        os.path.join(path, file_name)
+                        for file_name in files
+                        if os.path.splitext(file_name)[1] in (".rsl", ".trlc")
+                    )
+                }
+            )
 
     def register_file(self, file_name, file_content=None, primary=True):
         """Schedule a file for parsing.
@@ -236,9 +246,11 @@ class Source_Manager:
             elif file_name.endswith(".trlc") or file_name.endswith(MARKDOWN_EXTENSION):
                 self.register_trlc_file(file_name, file_content, primary)
             else:  # pragma: no cover
-                self.mh.error(Location(os.path.basename(file_name)),
-                              "is not a rsl, trlc or trlc.md file",
-                              fatal = False)
+                self.mh.error(
+                    Location(os.path.basename(file_name)),
+                    "is not a rsl, trlc or trlc.md file",
+                    fatal=False,
+                )
                 return False
 
         except TRLC_Error:
@@ -276,9 +288,10 @@ class Source_Manager:
                     del dirs[n]
 
             for file_name in sorted(files):
-                if os.path.splitext(file_name)[1] in (".rsl",
-                                                      ".trlc") or \
-                        file_name.endswith(MARKDOWN_EXTENSION):
+                if os.path.splitext(file_name)[1] in (
+                    ".rsl",
+                    ".trlc",
+                ) or file_name.endswith(MARKDOWN_EXTENSION):
                     ok &= self.register_file(os.path.join(path, file_name))
         return ok
 
@@ -290,9 +303,7 @@ class Source_Manager:
         # lobster-trace: LRM.Preamble
 
         self.update_common_root(file_name)
-        parser = self.create_parser(file_name,
-                                    file_content,
-                                    primary)
+        parser = self.create_parser(file_name, file_content, primary)
         self.rsl_files[file_name] = parser
         self.all_files[file_name] = parser
         if os.path.abspath(file_name) in self.includes:
@@ -311,9 +322,7 @@ class Source_Manager:
             return
 
         self.update_common_root(file_name)
-        parser = self.create_parser(file_name,
-                                    file_content,
-                                    primary)
+        parser = self.create_parser(file_name, file_content, primary)
         self.trlc_files[file_name] = parser
         self.all_files[file_name] = parser
         if os.path.abspath(file_name) in self.includes:
@@ -330,20 +339,19 @@ class Source_Manager:
         ok = True
         graph = self.dep_graph
         files = {}
-        for container, kind in ((self.rsl_files, "rsl"),
-                                (self.trlc_files, "trlc")):
+        for container, kind in ((self.rsl_files, "rsl"), (self.trlc_files, "trlc")):
             # First parse preamble and register packages in graph
             for file_name in sorted(container):
                 try:
                     parser = container[file_name]
                     parser.parse_preamble(kind)
                     pkg_name = parser.cu.package.name
-                    if (pkg_name , "rsl") not in graph:
-                        graph[(pkg_name , "rsl")] = set()
-                        graph[(pkg_name , "trlc")] = set([(pkg_name , "rsl")])
-                        files[(pkg_name , "rsl")] = set()
-                        files[(pkg_name , "trlc")] = set()
-                    files[(pkg_name , kind)].add(file_name)
+                    if (pkg_name, "rsl") not in graph:
+                        graph[(pkg_name, "rsl")] = set()
+                        graph[(pkg_name, "trlc")] = set([(pkg_name, "rsl")])
+                        files[(pkg_name, "rsl")] = set()
+                        files[(pkg_name, "trlc")] = set()
+                    files[(pkg_name, kind)].add(file_name)
                 except TRLC_Error:
                     ok = False
                     self.files_with_preamble_errors.add(file_name)
@@ -359,17 +367,21 @@ class Source_Manager:
                 pkg_name = parser.cu.package.name
                 parser.cu.resolve_imports(self.mh, self.stab)
 
-                graph[(pkg_name , kind)] |= \
-                    {(imported_pkg.name , kind)
-                     for imported_pkg in parser.cu.imports}
+                graph[(pkg_name, kind)] |= {
+                    (imported_pkg.name, kind) for imported_pkg in parser.cu.imports
+                }
 
         # Build closure for our files
-        work_list = {(parser.cu.package.name , "rsl")
-                     for parser in self.rsl_files.values()
-                     if parser.cu.package and parser.primary}
-        work_list |= {(parser.cu.package.name , "trlc")
-                      for parser in self.trlc_files.values()
-                      if parser.cu.package and parser.primary}
+        work_list = {
+            (parser.cu.package.name, "rsl")
+            for parser in self.rsl_files.values()
+            if parser.cu.package and parser.primary
+        }
+        work_list |= {
+            (parser.cu.package.name, "trlc")
+            for parser in self.trlc_files.values()
+            if parser.cu.package and parser.primary
+        }
         work_list &= set(graph)
 
         required = set()
@@ -379,9 +391,7 @@ class Source_Manager:
             work_list |= (graph[node] - required) & set(graph)
 
         # Expand into actual file list and flag dependencies
-        file_list = {file_name
-                     for node in required
-                     for file_name in files[node]}
+        file_list = {file_name for node in required for file_name in files[node]}
         for file_name in file_list:
             if not self.all_files[file_name].primary:
                 self.all_files[file_name].secondary = True
@@ -398,10 +408,11 @@ class Source_Manager:
         ok = True
 
         # Select RSL files that we should parse
-        rsl_map = {(parser.cu.package.name , "rsl"): parser
-                   for parser in self.rsl_files.values()
-                   if parser.cu.package and (parser.primary or
-                                             parser.secondary)}
+        rsl_map = {
+            (parser.cu.package.name, "rsl"): parser
+            for parser in self.rsl_files.values()
+            if parser.cu.package and (parser.primary or parser.secondary)
+        }
 
         # Parse packages that have no unparsed dependencies. Keep
         # doing it until we parse everything or until we have reached
@@ -410,27 +421,33 @@ class Source_Manager:
         work_list = set(rsl_map)
         processed = set()
         while work_list:
-            candidates = {node
-                          for node in work_list
-                          if len(self.dep_graph.get(node, set()) -
-                                 processed) == 0}
+            candidates = {
+                node
+                for node in work_list
+                if len(self.dep_graph.get(node, set()) - processed) == 0
+            }
             if not candidates:
                 # lobster-trace: LRM.Circular_Dependencies
                 sorted_work_list = sorted(work_list)
                 offender = rsl_map[sorted_work_list[0]]
-                names = {rsl_map[node].cu.package.name:
-                         rsl_map[node].cu.location
-                         for node in sorted_work_list[1:]}
+                names = {
+                    rsl_map[node].cu.package.name: rsl_map[node].cu.location
+                    for node in sorted_work_list[1:]
+                }
                 self.mh.error(
-                    location    = offender.cu.location,
-                    message     = ("circular inheritence between %s" %
-                                   " | ".join(sorted(names))),
-                    explanation = "\n".join(
-                        sorted("%s is declared in %s" %
-                               (name,
-                                self.mh.cross_file_reference(loc))
-                               for name, loc in names.items())),
-                    fatal       = False)
+                    location=offender.cu.location,
+                    message=(
+                        "circular inheritence between %s" % " | ".join(sorted(names))
+                    ),
+                    explanation="\n".join(
+                        sorted(
+                            "%s is declared in %s"
+                            % (name, self.mh.cross_file_reference(loc))
+                            for name, loc in names.items()
+                        )
+                    ),
+                    fatal=False,
+                )
                 return False
 
             for node in sorted(candidates):
@@ -532,16 +549,18 @@ class Source_Manager:
             _md_lexer = getattr(_md_parser, "lexer", None)
             if isinstance(_md_lexer, MD_Lexer):
                 _md_lexer.prepare_phase2(self.stab)  # Rebuild tokens with types
-                _md_parser.ct = None                 # Reset parser cursor
-                _md_parser.advance()                 # Prime first body token
+                _md_parser.ct = None  # Reset parser cursor
+                _md_parser.advance()  # Prime first body token
 
         # Perform sanity checks (enabled by default). We only do this
         # if there were no errors so far.
         if self.lint_mode and ok:
-            linter = lint.Linter(mh            = self.mh,
-                                 stab          = self.stab,
-                                 verify_checks = self.verify_mode,
-                                 debug_vcg     = self.debug_vcg)
+            linter = lint.Linter(
+                mh=self.mh,
+                stab=self.stab,
+                verify_checks=self.verify_mode,
+                debug_vcg=self.debug_vcg,
+            )
             ok &= linter.perform_sanity_checks()
         # Stop here if we're not processing TRLC files.
         if not self.parse_trlc:  # pragma: no cover
@@ -585,112 +604,143 @@ def trlc():
     ap = argparse.ArgumentParser(
         prog="trlc",
         description="TRLC %s (Python reference implementation)" % TRLC_VERSION,
-        epilog=("TRLC is licensed under the GPLv3."
-                " Report bugs here: %s" % BUGS_URL),
+        epilog=("TRLC is licensed under the GPLv3. Report bugs here: %s" % BUGS_URL),
         allow_abbrev=False,
     )
     og_lint = ap.add_argument_group("analysis options")
-    og_lint.add_argument("--no-lint",
-                         default=False,
-                         action="store_true",
-                         help="Disable additional, optional warnings.")
-    og_lint.add_argument("--skip-trlc-files",
-                         default=False,
-                         action="store_true",
-                         help=("Only process rsl files,"
-                               " do not process any trlc files."))
-    og_lint.add_argument("--verify",
-                         default=False,
-                         action="store_true",
-                         help=("[EXPERIMENTAL] Attempt to statically"
-                               " verify absence of errors in user defined"
-                               " checks. Does not yet support all language"
-                               " constructs. Requires PyVCG to be "
-                               " installed."))
+    og_lint.add_argument(
+        "--no-lint",
+        default=False,
+        action="store_true",
+        help="Disable additional, optional warnings.",
+    )
+    og_lint.add_argument(
+        "--skip-trlc-files",
+        default=False,
+        action="store_true",
+        help=("Only process rsl files, do not process any trlc files."),
+    )
+    og_lint.add_argument(
+        "--verify",
+        default=False,
+        action="store_true",
+        help=(
+            "[EXPERIMENTAL] Attempt to statically"
+            " verify absence of errors in user defined"
+            " checks. Does not yet support all language"
+            " constructs. Requires PyVCG to be "
+            " installed."
+        ),
+    )
 
     og_input = ap.add_argument_group("input options")
-    og_input.add_argument("--include-bazel-dirs",
-                          action="store_true",
-                          help=("Enter bazel-* directories, which are"
-                                " excluded by default."))
-    og_input.add_argument("-I",
-                          action="append",
-                          dest="include_dirs",
-                          help=("Add include path. Files from these"
-                                " directories are parsed only when needed."
-                                " Can be specified more than once."),
-                          default=[])
+    og_input.add_argument(
+        "--include-bazel-dirs",
+        action="store_true",
+        help=("Enter bazel-* directories, which are excluded by default."),
+    )
+    og_input.add_argument(
+        "-I",
+        action="append",
+        dest="include_dirs",
+        help=(
+            "Add include path. Files from these"
+            " directories are parsed only when needed."
+            " Can be specified more than once."
+        ),
+        default=[],
+    )
 
     og_output = ap.add_argument_group("output options")
-    og_output.add_argument("--version",
-                           default=False,
-                           action="store_true",
-                           help="Print TRLC version and exit.")
-    og_output.add_argument("--brief",
-                           default=False,
-                           action="store_true",
-                           help=("Simpler output intended for CI. Does not"
-                                 " show context or additional information,"
-                                 " but prints the usual summary at the end."))
-    og_output.add_argument("--no-detailed-info",
-                           default=False,
-                           action="store_true",
-                           help=("Do not print counter-examples and other"
-                                 " supplemental information on failed"
-                                 " checks. The specific values of"
-                                 " counter-examples are unpredictable"
-                                 " from system to system, so if you need"
-                                 " perfectly reproducible output then use"
-                                 " this option."))
-    og_output.add_argument("--no-user-warnings",
-                           default=False,
-                           action="store_true",
-                           help=("Do not display any warnings from user"
-                                 " defined checks, only errors."))
-    og_output.add_argument("--no-error-recovery",
-                           default=False,
-                           action="store_true",
-                           help=("By default the tool attempts to recover"
-                                 " from parse errors to show more errors, but"
-                                 " this can occasionally generate weird"
-                                 " errors. You can use this option to stop"
-                                 " at the first real errors."))
-    og_output.add_argument("--show-file-list",
-                           action="store_true",
-                           help=("If there are no errors, produce a summary"
-                                 " naming every file processed."))
-    og_output.add_argument("--log",
-                           nargs    = '+',
-                           metavar  = ("FILE", "PREFIX"),
-                           default  = None,
-                           help     = ("Write all output to FILE, optionally"
-                                       " strip PREFIX from file paths in"
-                                       " messages. Intended for use as a"
-                                       " Bazel build action."))
-    og_output.add_argument("--error-on-warnings",
-                           action="store_true",
-                           help=("If there are warnings, return status code"
-                                 " 1 instead of 0."))
+    og_output.add_argument(
+        "--version",
+        default=False,
+        action="store_true",
+        help="Print TRLC version and exit.",
+    )
+    og_output.add_argument(
+        "--brief",
+        default=False,
+        action="store_true",
+        help=(
+            "Simpler output intended for CI. Does not"
+            " show context or additional information,"
+            " but prints the usual summary at the end."
+        ),
+    )
+    og_output.add_argument(
+        "--no-detailed-info",
+        default=False,
+        action="store_true",
+        help=(
+            "Do not print counter-examples and other"
+            " supplemental information on failed"
+            " checks. The specific values of"
+            " counter-examples are unpredictable"
+            " from system to system, so if you need"
+            " perfectly reproducible output then use"
+            " this option."
+        ),
+    )
+    og_output.add_argument(
+        "--no-user-warnings",
+        default=False,
+        action="store_true",
+        help=("Do not display any warnings from user defined checks, only errors."),
+    )
+    og_output.add_argument(
+        "--no-error-recovery",
+        default=False,
+        action="store_true",
+        help=(
+            "By default the tool attempts to recover"
+            " from parse errors to show more errors, but"
+            " this can occasionally generate weird"
+            " errors. You can use this option to stop"
+            " at the first real errors."
+        ),
+    )
+    og_output.add_argument(
+        "--show-file-list",
+        action="store_true",
+        help=("If there are no errors, produce a summary naming every file processed."),
+    )
+    og_output.add_argument(
+        "--log",
+        nargs="+",
+        metavar=("FILE", "PREFIX"),
+        default=None,
+        help=(
+            "Write all output to FILE, optionally"
+            " strip PREFIX from file paths in"
+            " messages. Intended for use as a"
+            " Bazel build action."
+        ),
+    )
+    og_output.add_argument(
+        "--error-on-warnings",
+        action="store_true",
+        help=("If there are warnings, return status code 1 instead of 0."),
+    )
 
     og_debug = ap.add_argument_group("debug options")
-    og_debug.add_argument("--debug-dump",
-                          default=False,
-                          action="store_true",
-                          help="Dump symbol table.")
-    og_debug.add_argument("--debug-api-dump",
-                          default=False,
-                          action="store_true",
-                          help=("Dump json of to_python_object() for all"
-                                " objects."))
-    og_debug.add_argument("--debug-vcg",
-                          default=False,
-                          action="store_true",
-                          help=("Emit graph and individual VCs. Requires"
-                                " graphviz to be installed."))
+    og_debug.add_argument(
+        "--debug-dump", default=False, action="store_true", help="Dump symbol table."
+    )
+    og_debug.add_argument(
+        "--debug-api-dump",
+        default=False,
+        action="store_true",
+        help=("Dump json of to_python_object() for all objects."),
+    )
+    og_debug.add_argument(
+        "--debug-vcg",
+        default=False,
+        action="store_true",
+        help=("Emit graph and individual VCs. Requires graphviz to be installed."),
+    )
 
-    ap.add_argument("items",
-                    nargs="*",
-                    metavar="DIR|FILE")
+    ap.add_argument("items", nargs="*", metavar="DIR|FILE")
     options = ap.parse_args()
 
     if options.log:
@@ -704,23 +754,26 @@ def trlc():
         sys.exit(0)
 
     if options.verify and not VCG_API_AVAILABLE:  # pragma: no cover
-        ap.error("The --verify option requires the optional dependency"
-                 " CVC5")
+        ap.error("The --verify option requires the optional dependency CVC5")
 
-    mh = Message_Handler(options.brief,
-                          not options.no_detailed_info,
-                          out_path     = options.log[0] if options.log else None,
-                          strip_prefix = options.log[1] if options.log else None)
+    mh = Message_Handler(
+        options.brief,
+        not options.no_detailed_info,
+        out_path=options.log[0] if options.log else None,
+        strip_prefix=options.log[1] if options.log else None,
+    )
 
     if options.no_user_warnings:  # pragma: no cover
         mh.suppress(Kind.USER_WARNING)
 
-    sm = Source_Manager(mh             = mh,
-                        lint_mode      = not options.no_lint,
-                        parse_trlc     = not options.skip_trlc_files,
-                        verify_mode    = options.verify,
-                        debug_vcg      = options.debug_vcg,
-                        error_recovery = not options.no_error_recovery)
+    sm = Source_Manager(
+        mh=mh,
+        lint_mode=not options.no_lint,
+        parse_trlc=not options.skip_trlc_files,
+        verify_mode=options.verify,
+        debug_vcg=options.debug_vcg,
+        error_recovery=not options.no_error_recovery,
+    )
 
     if not options.include_bazel_dirs:  # pragma: no cover
         sm.exclude_patterns.append(re.compile("^bazel-.*$"))
@@ -736,8 +789,9 @@ def trlc():
     # Process input files, defaulting to the current directory if none
     # given.
     for path_name in options.items:
-        if not (os.path.isdir(path_name) or
-                os.path.isfile(path_name)):  # pragma: no cover
+        if not (
+            os.path.isdir(path_name) or os.path.isfile(path_name)
+        ):  # pragma: no cover
             ap.error("%s is not a file or directory" % path_name)
     if options.items:
         for path_name in options.items:
@@ -772,13 +826,13 @@ def trlc():
             print(json.dumps(tmp, indent=2, sort_keys=True), file=mh.out)
 
     total_models = len(sm.rsl_files)
-    parsed_models = len([item
-                            for item in sm.rsl_files.values()
-                            if item.primary or item.secondary])
+    parsed_models = len(
+        [item for item in sm.rsl_files.values() if item.primary or item.secondary]
+    )
     total_trlc = len(sm.trlc_files)
-    parsed_trlc = len([item
-                        for item in sm.trlc_files.values()
-                        if item.primary or item.secondary])
+    parsed_trlc = len(
+        [item for item in sm.trlc_files.values() if item.primary or item.secondary]
+    )
 
     def count(parsed, total, what):
         rv = str(parsed)
@@ -789,14 +843,10 @@ def trlc():
             rv += "s"
         return rv
 
-    summary = "Processed %s" % count(parsed_models,
-                                        total_models,
-                                        "model")
+    summary = "Processed %s" % count(parsed_models, total_models, "model")
 
     if not options.skip_trlc_files:  # pragma: no cover
-        summary += " and %s" % count(parsed_trlc,
-                                        total_trlc,
-                                        "requirement file")
+        summary += " and %s" % count(parsed_trlc, total_trlc, "requirement file")
 
     summary += " and found"
 
@@ -816,6 +866,7 @@ def trlc():
     print(summary, file=mh.out)
 
     if options.show_file_list and ok:  # pragma: no cover
+
         def get_status(parser):
             if parser.primary:
                 return "[Primary] "
@@ -826,17 +877,19 @@ def trlc():
 
         for filename in sorted(sm.rsl_files):
             parser = sm.rsl_files[filename]
-            print("> %s Model %s (Package %s)" %
-                  (get_status(parser),
-                   filename,
-                   parser.cu.package.name), file=mh.out)
+            print(
+                "> %s Model %s (Package %s)"
+                % (get_status(parser), filename, parser.cu.package.name),
+                file=mh.out,
+            )
         if not options.skip_trlc_files:
             for filename in sorted(sm.trlc_files):
                 parser = sm.trlc_files[filename]
-                print("> %s Requirements %s (Package %s)" %
-                      (get_status(parser),
-                       filename,
-                       parser.cu.package.name), file=mh.out)
+                print(
+                    "> %s Requirements %s (Package %s)"
+                    % (get_status(parser), filename, parser.cu.package.name),
+                    file=mh.out,
+                )
 
     if ok:
         if (options.error_on_warnings and mh.warnings) or mh.errors:  # pragma: no cover

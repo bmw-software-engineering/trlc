@@ -42,8 +42,8 @@ test_suite(
 test_suite(
     name = "bzl_api",
     tests = [
-        "//tests-system/bzl-api-simple:bzl-api-simple-test",
         "//tests-system/bzl-api-deps:bzl-api-deps-test",
+        "//tests-system/bzl-api-simple:bzl-api-simple-test",
         "//tests-system/bzl-api-spec-check:bzl-api-spec-check-test",
     ],
 )

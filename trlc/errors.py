@@ -40,6 +40,7 @@ class Location:
     :attribute col_no: an optional column number, starting at 1
     :type: int:
     """
+
     def __init__(self, file_name, line_no=None, col_no=None):
         assert isinstance(file_name, str)
         if line_no is not None:
@@ -48,9 +49,9 @@ class Location:
         if col_no is not None:
             assert isinstance(col_no, int)
             assert col_no >= 1
-        self.file_name   = file_name
-        self.line_no     = line_no
-        self.col_no      = col_no
+        self.file_name = file_name
+        self.line_no = line_no
+        self.col_no = col_no
 
     def to_string(self, include_column=True):
         """Return a nice string representation
@@ -104,15 +105,17 @@ class Kind(enum.Enum):
     USER_WARNING = enum.auto()
 
     def __str__(self):
-        return {"SYS_ERROR"    : "error",
-                "SYS_CHECK"    : "issue",
-                "SYS_WARNING"  : "warning",
-                "USER_ERROR"   : "check error",
-                "USER_WARNING" : "check warning"}[self.name]
+        return {
+            "SYS_ERROR": "error",
+            "SYS_CHECK": "issue",
+            "SYS_WARNING": "warning",
+            "USER_ERROR": "check error",
+            "USER_WARNING": "check warning",
+        }[self.name]
 
 
 class TRLC_Error(Exception):
-    """ The universal exception that TRLC raises if something goes wrong
+    """The universal exception that TRLC raises if something goes wrong
 
     :attribute location: Where the issue originates from
     :type: Location
@@ -123,6 +126,7 @@ class TRLC_Error(Exception):
     :attribute message: Description of the problem
     :type: str
     """
+
     def __init__(self, location, kind, message):
         assert isinstance(location, Location)
         assert isinstance(kind, Kind)
@@ -130,8 +134,8 @@ class TRLC_Error(Exception):
 
         super().__init__()
         self.location = location
-        self.kind     = kind
-        self.message  = message
+        self.kind = kind
+        self.message = message
 
 
 class Message_Handler:
@@ -169,26 +173,34 @@ class Message_Handler:
     ``out_path``.
 
     """
-    def __init__(self, brief=False, detailed_info=True,
-                 out=None, strip_prefix=None, out_path=None):
+
+    def __init__(
+        self,
+        brief=False,
+        detailed_info=True,
+        out=None,
+        strip_prefix=None,
+        out_path=None,
+    ):
         assert isinstance(brief, bool)
         assert isinstance(strip_prefix, str) or strip_prefix is None
         assert isinstance(out_path, str) or out_path is None
-        self.brief         = brief
-        self.show_details  = detailed_info
-        self.warnings      = 0
-        self.errors        = 0
-        self.suppressed    = 0
-        self.sm            = None
+        self.brief = brief
+        self.show_details = detailed_info
+        self.warnings = 0
+        self.errors = 0
+        self.suppressed = 0
+        self.sm = None
         self.suppress_kind = set()
-        self.strip_prefix  = strip_prefix
+        self.strip_prefix = strip_prefix
         if out_path is not None:
             self._owned_file = open(  # pylint: disable=consider-using-with
-                out_path, "w", encoding="UTF-8")
-            self.out         = self._owned_file
+                out_path, "w", encoding="UTF-8"
+            )
+            self.out = self._owned_file
         else:
             self._owned_file = None
-            self.out         = out if out is not None else sys.stdout
+            self.out = out if out is not None else sys.stdout
 
     def close(self):
         if self._owned_file is not None:
@@ -215,13 +227,7 @@ class Message_Handler:
             return location.to_string(include_column=False)
         return self.sm.cross_file_reference(location)
 
-    def emit(self,
-             location,
-             kind,
-             message,
-             fatal=True,
-             extrainfo=None,
-             category=None):
+    def emit(self, location, kind, message, fatal=True, extrainfo=None, category=None):
         assert isinstance(location, Location)
         assert isinstance(kind, Kind)
         assert isinstance(message, str)
@@ -232,20 +238,16 @@ class Message_Handler:
         def _loc_str(include_column=True):
             loc = location.to_string(include_column)
             if self.strip_prefix and loc.startswith(self.strip_prefix):
-                loc = loc[len(self.strip_prefix):]
+                loc = loc[len(self.strip_prefix) :]
             return loc
 
         if self.brief:
             context = None
-            msg = "%s: trlc %s: %s" % (_loc_str(),
-                                       str(kind),
-                                       message)
+            msg = "%s: trlc %s: %s" % (_loc_str(), str(kind), message)
 
         else:
             context = location.context_lines()
-            msg = "%s: %s: %s" % (_loc_str(len(context) == 0),
-                                  str(kind),
-                                  message)
+            msg = "%s: %s: %s" % (_loc_str(len(context) == 0), str(kind), message)
 
         if category:
             msg += " [%s]" % category
@@ -261,16 +263,13 @@ class Message_Handler:
             else:
                 print(msg, file=self.out)
 
-            if not self.brief \
-               and self.show_details \
-               and extrainfo:
+            if not self.brief and self.show_details and extrainfo:
                 if context:
                     indent = len(context[1]) - 1
                 else:
                     indent = 0
                 for line in extrainfo.splitlines():
-                    print("%s| %s" % (" " * indent,
-                                      line.rstrip()), file=self.out)
+                    print("%s| %s" % (" " * indent, line.rstrip()), file=self.out)
 
         if fatal:
             raise TRLC_Error(location, kind, message)
@@ -280,16 +279,9 @@ class Message_Handler:
         assert isinstance(message, str)
 
         self.errors += 1
-        self.emit(location = location,
-                  kind     = Kind.SYS_ERROR,
-                  message  = message)
+        self.emit(location=location, kind=Kind.SYS_ERROR, message=message)
 
-    def error(self,
-              location,
-              message,
-              explanation=None,
-              fatal=True,
-              user=False):
+    def error(self, location, message, explanation=None, fatal=True, user=False):
         """ Create an error message
 
         For example::
@@ -328,14 +320,16 @@ class Message_Handler:
             kind = Kind.SYS_ERROR
 
         self.errors += 1
-        self.emit(location  = location,
-                  kind      = kind,
-                  message   = message,
-                  fatal     = fatal,
-                  extrainfo = explanation)
+        self.emit(
+            location=location,
+            kind=kind,
+            message=message,
+            fatal=fatal,
+            extrainfo=explanation,
+        )
 
     def warning(self, location, message, explanation=None, user=False):
-        """ Create a warning message
+        """Create a warning message
 
         :param location: where to attach the message
         :type location: Location
@@ -355,11 +349,13 @@ class Message_Handler:
             kind = Kind.SYS_WARNING
 
         self.warnings += 1
-        self.emit(location  = location,
-                  kind      = kind,
-                  message   = message,
-                  extrainfo = explanation,
-                  fatal     = False)
+        self.emit(
+            location=location,
+            kind=kind,
+            message=message,
+            extrainfo=explanation,
+            fatal=False,
+        )
 
     def check(self, location, message, check, explanation=None):
         assert isinstance(location, Location)
@@ -368,21 +364,25 @@ class Message_Handler:
         assert isinstance(explanation, str) or explanation is None
 
         self.warnings += 1
-        self.emit(location  = location,
-                  kind      = Kind.SYS_CHECK,
-                  message   = message,
-                  fatal     = False,
-                  extrainfo = explanation,
-                  category  = check)
+        self.emit(
+            location=location,
+            kind=Kind.SYS_CHECK,
+            message=message,
+            fatal=False,
+            extrainfo=explanation,
+            category=check,
+        )
 
     def ice_loc(self, location, message):  # pragma: no cover
         assert isinstance(location, Location)
         assert isinstance(message, str)
 
         self.errors += 1
-        self.emit(location  = location,
-                  kind      = Kind.SYS_ERROR,
-                  message   = message,
-                  extrainfo = "please report this to %s" % version.BUGS_URL,
-                  fatal     = False)
+        self.emit(
+            location=location,
+            kind=Kind.SYS_ERROR,
+            message=message,
+            extrainfo="please report this to %s" % version.BUGS_URL,
+            fatal=False,
+        )
         sys.exit(1)

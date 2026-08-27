@@ -21,8 +21,10 @@ if symbols is None:
 # Do something if there are no errors
 for obj in symbols.iter_record_objects():
     values = obj.to_python_dict()
-    if values["illustration"] is not None and \
-       not os.path.isfile(values["illustration"]):
-        print("error: %s for requirement %s is not a file" %
-              (values["illustration"],
-               obj.name))
+    if values["illustration"] is not None and not os.path.isfile(
+        values["illustration"]
+    ):
+        print(
+            "error: %s for requirement %s is not a file"
+            % (values["illustration"], obj.name)
+        )

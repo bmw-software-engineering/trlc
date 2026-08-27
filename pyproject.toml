@@ -1,7 +1,19 @@
 [tool.ty.rules]
 # ty is Astral's Python type checker (fast, Rust-based)
-# Add per-rule overrides here as needed, e.g.:
-#   invalid-return-type = "warn"
+# The trlc codebase uses dynamic patterns without full type annotations;
+# unresolved-attribute and invalid-assignment produce many false positives
+# on Optional/Unknown returns from unannotated AST types.
+# Suppress these checks to reduce noise in current dynamic/unannotated paths.
+unresolved-attribute = "ignore"
+invalid-assignment = "ignore"
+
+# lobster-trlc-system-test.py imports lobster which is not a Bazel dep;
+# suppress unresolved-import for that file only (same intent as the
+# existing # pylint: disable=import-error comments in the source).
+[[tool.ty.overrides]]
+include = ["lobster-trlc-system-test.py"]
+[tool.ty.overrides.rules]
+unresolved-import = "ignore"
 
 # ---------------------------------------------------------------------------
 # Pylint — migrated from pylint3.cfg

@@ -150,7 +150,8 @@ class TrlcMarkdownParser(Parser):
                             break
                     elif self.cu.package.symbols.contains(self.nt.value):
                         n_sym = self.cu.package.symbols.lookup_assuming(
-                            self.mh, self.nt.value)
+                            self.mh, self.nt.value
+                        )
                         if isinstance(n_sym, ast.Record_Type):
                             break
                     self.advance()

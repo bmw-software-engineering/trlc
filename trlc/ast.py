@@ -47,6 +47,7 @@ from trlc import math
 # Valuations
 ##############################################################################
 
+
 class Value:
     # lobster-trace: LRM.Boolean_Values
     # lobster-trace: LRM.Integer_Values
@@ -67,23 +68,28 @@ class Value:
     :attribute typ: type of the value (or None for null values)
     :type: Type
     """
+
     def __init__(self, location, value, typ):
         assert isinstance(location, Location)
-        assert value is None or \
-            isinstance(value, (str,
-                               int,
-                               bool,
-                               list,  # for arrays
-                               dict,  # for tuples
-                               Fraction,
-                               Record_Reference,
-                               Enumeration_Literal_Spec))
+        assert value is None or isinstance(
+            value,
+            (
+                str,
+                int,
+                bool,
+                list,  # for arrays
+                dict,  # for tuples
+                Fraction,
+                Record_Reference,
+                Enumeration_Literal_Spec,
+            ),
+        )
         assert typ is None or isinstance(typ, Type)
         assert (typ is None) == (value is None)
 
         self.location = location
-        self.value    = value
-        self.typ      = typ
+        self.value = value
+        self.typ = typ
 
     def __eq__(self, other):
         return self.typ == other.typ and self.value == other.value
@@ -102,12 +108,14 @@ class Value:
 # AST Nodes
 ##############################################################################
 
+
 class Node(metaclass=ABCMeta):
     """Base class for all AST items.
 
     :attribute location: source location
     :type: Location
     """
+
     def __init__(self, location):
         # lobster-exclude: Constructor only declares variables
         assert isinstance(location, Location)
@@ -184,11 +192,12 @@ class Check_Block(Node):
     :type: list[Check]
 
     """
+
     def __init__(self, location, n_typ):
         # lobster-trace: LRM.Check_Block
         super().__init__(location)
         assert isinstance(n_typ, Composite_Type)
-        self.n_typ  = n_typ
+        self.n_typ = n_typ
         self.checks = []
 
     def add_check(self, n_check):
@@ -217,13 +226,14 @@ class Compilation_Unit(Node):
     :type: list[Node]
 
     """
+
     def __init__(self, file_name):
         # lobster-exclude: Constructor only declares variables
         super().__init__(Location(file_name))
-        self.package       = None
-        self.imports       = None
-        self.raw_imports   = []
-        self.items         = []
+        self.package = None
+        self.imports = None
+        self.raw_imports = []
+        self.items = []
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
@@ -246,14 +256,16 @@ class Compilation_Unit(Node):
         assert t_import.kind == "IDENTIFIER"
 
         if t_import.value == self.package.name:
-            mh.error(t_import.location,
-                     "package %s cannot import itself" % self.package.name)
+            mh.error(
+                t_import.location, "package %s cannot import itself" % self.package.name
+            )
 
         # Skip duplicates
         for t_previous in self.raw_imports:
             if t_previous.value == t_import.value:
-                mh.warning(t_import.location,
-                           "duplicate import of package %s" % t_import.value)
+                mh.warning(
+                    t_import.location, "duplicate import of package %s" % t_import.value
+                )
                 return
 
         self.raw_imports.append(t_import)
@@ -282,10 +294,9 @@ class Compilation_Unit(Node):
     def add_item(self, node):
         # lobster-trace: LRM.RSL_File
         # lobster-trace: LRM.TRLC_File
-        assert isinstance(node, (Concrete_Type,
-                                 Check_Block,
-                                 Record_Object)), \
+        assert isinstance(node, (Concrete_Type, Check_Block, Record_Object)), (
             "trying to add %s to a compilation unit" % node.__class__.__name__
+        )
         self.items.append(node)
 
 
@@ -315,13 +326,8 @@ class Check(Node):
     :attribute message: the user-supplied message (see 3)
     :type: str
     """
-    def __init__(self,
-                 n_type,
-                 n_expr,
-                 n_anchor,
-                 severity,
-                 t_message,
-                 extrainfo):
+
+    def __init__(self, n_type, n_expr, n_anchor, severity, t_message, extrainfo):
         # lobster-trace: LRM.Check_Block
         assert isinstance(n_type, Composite_Type)
         assert isinstance(n_expr, Expression)
@@ -332,15 +338,15 @@ class Check(Node):
         assert isinstance(extrainfo, str) or extrainfo is None
         super().__init__(t_message.location)
 
-        self.n_type    = n_type
-        self.n_expr    = n_expr
-        self.n_anchor  = n_anchor
-        self.severity  = severity
+        self.n_type = n_type
+        self.n_expr = n_expr
+        self.n_anchor = n_anchor
+        self.severity = severity
         # lobster-trace: LRM.No_Newlines_In_Message
         # This is the error recovery strategy if we find newlines in
         # the short error messages: we just remove them. The error
         # raised is non-fatal.
-        self.message   = t_message.value.replace("\n", " ")
+        self.message = t_message.value.replace("\n", " ")
         self.extrainfo = extrainfo
         self._uses_field_access = None
 
@@ -377,8 +383,7 @@ class Check(Node):
 
     def get_real_location(self, composite_object):
         # lobster-exclude: LRM.Anchoring
-        assert isinstance(composite_object, (Record_Object,
-                                             Tuple_Aggregate))
+        assert isinstance(composite_object, (Record_Object, Tuple_Aggregate))
         if isinstance(composite_object, Record_Object):
             fields = composite_object.field
         else:
@@ -393,43 +398,44 @@ class Check(Node):
         # lobster-trace: LRM.Check_Messages
         # lobster-trace: LRM.Check_Severity
         assert isinstance(mh, Message_Handler)
-        assert isinstance(composite_object, (Record_Object,
-                                             Tuple_Aggregate))
+        assert isinstance(composite_object, (Record_Object, Tuple_Aggregate))
         assert isinstance(gstab, Symbol_Table)
 
         if isinstance(composite_object, Record_Object):
-            result = self.n_expr.evaluate(mh,
-                                          copy(composite_object.field),
-                                          gstab)
+            result = self.n_expr.evaluate(mh, copy(composite_object.field), gstab)
         else:
-            result = self.n_expr.evaluate(mh,
-                                          copy(composite_object.value),
-                                          gstab)
+            result = self.n_expr.evaluate(mh, copy(composite_object.value), gstab)
         if result.value is None:
             loc = self.get_real_location(composite_object)
-            mh.error(loc,
-                     "check %s (%s) evaluates to null" %
-                     (self.n_expr.to_string(),
-                      mh.cross_file_reference(self.location)))
+            mh.error(
+                loc,
+                "check %s (%s) evaluates to null"
+                % (self.n_expr.to_string(), mh.cross_file_reference(self.location)),
+            )
 
         assert isinstance(result.value, bool)
 
         if not result.value:
             loc = self.get_real_location(composite_object)
             if self.severity == "warning":
-                mh.warning(location    = loc,
-                           message     = self.message,
-                           explanation = self.extrainfo,
-                           user        = True)
+                mh.warning(
+                    location=loc,
+                    message=self.message,
+                    explanation=self.extrainfo,
+                    user=True,
+                )
             else:
-                mh.error(location    = loc,
-                         message     = self.message,
-                         explanation = self.extrainfo,
-                         fatal       = self.severity == "fatal",
-                         user        = True)
+                mh.error(
+                    location=loc,
+                    message=self.message,
+                    explanation=self.extrainfo,
+                    fatal=self.severity == "fatal",
+                    user=True,
+                )
                 return False
 
         return True
+
 
 ##############################################################################
 # AST Nodes (Expressions)
@@ -438,43 +444,43 @@ class Check(Node):
 
 class Unary_Operator(Enum):
     # lobster-exclude: Utility enumeration for unary operators
-    MINUS          = auto()
-    PLUS           = auto()
-    LOGICAL_NOT    = auto()
+    MINUS = auto()
+    PLUS = auto()
+    LOGICAL_NOT = auto()
     ABSOLUTE_VALUE = auto()
 
-    STRING_LENGTH  = auto()
-    ARRAY_LENGTH   = auto()
+    STRING_LENGTH = auto()
+    ARRAY_LENGTH = auto()
 
-    CONVERSION_TO_INT     = auto()
+    CONVERSION_TO_INT = auto()
     CONVERSION_TO_DECIMAL = auto()
 
 
 class Binary_Operator(Enum):
     # lobster-exclude: Utility enumeration for binary operators
-    LOGICAL_AND     = auto()    # Short-circuit
-    LOGICAL_OR      = auto()    # Short-circuit
-    LOGICAL_XOR     = auto()
-    LOGICAL_IMPLIES = auto()    # Short-circuit
+    LOGICAL_AND = auto()  # Short-circuit
+    LOGICAL_OR = auto()  # Short-circuit
+    LOGICAL_XOR = auto()
+    LOGICAL_IMPLIES = auto()  # Short-circuit
 
-    COMP_EQ  = auto()
+    COMP_EQ = auto()
     COMP_NEQ = auto()
-    COMP_LT  = auto()
+    COMP_LT = auto()
     COMP_LEQ = auto()
-    COMP_GT  = auto()
+    COMP_GT = auto()
     COMP_GEQ = auto()
 
-    STRING_CONTAINS   = auto()
+    STRING_CONTAINS = auto()
     STRING_STARTSWITH = auto()
-    STRING_ENDSWITH   = auto()
-    STRING_REGEX      = auto()
+    STRING_ENDSWITH = auto()
+    STRING_REGEX = auto()
 
     ARRAY_CONTAINS = auto()
 
-    PLUS      = auto()
-    MINUS     = auto()
-    TIMES     = auto()
-    DIVIDE    = auto()
+    PLUS = auto()
+    MINUS = auto()
+    TIMES = auto()
+    DIVIDE = auto()
     REMAINDER = auto()
 
     POWER = auto()
@@ -488,6 +494,7 @@ class Expression(Node, metaclass=ABCMeta):
     :attribute typ: The type of this expression (or None for null values)
     :type: Type
     """
+
     def __init__(self, location, typ):
         # lobster-exclude: Constructor only declares variables
         super().__init__(location)
@@ -518,13 +525,11 @@ class Expression(Node, metaclass=ABCMeta):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
         assert gstab is None or isinstance(gstab, Symbol_Table)
-        assert False, "evaluate not implemented for %s" % \
-            self.__class__.__name__
+        assert False, "evaluate not implemented for %s" % self.__class__.__name__
 
     @abstractmethod
     def to_string(self):  # pragma: no cover
-        assert False, "to_string not implemented for %s" % \
-            self.__class__.__name__
+        assert False, "to_string not implemented for %s" % self.__class__.__name__
 
     def ensure_type(self, mh, typ):
         # lobster-trace: LRM.Restricted_Null
@@ -532,18 +537,19 @@ class Expression(Node, metaclass=ABCMeta):
 
         assert isinstance(typ, (type, Type))
         if self.typ is None:
-            mh.error(self.location,
-                     "null is not permitted here")
+            mh.error(self.location, "null is not permitted here")
         elif isinstance(typ, type) and not isinstance(self.typ, typ):
-            mh.error(self.location,
-                     "expected expression of type %s, got %s instead" %
-                     (typ.__name__,
-                      self.typ.__class__.__name__))
+            mh.error(
+                self.location,
+                "expected expression of type %s, got %s instead"
+                % (typ.__name__, self.typ.__class__.__name__),
+            )
         elif isinstance(typ, Type) and self.typ != typ:
-            mh.error(self.location,
-                     "expected expression of type %s, got %s instead" %
-                     (typ.name,
-                      self.typ.name))
+            mh.error(
+                self.location,
+                "expected expression of type %s, got %s instead"
+                % (typ.name, self.typ.name),
+            )
 
     def resolve_references(self, mh):
         assert isinstance(mh, Message_Handler)
@@ -562,8 +568,7 @@ class Expression(Node, metaclass=ABCMeta):
         :rtype: bool
 
         """
-        assert False, "can_be_null not implemented for %s" % \
-            self.__class__.__name__
+        assert False, "can_be_null not implemented for %s" % self.__class__.__name__
 
     def uses_field_access(self):
         """Test if this expression contains a field access on a record or
@@ -608,10 +613,10 @@ class Implicit_Null(Expression):
     that can appear in check expressions.
 
     """
+
     def __init__(self, composite_object, composite_component):
         # lobster-trace: LRM.Unspecified_Optional_Components
-        assert isinstance(composite_object, (Record_Object,
-                                             Tuple_Aggregate))
+        assert isinstance(composite_object, (Record_Object, Tuple_Aggregate))
         assert isinstance(composite_component, Composite_Component)
         super().__init__(composite_object.location, None)
 
@@ -646,6 +651,7 @@ class Literal(Expression, metaclass=ABCMeta):
       isinstance(my_expression, Literal)
 
     """
+
     @abstractmethod
     def to_python_object(self):
         assert False
@@ -664,6 +670,7 @@ class Null_Literal(Literal):
     values that appear in record objects.
 
     """
+
     def __init__(self, token):
         assert isinstance(token, Token)
         assert token.kind == "KEYWORD"
@@ -710,6 +717,7 @@ class Integer_Literal(Literal):
     :attribute value: the non-negative integer value
     :type: int
     """
+
     def __init__(self, token, typ):
         assert isinstance(token, Token)
         assert token.kind == "INTEGER"
@@ -758,6 +766,7 @@ class Decimal_Literal(Literal):
     :attribute value: the non-negative decimal value
     :type: fractions.Fraction
     """
+
     def __init__(self, token, typ):
         assert isinstance(token, Token)
         assert token.kind == "DECIMAL"
@@ -805,15 +814,16 @@ class String_Literal(Literal):
     :type: list[Record_Reference]
 
     """
+
     def __init__(self, token, typ):
         assert isinstance(token, Token)
         assert token.kind == "STRING"
         assert isinstance(typ, Builtin_String)
         super().__init__(token.location, typ)
 
-        self.value          = token.value
+        self.value = token.value
         self.has_references = isinstance(typ, Builtin_Markup_String)
-        self.references     = []
+        self.references = []
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, f"String Literal {repr(self.value)}")
@@ -851,6 +861,7 @@ class Boolean_Literal(Literal):
     :attribute value: the boolean value
     :type: bool
     """
+
     def __init__(self, token, typ):
         assert isinstance(token, Token)
         assert token.kind == "KEYWORD"
@@ -899,6 +910,7 @@ class Enumeration_Literal(Literal):
     :type: Enumeration_Literal_Spec
 
     """
+
     def __init__(self, location, literal):
         # lobster-exclude: Constructor only declares variables
         assert isinstance(literal, Enumeration_Literal_Spec)
@@ -908,8 +920,9 @@ class Enumeration_Literal(Literal):
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
-        self.write_indent(indent,
-                          f"Enumeration Literal {self.typ.name}.{self.value.name}")
+        self.write_indent(
+            indent, f"Enumeration Literal {self.typ.name}.{self.value.name}"
+        )
 
     def to_string(self):
         return self.typ.name + "." + self.value.name
@@ -946,6 +959,7 @@ class Array_Aggregate(Expression):
     :type: list[Expression]
 
     """
+
     def __init__(self, location, typ):
         # lobster-trace: LRM.Record_Object_Declaration
 
@@ -959,11 +973,16 @@ class Array_Aggregate(Expression):
             n_value.dump(indent + 1)
 
     def append(self, value):
-        assert isinstance(value, (Literal,
-                                  Unary_Expression,
-                                  Array_Aggregate,
-                                  Tuple_Aggregate,
-                                  Record_Reference))
+        assert isinstance(
+            value,
+            (
+                Literal,
+                Unary_Expression,
+                Array_Aggregate,
+                Tuple_Aggregate,
+                Record_Reference,
+            ),
+        )
         self.value.append(value)
 
     def to_string(self):
@@ -973,10 +992,11 @@ class Array_Aggregate(Expression):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
         assert gstab is None or isinstance(gstab, Symbol_Table)
-        return Value(self.location,
-                     list(element.evaluate(mh, context, gstab)
-                          for element in self.value),
-                     self.typ)
+        return Value(
+            self.location,
+            list(element.evaluate(mh, context, gstab) for element in self.value),
+            self.typ,
+        )
 
     def resolve_references(self, mh):
         assert isinstance(mh, Message_Handler)
@@ -1015,21 +1035,22 @@ class Tuple_Aggregate(Expression):
     :type: dict[str, Expression]
 
     """
+
     def __init__(self, location, typ):
         # lobster-trace: LRM.Unspecified_Optional_Components
         # lobster-trace: LRM.Record_Object_Declaration
 
         super().__init__(location, typ)
-        self.value = {n_field.name : Implicit_Null(self, n_field)
-                      for n_field in self.typ.components.values()}
+        self.value = {
+            n_field.name: Implicit_Null(self, n_field)
+            for n_field in self.typ.components.values()
+        }
 
     def assign(self, field, value):
         assert isinstance(field, str)
-        assert isinstance(value, (Literal,
-                                  Unary_Expression,
-                                  Tuple_Aggregate,
-                                  Record_Reference)), \
-                "value is %s" % value.__class__.__name__
+        assert isinstance(
+            value, (Literal, Unary_Expression, Tuple_Aggregate, Record_Reference)
+        ), "value is %s" % value.__class__.__name__
         assert field in self.typ.components
 
         self.value[field] = value
@@ -1068,10 +1089,14 @@ class Tuple_Aggregate(Expression):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
         assert gstab is None or isinstance(gstab, Symbol_Table)
-        return Value(self.location,
-                     {name : element.evaluate(mh, context, gstab)
-                      for name, element in self.value.items()},
-                     self.typ)
+        return Value(
+            self.location,
+            {
+                name: element.evaluate(mh, context, gstab)
+                for name, element in self.value.items()
+            },
+            self.typ,
+        )
 
     def resolve_references(self, mh):
         assert isinstance(mh, Message_Handler)
@@ -1080,15 +1105,13 @@ class Tuple_Aggregate(Expression):
             val.resolve_references(mh)
 
     def to_python_object(self):
-        return {name: value.to_python_object()
-                for name, value in self.value.items()}
+        return {name: value.to_python_object() for name, value in self.value.items()}
 
     def can_be_null(self):
         return False
 
     def uses_field_access(self):
-        return any(expr.uses_field_access()
-                   for expr in self.value.values())
+        return any(expr.uses_field_access() for expr in self.value.values())
 
 
 class Record_Reference(Expression):
@@ -1122,6 +1145,7 @@ class Record_Reference(Expression):
     :type: Package
 
     """
+
     def __init__(self, location, name, typ, package):
         # lobster-exclude: Constructor only declares variables
         assert isinstance(location, Location)
@@ -1130,15 +1154,14 @@ class Record_Reference(Expression):
         assert isinstance(package, Package)
         super().__init__(location, typ)
 
-        self.name    = name
-        self.target  = None
+        self.name = name
+        self.target = None
         self.package = package
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
         self.write_indent(indent, f"Record Reference {self.name}")
-        self.write_indent(indent + 1,
-                          f"Resolved: {self.target is not None}")
+        self.write_indent(indent + 1, f"Resolved: {self.target is not None}")
 
     def to_string(self):
         return self.name
@@ -1155,26 +1178,27 @@ class Record_Reference(Expression):
         assert isinstance(mh, Message_Handler)
 
         self.target = self.package.symbols.lookup_direct(
-            mh                = mh,
-            name              = self.name,
-            error_location    = self.location,
-            required_subclass = Record_Object)
+            mh=mh,
+            name=self.name,
+            error_location=self.location,
+            required_subclass=Record_Object,
+        )
         if self.typ is None:
             self.typ = self.target.n_typ
         elif isinstance(self.typ, Union_Type):
             if not self.typ.is_compatible(self.target.n_typ):
-                mh.error(self.location,
-                         "expected reference of type %s,"
-                         " but %s is of type %s" %
-                         (self.typ.name,
-                          self.target.name,
-                          self.target.n_typ.name))
+                mh.error(
+                    self.location,
+                    "expected reference of type %s,"
+                    " but %s is of type %s"
+                    % (self.typ.name, self.target.name, self.target.n_typ.name),
+                )
         elif not self.target.n_typ.is_subclass_of(self.typ):
-            mh.error(self.location,
-                     "expected reference of type %s, but %s is of type %s" %
-                     (self.typ.name,
-                      self.target.name,
-                      self.target.n_typ.name))
+            mh.error(
+                self.location,
+                "expected reference of type %s, but %s is of type %s"
+                % (self.typ.name, self.target.name, self.target.n_typ.name),
+            )
 
     def to_python_object(self):
         return self.target.fully_qualified_name()
@@ -1205,9 +1229,9 @@ class Name_Reference(Expression):
     :attribute entity: the entity named here
     :type: Composite_Component, Quantified_Variable
     """
+
     def __init__(self, location, entity):
-        assert isinstance(entity, (Composite_Component,
-                                   Quantified_Variable))
+        assert isinstance(entity, (Composite_Component, Quantified_Variable))
         super().__init__(location, entity.n_typ)
         self.entity = entity
 
@@ -1223,8 +1247,7 @@ class Name_Reference(Expression):
         assert gstab is None or isinstance(gstab, Symbol_Table)
 
         if context is None:
-            mh.error(self.location,
-                     "cannot be used in a static context")
+            mh.error(self.location, "cannot be used in a static context")
 
         assert self.entity.name in context
         return context[self.entity.name].evaluate(mh, context, gstab)
@@ -1262,6 +1285,7 @@ class Unary_Expression(Expression):
     :type: Expression
 
     """
+
     def __init__(self, mh, location, typ, operator, n_operand):
         # lobster-trace: LRM.Simple_Expression
         # lobster-trace: LRM.Relation
@@ -1273,12 +1297,14 @@ class Unary_Expression(Expression):
         assert isinstance(mh, Message_Handler)
         assert isinstance(operator, Unary_Operator)
         assert isinstance(n_operand, Expression)
-        self.operator  = operator
+        self.operator = operator
         self.n_operand = n_operand
 
-        if operator in (Unary_Operator.MINUS,
-                        Unary_Operator.PLUS,
-                        Unary_Operator.ABSOLUTE_VALUE):
+        if operator in (
+            Unary_Operator.MINUS,
+            Unary_Operator.PLUS,
+            Unary_Operator.ABSOLUTE_VALUE,
+        ):
             self.n_operand.ensure_type(mh, Builtin_Numeric_Type)
         elif operator == Unary_Operator.LOGICAL_NOT:
             self.n_operand.ensure_type(mh, Builtin_Boolean)
@@ -1291,30 +1317,30 @@ class Unary_Expression(Expression):
         elif operator == Unary_Operator.CONVERSION_TO_DECIMAL:
             self.n_operand.ensure_type(mh, Builtin_Numeric_Type)
         else:
-            mh.ice_loc(self.location,
-                       "unexpected unary operation %s" % operator)
+            mh.ice_loc(self.location, "unexpected unary operation %s" % operator)
 
     def to_string(self):
         prefix_operators = {
-            Unary_Operator.MINUS          : "-",
-            Unary_Operator.PLUS           : "+",
-            Unary_Operator.ABSOLUTE_VALUE : "abs ",
-            Unary_Operator.LOGICAL_NOT    : "not ",
+            Unary_Operator.MINUS: "-",
+            Unary_Operator.PLUS: "+",
+            Unary_Operator.ABSOLUTE_VALUE: "abs ",
+            Unary_Operator.LOGICAL_NOT: "not ",
         }
         function_calls = {
-            Unary_Operator.STRING_LENGTH         : "len",
-            Unary_Operator.ARRAY_LENGTH          : "len",
-            Unary_Operator.CONVERSION_TO_INT     : "Integer",
-            Unary_Operator.CONVERSION_TO_DECIMAL : "Decimal"
+            Unary_Operator.STRING_LENGTH: "len",
+            Unary_Operator.ARRAY_LENGTH: "len",
+            Unary_Operator.CONVERSION_TO_INT: "Integer",
+            Unary_Operator.CONVERSION_TO_DECIMAL: "Decimal",
         }
 
         if self.operator in prefix_operators:
-            return prefix_operators[self.operator] + \
-                self.n_operand.to_string()
+            return prefix_operators[self.operator] + self.n_operand.to_string()
 
         elif self.operator in function_calls:
-            return "%s(%s)" % (function_calls[self.operator],
-                               self.n_operand.to_string())
+            return "%s(%s)" % (
+                function_calls[self.operator],
+                self.n_operand.to_string(),
+            )
 
         else:
             assert False
@@ -1339,53 +1365,51 @@ class Unary_Expression(Expression):
 
         v_operand = self.n_operand.evaluate(mh, context, gstab)
         if v_operand.value is None:
-            mh.error(v_operand.location,
-                     "input to unary expression %s (%s) must not be null" %
-                     (self.to_string(),
-                      mh.cross_file_reference(self.location)))
+            mh.error(
+                v_operand.location,
+                "input to unary expression %s (%s) must not be null"
+                % (self.to_string(), mh.cross_file_reference(self.location)),
+            )
 
         if self.operator == Unary_Operator.MINUS:
-            return Value(location = self.location,
-                         value    = -v_operand.value,
-                         typ      = self.typ)
+            return Value(location=self.location, value=-v_operand.value, typ=self.typ)
         elif self.operator == Unary_Operator.PLUS:
-            return Value(location = self.location,
-                         value    = +v_operand.value,
-                         typ      = self.typ)
+            return Value(location=self.location, value=+v_operand.value, typ=self.typ)
         elif self.operator == Unary_Operator.LOGICAL_NOT:
-            return Value(location = self.location,
-                         value    = not v_operand.value,
-                         typ      = self.typ)
+            return Value(
+                location=self.location, value=not v_operand.value, typ=self.typ
+            )
         elif self.operator == Unary_Operator.ABSOLUTE_VALUE:
-            return Value(location = self.location,
-                         value    = abs(v_operand.value),
-                         typ      = self.typ)
-        elif self.operator in (Unary_Operator.STRING_LENGTH,
-                               Unary_Operator.ARRAY_LENGTH):
-            return Value(location = self.location,
-                         value    = len(v_operand.value),
-                         typ      = self.typ)
+            return Value(
+                location=self.location, value=abs(v_operand.value), typ=self.typ
+            )
+        elif self.operator in (
+            Unary_Operator.STRING_LENGTH,
+            Unary_Operator.ARRAY_LENGTH,
+        ):
+            return Value(
+                location=self.location, value=len(v_operand.value), typ=self.typ
+            )
         elif self.operator == Unary_Operator.CONVERSION_TO_INT:
             if isinstance(v_operand.value, Fraction):
                 return Value(
-                    location = self.location,
-                    value    = math.round_nearest_away(v_operand.value),
-                    typ      = self.typ)
+                    location=self.location,
+                    value=math.round_nearest_away(v_operand.value),
+                    typ=self.typ,
+                )
             else:
-                return Value(location = self.location,
-                             value    = v_operand.value,
-                             typ      = self.typ)
+                return Value(
+                    location=self.location, value=v_operand.value, typ=self.typ
+                )
         elif self.operator == Unary_Operator.CONVERSION_TO_DECIMAL:
-            return Value(location = self.location,
-                         value    = Fraction(v_operand.value),
-                         typ      = self.typ)
+            return Value(
+                location=self.location, value=Fraction(v_operand.value), typ=self.typ
+            )
         else:
-            mh.ice_loc(self.location,
-                       "unexpected unary operation %s" % self.operator)
+            mh.ice_loc(self.location, "unexpected unary operation %s" % self.operator)
 
     def to_python_object(self):
-        assert self.operator in (Unary_Operator.MINUS,
-                                 Unary_Operator.PLUS)
+        assert self.operator in (Unary_Operator.MINUS, Unary_Operator.PLUS)
         val = self.n_operand.to_python_object()
         if self.operator == Unary_Operator.MINUS:
             return -val
@@ -1442,6 +1466,7 @@ class Binary_Expression(Expression):
     :type: Expression
 
     """
+
     def __init__(self, mh, location, typ, operator, n_lhs, n_rhs):
         # lobster-trace: LRM.Expression
         # lobster-trace: LRM.Relation
@@ -1457,73 +1482,86 @@ class Binary_Expression(Expression):
         assert isinstance(n_lhs, Expression)
         assert isinstance(n_rhs, Expression)
         self.operator = operator
-        self.n_lhs    = n_lhs
-        self.n_rhs    = n_rhs
+        self.n_lhs = n_lhs
+        self.n_rhs = n_rhs
 
-        if operator in (Binary_Operator.LOGICAL_AND,
-                        Binary_Operator.LOGICAL_OR,
-                        Binary_Operator.LOGICAL_XOR,
-                        Binary_Operator.LOGICAL_IMPLIES):
+        if operator in (
+            Binary_Operator.LOGICAL_AND,
+            Binary_Operator.LOGICAL_OR,
+            Binary_Operator.LOGICAL_XOR,
+            Binary_Operator.LOGICAL_IMPLIES,
+        ):
             self.n_lhs.ensure_type(mh, Builtin_Boolean)
             self.n_rhs.ensure_type(mh, Builtin_Boolean)
 
-        elif operator in (Binary_Operator.COMP_EQ,
-                          Binary_Operator.COMP_NEQ):
+        elif operator in (Binary_Operator.COMP_EQ, Binary_Operator.COMP_NEQ):
             # lobster-trace: LRM.Union_Type_Equality
             # lobster-trace: LRM.Union_Type_Equality_Domain
             if (self.n_lhs.typ is None) or (self.n_rhs.typ is None):
                 # We can compary anything to null (including itself)
                 pass
-            elif isinstance(self.n_lhs.typ, Union_Type) or \
-                 isinstance(self.n_rhs.typ, Union_Type):
+            elif isinstance(self.n_lhs.typ, Union_Type) or isinstance(
+                self.n_rhs.typ, Union_Type
+            ):
                 # For union types, we allow comparison if both
                 # sides are record-like (Record_Type or Union_Type)
-                lhs_is_record = isinstance(self.n_lhs.typ,
-                                           (Record_Type, Union_Type))
-                rhs_is_record = isinstance(self.n_rhs.typ,
-                                           (Record_Type, Union_Type))
+                lhs_is_record = isinstance(self.n_lhs.typ, (Record_Type, Union_Type))
+                rhs_is_record = isinstance(self.n_rhs.typ, (Record_Type, Union_Type))
                 if not (lhs_is_record and rhs_is_record):
-                    mh.error(self.location,
-                             "type mismatch: %s and %s do not match" %
-                             (self.n_lhs.typ.name,
-                              self.n_rhs.typ.name))
+                    mh.error(
+                        self.location,
+                        "type mismatch: %s and %s do not match"
+                        % (self.n_lhs.typ.name, self.n_rhs.typ.name),
+                    )
                 else:
                     # Check that there is at least one pair of member
                     # types (one from each side) where one is a subtype
                     # of the other. This implements Equality_Domain for
                     # union types: an unrelated record type is rejected.
-                    lhs_members = (self.n_lhs.typ.types
-                                   if isinstance(self.n_lhs.typ, Union_Type)
-                                   else [self.n_lhs.typ])
-                    rhs_members = (self.n_rhs.typ.types
-                                   if isinstance(self.n_rhs.typ, Union_Type)
-                                   else [self.n_rhs.typ])
-                    if not any(lm.is_subclass_of(rm) or rm.is_subclass_of(lm)
-                               for lm in lhs_members
-                               for rm in rhs_members):
-                        mh.error(self.location,
-                                 "type mismatch: %s and %s do not match" %
-                                 (self.n_lhs.typ.name,
-                                  self.n_rhs.typ.name))
+                    lhs_members = (
+                        self.n_lhs.typ.types
+                        if isinstance(self.n_lhs.typ, Union_Type)
+                        else [self.n_lhs.typ]
+                    )
+                    rhs_members = (
+                        self.n_rhs.typ.types
+                        if isinstance(self.n_rhs.typ, Union_Type)
+                        else [self.n_rhs.typ]
+                    )
+                    if not any(
+                        lm.is_subclass_of(rm) or rm.is_subclass_of(lm)
+                        for lm in lhs_members
+                        for rm in rhs_members
+                    ):
+                        mh.error(
+                            self.location,
+                            "type mismatch: %s and %s do not match"
+                            % (self.n_lhs.typ.name, self.n_rhs.typ.name),
+                        )
             elif self.n_lhs.typ != self.n_rhs.typ:
                 # Otherwise we can compare anything, as long as the
                 # types match
-                mh.error(self.location,
-                         "type mismatch: %s and %s do not match" %
-                         (self.n_lhs.typ.name,
-                          self.n_rhs.typ.name))
+                mh.error(
+                    self.location,
+                    "type mismatch: %s and %s do not match"
+                    % (self.n_lhs.typ.name, self.n_rhs.typ.name),
+                )
 
-        elif operator in (Binary_Operator.COMP_LT,
-                          Binary_Operator.COMP_LEQ,
-                          Binary_Operator.COMP_GT,
-                          Binary_Operator.COMP_GEQ):
+        elif operator in (
+            Binary_Operator.COMP_LT,
+            Binary_Operator.COMP_LEQ,
+            Binary_Operator.COMP_GT,
+            Binary_Operator.COMP_GEQ,
+        ):
             self.n_lhs.ensure_type(mh, Builtin_Numeric_Type)
             self.n_rhs.ensure_type(mh, self.n_lhs.typ)
 
-        elif operator in (Binary_Operator.STRING_CONTAINS,
-                          Binary_Operator.STRING_STARTSWITH,
-                          Binary_Operator.STRING_ENDSWITH,
-                          Binary_Operator.STRING_REGEX):
+        elif operator in (
+            Binary_Operator.STRING_CONTAINS,
+            Binary_Operator.STRING_STARTSWITH,
+            Binary_Operator.STRING_ENDSWITH,
+            Binary_Operator.STRING_REGEX,
+        ):
             self.n_lhs.ensure_type(mh, Builtin_String)
             self.n_rhs.ensure_type(mh, Builtin_String)
 
@@ -1538,9 +1576,11 @@ class Binary_Expression(Expression):
                 self.n_lhs.ensure_type(mh, Builtin_String)
                 self.n_rhs.ensure_type(mh, Builtin_String)
 
-        elif operator in (Binary_Operator.MINUS,
-                          Binary_Operator.TIMES,
-                          Binary_Operator.DIVIDE):
+        elif operator in (
+            Binary_Operator.MINUS,
+            Binary_Operator.TIMES,
+            Binary_Operator.DIVIDE,
+        ):
             self.n_lhs.ensure_type(mh, Builtin_Numeric_Type)
             self.n_rhs.ensure_type(mh, self.n_lhs.typ)
 
@@ -1557,8 +1597,7 @@ class Binary_Expression(Expression):
             self.n_rhs.ensure_type(mh, Builtin_Integer)
 
         else:
-            mh.ice_loc(self.location,
-                       "unexpected binary operation %s" % operator)
+            mh.ice_loc(self.location, "unexpected binary operation %s" % operator)
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
@@ -1569,44 +1608,47 @@ class Binary_Expression(Expression):
 
     def to_string(self):
         infix_operators = {
-            Binary_Operator.LOGICAL_AND     : "and",
-            Binary_Operator.LOGICAL_OR      : "or",
-            Binary_Operator.LOGICAL_XOR     : "xor",
-            Binary_Operator.LOGICAL_IMPLIES : "implies",
-            Binary_Operator.COMP_EQ         : "==",
-            Binary_Operator.COMP_NEQ        : "!=",
-            Binary_Operator.COMP_LT         : "<",
-            Binary_Operator.COMP_LEQ        : "<=",
-            Binary_Operator.COMP_GT         : ">",
-            Binary_Operator.COMP_GEQ        : ">=",
-            Binary_Operator.STRING_CONTAINS : "in",
-            Binary_Operator.ARRAY_CONTAINS  : "in",
-            Binary_Operator.PLUS            : "+",
-            Binary_Operator.MINUS           : "-",
-            Binary_Operator.TIMES           : "*",
-            Binary_Operator.DIVIDE          : "/",
-            Binary_Operator.REMAINDER       : "%",
-            Binary_Operator.POWER           : "**",
+            Binary_Operator.LOGICAL_AND: "and",
+            Binary_Operator.LOGICAL_OR: "or",
+            Binary_Operator.LOGICAL_XOR: "xor",
+            Binary_Operator.LOGICAL_IMPLIES: "implies",
+            Binary_Operator.COMP_EQ: "==",
+            Binary_Operator.COMP_NEQ: "!=",
+            Binary_Operator.COMP_LT: "<",
+            Binary_Operator.COMP_LEQ: "<=",
+            Binary_Operator.COMP_GT: ">",
+            Binary_Operator.COMP_GEQ: ">=",
+            Binary_Operator.STRING_CONTAINS: "in",
+            Binary_Operator.ARRAY_CONTAINS: "in",
+            Binary_Operator.PLUS: "+",
+            Binary_Operator.MINUS: "-",
+            Binary_Operator.TIMES: "*",
+            Binary_Operator.DIVIDE: "/",
+            Binary_Operator.REMAINDER: "%",
+            Binary_Operator.POWER: "**",
         }
         string_functions = {
-            Binary_Operator.STRING_STARTSWITH : "startswith",
-            Binary_Operator.STRING_ENDSWITH   : "endswith",
-            Binary_Operator.STRING_REGEX      : "matches",
+            Binary_Operator.STRING_STARTSWITH: "startswith",
+            Binary_Operator.STRING_ENDSWITH: "endswith",
+            Binary_Operator.STRING_REGEX: "matches",
         }
 
         if self.operator in infix_operators:
-            return "%s %s %s" % (self.n_lhs.to_string(),
-                                 infix_operators[self.operator],
-                                 self.n_rhs.to_string())
+            return "%s %s %s" % (
+                self.n_lhs.to_string(),
+                infix_operators[self.operator],
+                self.n_rhs.to_string(),
+            )
 
         elif self.operator in string_functions:
-            return "%s(%s, %s)" % (string_functions[self.operator],
-                                   self.n_lhs.to_string(),
-                                   self.n_rhs.to_string())
+            return "%s(%s, %s)" % (
+                string_functions[self.operator],
+                self.n_lhs.to_string(),
+                self.n_rhs.to_string(),
+            )
 
         elif self.operator == Binary_Operator.INDEX:
-            return "%s[%s]" % (self.n_lhs.to_string(),
-                               self.n_rhs.to_string())
+            return "%s[%s]" % (self.n_lhs.to_string(), self.n_rhs.to_string())
 
         else:
             assert False
@@ -1625,13 +1667,15 @@ class Binary_Expression(Expression):
         assert gstab is None or isinstance(gstab, Symbol_Table)
 
         v_lhs = self.n_lhs.evaluate(mh, context, gstab)
-        if v_lhs.value is None and \
-           self.operator not in (Binary_Operator.COMP_EQ,
-                                 Binary_Operator.COMP_NEQ):
-            mh.error(v_lhs.location,
-                     "lhs of check %s (%s) must not be null" %
-                     (self.to_string(),
-                      mh.cross_file_reference(self.location)))
+        if v_lhs.value is None and self.operator not in (
+            Binary_Operator.COMP_EQ,
+            Binary_Operator.COMP_NEQ,
+        ):
+            mh.error(
+                v_lhs.location,
+                "lhs of check %s (%s) must not be null"
+                % (self.to_string(), mh.cross_file_reference(self.location)),
+            )
 
         # Check for the short-circuit operators first
         if self.operator == Binary_Operator.LOGICAL_AND:
@@ -1653,185 +1697,209 @@ class Binary_Expression(Expression):
             if v_lhs.value:
                 return self.n_rhs.evaluate(mh, context, gstab)
             else:
-                return Value(location = self.location,
-                             value    = True,
-                             typ      = self.typ)
+                return Value(location=self.location, value=True, typ=self.typ)
 
         # Otherwise, evaluate RHS and do the operation
         v_rhs = self.n_rhs.evaluate(mh, context, gstab)
-        if v_rhs.value is None and \
-           self.operator not in (Binary_Operator.COMP_EQ,
-                                 Binary_Operator.COMP_NEQ):
-            mh.error(v_rhs.location,
-                     "rhs of check %s (%s) must not be null" %
-                     (self.to_string(),
-                      mh.cross_file_reference(self.location)))
+        if v_rhs.value is None and self.operator not in (
+            Binary_Operator.COMP_EQ,
+            Binary_Operator.COMP_NEQ,
+        ):
+            mh.error(
+                v_rhs.location,
+                "rhs of check %s (%s) must not be null"
+                % (self.to_string(), mh.cross_file_reference(self.location)),
+            )
 
         if self.operator == Binary_Operator.LOGICAL_XOR:
             assert isinstance(v_lhs.value, bool)
             assert isinstance(v_rhs.value, bool)
-            return Value(location = self.location,
-                         value    = v_lhs.value ^ v_rhs.value,
-                         typ      = self.typ)
+            return Value(
+                location=self.location, value=v_lhs.value ^ v_rhs.value, typ=self.typ
+            )
 
         elif self.operator == Binary_Operator.COMP_EQ:
-            return Value(location = self.location,
-                         value    = v_lhs.value == v_rhs.value,
-                         typ      = self.typ)
+            return Value(
+                location=self.location, value=v_lhs.value == v_rhs.value, typ=self.typ
+            )
 
         elif self.operator == Binary_Operator.COMP_NEQ:
-            return Value(location = self.location,
-                         value    = v_lhs.value != v_rhs.value,
-                         typ      = self.typ)
-
-        elif self.operator in (Binary_Operator.COMP_LT,
-                               Binary_Operator.COMP_LEQ,
-                               Binary_Operator.COMP_GT,
-                               Binary_Operator.COMP_GEQ):
             return Value(
-                location = self.location,
-                value    = {
-                    Binary_Operator.COMP_LT  : lambda lhs, rhs: lhs < rhs,
-                    Binary_Operator.COMP_LEQ : lambda lhs, rhs: lhs <= rhs,
-                    Binary_Operator.COMP_GT  : lambda lhs, rhs: lhs > rhs,
-                    Binary_Operator.COMP_GEQ : lambda lhs, rhs: lhs >= rhs,
+                location=self.location, value=v_lhs.value != v_rhs.value, typ=self.typ
+            )
+
+        elif self.operator in (
+            Binary_Operator.COMP_LT,
+            Binary_Operator.COMP_LEQ,
+            Binary_Operator.COMP_GT,
+            Binary_Operator.COMP_GEQ,
+        ):
+            return Value(
+                location=self.location,
+                value={
+                    Binary_Operator.COMP_LT: lambda lhs, rhs: lhs < rhs,
+                    Binary_Operator.COMP_LEQ: lambda lhs, rhs: lhs <= rhs,
+                    Binary_Operator.COMP_GT: lambda lhs, rhs: lhs > rhs,
+                    Binary_Operator.COMP_GEQ: lambda lhs, rhs: lhs >= rhs,
                 }[self.operator](v_lhs.value, v_rhs.value),
-                typ      = self.typ)
+                typ=self.typ,
+            )
 
         elif self.operator == Binary_Operator.STRING_CONTAINS:
             assert isinstance(v_lhs.value, str)
             assert isinstance(v_rhs.value, str)
 
-            return Value(location = self.location,
-                         value    = v_lhs.value in v_rhs.value,
-                         typ      = self.typ)
+            return Value(
+                location=self.location, value=v_lhs.value in v_rhs.value, typ=self.typ
+            )
 
         elif self.operator == Binary_Operator.STRING_STARTSWITH:
             assert isinstance(v_lhs.value, str)
             assert isinstance(v_rhs.value, str)
-            return Value(location = self.location,
-                         value    = v_lhs.value.startswith(v_rhs.value),
-                         typ      = self.typ)
+            return Value(
+                location=self.location,
+                value=v_lhs.value.startswith(v_rhs.value),
+                typ=self.typ,
+            )
 
         elif self.operator == Binary_Operator.STRING_ENDSWITH:
             assert isinstance(v_lhs.value, str)
             assert isinstance(v_rhs.value, str)
-            return Value(location = self.location,
-                         value    = v_lhs.value.endswith(v_rhs.value),
-                         typ      = self.typ)
+            return Value(
+                location=self.location,
+                value=v_lhs.value.endswith(v_rhs.value),
+                typ=self.typ,
+            )
 
         elif self.operator == Binary_Operator.STRING_REGEX:
             assert isinstance(v_lhs.value, str)
             assert isinstance(v_rhs.value, str)
-            return Value(location = self.location,
-                         value    = re.match(v_rhs.value,
-                                             v_lhs.value) is not None,
-                         typ      = self.typ)
+            return Value(
+                location=self.location,
+                value=re.match(v_rhs.value, v_lhs.value) is not None,
+                typ=self.typ,
+            )
 
         elif self.operator == Binary_Operator.ARRAY_CONTAINS:
             assert isinstance(v_rhs.value, list)
 
-            return Value(location = self.location,
-                         value    = v_lhs in v_rhs.value,
-                         typ      = self.typ)
+            return Value(
+                location=self.location, value=v_lhs in v_rhs.value, typ=self.typ
+            )
 
         elif self.operator == Binary_Operator.PLUS:
             assert isinstance(v_lhs.value, (int, str, Fraction))
             assert isinstance(v_rhs.value, (int, str, Fraction))
-            return Value(location = self.location,
-                         value    = v_lhs.value + v_rhs.value,
-                         typ      = self.typ)
+            return Value(
+                location=self.location, value=v_lhs.value + v_rhs.value, typ=self.typ
+            )
 
         elif self.operator == Binary_Operator.MINUS:
             assert isinstance(v_lhs.value, (int, Fraction))
             assert isinstance(v_rhs.value, (int, Fraction))
-            return Value(location = self.location,
-                         value    = v_lhs.value - v_rhs.value,
-                         typ      = self.typ)
+            return Value(
+                location=self.location, value=v_lhs.value - v_rhs.value, typ=self.typ
+            )
 
         elif self.operator == Binary_Operator.TIMES:
             assert isinstance(v_lhs.value, (int, Fraction))
             assert isinstance(v_rhs.value, (int, Fraction))
-            return Value(location = self.location,
-                         value    = v_lhs.value * v_rhs.value,
-                         typ      = self.typ)
+            return Value(
+                location=self.location, value=v_lhs.value * v_rhs.value, typ=self.typ
+            )
 
         elif self.operator == Binary_Operator.DIVIDE:
             assert isinstance(v_lhs.value, (int, Fraction))
             assert isinstance(v_rhs.value, (int, Fraction))
 
             if v_rhs.value == 0:
-                mh.error(v_rhs.location,
-                         "division by zero in %s (%s)" %
-                         (self.to_string(),
-                          mh.cross_file_reference(self.location)))
+                mh.error(
+                    v_rhs.location,
+                    "division by zero in %s (%s)"
+                    % (self.to_string(), mh.cross_file_reference(self.location)),
+                )
 
             if isinstance(v_lhs.value, int):
-                return Value(location = self.location,
-                             value    = v_lhs.value // v_rhs.value,
-                             typ      = self.typ)
+                return Value(
+                    location=self.location,
+                    value=v_lhs.value // v_rhs.value,
+                    typ=self.typ,
+                )
             else:
-                return Value(location = self.location,
-                             value    = v_lhs.value / v_rhs.value,
-                             typ      = self.typ)
+                return Value(
+                    location=self.location,
+                    value=v_lhs.value / v_rhs.value,
+                    typ=self.typ,
+                )
 
         elif self.operator == Binary_Operator.REMAINDER:
             assert isinstance(v_lhs.value, int)
             assert isinstance(v_rhs.value, int)
 
             if v_rhs.value == 0:
-                mh.error(v_rhs.location,
-                         "division by zero in %s (%s)" %
-                         (self.to_string(),
-                          mh.cross_file_reference(self.location)))
+                mh.error(
+                    v_rhs.location,
+                    "division by zero in %s (%s)"
+                    % (self.to_string(), mh.cross_file_reference(self.location)),
+                )
 
-            return Value(location = self.location,
-                         value    = math.remainder(v_lhs.value, v_rhs.value),
-                         typ      = self.typ)
+            return Value(
+                location=self.location,
+                value=math.remainder(v_lhs.value, v_rhs.value),
+                typ=self.typ,
+            )
 
         elif self.operator == Binary_Operator.POWER:
             assert isinstance(v_lhs.value, (int, Fraction))
             assert isinstance(v_rhs.value, int)
-            return Value(location = self.location,
-                         value    = v_lhs.value ** v_rhs.value,
-                         typ      = self.typ)
+            return Value(
+                location=self.location, value=v_lhs.value**v_rhs.value, typ=self.typ
+            )
 
         elif self.operator == Binary_Operator.INDEX:
             assert isinstance(v_lhs.value, list)
             assert isinstance(v_rhs.value, int)
 
             if v_rhs.value < 0:
-                mh.error(v_rhs.location,
-                         "index cannot be less than zero in %s (%s)" %
-                         (self.to_string(),
-                          mh.cross_file_reference(self.location)))
-            elif v_lhs.typ.upper_bound is not None and \
-                 v_rhs.value > v_lhs.typ.upper_bound:
-                mh.error(v_rhs.location,
-                         "index cannot be more than %u in %s (%s)" %
-                         (v_lhs.typ.upper_bound,
-                          self.to_string(),
-                          mh.cross_file_reference(self.location)))
+                mh.error(
+                    v_rhs.location,
+                    "index cannot be less than zero in %s (%s)"
+                    % (self.to_string(), mh.cross_file_reference(self.location)),
+                )
+            elif (
+                v_lhs.typ.upper_bound is not None
+                and v_rhs.value > v_lhs.typ.upper_bound
+            ):
+                mh.error(
+                    v_rhs.location,
+                    "index cannot be more than %u in %s (%s)"
+                    % (
+                        v_lhs.typ.upper_bound,
+                        self.to_string(),
+                        mh.cross_file_reference(self.location),
+                    ),
+                )
             elif v_rhs.value > len(v_lhs.value):
-                mh.error(v_lhs.location,
-                         "array is not big enough in %s (%s)" %
-                         (self.to_string(),
-                          mh.cross_file_reference(self.location)))
+                mh.error(
+                    v_lhs.location,
+                    "array is not big enough in %s (%s)"
+                    % (self.to_string(), mh.cross_file_reference(self.location)),
+                )
 
-            return Value(location = self.location,
-                         value    = v_lhs.value[v_rhs.value].value,
-                         typ      = self.typ)
+            return Value(
+                location=self.location,
+                value=v_lhs.value[v_rhs.value].value,
+                typ=self.typ,
+            )
 
         else:
-            mh.ice_loc(self.location,
-                       "unexpected binary operator %s" % self.operator)
+            mh.ice_loc(self.location, "unexpected binary operator %s" % self.operator)
 
     def can_be_null(self):
         return False
 
     def uses_field_access(self):
-        return (self.n_lhs.uses_field_access() or
-                self.n_rhs.uses_field_access())
+        return self.n_lhs.uses_field_access() or self.n_rhs.uses_field_access()
 
 
 class Field_Access_Expression(Expression):
@@ -1856,8 +1924,10 @@ class Field_Access_Expression(Expression):
     :type: bool
 
     """
-    def __init__(self, mh, location, n_prefix, n_field,
-                 is_union_access=False, is_universal=True):
+
+    def __init__(
+        self, mh, location, n_prefix, n_field, is_union_access=False, is_universal=True
+    ):
         # lobster-trace: LRM.Union_Type_Field_Access
         assert isinstance(mh, Message_Handler)
         assert isinstance(n_prefix, Expression)
@@ -1865,10 +1935,10 @@ class Field_Access_Expression(Expression):
         assert isinstance(is_union_access, bool)
         assert isinstance(is_universal, bool)
         super().__init__(location, n_field.n_typ)
-        self.n_prefix        = n_prefix
-        self.n_field         = n_field
+        self.n_prefix = n_prefix
+        self.n_field = n_field
         self.is_union_access = is_union_access
-        self.is_universal    = is_universal
+        self.is_universal = is_universal
 
         if not is_union_access:
             self.n_prefix.ensure_type(mh, self.n_field.member_of)
@@ -1886,13 +1956,10 @@ class Field_Access_Expression(Expression):
         assert context is None or isinstance(context, dict)
         assert gstab is None or isinstance(gstab, Symbol_Table)
 
-        v_prefix = self.n_prefix.evaluate(mh,
-                                          context,
-                                          gstab).value
+        v_prefix = self.n_prefix.evaluate(mh, context, gstab).value
         if v_prefix is None:
             # lobster-trace: LRM.Dereference
-            mh.error(self.n_prefix.location,
-                     "null dereference")
+            mh.error(self.n_prefix.location, "null dereference")
 
         # lobster-trace: LRM.Union_Type_Partial_Field_Access
         # lobster-trace: LRM.Union_Type_Partial_Field_Null
@@ -1940,6 +2007,7 @@ class Range_Test(Expression):
     :type: Expression
 
     """
+
     def __init__(self, mh, location, typ, n_lhs, n_lower, n_upper):
         # lobster-trace: LRM.Relation
         super().__init__(location, typ)
@@ -1947,7 +2015,7 @@ class Range_Test(Expression):
         assert isinstance(n_lhs, Expression)
         assert isinstance(n_lower, Expression)
         assert isinstance(n_upper, Expression)
-        self.n_lhs   = n_lhs
+        self.n_lhs = n_lhs
         self.n_lower = n_lower
         self.n_upper = n_upper
 
@@ -1956,9 +2024,11 @@ class Range_Test(Expression):
         self.n_upper.ensure_type(mh, self.n_lhs.typ)
 
     def to_string(self):
-        return "%s in %s .. %s" % (self.n_lhs.to_string(),
-                                   self.n_lower.to_string(),
-                                   self.n_upper.to_string())
+        return "%s in %s .. %s" % (
+            self.n_lhs.to_string(),
+            self.n_lower.to_string(),
+            self.n_upper.to_string(),
+        )
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
@@ -1976,36 +2046,43 @@ class Range_Test(Expression):
 
         v_lhs = self.n_lhs.evaluate(mh, context, gstab)
         if v_lhs.value is None:
-            mh.error(v_lhs.location,
-                     "lhs of range check %s (%s) see must not be null" %
-                     (self.to_string(),
-                      mh.cross_file_reference(self.location)))
+            mh.error(
+                v_lhs.location,
+                "lhs of range check %s (%s) see must not be null"
+                % (self.to_string(), mh.cross_file_reference(self.location)),
+            )
 
         v_lower = self.n_lower.evaluate(mh, context, gstab)
         if v_lower.value is None:
-            mh.error(v_lower.location,
-                     "lower bound of range check %s (%s) must not be null" %
-                     (self.to_string(),
-                      mh.cross_file_reference(self.location)))
+            mh.error(
+                v_lower.location,
+                "lower bound of range check %s (%s) must not be null"
+                % (self.to_string(), mh.cross_file_reference(self.location)),
+            )
 
         v_upper = self.n_upper.evaluate(mh, context, gstab)
         if v_upper.value is None:
-            mh.error(v_upper.location,
-                     "upper bound of range check %s (%s) must not be null" %
-                     (self.to_string(),
-                      mh.cross_file_reference(self.location)))
+            mh.error(
+                v_upper.location,
+                "upper bound of range check %s (%s) must not be null"
+                % (self.to_string(), mh.cross_file_reference(self.location)),
+            )
 
-        return Value(location = self.location,
-                     value    = v_lower.value <= v_lhs.value <= v_upper.value,
-                     typ      = self.typ)
+        return Value(
+            location=self.location,
+            value=v_lower.value <= v_lhs.value <= v_upper.value,
+            typ=self.typ,
+        )
 
     def can_be_null(self):
         return False
 
     def uses_field_access(self):
-        return (self.n_lhs.uses_field_access() or
-                self.n_lower.uses_field_access() or
-                self.n_upper.uses_field_access())
+        return (
+            self.n_lhs.uses_field_access()
+            or self.n_lower.uses_field_access()
+            or self.n_upper.uses_field_access()
+        )
 
 
 class OneOf_Expression(Expression):
@@ -2019,22 +2096,23 @@ class OneOf_Expression(Expression):
     :attribute choices: a list of boolean expressions to test
     :type: list[Expression]
     """
+
     def __init__(self, mh, location, typ, choices):
         # lobster-trace: LRM.Signature_OneOf
         super().__init__(location, typ)
         assert isinstance(typ, Builtin_Boolean)
         assert isinstance(mh, Message_Handler)
         assert isinstance(choices, list)
-        assert all(isinstance(item, Expression)
-                   for item in choices)
+        assert all(isinstance(item, Expression) for item in choices)
         self.choices = choices
 
         for n_choice in choices:
             n_choice.ensure_type(mh, Builtin_Boolean)
 
     def to_string(self):
-        return "oneof(%s)" % ", ".join(n_choice.to_string()
-                                       for n_choice in self.choices)
+        return "oneof(%s)" % ", ".join(
+            n_choice.to_string() for n_choice in self.choices
+        )
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
@@ -2049,12 +2127,13 @@ class OneOf_Expression(Expression):
         assert context is None or isinstance(context, dict)
         assert gstab is None or isinstance(gstab, Symbol_Table)
 
-        v_choices = [n_choice.evaluate(mh, context, gstab).value
-                     for n_choice in self.choices]
+        v_choices = [
+            n_choice.evaluate(mh, context, gstab).value for n_choice in self.choices
+        ]
 
-        return Value(location = self.location,
-                     value    = v_choices.count(True) == 1,
-                     typ      = self.typ)
+        return Value(
+            location=self.location, value=v_choices.count(True) == 1, typ=self.typ
+        )
 
     def can_be_null(self):
         return False
@@ -2086,6 +2165,7 @@ class Action(Node):
     :type: Expression
 
     """
+
     def __init__(self, mh, t_kind, n_condition, n_expression):
         # lobster-trace: LRM.Conditional_Expression
         assert isinstance(mh, Message_Handler)
@@ -2095,7 +2175,7 @@ class Action(Node):
         assert isinstance(n_condition, Expression)
         assert isinstance(n_expression, Expression)
         super().__init__(t_kind.location)
-        self.kind   = t_kind.value
+        self.kind = t_kind.value
         self.n_cond = n_condition
         self.n_expr = n_expression
         # lobster-trace: LRM.Conditional_Expression_Types
@@ -2110,9 +2190,11 @@ class Action(Node):
         self.n_expr.dump(indent + 2)
 
     def to_string(self):
-        return "%s %s then %s" % (self.kind,
-                                  self.n_cond.to_string(),
-                                  self.n_expr.to_string())
+        return "%s %s then %s" % (
+            self.kind,
+            self.n_cond.to_string(),
+            self.n_expr.to_string(),
+        )
 
 
 class Conditional_Expression(Expression):
@@ -2139,12 +2221,13 @@ class Conditional_Expression(Expression):
     :type: Expression
 
     """
+
     def __init__(self, location, if_action):
         # lobster-trace: LRM.Conditional_Expression
         assert isinstance(if_action, Action)
         assert if_action.kind == "if"
         super().__init__(location, if_action.n_expr.typ)
-        self.actions   = [if_action]
+        self.actions = [if_action]
         self.else_expr = None
 
     def add_elsif(self, mh, n_action):
@@ -2175,8 +2258,7 @@ class Conditional_Expression(Expression):
         self.else_expr.dump(indent + 2)
 
     def to_string(self):
-        rv = "(" + " ".join(action.to_string()
-                            for action in self.actions)
+        rv = "(" + " ".join(action.to_string() for action in self.actions)
         rv += " else %s" % self.else_expr.to_string()
         rv += ")"
         return rv
@@ -2192,10 +2274,11 @@ class Conditional_Expression(Expression):
         for action in self.actions:
             v_cond = action.n_cond.evaluate(mh, context, gstab)
             if v_cond.value is None:
-                mh.error(v_cond.location,
-                         "condition of %s (%s) must not be null" %
-                         (action.to_string(),
-                          mh.cross_file_reference(self.location)))
+                mh.error(
+                    v_cond.location,
+                    "condition of %s (%s) must not be null"
+                    % (action.to_string(), mh.cross_file_reference(self.location)),
+                )
             if v_cond.value:
                 return action.n_expr.evaluate(mh, context, gstab)
 
@@ -2205,15 +2288,13 @@ class Conditional_Expression(Expression):
         if self.else_expr and self.else_expr.can_be_null():
             return True
 
-        return any(action.n_expr.can_be_null()
-                   for action in self.actions)
+        return any(action.n_expr.can_be_null() for action in self.actions)
 
     def uses_field_access(self):
-        return (any(action.n_cond.uses_field_access() or
-                    action.n_expr.uses_field_access()
-                    for action in self.actions) or
-                (self.else_expr is not None and
-                 self.else_expr.uses_field_access()))
+        return any(
+            action.n_cond.uses_field_access() or action.n_expr.uses_field_access()
+            for action in self.actions
+        ) or (self.else_expr is not None and self.else_expr.uses_field_access())
 
 
 class Quantified_Expression(Expression):
@@ -2242,12 +2323,8 @@ class Quantified_Expression(Expression):
     :type: Boolean
 
     """
-    def __init__(self, mh, location,
-                 typ,
-                 universal,
-                 n_variable,
-                 n_source,
-                 n_expr):
+
+    def __init__(self, mh, location, typ, universal, n_variable, n_source, n_expr):
         # lobster-trace: LRM.Quantified_Expression
         # lobster-trace: LRM.Quantification_Type
         super().__init__(location, typ)
@@ -2257,9 +2334,9 @@ class Quantified_Expression(Expression):
         assert isinstance(n_expr, Expression)
         assert isinstance(n_source, Name_Reference)
         self.universal = universal
-        self.n_var     = n_variable
-        self.n_expr    = n_expr
-        self.n_source  = n_source
+        self.n_var = n_variable
+        self.n_expr = n_expr
+        self.n_source = n_source
         self.n_expr.ensure_type(mh, Builtin_Boolean)
 
     def dump(self, indent=0):  # pragma: no cover
@@ -2272,12 +2349,12 @@ class Quantified_Expression(Expression):
         self.n_expr.dump(indent + 1)
 
     def to_string(self):
-        return "(%s %s in %s => %s)" % ("forall"
-                                        if self.universal
-                                        else "exists",
-                                        self.n_var.name,
-                                        self.n_source.to_string(),
-                                        self.n_expr.to_string())
+        return "(%s %s in %s => %s)" % (
+            "forall" if self.universal else "exists",
+            self.n_var.name,
+            self.n_source.to_string(),
+            self.n_expr.to_string(),
+        )
 
     def evaluate(self, mh, context, gstab):
         # lobster-trace: LRM.Null_Is_Invalid
@@ -2298,45 +2375,47 @@ class Quantified_Expression(Expression):
         assert isinstance(self.n_source.entity, Composite_Component)
         array_values = context[self.n_source.entity.name]
         if isinstance(array_values, Implicit_Null):
-            mh.error(array_values.location,
-                     "%s in quantified expression %s (%s) "
-                     "must not be null" %
-                     (self.n_source.to_string(),
-                      self.to_string(),
-                      mh.cross_file_reference(self.location)))
+            mh.error(
+                array_values.location,
+                "%s in quantified expression %s (%s) "
+                "must not be null"
+                % (
+                    self.n_source.to_string(),
+                    self.to_string(),
+                    mh.cross_file_reference(self.location),
+                ),
+            )
         else:
             assert isinstance(array_values, Array_Aggregate)
 
-        rv  = self.universal
+        rv = self.universal
         loc = self.location
         for binding in array_values.value:
             new_ctx[self.n_var.name] = binding
             result = self.n_expr.evaluate(mh, new_ctx, gstab)
             assert isinstance(result.value, bool)
             if self.universal and not result.value:
-                rv  = False
+                rv = False
                 loc = binding.location
                 break
             elif not self.universal and result.value:
-                rv  = True
+                rv = True
                 loc = binding.location
                 break
 
-        return Value(location = loc,
-                     value    = rv,
-                     typ      = self.typ)
+        return Value(location=loc, value=rv, typ=self.typ)
 
     def can_be_null(self):
         return False
 
     def uses_field_access(self):
-        return (self.n_source.uses_field_access() or
-                self.n_expr.uses_field_access())
+        return self.n_source.uses_field_access() or self.n_expr.uses_field_access()
 
 
 ##############################################################################
 # AST Nodes (Entities)
 ##############################################################################
+
 
 class Entity(Node, metaclass=ABCMeta):
     """Base class for all entities.
@@ -2349,6 +2428,7 @@ class Entity(Node, metaclass=ABCMeta):
     :type: str
 
     """
+
     def __init__(self, name, location):
         # lobster-trace: LRM.Described_Name_Equality
         super().__init__(location)
@@ -2367,6 +2447,7 @@ class Typed_Entity(Entity, metaclass=ABCMeta):
     :type: Type
 
     """
+
     def __init__(self, name, location, n_typ):
         # lobster-exclude: Constructor only declares variables
         super().__init__(name, location)
@@ -2390,6 +2471,7 @@ class Quantified_Variable(Typed_Entity):
     :type: Type
 
     """
+
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
         self.write_indent(indent, f"Quantified Variable {self.name}")
@@ -2397,9 +2479,8 @@ class Quantified_Variable(Typed_Entity):
 
 
 class Type(Entity, metaclass=ABCMeta):
-    """Abstract base class for all types.
+    """Abstract base class for all types."""
 
-    """
     def perform_type_checks(self, mh, value, gstab):
         assert isinstance(mh, Message_Handler)
         assert isinstance(value, Expression)
@@ -2418,6 +2499,7 @@ class Concrete_Type(Type, metaclass=ABCMeta):
     :attribute n_package: package where this type was declared
     :type: Package
     """
+
     def __init__(self, name, location, n_package):
         super().__init__(name, location)
         assert isinstance(n_package, Package)
@@ -2435,16 +2517,14 @@ class Concrete_Type(Type, metaclass=ABCMeta):
         return hash((self.n_package.name, self.name))
 
     def __repr__(self):
-        return "%s<%s>" % (self.__class__.__name__,
-                           self.fully_qualified_name())
+        return "%s<%s>" % (self.__class__.__name__, self.fully_qualified_name())
 
 
 class Builtin_Type(Type, metaclass=ABCMeta):
     # lobster-trace: LRM.Builtin_Types
-    """Abstract base class for all builtin types.
+    """Abstract base class for all builtin types."""
 
-    """
-    LOCATION = Location(file_name = "<builtin>")
+    LOCATION = Location(file_name="<builtin>")
 
     def __init__(self, name):
         super().__init__(name, Builtin_Type.LOCATION)
@@ -2455,9 +2535,8 @@ class Builtin_Type(Type, metaclass=ABCMeta):
 
 class Builtin_Numeric_Type(Builtin_Type, metaclass=ABCMeta):
     # lobster-trace: LRM.Builtin_Types
-    """Abstract base class for all builtin numeric types.
+    """Abstract base class for all builtin numeric types."""
 
-    """
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, self.__class__.__name__)
 
@@ -2475,14 +2554,15 @@ class Builtin_Function(Entity):
     :type: bool
 
     """
-    LOCATION = Location(file_name = "<builtin>")
+
+    LOCATION = Location(file_name="<builtin>")
 
     def __init__(self, name, arity, arity_at_least=False):
         super().__init__(name, Builtin_Function.LOCATION)
         assert isinstance(arity, int)
         assert isinstance(arity_at_least, bool)
         assert arity >= 0
-        self.arity          = arity
+        self.arity = arity
         self.arity_at_least = arity_at_least
 
     def dump(self, indent=0):  # pragma: no cover
@@ -2514,13 +2594,10 @@ class Array_Type(Type):
     :type: Type
 
     """
-    def __init__(self,
-                 location,
-                 element_type,
-                 loc_lower,
-                 lower_bound,
-                 loc_upper,
-                 upper_bound):
+
+    def __init__(
+        self, location, element_type, loc_lower, lower_bound, loc_upper, upper_bound
+    ):
         # lobster-exclude: Constructor only declares variables
         assert isinstance(element_type, Type) or element_type is None
         assert isinstance(lower_bound, int)
@@ -2536,20 +2613,20 @@ class Array_Type(Type):
             if lower_bound == 0:
                 name = "array of %s" % element_type.name
             else:
-                name = "array of at least %u %s" % (lower_bound,
-                                                    element_type.name)
+                name = "array of at least %u %s" % (lower_bound, element_type.name)
         elif lower_bound == upper_bound:
-            name = "array of %u %s" % (lower_bound,
-                                       element_type.name)
+            name = "array of %u %s" % (lower_bound, element_type.name)
         else:
-            name = "array of %u to %u %s" % (lower_bound,
-                                             upper_bound,
-                                             element_type.name)
+            name = "array of %u to %u %s" % (
+                lower_bound,
+                upper_bound,
+                element_type.name,
+            )
         super().__init__(name, location)
-        self.lower_bound  = lower_bound
-        self.loc_lower    = loc_lower
-        self.upper_bound  = upper_bound
-        self.loc_upper    = loc_upper
+        self.lower_bound = lower_bound
+        self.loc_lower = loc_lower
+        self.upper_bound = upper_bound
+        self.loc_upper = loc_upper
         self.element_type = element_type
 
     def dump(self, indent=0):  # pragma: no cover
@@ -2567,8 +2644,9 @@ class Array_Type(Type):
         assert isinstance(gstab, Symbol_Table)
 
         if isinstance(value, Array_Aggregate):
-            return all(self.element_type.perform_type_checks(mh, v, gstab)
-                       for v in value.value)
+            return all(
+                self.element_type.perform_type_checks(mh, v, gstab) for v in value.value
+            )
         else:
             assert isinstance(value, Implicit_Null)
             return True
@@ -2594,6 +2672,7 @@ class Union_Type(Type):
     :type: list[Record_Type]
 
     """
+
     def __init__(self, location, types):
         assert isinstance(types, list)
         assert len(types) >= 1
@@ -2629,11 +2708,11 @@ class Union_Type(Type):
                 seen_in_type.add(comp.name)
                 if comp.name not in field_map:
                     field_map[comp.name] = {
-                        "component"       : comp,
-                        "n_typ"           : comp.n_typ,
-                        "count"           : 1,
-                        "total"           : len(self.types),
-                        "optional_in_any" : comp.optional,
+                        "component": comp,
+                        "n_typ": comp.n_typ,
+                        "count": 1,
+                        "total": len(self.types),
+                        "optional_in_any": comp.optional,
                     }
                 else:
                     info = field_map[comp.name]
@@ -2688,6 +2767,7 @@ class Builtin_Integer(Builtin_Numeric_Type):
     # lobster-trace: LRM.Builtin_Types
     # lobster-trace: LRM.Integer_Values
     """Builtin integer type."""
+
     def __init__(self):
         super().__init__("Integer")
 
@@ -2700,6 +2780,7 @@ class Builtin_Decimal(Builtin_Numeric_Type):
     # lobster-trace: LRM.Builtin_Types
     # lobster-trace: LRM.Decimal_Values
     """Builtin decimal type."""
+
     def __init__(self):
         super().__init__("Decimal")
 
@@ -2712,6 +2793,7 @@ class Builtin_Boolean(Builtin_Type):
     # lobster-trace: LRM.Builtin_Types
     # lobster-trace: LRM.Boolean_Values
     """Builtin boolean type."""
+
     def __init__(self):
         super().__init__("Boolean")
 
@@ -2724,27 +2806,29 @@ class Builtin_String(Builtin_Type):
     # lobster-trace: LRM.Builtin_Types
     # lobster-trace: LRM.String_Values
     """Builtin string type."""
+
     def __init__(self):
         super().__init__("String")
 
     def get_example_value(self):
         # lobster-exclude: utility method
-        return "\"potato\""
+        return '"potato"'
 
 
 class Builtin_Markup_String(Builtin_String):
     # lobster-trace: LRM.Builtin_Types
     # lobster-trace: LRM.Markup_String_Values
     """Builtin string type that allows checked references to TRLC
-       objects.
+    objects.
     """
+
     def __init__(self):
         super().__init__()
         self.name = "Markup_String"
 
     def get_example_value(self):
         # lobster-exclude: utility method
-        return "\"also see [[potato]]\""
+        return '"also see [[potato]]"'
 
 
 class Package(Entity):
@@ -2763,6 +2847,7 @@ class Package(Entity):
     :type: Symbol_Table
 
     """
+
     def __init__(self, name, location, builtin_stab, declared_late):
         # lobster-exclude: Constructor only declares variables
         super().__init__(name, location)
@@ -2779,8 +2864,7 @@ class Package(Entity):
         self.symbols.dump(indent + 1, omit_heading=True)
 
     def __repr__(self):
-        return "%s<%s>" % (self.__class__.__name__,
-                           self.name)
+        return "%s<%s>" % (self.__class__.__name__, self.name)
 
 
 class Composite_Type(Concrete_Type, metaclass=ABCMeta):
@@ -2798,21 +2882,16 @@ class Composite_Type(Concrete_Type, metaclass=ABCMeta):
     :type: list[Check]
 
     """
-    def __init__(self,
-                 name,
-                 description,
-                 location,
-                 package,
-                 inherited_symbols=None):
+
+    def __init__(self, name, description, location, package, inherited_symbols=None):
         # lobster-trace: LRM.Described_Name_Description
         super().__init__(name, location, package)
         assert isinstance(description, str) or description is None
-        assert isinstance(inherited_symbols, Symbol_Table) or \
-            inherited_symbols is None
+        assert isinstance(inherited_symbols, Symbol_Table) or inherited_symbols is None
 
-        self.components  = Symbol_Table(inherited_symbols)
+        self.components = Symbol_Table(inherited_symbols)
         self.description = description
-        self.checks      = []
+        self.checks = []
 
     def add_check(self, n_check):
         # lobster-trace: LRM.Check_Evaluation_Order
@@ -2854,21 +2933,15 @@ class Composite_Component(Typed_Entity):
 
     """
 
-    def __init__(self,
-                 name,
-                 description,
-                 location,
-                 member_of,
-                 n_typ,
-                 optional):
+    def __init__(self, name, description, location, member_of, n_typ, optional):
         # lobster-trace: LRM.Described_Name_Description
         super().__init__(name, location, n_typ)
         assert isinstance(description, str) or description is None
         assert isinstance(member_of, Composite_Type)
         assert isinstance(optional, bool)
         self.description = description
-        self.member_of   = member_of
-        self.optional    = optional
+        self.member_of = member_of
+        self.optional = optional
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
@@ -2879,9 +2952,10 @@ class Composite_Component(Typed_Entity):
         self.write_indent(indent + 1, f"Type: {self.n_typ.name}")
 
     def __repr__(self):
-        return "%s<%s>" % (self.__class__.__name__,
-                           self.member_of.fully_qualified_name() + "." +
-                           self.name)
+        return "%s<%s>" % (
+            self.__class__.__name__,
+            self.member_of.fully_qualified_name() + "." + self.name,
+        )
 
 
 class Record_Type(Composite_Type):
@@ -2908,24 +2982,21 @@ class Record_Type(Composite_Type):
     :type: bool
 
     """
-    def __init__(self,
-                 name,
-                 description,
-                 location,
-                 package,
-                 n_parent,
-                 is_abstract):
+
+    def __init__(self, name, description, location, package, n_parent, is_abstract):
         # lobster-exclude: Constructor only declares variables
         assert isinstance(n_parent, Record_Type) or n_parent is None
         assert isinstance(is_abstract, bool)
-        super().__init__(name,
-                         description,
-                         location,
-                         package,
-                         n_parent.components if n_parent else None)
-        self.parent      = n_parent
-        self.frozen      = {}
-        self.is_final    = (n_parent.is_final if n_parent else False)
+        super().__init__(
+            name,
+            description,
+            location,
+            package,
+            n_parent.components if n_parent else None,
+        )
+        self.parent = n_parent
+        self.frozen = {}
+        self.is_final = n_parent.is_final if n_parent else False
         self.is_abstract = is_abstract
 
     def iter_checks(self):
@@ -2956,13 +3027,12 @@ class Record_Type(Composite_Type):
         :rtype: list[Composite_Component]
         """
         if self.parent:
-            return self.parent.all_components() + \
-                list(self.components.table.values())
+            return self.parent.all_components() + list(self.components.table.values())
         else:
             return list(self.components.table.values())
 
     def is_subclass_of(self, record_type):
-        """ Checks if this record type is or inherits from the given type
+        """Checks if this record type is or inherits from the given type
 
         :param record_type: check if are or extend this type
         :type record_type: Record_Type
@@ -3041,12 +3111,10 @@ class Tuple_Type(Composite_Type):
     precisely one less separator than components.
 
     """
+
     def __init__(self, name, description, location, package):
         # lobster-trace: LRM.Tuple_Declaration
-        super().__init__(name,
-                         description,
-                         location,
-                         package)
+        super().__init__(name, description, location, package)
         self.separators = []
 
     def add_separator(self, n_separator):
@@ -3132,20 +3200,21 @@ class Separator(Node):
     :attribute token: token used to separate fields of the tuple
     :type: Token
     """
+
     def __init__(self, token):
         super().__init__(token.location)
-        assert isinstance(token, Token) and token.kind in ("IDENTIFIER",
-                                                           "AT",
-                                                           "COLON",
-                                                           "SEMICOLON")
+        assert isinstance(token, Token) and token.kind in (
+            "IDENTIFIER",
+            "AT",
+            "COLON",
+            "SEMICOLON",
+        )
         self.token = token
 
     def to_string(self):
-        return {
-            "AT"        : "@",
-            "COLON"     : ":",
-            "SEMICOLON" : ";"
-        }.get(self.token.kind, self.token.value)
+        return {"AT": "@", "COLON": ":", "SEMICOLON": ";"}.get(
+            self.token.kind, self.token.value
+        )
 
     def dump(self, indent=0):  # pragma: no cover
         self.write_indent(indent, f"Separator {self.token.value}")
@@ -3166,11 +3235,12 @@ class Enumeration_Type(Concrete_Type):
     :type: Symbol_Table[Enumeration_Literal_Spec]
 
     """
+
     def __init__(self, name, description, location, package):
         # lobster-trace: LRM.Described_Name_Description
         super().__init__(name, location, package)
         assert isinstance(description, str) or description is None
-        self.literals    = Symbol_Table()
+        self.literals = Symbol_Table()
         self.description = description
 
     def dump(self, indent=0):  # pragma: no cover
@@ -3205,6 +3275,7 @@ class Enumeration_Literal_Spec(Typed_Entity):
     :type: str
 
     """
+
     def __init__(self, name, description, location, enum):
         # lobster-trace: LRM.Described_Name_Description
         super().__init__(name, location, enum)
@@ -3255,6 +3326,7 @@ class Record_Object(Typed_Entity):
     * :class:`Implicit_Null`
 
     """
+
     def __init__(self, name, location, n_typ, section, n_package):
         # lobster-trace: LRM.Section_Declaration
         # lobster-trace: LRM.Unspecified_Optional_Components
@@ -3264,11 +3336,10 @@ class Record_Object(Typed_Entity):
         assert isinstance(section, list) or section is None
         assert isinstance(n_package, Package)
         super().__init__(name, location, n_typ)
-        self.field     = {
-            comp.name: Implicit_Null(self, comp)
-            for comp in self.n_typ.all_components()
+        self.field = {
+            comp.name: Implicit_Null(self, comp) for comp in self.n_typ.all_components()
         }
-        self.section   = section
+        self.section = section
         self.n_package = n_package
 
     def fully_qualified_name(self):
@@ -3292,24 +3363,29 @@ class Record_Object(Typed_Entity):
         name of the object itself is not in this returned dictionary.
 
         """
-        return {name: value.to_python_object()
-                for name, value in self.field.items()}
+        return {name: value.to_python_object() for name, value in self.field.items()}
 
     def is_component_implicit_null(self, component) -> bool:
         return not isinstance(self.field[component.name], Implicit_Null)
 
     def assign(self, component, value):
         assert isinstance(component, Composite_Component)
-        assert isinstance(value, (Literal,
-                                  Array_Aggregate,
-                                  Tuple_Aggregate,
-                                  Record_Reference,
-                                  Implicit_Null,
-                                  Unary_Expression)), \
-                "value is %s" % value.__class__.__name__
+        assert isinstance(
+            value,
+            (
+                Literal,
+                Array_Aggregate,
+                Tuple_Aggregate,
+                Record_Reference,
+                Implicit_Null,
+                Unary_Expression,
+            ),
+        ), "value is %s" % value.__class__.__name__
         if self.is_component_implicit_null(component):
-            raise KeyError(f"Component {component.name} already \
-                           assigned to {self.n_typ.name} {self.name}!")
+            raise KeyError(
+                f"Component {component.name} already \
+                           assigned to {self.n_typ.name} {self.name}!"
+            )
         self.field[component.name] = value
 
     def dump(self, indent=0):  # pragma: no cover
@@ -3337,9 +3413,7 @@ class Record_Object(Typed_Entity):
 
         # First evaluate all tuple checks
         for n_comp in self.n_typ.all_components():
-            if not n_comp.n_typ.perform_type_checks(mh,
-                                                    self.field[n_comp.name],
-                                                    gstab):
+            if not n_comp.n_typ.perform_type_checks(mh, self.field[n_comp.name], gstab):
                 ok = False
 
         # TODO: Is there a bug here (a check relies on a tuple check)?
@@ -3354,10 +3428,10 @@ class Record_Object(Typed_Entity):
         return ok
 
     def __repr__(self):
-        return "%s<%s>" % (self.__class__.__name__,
-                           self.n_package.name + "." +
-                           self.n_typ.name + "." +
-                           self.name)
+        return "%s<%s>" % (
+            self.__class__.__name__,
+            self.n_package.name + "." + self.n_typ.name + "." + self.name,
+        )
 
 
 class Section(Entity):
@@ -3376,6 +3450,7 @@ class Section(Entity):
     :type: Section
 
     """
+
     def __init__(self, name, location, parent):
         super().__init__(name, location)
         assert isinstance(parent, Section) or parent is None
@@ -3393,15 +3468,16 @@ class Section(Entity):
 # Symbol Table & Scopes
 ##############################################################################
 
+
 class Symbol_Table:
-    """ Symbol table mapping names to entities
-    """
+    """Symbol table mapping names to entities"""
+
     def __init__(self, parent=None):
         # lobster-exclude: Constructor only declares variables
         assert isinstance(parent, Symbol_Table) or parent is None
-        self.parent   = parent
+        self.parent = parent
         self.imported = []
-        self.table    = OrderedDict()
+        self.table = OrderedDict()
         self.trlc_files = []
         self.section_names = []
 
@@ -3413,7 +3489,7 @@ class Symbol_Table:
 
     def all_names(self):
         # lobster-exclude: API for users
-        """ All names in the symbol table
+        """All names in the symbol table
 
         :rtype: set[str]
         """
@@ -3449,7 +3525,7 @@ class Symbol_Table:
 
     def iter_record_objects(self):
         # lobster-exclude: API for users
-        """ Iterate over all record objects
+        """Iterate over all record objects
 
         :rtype: iterable[Record_Object]
         """
@@ -3486,18 +3562,19 @@ class Symbol_Table:
         simple_name = self.simplified_name(entity.name)
 
         if self.contains_raw(simple_name):
-            pdef = self.lookup_direct(mh, entity.name, entity.location,
-                                      simplified=True)
+            pdef = self.lookup_direct(mh, entity.name, entity.location, simplified=True)
             if pdef.name == entity.name:
-                mh.error(entity.location,
-                         "duplicate definition, previous definition at %s" %
-                         mh.cross_file_reference(pdef.location))
+                mh.error(
+                    entity.location,
+                    "duplicate definition, previous definition at %s"
+                    % mh.cross_file_reference(pdef.location),
+                )
             else:
-                mh.error(entity.location,
-                         "%s is too similar to %s, declared at %s" %
-                         (entity.name,
-                          pdef.name,
-                          mh.cross_file_reference(pdef.location)))
+                mh.error(
+                    entity.location,
+                    "%s is too similar to %s, declared at %s"
+                    % (entity.name, pdef.name, mh.cross_file_reference(pdef.location)),
+                )
 
         else:
             self.table[simple_name] = entity
@@ -3518,8 +3595,7 @@ class Symbol_Table:
         if simple_name in self.table:
             # No need to continue searching since registering a
             # clashing name would have been stopped
-            return precise_name is None or \
-                self.table[simple_name].name == precise_name
+            return precise_name is None or self.table[simple_name].name == precise_name
 
         elif self.parent:
             return self.parent.contains_raw(simple_name, precise_name)
@@ -3532,7 +3608,7 @@ class Symbol_Table:
 
     def contains(self, name):
         # lobster-trace: LRM.Described_Name_Equality
-        """ Tests if the given name is in the table
+        """Tests if the given name is in the table
 
         :param name: the name to test
         :type name: str
@@ -3579,25 +3655,23 @@ class Symbol_Table:
                     if rv.name != name:
                         return None
 
-                    if required_subclass is not None and \
-                       not isinstance(rv, required_subclass):
-                        mh.error(rv.location,
-                                 "%s %s is not a %s" %
-                                 (rv.__class__.__name__,
-                                  name,
-                                  required_subclass.__name__))
+                    if required_subclass is not None and not isinstance(
+                        rv, required_subclass
+                    ):
+                        mh.error(
+                            rv.location,
+                            "%s %s is not a %s"
+                            % (rv.__class__.__name__, name, required_subclass.__name__),
+                        )
                     return rv
                 else:
                     ptr = ptr.parent
 
         return None
 
-    def lookup_direct(self,
-                      mh,
-                      name,
-                      error_location,
-                      required_subclass=None,
-                      simplified=False):
+    def lookup_direct(
+        self, mh, name, error_location, required_subclass=None, simplified=False
+    ):
         # lobster-trace: LRM.Described_Name_Equality
         # lobster-trace: LRM.Sufficiently_Distinct
         # lobster-trace: LRM.Valid_Base_Names
@@ -3653,45 +3727,41 @@ class Symbol_Table:
         assert isinstance(simplified, bool)
 
         simple_name = self.simplified_name(name)
-        ptr         = self
-        options     = []
+        ptr = self
+        options = []
 
         for ptr in [self] + self.imported:
             while ptr:
                 if simple_name in ptr.table:
                     rv = ptr.table[simple_name]
                     if not simplified and rv.name != name:
-                        mh.error(error_location,
-                                 "unknown symbol %s, did you mean %s?" %
-                                 (name,
-                                  rv.name))
+                        mh.error(
+                            error_location,
+                            "unknown symbol %s, did you mean %s?" % (name, rv.name),
+                        )
 
-                    if required_subclass is not None and \
-                       not isinstance(rv, required_subclass):
-                        mh.error(error_location,
-                                 "%s %s is not a %s" %
-                                 (rv.__class__.__name__,
-                                  name,
-                                  required_subclass.__name__))
+                    if required_subclass is not None and not isinstance(
+                        rv, required_subclass
+                    ):
+                        mh.error(
+                            error_location,
+                            "%s %s is not a %s"
+                            % (rv.__class__.__name__, name, required_subclass.__name__),
+                        )
                     return rv
                 else:
-                    options += list(item.name
-                                    for item in ptr.table.values())
-                    ptr      = ptr.parent
+                    options += list(item.name for item in ptr.table.values())
+                    ptr = ptr.parent
 
-        matches = get_close_matches(
-            word          = name,
-            possibilities = options,
-            n             = 1)
+        matches = get_close_matches(word=name, possibilities=options, n=1)
 
         if matches:
-            mh.error(error_location,
-                     "unknown symbol %s, did you mean %s?" %
-                     (name,
-                      matches[0]))
+            mh.error(
+                error_location,
+                "unknown symbol %s, did you mean %s?" % (name, matches[0]),
+            )
         else:
-            mh.error(error_location,
-                     "unknown symbol %s" % name)
+            mh.error(error_location, "unknown symbol %s" % name)
 
     def lookup(self, mh, referencing_token, required_subclass=None):
         # lobster-trace: LRM.Described_Name_Equality
@@ -3701,10 +3771,11 @@ class Symbol_Table:
         assert isinstance(required_subclass, type) or required_subclass is None
 
         return self.lookup_direct(
-            mh                = mh,
-            name              = referencing_token.value,
-            error_location    = referencing_token.location,
-            required_subclass = required_subclass)
+            mh=mh,
+            name=referencing_token.value,
+            error_location=referencing_token.location,
+            required_subclass=required_subclass,
+        )
 
     def write_indent(self, indent, message):  # pragma: no cover
         # lobster-exclude: Debugging feature
@@ -3741,16 +3812,11 @@ class Symbol_Table:
         stab.register(mh, Builtin_Boolean())
         stab.register(mh, Builtin_String())
         stab.register(mh, Builtin_Markup_String())
-        stab.register(mh,
-                      Builtin_Function("len", 1))
-        stab.register(mh,
-                      Builtin_Function("startswith", 2))
-        stab.register(mh,
-                      Builtin_Function("endswith", 2))
-        stab.register(mh,
-                      Builtin_Function("matches", 2))
-        stab.register(mh,
-                      Builtin_Function("oneof", 1, arity_at_least=True))
+        stab.register(mh, Builtin_Function("len", 1))
+        stab.register(mh, Builtin_Function("startswith", 2))
+        stab.register(mh, Builtin_Function("endswith", 2))
+        stab.register(mh, Builtin_Function("matches", 2))
+        stab.register(mh, Builtin_Function("oneof", 1, arity_at_least=True))
 
         return stab
 

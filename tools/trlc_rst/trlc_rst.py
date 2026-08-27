@@ -61,7 +61,9 @@ class TRLCRST:
         return field_name.replace("_", " ").strip().title()
 
     @classmethod
-    def _normalize_fields(cls, fields: list[str] | dict[str, str]) -> list[tuple[str, str]]:
+    def _normalize_fields(
+        cls, fields: list[str] | dict[str, str]
+    ) -> list[tuple[str, str]]:
         """Convert a field spec to ``[(field_name, label), ...]``.
 
         Accepts:
@@ -187,7 +189,9 @@ class TRLCRST:
                 "Requirements tree not built. Call convert_symbols_to_tree() first."
             )
 
-        normalized = self._normalize_fields(fields if fields is not None else _DEFAULT_FIELDS)
+        normalized = self._normalize_fields(
+            fields if fields is not None else _DEFAULT_FIELDS
+        )
 
         with open(output_path, "w", newline="", encoding="utf-8") as file:
             if title:
@@ -220,7 +224,9 @@ class TRLCRST:
                 else:
                     trlc_obj = getattr(node, "trlc_obj", None)
                     file.write(
-                        "\n".join(self._render_record_block(node.name, trlc_obj, normalized))
+                        "\n".join(
+                            self._render_record_block(node.name, trlc_obj, normalized)
+                        )
                     )
                     file.write("\n")
 
@@ -242,13 +248,18 @@ class TRLCRST:
         if trlc_obj is None:
             return None
         field_node = trlc_obj.field.get(field_name)
-        if isinstance(field_node, trlc.ast.String_Literal) and field_node.has_references:
+        if (
+            isinstance(field_node, trlc.ast.String_Literal)
+            and field_node.has_references
+        ):
             return TRLCRST._resolve_markup_references(
                 field_node.value, field_node.references
             )
         return trlc_obj.to_python_dict().get(field_name)
 
-    def _render_record_block(self, fqn: str, trlc_obj, fields: list[tuple[str, str]]) -> list:
+    def _render_record_block(
+        self, fqn: str, trlc_obj, fields: list[tuple[str, str]]
+    ) -> list:
         """Render one record as a ``requirement:definition`` directive block.
 
         Scalar ``String``/``Markup_String`` fields are rendered as preprocessed
@@ -302,7 +313,9 @@ class TRLCRST:
 
     def _objects_by_fqn(self, records: set[str] | None = None) -> dict:
         """Return ``{fully_qualified_name: trlc_obj}`` for all filtered records."""
-        return {o.fully_qualified_name(): o for o in self._iter_filtered_objects(records)}
+        return {
+            o.fully_qualified_name(): o for o in self._iter_filtered_objects(records)
+        }
 
     def objects_by_fqn(self, records: set[str] | None = None) -> dict:
         """Public access to ``{fqn: trlc_obj}`` for callers needing raw TRLC objects."""
@@ -362,7 +375,9 @@ class TRLCRST:
         Returns:
             RST string ending with a newline.
         """
-        normalized = self._normalize_fields(fields if fields is not None else _DEFAULT_FIELDS)
+        normalized = self._normalize_fields(
+            fields if fields is not None else _DEFAULT_FIELDS
+        )
         obj_map = self._objects_by_fqn(records)
         if fqns is None:
             objs = list(self._iter_filtered_objects(records))
@@ -404,7 +419,10 @@ class TRLCRST:
         normalized = self._normalize_fields(columns)
         obj_map = self._objects_by_fqn(records)
         if fqns is None:
-            objs = [(o.fully_qualified_name(), o) for o in self._iter_filtered_objects(records)]
+            objs = [
+                (o.fully_qualified_name(), o)
+                for o in self._iter_filtered_objects(records)
+            ]
         else:
             objs = [(f, obj_map[f]) for f in fqns if f in obj_map]
 
@@ -451,9 +469,7 @@ class TRLCRST:
                 if ref.target is not None:
                     fqn = ref.target.fully_qualified_name()
                     short = ref.target.name
-                    parts.append(
-                        f":requirement:upstream-ref:`{short} <{fqn}>`"
-                    )
+                    parts.append(f":requirement:upstream-ref:`{short} <{fqn}>`")
                 else:
                     parts.append(match.group(0))
             return ", ".join(parts)
@@ -522,7 +538,9 @@ class TRLCRST:
                     # relative_indent = 20-16 = 4, resulting in 6 base + 4 = 10 total spaces
                     original_indent = len(line) - len(line.lstrip())
                     relative_indent = original_indent - code_block_base_indent
-                    processed_lines.append(" " * (indent + 3) + " " * relative_indent + stripped)
+                    processed_lines.append(
+                        " " * (indent + 3) + " " * relative_indent + stripped
+                    )
                     skip_normal = True
                 elif in_directive:
                     original_indent = len(line) - len(line.lstrip())
@@ -530,7 +548,9 @@ class TRLCRST:
                         # Directive option or body content — preserve relative indentation
                         # so that e.g. ``:width: 50%`` stays indented under ``.. image::``.
                         relative_indent = original_indent - directive_base_indent
-                        processed_lines.append(" " * indent + " " * relative_indent + stripped)
+                        processed_lines.append(
+                            " " * indent + " " * relative_indent + stripped
+                        )
                         prev_was_list_item = False
                         skip_normal = True
                     else:

@@ -31,19 +31,20 @@ class List_Handler(Message_Handler):
 
 class Test_Lexer(unittest.TestCase):
     def setUp(self):
-        self.mh    = List_Handler()
+        self.mh = List_Handler()
         self.lexer = None
 
     def tearDown(self):
-        self.assertEqual(len(self.mh.messages),
-                         0,
-                         "unexpected messages: %s" %
-                         (", ".join(msg[2]
-                                    for msg in self.mh.messages)))
-        self.assertEqual(len(self.tokens),
-                         0,
-                         "unexpected tokens: %s" %
-                         (", ".join(map(str, self.tokens))))
+        self.assertEqual(
+            len(self.mh.messages),
+            0,
+            "unexpected messages: %s" % (", ".join(msg[2] for msg in self.mh.messages)),
+        )
+        self.assertEqual(
+            len(self.tokens),
+            0,
+            "unexpected tokens: %s" % (", ".join(map(str, self.tokens))),
+        )
 
     def input(self, content):
         assert isinstance(content, str)
@@ -64,8 +65,9 @@ class Test_Lexer(unittest.TestCase):
     def match(self, kind, value=None):
         self.assertGreater(len(self.tokens), 0)
         token, self.tokens = self.tokens[0], self.tokens[1:]
-        self.assertEqual(token.kind, kind,
-                         "%s does not have the right kind" % str(token))
+        self.assertEqual(
+            token.kind, kind, "%s does not have the right kind" % str(token)
+        )
         if value is not None:
             self.assertEqual(token.value, value)
         return token
@@ -123,7 +125,7 @@ class Test_Lexer(unittest.TestCase):
             "tuple",
             "type",
             "warning",
-            "xor"
+            "xor",
         ]
         self.input(" ".join(bullets))
         for kw in bullets:
@@ -138,8 +140,7 @@ class Test_Lexer(unittest.TestCase):
             "Boolean operators: `<` `>`",
             "Symbols: `@` `:` `;`",
         ]
-        self.input(" ".join(" ".join(re.findall(r"`(.*?)`", item))
-                            for item in bullets))
+        self.input(" ".join(" ".join(re.findall(r"`(.*?)`", item)) for item in bullets))
         self.match("BRA")
         self.match("KET")
         self.match("S_BRA")
@@ -166,10 +167,9 @@ class Test_Lexer(unittest.TestCase):
         bullets = [
             "Operators: `**`",
             "Boolean operators: `==` `<=` `>=` `!=`",
-            "Punctuation: `=>` `..`"
+            "Punctuation: `=>` `..`",
         ]
-        self.input(" ".join(" ".join(re.findall(r"`(.*?)`", item))
-                            for item in bullets))
+        self.input(" ".join(" ".join(re.findall(r"`(.*?)`", item)) for item in bullets))
         self.match("OPERATOR")
         self.match("OPERATOR")
         self.match("OPERATOR")
@@ -191,7 +191,7 @@ class Test_Lexer(unittest.TestCase):
         self.match("INTEGER", 0)
         self.match("INTEGER", 4)
         self.match("INTEGER", 10000)
-        self.match("INTEGER", 0xdeadbeef)
+        self.match("INTEGER", 0xDEADBEEF)
 
     def testIntegers2(self):
         # lobster-trace: LRM.Integers
@@ -235,14 +235,14 @@ class Test_Lexer(unittest.TestCase):
         # lobster-trace: LRM.Strings
         # lobster-trace: LRM.Simple_String_Value
         with self.assertRaises(TRLC_Error):
-            self.input('''
+            self.input("""
                "potato" "pot\\"ato" "no\\nescape"
                "foo\nbar"
-            ''')
+            """)
         self.matchError("double quoted strings cannot include newlines")
-        self.match("STRING", r'potato')
+        self.match("STRING", r"potato")
         self.match("STRING", r'pot"ato')
-        self.match("STRING", r'no\nescape')
+        self.match("STRING", r"no\nescape")
 
     def testStrings2(self):
         # lobster-trace: LRM.Strings
@@ -254,8 +254,7 @@ class Test_Lexer(unittest.TestCase):
              Potato.
           '''
         """)
-        self.match("STRING",
-                   "This is a\n  * complex\n  * string\nPotato.")
+        self.match("STRING", "This is a\n  * complex\n  * string\nPotato.")
 
     def testStrings3(self):
         # lobster-trace: LRM.Strings

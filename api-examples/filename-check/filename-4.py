@@ -20,14 +20,12 @@ if symbols is None:
     sys.exit(1)
 
 # Do something if there are no errors
-pkg_example   = symbols.lookup_assuming(
-    mh                = mh,
-    name              = "Example",
-    required_subclass = ast.Package)
+pkg_example = symbols.lookup_assuming(
+    mh=mh, name="Example", required_subclass=ast.Package
+)
 req_base_type = pkg_example.symbols.lookup_assuming(
-    mh                = mh,
-    name              = "Requirement",
-    required_subclass = ast.Record_Type)
+    mh=mh, name="Requirement", required_subclass=ast.Record_Type
+)
 
 for obj in symbols.iter_record_objects():
     values = obj.to_python_dict()
@@ -35,10 +33,12 @@ for obj in symbols.iter_record_objects():
     if not obj.n_typ.is_subclass_of(req_base_type):
         continue
 
-    if values["illustration"] is not None and \
-       not os.path.isfile(values["illustration"]):
-
-        mh.error(location = obj.field["illustration"].location,
-                 message  = "is not a file",
-                 fatal    = False,
-                 user     = True)
+    if values["illustration"] is not None and not os.path.isfile(
+        values["illustration"]
+    ):
+        mh.error(
+            location=obj.field["illustration"].location,
+            message="is not a file",
+            fatal=False,
+            user=True,
+        )
