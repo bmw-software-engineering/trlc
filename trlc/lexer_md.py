@@ -1256,7 +1256,7 @@ class MD_Lexer(TRLC_Lexer):
                     type_name = value.strip()
                     if "." not in type_name and len(imported_packages) == 1:
                         type_name = imported_packages[0] + "." + type_name
-                    self._emit_qualified_identifier(pending_name_loc, type_name)
+                    self._emit_qualified_identifier(loc, type_name)
                     self._emit(pending_name_loc, "IDENTIFIER", pending_name)
                     self._emit(pending_name_loc, "C_BRA")
                     in_record = True
