@@ -7,7 +7,7 @@ Use these instructions for any work in this repository.
 - Repository: TRLC (Treat Requirements Like Code), Python reference
   implementation plus docs and Bazel integration.
 - Priorities: language correctness, deterministic behavior, and keeping spec/docs/tests aligned.
-- Runtime constraints: Python 3.8–3.14 supported.
+- Runtime constraints: Python 3.10–3.14 supported.
 
 ## Default workflow
 

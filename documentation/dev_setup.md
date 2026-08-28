@@ -8,7 +8,7 @@ the latest GNU make version.
 
 ## Setup
 
-* You need a suitable version of Python3 (3.8 <= Python3 <= 3.14). You
+* You need a suitable version of Python3 (3.10 <= Python3 <= 3.14). You
   can install this from your package manager. On Debian the package is
   called `python3`.
 
