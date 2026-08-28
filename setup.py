@@ -45,7 +45,7 @@ setuptools.setup(
     license="GNU General Public License v3",
     packages=setuptools.find_packages(),
     install_requires="PyVCG[api]==1.0.12",
-    python_requires=">=3.8, <3.15",
+    python_requires=">=3.10, <3.15",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
