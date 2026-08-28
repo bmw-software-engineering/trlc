@@ -25,7 +25,6 @@ bazel_dep(
 )
 
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
-python.toolchain(python_version = "3.9")
 python.toolchain(python_version = "3.10")
 python.toolchain(python_version = "3.11")
 python.toolchain(
@@ -44,7 +43,6 @@ pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
         requirements_lock = "//:requirements_lock_3_{}.txt".format(python_version),
     )
     for python_version in [
-        "9",
         "10",
         "11",
         "12",
@@ -60,7 +58,6 @@ use_repo(pip, "trlc_dependencies")
         requirements_lock = "//tools/sphinx:requirements_3_{}.txt".format(python_version),
     )
     for python_version in [
-        "9",
         "10",
         "11",
         "12",
