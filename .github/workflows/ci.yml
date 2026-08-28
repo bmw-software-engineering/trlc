@@ -50,12 +50,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.py-version }}
-      - name: Install scoop and gnu findutils on windows
+      - name: Add GNU find from Git for Windows to PATH
         if: matrix.os == 'windows-2022'
         run: |
-          Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-          scoop install findutils
-          "$env:HOMEDRIVE$env:HOMEPATH\scoop\apps\findutils\current\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          $git_exe = (Get-Command git -ErrorAction Stop).Source
+          $git_root = Split-Path (Split-Path $git_exe -Parent) -Parent
+          $gnu_bin = Join-Path $git_root "usr\bin"
+          if (-not (Test-Path $gnu_bin)) {
+            throw "GNU tools path not found: $gnu_bin"
+          }
+          $gnu_bin | Out-File -FilePath $env:GITHUB_PATH -Append
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
