@@ -33,7 +33,6 @@ py_binary(
         requirements_txt = "requirements_lock_3_{}.txt".format(version),
     )
     for version in [
-        "9",
         "10",
         "11",
         "12",
