@@ -304,7 +304,7 @@ class MD_Lexer(TRLC_Lexer):
         return None
 
     def _process_preamble(self, content):
-        """Phase 1: emit only preamble tokens (# PackageName, import lines).
+        """Phase 1: TEST TEST emit only preamble tokens (# PackageName, import lines).
 
         Body processing is deferred to prepare_phase2() so that RSL types
         are available when field values are tokenised.
