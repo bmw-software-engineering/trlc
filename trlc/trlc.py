@@ -222,7 +222,7 @@ class Source_Manager:
         :param file_name: name of the file
         :type file_name: str
         :raise AssertionError: if the file does not exist
-        :raise AssertionError: if the file is registed more than once
+        :raise AssertionError: if the file is registered more than once
         :raise TRLC_Error: if the file is not a rsl, trlc or trlc.md file
 
         :param file_content: content of the file
@@ -437,7 +437,7 @@ class Source_Manager:
                 self.mh.error(
                     location=offender.cu.location,
                     message=(
-                        "circular inheritence between %s" % " | ".join(sorted(names))
+                        "circular inheritance between %s" % " | ".join(sorted(names))
                     ),
                     explanation="\n".join(
                         sorted(

@@ -24,7 +24,7 @@ the latest GNU make version.
   * Check out https://github.com/bmw-software-engineering/lobster and
     put the root of the repo on your `PYTHONPATH`.
 
-  * Install from PyPI, carfully avoiding to install the TRLC
+  * Install from PyPI, carefully avoiding to install the TRLC
     dependency as that will make things really confusing:
 
     ```bash

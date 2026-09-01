@@ -1291,7 +1291,7 @@ def main():
     typ_punct = pkg_lrm.symbols.lookup_assuming(mh, "Punctuation", ast.Record_Type)
     typ_terminal = pkg_lrm.symbols.lookup_assuming(mh, "Terminal", ast.Record_Type)
 
-    # Process grammer
+    # Process grammar
     parser = BNF_Parser(mh)
     for obj in pkg_lrm.symbols.iter_record_objects():
         if obj.n_typ.is_subclass_of(typ_gram):
