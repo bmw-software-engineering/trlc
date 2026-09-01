@@ -349,6 +349,48 @@ class TestLexerMd(unittest.TestCase):
             ],
         )
 
+    def test_type_row_tokens_use_type_row_location(self):
+        content = "\n".join(
+            [
+                "# DemoPkg",
+                "",
+                "## Overview",
+                "",
+                "### Req_1",
+                "",
+                "| Property | Value |",
+                "|----------|-------|",
+                "| type | Requirement |",
+                "| priority | 7 |",
+            ]
+        )
+
+        lexer = MD_Lexer(self.mh, "test.trlc.md", content)
+        lexer.prepare_phase2(trlc_ast.Symbol_Table())
+
+        tokens = []
+        while True:
+            token = lexer.token()
+            if token is None:
+                break
+            tokens.append(token)
+
+        type_row_tokens = [token for token in tokens if token.location.line_no == 9]
+        heading_tokens = [token for token in tokens if token.location.line_no == 5]
+
+        self.assertEqual(
+            [(token.kind, token.value) for token in type_row_tokens],
+            [("IDENTIFIER", "Requirement")],
+        )
+
+        self.assertEqual(
+            [(token.kind, token.value) for token in heading_tokens[-2:]],
+            [
+                ("IDENTIFIER", "Req_1"),
+                ("C_BRA", None),
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
