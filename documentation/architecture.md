@@ -32,7 +32,7 @@ with some changes:
   practice this means the final else clause in an if statement that
   distinguishes on three shape should always raise an ICE (internal
   compiler error). That way if somebody adds a new AST node in the
-  future or changes the tree in some way we immediately get a failre,
+  future or changes the tree in some way we immediately get a failure,
   instead of silent success or worse silent failure. This is essential
   in making sure we can qualify this tool under ISO 26262 with minimal
   effort.
@@ -166,7 +166,7 @@ the `Source_Manager`.
 
 * First we register all include files that haven't been explicitly
   requested on the command-line. We register them with `primary =
-  False` to indicate that they are not explictly requested.
+  False` to indicate that they are not explicitly requested.
 
 * We then parse just the preamble of _all_ files. After that we
   resolve the imports of all packages. This means we could raise

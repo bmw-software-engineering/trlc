@@ -115,7 +115,7 @@ class VCG:
         self.functional = False
         # If set to true, then we ignore validity checks and do not
         # create intermediates. We just build the value and validity
-        # expresions and return them.
+        # expressions and return them.
 
         self.emit_checks = True
         # If set to false, we skip creating checks.
@@ -402,7 +402,7 @@ class VCG:
                 else:
                     ok_feasibility_checks.add(vc["feedback"])
 
-        # This is a bit wonky, but this way we make sure the ording is
+        # This is a bit wonky, but this way we make sure the ordering is
         # consistent
         for feedback in nok_feasibility_checks:
             if feedback not in ok_feasibility_checks:
