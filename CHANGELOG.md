@@ -24,7 +24,10 @@ generated in the following situations:
 
 ## Changelog
 
-### 3.0.1 post
+### 3.0.2-dev
+
+* [TRLC] Drop support for Python versions below 3.10. TRLC now requires
+  Python 3.10 through 3.14.
 
 * [TRLC_RST] Fix trlc_rst rendering plain-String description fields as broken field lists
 
