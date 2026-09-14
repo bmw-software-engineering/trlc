@@ -222,12 +222,12 @@ class Linter:
 
     def _find_import_location(self, cu, name, is_wildcard):
         # lobster-exclude: Utility function
-        for raw_name, raw_loc, raw_wildcard in cu.raw_imports:
+        for raw_name, raw_loc, raw_wildcard, _tokens in cu.raw_imports:
             if raw_name == name and raw_wildcard == is_wildcard:
                 return raw_loc
         return None
 
-    def _import_in_markup(self, file, item, include_descendants = False):
+    def _import_in_markup(self, file, item, include_descendants=False):
         # lobster-exclude: Utility function
         # A package referenced in a markup string counts as used. For a
         # wildcard root, a reference to any descendant package also counts.
@@ -290,7 +290,7 @@ class Linter:
                 if root in cu.referenced_imports:
                     continue
                 if self._import_in_markup(file, root,
-                                          include_descendants = True):
+                                          include_descendants=True):
                     continue
                 imp_location = self._find_import_location(cu, root.name, True)
                 if imp_location is not None:
@@ -309,7 +309,7 @@ class Linter:
                     if root not in cu.referenced_imports:
                         continue
                     if self._import_in_markup(file, root,
-                                              include_descendants = True):
+                                              include_descendants=True):
                         continue
                     imp_location = self._find_import_location(
                         cu, root.name, True)

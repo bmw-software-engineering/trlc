@@ -1,0 +1,4 @@
+ns.Base B_001 {
+^^ nested-packages-child-import-no-parent/data.trlc:4: error: package must be imported before use
+ | add 'import ns' to the preamble of this file
+Processed 2 models and 1 requirement file and found 1 error

@@ -360,9 +360,12 @@ class Parser(Parser_Base):
             return name, None, None
 
     def parse_dotted_name(self):
+        """Parse a dotted package name: ``IDENTIFIER { '.' IDENTIFIER }``.
+
+        :returns: ``(full_name, first_location, tokens)``
+        :rtype: tuple[str, Location, list[Token]]
+        """
         # lobster-trace: LRM.Nested_Package_Names
-        # Consume IDENTIFIER { '.' IDENTIFIER } and return the full dotted
-        # name, the location of the first segment, and all tokens consumed.
         self.match("IDENTIFIER")
         parts          = [self.ct.value]
         first_location = self.ct.location
@@ -435,7 +438,9 @@ class Parser(Parser_Base):
                 pkg.set_ast_link(t_dot)
                 if not self.cu.is_visible(pkg):
                     self.mh.error(t_pkg.location,
-                                  "package must be imported before use")
+                                  "package must be imported before use",
+                                  explanation="add 'import %s' to the "
+                                  "preamble of this file" % pkg.name)
                 self.cu.mark_import_used(pkg)
                 return pkg, t_member
             child.set_ast_link(t_dot)
@@ -445,7 +450,9 @@ class Parser(Parser_Base):
 
         if not self.cu.is_visible(pkg):
             self.mh.error(t_pkg.location,
-                          "package must be imported before use")
+                          "package must be imported before use",
+                          explanation="add 'import %s' to the preamble "
+                          "of this file" % pkg.name)
         self.cu.mark_import_used(pkg)
         return pkg, self.ct
 
@@ -2127,10 +2134,8 @@ class Parser(Parser_Base):
                 imp_name, imp_location, imp_tokens, imp_wildcard = \
                     self.parse_import_name()
                 pkg.set_ast_link(t_import_kw)
-                for t in imp_tokens:
-                    pkg.set_ast_link(t)
                 self.cu.add_import(self.mh, imp_name, imp_location,
-                                   imp_wildcard)
+                                   imp_wildcard, imp_tokens)
 
     def parse_rsl_file(self):
         # lobster-trace: LRM.RSL_File

@@ -1,0 +1,6 @@
+package data
+import foo
+
+foo.bar.T OBJ {
+  x = "hello"
+}

@@ -357,6 +357,7 @@ class Source_Manager:
                     self.files_with_preamble_errors.add(file_name)
 
             # Then parse all imports and add all valid links
+            all_packages = list(self.stab.values(ast.Package))
             for file_name in sorted(container):
                 if file_name in self.files_with_preamble_errors:
                     continue
@@ -373,20 +374,29 @@ class Source_Manager:
 
                 # A wildcard import depends on the whole subtree rooted at
                 # the wildcard root, so the file-load closure pulls in every
-                # descendant package. The current package is excluded: a
-                # wildcard whose root covers the current package (see
-                # LRM.Wildcard_Self_Cover) must not make the package depend
-                # on itself, which would be reported as a spurious cycle.
+                # descendant package. Only for a self-covering wildcard
+                # (root is the current package or an ancestor of it, see
+                # LRM.Wildcard_Self_Cover) is the current package and its
+                # own descendants excluded: those already have an implicit
+                # dependency on the current package's rsl file, which
+                # would otherwise be reported as a spurious cycle. A
+                # wildcard root that is a genuine descendant of the current
+                # package must still create the dependency, so that a real
+                # cycle is reported instead of silently ignored.
                 # lobster-trace: LRM.Wildcard_Import
                 # lobster-trace: LRM.Wildcard_Self_Cover
                 if parser.cu.wildcard_roots:
                     for root in parser.cu.wildcard_roots:
-                        for other in self.stab.values(ast.Package):
-                            if other.name == pkg_name:
+                        self_cover = pkg_name == root.name or \
+                            pkg_name.startswith(root.name + ".")
+                        for other in all_packages:
+                            if self_cover and \
+                               (other.name == pkg_name or
+                                other.name.startswith(pkg_name + ".")):
                                 continue
                             if other.name == root.name or \
                                other.name.startswith(root.name + "."):
-                                graph[(pkg_name , kind)].add((other.name , kind))
+                                graph[(pkg_name, kind)].add((other.name, kind))
 
         # Build the package hierarchy for nested packages. Parents are
         # always registered already (in the flat global table), so the
@@ -403,11 +413,14 @@ class Source_Manager:
             if not isinstance(parent_pkg, ast.Package):
                 ok = False
                 self.mh.error(
-                    location = pkg.location,
-                    message  = ("parent package %s of nested package %s"
-                                " has not been declared"
-                                % (parent_name, pkg.name)),
-                    fatal    = False)
+                    location    = pkg.location,
+                    message     = ("parent package %s of nested package %s"
+                                   " has not been declared"
+                                   % (parent_name, pkg.name)),
+                    explanation = ("declare package %s (e.g. in its own "
+                                   ".rsl file) before declaring %s"
+                                   % (parent_name, pkg.name)),
+                    fatal       = False)
                 continue
             try:
                 parent_pkg.sub_packages.register_with_key(self.mh,
@@ -552,12 +565,14 @@ class Source_Manager:
 
     def verify_subpackage_distinctness(self) -> bool:
         """Check that sub-package leaf names are sufficiently distinct from
-        types or objects declared in the same parent package.
+        types declared in the same parent package.
 
         Must run after RSL parsing, once every package's ``symbols`` table
-        is fully populated. Without this, the greedy qualified-name descent
-        (which consults ``sub_packages`` first) would silently shadow a
-        same-named member.
+        is fully populated with types. Without this, the greedy
+        qualified-name descent (which consults ``sub_packages`` first)
+        would silently shadow a same-named member. Objects (declared in
+        TRLC files) are checked separately, once they exist, by
+        :meth:`verify_subpackage_object_distinctness`.
 
         :rtype: bool
         """
@@ -570,11 +585,46 @@ class Source_Manager:
                 if pkg.symbols.contains_raw(simple_leaf):
                     ok = False
                     self.mh.error(
-                        location = child.location,
-                        message  = ("sub-package %s clashes with a type or"
-                                    " object of the same name in package %s"
-                                    % (leaf_name, pkg.name)),
-                        fatal    = False)
+                        location    = child.location,
+                        message     = ("sub-package %s clashes with a type or"
+                                       " object of the same name in package %s"
+                                       % (leaf_name, pkg.name)),
+                        explanation = ("rename the sub-package or the "
+                                       "conflicting type so that qualified"
+                                       "-name resolution is unambiguous"),
+                        fatal       = False)
+        return ok
+
+    def verify_subpackage_object_distinctness(self) -> bool:
+        """Check that sub-package leaf names are sufficiently distinct from
+        record objects declared in the same parent package.
+
+        Must run after TRLC files are parsed, since (unlike types) objects
+        only exist from that point on. Type clashes were already reported
+        by :meth:`verify_subpackage_distinctness`; this only looks at
+        objects so the same clash is not reported twice.
+
+        :rtype: bool
+        """
+        # lobster-trace: LRM.Subpackage_Member_Distinct
+        ok = True
+        for pkg in self.stab.values(ast.Package):
+            for child in pkg.sub_packages.table.values():
+                leaf_name   = child.name.rsplit(".", 1)[1]
+                simple_leaf = pkg.symbols.simplified_name(leaf_name)
+                existing    = pkg.symbols.table.get(simple_leaf)
+                if not isinstance(existing, ast.Record_Object):
+                    continue
+                ok = False
+                self.mh.error(
+                    location    = existing.location,
+                    message     = ("object %s clashes with a sub-package of"
+                                   " the same name in package %s"
+                                   % (existing.name, pkg.name)),
+                    explanation = ("rename the object or the sub-package so"
+                                   " that qualified-name resolution is"
+                                   " unambiguous"),
+                    fatal       = False)
         return ok
 
     def perform_checks(self) -> bool:
@@ -656,7 +706,16 @@ class Source_Manager:
         # Parse TRLC files. Almost all the semantic analysis and name
         # resolution happens here, with the notable exception of resolving
         # record references (as we can have circularity here).
-        if not self.parse_trlc_files():  # pragma: no cover
+        trlc_files_ok = self.parse_trlc_files()
+
+        # Now that all objects are known, check that sub-package names do
+        # not clash with objects declared in their parent package. This
+        # runs even if some TRLC files failed to parse, so a distinctness
+        # violation is still reported instead of being masked by an
+        # unrelated parsing error.
+        ok &= self.verify_subpackage_object_distinctness()
+
+        if not trlc_files_ok:  # pragma: no cover
             self.callback_parse_end()
             return None
 

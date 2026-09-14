@@ -1,5 +1,6 @@
 import Foo
        ^^^ duplicate-imports/bar.trlc:4: warning: duplicate import of package Foo
+         | remove this redundant import statement, the package is already imported
 import Foo
        ^^^ duplicate-imports/bar.trlc:3: issue: unused import Foo [unused_imports]
          | Consider deleting this import statement if not needed.

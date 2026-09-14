@@ -26,9 +26,6 @@ class List_Handler(Message_Handler):
     def error_messages(self):
         return [m for k, m in self.messages if k in (Kind.SYS_ERROR, Kind.USER_ERROR)]
 
-    def clear(self):
-        self.messages = []
-
 
 def make_source_manager(lint_mode=True):
     mh = List_Handler()
@@ -279,6 +276,30 @@ class Test_Nested_Packages(unittest.TestCase):
             "got: %s" % mh.error_messages(),
         )
 
+    def test_wildcard_self_cover_with_own_child_no_cycle(self):
+        """A self-covering wildcard root that also has its own child package
+        must not create a spurious circular dependency with that child."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(self.write("foo.rsl", "package foo\n"))
+        sm.register_rsl_file(
+            self.write("foo_baz.rsl", "package foo.baz\nenum Color { a b }\n")
+        )
+        sm.register_rsl_file(
+            self.write(
+                "foo_bar.rsl",
+                "package foo.bar\nimport foo.*\ntype R {\n  c foo.baz.Color\n}\n",
+            )
+        )
+        sm.register_rsl_file(
+            self.write("foo_bar_qux.rsl", "package foo.bar.qux\nenum E { a b }\n")
+        )
+        self.process(sm)
+        self.assertFalse(
+            any("circular" in m for m in mh.error_messages()),
+            "Self-covering wildcard must not produce a circular dependency "
+            "with its own child package, got: %s" % mh.error_messages(),
+        )
+
     def test_wildcard_unused_lint(self):
         """An unused wildcard import is flagged by the linter."""
         sm, mh = make_source_manager()
@@ -358,6 +379,43 @@ class Test_Nested_Packages(unittest.TestCase):
         stab = self.process(sm)
         self.assertIsNotNone(stab)
         self.assertFalse(mh.has_error())
+
+    def test_import_token_ast_link(self):
+        """Import tokens are linked (ast_link) to the resolved package,
+        for plain, dotted (nested) and wildcard imports."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(self.write("foo.rsl", "package foo\ntype Base {}\n"))
+        sm.register_rsl_file(
+            self.write("foo_bar.rsl", "package foo.bar\ntype T {}\n")
+        )
+        data_path = self.write(
+            "data.trlc",
+            "package data\nimport foo\nimport foo.bar\nimport foo.*\n",
+        )
+        sm.register_trlc_file(data_path)
+        stab = self.process(sm)
+        self.assertIsNotNone(stab)
+        self.assertFalse(mh.has_error())
+
+        packages_by_name = {pkg.name: pkg for pkg in stab.values(ast.Package)}
+        foo_pkg = packages_by_name["foo"]
+        foo_bar_pkg = packages_by_name["foo.bar"]
+
+        data_parser = sm.trlc_files[data_path]
+        self.assertEqual(len(data_parser.cu.raw_imports), 3)
+        checked = set()
+        for name, _location, is_wildcard, tokens in data_parser.cu.raw_imports:
+            self.assertTrue(tokens)
+            if name == "foo" and not is_wildcard:
+                self.assertIs(tokens[0].ast_link, foo_pkg)
+                checked.add("foo")
+            elif name == "foo.bar":
+                self.assertIs(tokens[0].ast_link, foo_bar_pkg)
+                checked.add("foo.bar")
+            elif name == "foo" and is_wildcard:
+                self.assertIs(tokens[0].ast_link, foo_pkg)
+                checked.add("foo.*")
+        self.assertEqual(checked, {"foo", "foo.bar", "foo.*"})
 
 
 class Test_Symbol_Table_Nested(unittest.TestCase):
