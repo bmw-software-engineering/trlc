@@ -86,9 +86,12 @@ class TrlcMarkdownParser(Parser):
         # Optional import list right after H1
         while self.peek_kw("import"):
             self.match_kw("import")
-            pkg.set_ast_link(self.ct)
+            t_import_kw = self.ct
             self.match("IDENTIFIER")
-            self.cu.add_import(self.mh, self.ct)
+            t_import = self.ct
+            pkg.set_ast_link(t_import_kw)
+            self.cu.add_import(self.mh, t_import.value, t_import.location,
+                               tokens=[t_import])
 
     def parse_section_declaration(self):
         # H2: '## Section Name'

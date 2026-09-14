@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 3.3 of [TRLC language reference
+Up to date with version 3.4 of [TRLC language reference
 manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
@@ -32,6 +32,22 @@ generated in the following situations:
   Supports comma, `<br>`, and newline separation, and all LRM separator
   kinds (`@`, `:`, `;`, identifier). Bracket notation is not supported.
 
+### 3.0.1 post
+
+* [TRLC] Add support for nested (dotted) packages, e.g. `package
+  com.bigcorp.safety`, and for wildcard imports (`import foo.*`) that
+  bring an entire package subtree into scope.
+
+* [TRLC] Extend the `unused_imports` lint check with new sub-checks for
+  the nested-packages and wildcard-import features: redundant explicit
+  imports already covered by a wildcard import, unused wildcard
+  imports, and trivial wildcard imports (i.e. a wildcard import of a
+  package with no sub-packages, which can be replaced by a plain
+  import).
+
+* [TRLC] Fix a crash when a markdown (`.trlc.md`) file contains an
+  `import` statement.
+
 ### 3.0.1
 
 * [TRLC] Add experimental feature to parse markdown files and interpret their content as trlc objects.
@@ -44,8 +60,6 @@ For more details see: https://github.com/bmw-software-engineering/trlc/issues/22
 * [Bazel] Fixed python setup to support other versions than 3.12
 
 * [TRLC_RST] Add CLI support for `--fields` and `--records` filtering.
-
-* [TRLC] * Add support for nested (dotted) packages, e.g. `package com.bigcorp.safety`.
 
 * [TRLC_RST] Render soft-wrapped description lines as a single RST
   paragraph instead of splitting each line into its own paragraph.
