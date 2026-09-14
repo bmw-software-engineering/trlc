@@ -240,8 +240,9 @@ class Linter:
             for reference in literal.references:
                 if reference.package.name == item.name:
                     return True
-                if include_descendants and \
-                   reference.package.name.startswith(item.name + "."):
+                if include_descendants and reference.package.name.startswith(
+                    item.name + "."
+                ):
                     return True
         return False
 
@@ -261,12 +262,13 @@ class Linter:
                     continue
                 imp_location = self._find_import_location(cu, item.name, False)
                 if imp_location is not None:
-                    self.mh.check(imp_location,
-                                  "redundant import %s, already covered by"
-                                  " wildcard import %s.*"
-                                  % (item.name, root.name),
-                                  "unused_imports",
-                                  "Consider deleting this import statement.")
+                    self.mh.check(
+                        imp_location,
+                        "redundant import %s, already covered by"
+                        " wildcard import %s.*" % (item.name, root.name),
+                        "unused_imports",
+                        "Consider deleting this import statement.",
+                    )
 
             # Unused explicit imports.
             for item in cu.imports:
@@ -279,26 +281,27 @@ class Linter:
                     continue
                 imp_location = self._find_import_location(cu, item.name, False)
                 if imp_location is not None:
-                    self.mh.check(imp_location,
-                                  "unused import %s" % item.name,
-                                  "unused_imports",
-                                  "Consider deleting this import statement if"
-                                  " not needed.")
+                    self.mh.check(
+                        imp_location,
+                        "unused import %s" % item.name,
+                        "unused_imports",
+                        "Consider deleting this import statement if not needed.",
+                    )
 
             # Unused wildcard imports (no package in the subtree referenced).
             for root in cu.wildcard_roots:
                 if root in cu.referenced_imports:
                     continue
-                if self._import_in_markup(file, root,
-                                          include_descendants=True):
+                if self._import_in_markup(file, root, include_descendants=True):
                     continue
                 imp_location = self._find_import_location(cu, root.name, True)
                 if imp_location is not None:
-                    self.mh.check(imp_location,
-                                  "unused wildcard import %s.*" % root.name,
-                                  "unused_imports",
-                                  "Consider deleting this import statement if"
-                                  " not needed.")
+                    self.mh.check(
+                        imp_location,
+                        "unused wildcard import %s.*" % root.name,
+                        "unused_imports",
+                        "Consider deleting this import statement if not needed.",
+                    )
 
             # Trivial wildcard imports (root has no sub-packages).
             # lobster-trace: LRM.Wildcard_Trivial
@@ -308,11 +311,9 @@ class Linter:
                     # advice than replacing).
                     if root not in cu.referenced_imports:
                         continue
-                    if self._import_in_markup(file, root,
-                                              include_descendants=True):
+                    if self._import_in_markup(file, root, include_descendants=True):
                         continue
-                    imp_location = self._find_import_location(
-                        cu, root.name, True)
+                    imp_location = self._find_import_location(cu, root.name, True)
                     if imp_location is not None:
                         self.mh.check(
                             imp_location,
@@ -320,4 +321,5 @@ class Linter:
                             " since %s has no sub-packages"
                             % (root.name, root.name, root.name),
                             "unused_imports",
-                            "Consider replacing with: import %s" % root.name)
+                            "Consider replacing with: import %s" % root.name,
+                        )

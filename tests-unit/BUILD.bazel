@@ -21,7 +21,7 @@ py_test(
 py_test(
     name = "test_nested_packages",
     srcs = ["test_nested_packages.py"],
-    deps = ["//trlc:trlc"],
+    deps = ["//trlc"],
 )
 
 test_suite(

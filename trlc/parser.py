@@ -367,9 +367,9 @@ class Parser(Parser_Base):
         """
         # lobster-trace: LRM.Nested_Package_Names
         self.match("IDENTIFIER")
-        parts          = [self.ct.value]
+        parts = [self.ct.value]
         first_location = self.ct.location
-        tokens         = [self.ct]
+        tokens = [self.ct]
 
         while self.peek("DOT"):
             self.match("DOT")
@@ -393,10 +393,10 @@ class Parser(Parser_Base):
         # lobster-trace: LRM.Wildcard_Import
         # lobster-trace: LRM.Nested_Package_Names
         self.match("IDENTIFIER")
-        parts          = [self.ct.value]
+        parts = [self.ct.value]
         first_location = self.ct.location
-        tokens         = [self.ct]
-        is_wildcard    = False
+        tokens = [self.ct]
+        is_wildcard = False
 
         while self.peek("DOT"):
             self.match("DOT")
@@ -437,29 +437,29 @@ class Parser(Parser_Base):
             if child is None:
                 pkg.set_ast_link(t_dot)
                 if not self.cu.is_visible(pkg):
-                    self.mh.error(t_pkg.location,
-                                  "package must be imported before use",
-                                  explanation="add 'import %s' to the "
-                                  "preamble of this file" % pkg.name)
+                    self.mh.error(
+                        t_pkg.location,
+                        "package must be imported before use",
+                        explanation="add 'import %s' to the "
+                        "preamble of this file" % pkg.name,
+                    )
                 self.cu.mark_import_used(pkg)
                 return pkg, t_member
             child.set_ast_link(t_dot)
             child.set_ast_link(t_member)
-            pkg   = child
+            pkg = child
             t_pkg = t_member
 
         if not self.cu.is_visible(pkg):
-            self.mh.error(t_pkg.location,
-                          "package must be imported before use",
-                          explanation="add 'import %s' to the preamble "
-                          "of this file" % pkg.name)
+            self.mh.error(
+                t_pkg.location,
+                "package must be imported before use",
+                explanation="add 'import %s' to the preamble of this file" % pkg.name,
+            )
         self.cu.mark_import_used(pkg)
         return pkg, self.ct
 
-    def parse_qualified_name(self,
-                             scope,
-                             required_subclass=None,
-                             match_ident=True):
+    def parse_qualified_name(self, scope, required_subclass=None, match_ident=True):
         # lobster-trace: LRM.Qualified_Name
         # lobster-trace: LRM.Valid_Qualifier
         # lobster-trace: LRM.Valid_Name
@@ -2107,14 +2107,15 @@ class Parser(Parser_Base):
 
         if declare_package:
             # lobster-trace: LRM.Package_Declaration
-            pkg = ast.Package(name          = pkg_name,
-                              location      = pkg_location,
-                              builtin_stab  = self.stab,
-                              declared_late = kind == "trlc")
+            pkg = ast.Package(
+                name=pkg_name,
+                location=pkg_location,
+                builtin_stab=self.stab,
+                declared_late=kind == "trlc",
+            )
             self.stab.register(self.mh, pkg)
         else:
-            pkg = self.stab.lookup_direct(self.mh, pkg_name, pkg_location,
-                                          ast.Package)
+            pkg = self.stab.lookup_direct(self.mh, pkg_name, pkg_location, ast.Package)
 
         pkg.set_ast_link(t_pkg)
         for t in pkg_tokens:
@@ -2131,11 +2132,13 @@ class Parser(Parser_Base):
             while self.peek_kw("import"):
                 self.match_kw("import")
                 t_import_kw = self.ct
-                imp_name, imp_location, imp_tokens, imp_wildcard = \
+                imp_name, imp_location, imp_tokens, imp_wildcard = (
                     self.parse_import_name()
+                )
                 pkg.set_ast_link(t_import_kw)
-                self.cu.add_import(self.mh, imp_name, imp_location,
-                                   imp_wildcard, imp_tokens)
+                self.cu.add_import(
+                    self.mh, imp_name, imp_location, imp_wildcard, imp_tokens
+                )
 
     def parse_rsl_file(self):
         # lobster-trace: LRM.RSL_File
