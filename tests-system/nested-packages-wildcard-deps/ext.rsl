@@ -1,0 +1,5 @@
+package lib.core.ext
+
+type Ext {
+  w Integer
+}

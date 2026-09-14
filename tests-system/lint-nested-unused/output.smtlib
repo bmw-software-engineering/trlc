@@ -1,0 +1,4 @@
+import ns.pkg
+       ^^ lint-nested-unused/app.rsl:2: issue: unused import ns.pkg [unused_imports]
+        | Consider deleting this import statement if not needed.
+Processed 3 models and 0 requirement files and found 1 warning

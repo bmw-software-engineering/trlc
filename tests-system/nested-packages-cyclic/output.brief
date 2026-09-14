@@ -1,0 +1,2 @@
+nested-packages-cyclic/a.rsl: trlc error: circular inheritance between a | a.b
+Processed 2 models and 0 requirement files and found 1 error

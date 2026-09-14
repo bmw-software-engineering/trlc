@@ -1,0 +1,4 @@
+nested-packages-cyclic/a.rsl: error: circular inheritance between a | a.b
+| a is declared in a.rsl
+| a.b is declared in a_b.rsl
+Processed 2 models and 0 requirement files and found 1 error
