@@ -13,9 +13,7 @@ class List_Handler(Message_Handler):
         super().__init__()
         self.messages = []
 
-    def emit(
-        self, location, kind, message, fatal=True, extrainfo=None, category=None
-    ):
+    def emit(self, location, kind, message, fatal=True, extrainfo=None, category=None):
         self.messages.append((kind, message))
         if fatal:
             raise TRLC_Error(location, kind, message)
@@ -311,11 +309,9 @@ class Test_Nested_Packages(unittest.TestCase):
         self.process(sm)
         self.assertTrue(
             any(
-                "unused wildcard import sub.*" in m
-                for m in self._warning_messages(mh)
+                "unused wildcard import sub.*" in m for m in self._warning_messages(mh)
             ),
-            "Expected unused wildcard warning, got: %s"
-            % self._warning_messages(mh),
+            "Expected unused wildcard warning, got: %s" % self._warning_messages(mh),
         )
 
     def test_wildcard_redundant_lint(self):
@@ -336,8 +332,7 @@ class Test_Nested_Packages(unittest.TestCase):
         self.process(sm)
         self.assertTrue(
             any("redundant import sub.deep" in m for m in self._warning_messages(mh)),
-            "Expected redundant import warning, got: %s"
-            % self._warning_messages(mh),
+            "Expected redundant import warning, got: %s" % self._warning_messages(mh),
         )
 
     # ------------------------------------------------------------------
@@ -355,8 +350,7 @@ class Test_Nested_Packages(unittest.TestCase):
         self.assertTrue(mh.has_error())
         self.assertTrue(
             any("clashes with a type or object" in m for m in mh.error_messages()),
-            "Expected sub-package/member clash error, got: %s"
-            % mh.error_messages(),
+            "Expected sub-package/member clash error, got: %s" % mh.error_messages(),
         )
 
     def test_shadow_resolve_type_and_subpackage(self):
@@ -385,9 +379,7 @@ class Test_Nested_Packages(unittest.TestCase):
         for plain, dotted (nested) and wildcard imports."""
         sm, mh = make_source_manager()
         sm.register_rsl_file(self.write("foo.rsl", "package foo\ntype Base {}\n"))
-        sm.register_rsl_file(
-            self.write("foo_bar.rsl", "package foo.bar\ntype T {}\n")
-        )
+        sm.register_rsl_file(self.write("foo_bar.rsl", "package foo.bar\ntype T {}\n"))
         data_path = self.write(
             "data.trlc",
             "package data\nimport foo\nimport foo.bar\nimport foo.*\n",

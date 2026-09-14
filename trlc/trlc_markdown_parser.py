@@ -90,8 +90,9 @@ class TrlcMarkdownParser(Parser):
             self.match("IDENTIFIER")
             t_import = self.ct
             pkg.set_ast_link(t_import_kw)
-            self.cu.add_import(self.mh, t_import.value, t_import.location,
-                               tokens=[t_import])
+            self.cu.add_import(
+                self.mh, t_import.value, t_import.location, tokens=[t_import]
+            )
 
     def parse_section_declaration(self):
         # H2: '## Section Name'

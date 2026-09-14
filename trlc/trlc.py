@@ -387,15 +387,18 @@ class Source_Manager:
                 # lobster-trace: LRM.Wildcard_Self_Cover
                 if parser.cu.wildcard_roots:
                     for root in parser.cu.wildcard_roots:
-                        self_cover = pkg_name == root.name or \
-                            pkg_name.startswith(root.name + ".")
+                        self_cover = pkg_name == root.name or pkg_name.startswith(
+                            root.name + "."
+                        )
                         for other in all_packages:
-                            if self_cover and \
-                               (other.name == pkg_name or
-                                other.name.startswith(pkg_name + ".")):
+                            if self_cover and (
+                                other.name == pkg_name
+                                or other.name.startswith(pkg_name + ".")
+                            ):
                                 continue
-                            if other.name == root.name or \
-                               other.name.startswith(root.name + "."):
+                            if other.name == root.name or other.name.startswith(
+                                root.name + "."
+                            ):
                                 graph[(pkg_name, kind)].add((other.name, kind))
 
         # Build the package hierarchy for nested packages. Parents are
@@ -405,27 +408,29 @@ class Source_Manager:
         # lobster-trace: LRM.Parent_Package_Required
         nested_packages = sorted(
             (pkg for pkg in self.stab.values(ast.Package) if "." in pkg.name),
-            key=lambda p: p.name)
+            key=lambda p: p.name,
+        )
         for pkg in nested_packages:
             parent_name = pkg.name.rsplit(".", 1)[0]
-            leaf_name   = pkg.name.rsplit(".", 1)[1]
-            parent_pkg  = self.stab.lookup_sub_package(parent_name)
+            leaf_name = pkg.name.rsplit(".", 1)[1]
+            parent_pkg = self.stab.lookup_sub_package(parent_name)
             if not isinstance(parent_pkg, ast.Package):
                 ok = False
                 self.mh.error(
-                    location    = pkg.location,
-                    message     = ("parent package %s of nested package %s"
-                                   " has not been declared"
-                                   % (parent_name, pkg.name)),
-                    explanation = ("declare package %s (e.g. in its own "
-                                   ".rsl file) before declaring %s"
-                                   % (parent_name, pkg.name)),
-                    fatal       = False)
+                    location=pkg.location,
+                    message=(
+                        "parent package %s of nested package %s"
+                        " has not been declared" % (parent_name, pkg.name)
+                    ),
+                    explanation=(
+                        "declare package %s (e.g. in its own "
+                        ".rsl file) before declaring %s" % (parent_name, pkg.name)
+                    ),
+                    fatal=False,
+                )
                 continue
             try:
-                parent_pkg.sub_packages.register_with_key(self.mh,
-                                                          pkg,
-                                                          leaf_name)
+                parent_pkg.sub_packages.register_with_key(self.mh, pkg, leaf_name)
             except TRLC_Error:
                 ok = False
                 continue
@@ -580,19 +585,24 @@ class Source_Manager:
         ok = True
         for pkg in self.stab.values(ast.Package):
             for child in pkg.sub_packages.table.values():
-                leaf_name   = child.name.rsplit(".", 1)[1]
+                leaf_name = child.name.rsplit(".", 1)[1]
                 simple_leaf = pkg.symbols.simplified_name(leaf_name)
                 if pkg.symbols.contains_raw(simple_leaf):
                     ok = False
                     self.mh.error(
-                        location    = child.location,
-                        message     = ("sub-package %s clashes with a type or"
-                                       " object of the same name in package %s"
-                                       % (leaf_name, pkg.name)),
-                        explanation = ("rename the sub-package or the "
-                                       "conflicting type so that qualified"
-                                       "-name resolution is unambiguous"),
-                        fatal       = False)
+                        location=child.location,
+                        message=(
+                            "sub-package %s clashes with a type or"
+                            " object of the same name in package %s"
+                            % (leaf_name, pkg.name)
+                        ),
+                        explanation=(
+                            "rename the sub-package or the "
+                            "conflicting type so that qualified"
+                            "-name resolution is unambiguous"
+                        ),
+                        fatal=False,
+                    )
         return ok
 
     def verify_subpackage_object_distinctness(self) -> bool:
@@ -610,21 +620,25 @@ class Source_Manager:
         ok = True
         for pkg in self.stab.values(ast.Package):
             for child in pkg.sub_packages.table.values():
-                leaf_name   = child.name.rsplit(".", 1)[1]
+                leaf_name = child.name.rsplit(".", 1)[1]
                 simple_leaf = pkg.symbols.simplified_name(leaf_name)
-                existing    = pkg.symbols.table.get(simple_leaf)
+                existing = pkg.symbols.table.get(simple_leaf)
                 if not isinstance(existing, ast.Record_Object):
                     continue
                 ok = False
                 self.mh.error(
-                    location    = existing.location,
-                    message     = ("object %s clashes with a sub-package of"
-                                   " the same name in package %s"
-                                   % (existing.name, pkg.name)),
-                    explanation = ("rename the object or the sub-package so"
-                                   " that qualified-name resolution is"
-                                   " unambiguous"),
-                    fatal       = False)
+                    location=existing.location,
+                    message=(
+                        "object %s clashes with a sub-package of"
+                        " the same name in package %s" % (existing.name, pkg.name)
+                    ),
+                    explanation=(
+                        "rename the object or the sub-package so"
+                        " that qualified-name resolution is"
+                        " unambiguous"
+                    ),
+                    fatal=False,
+                )
         return ok
 
     def perform_checks(self) -> bool:

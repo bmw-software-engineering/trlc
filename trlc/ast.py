@@ -240,15 +240,15 @@ class Compilation_Unit(Node):
     def __init__(self, file_name):
         # lobster-exclude: Constructor only declares variables
         super().__init__(Location(file_name))
-        self.package            = None
+        self.package = None
         # Both default to empty sets (rather than None) so is_visible()
         # behaves consistently even if called before resolve_imports()
         # has run (e.g. only self-visibility is granted at that point).
-        self.imports            = set()
-        self.wildcard_roots     = set()
+        self.imports = set()
+        self.wildcard_roots = set()
         # list of (name : str, location : Location, is_wildcard : bool,
         #          tokens : list[Token])
-        self.raw_imports        = []
+        self.raw_imports = []
         self.referenced_imports = set()
         self.items = []
 
@@ -283,20 +283,23 @@ class Compilation_Unit(Node):
         # covers the current package is permitted: the current package
         # stays implicitly visible (Wildcard_Self_Cover).
         if name == self.package.name and not is_wildcard:
-            mh.error(location,
-                     "package %s cannot import itself" % self.package.name,
-                     explanation="a package always has access to its own "
-                     "types and objects; remove this import statement")
+            mh.error(
+                location,
+                "package %s cannot import itself" % self.package.name,
+                explanation="a package always has access to its own "
+                "types and objects; remove this import statement",
+            )
 
         # Skip duplicates (same name and same wildcard flavour)
-        for prev_name, _prev_location, prev_wildcard, _prev_tokens \
-                in self.raw_imports:
+        for prev_name, _prev_location, prev_wildcard, _prev_tokens in self.raw_imports:
             if prev_name == name and prev_wildcard == is_wildcard:
-                mh.warning(location,
-                           "duplicate import of package %s%s"
-                           % (name, ".*" if is_wildcard else ""),
-                           explanation="remove this redundant import "
-                           "statement, the package is already imported")
+                mh.warning(
+                    location,
+                    "duplicate import of package %s%s"
+                    % (name, ".*" if is_wildcard else ""),
+                    explanation="remove this redundant import "
+                    "statement, the package is already imported",
+                )
                 return
 
         self.raw_imports.append((name, location, is_wildcard, tokens))
@@ -306,7 +309,7 @@ class Compilation_Unit(Node):
         # lobster-trace: LRM.Wildcard_Import
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, Symbol_Table)
-        self.imports        = set()
+        self.imports = set()
         self.wildcard_roots = set()
         for name, location, is_wildcard, tokens in self.raw_imports:
             # We can ignore errors here, because that just means we
@@ -2936,8 +2939,8 @@ class Package(Entity):
         self.symbols = Symbol_Table()
         self.symbols.make_visible(builtin_stab)
         self.declared_late = declared_late
-        self.sub_packages  = Symbol_Table()
-        self.parent        = None
+        self.sub_packages = Symbol_Table()
+        self.parent = None
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
@@ -3686,20 +3689,26 @@ class Symbol_Table:
         if simple_key in self.table:
             existing = self.table[simple_key]
             if existing.name == entity.name:
-                mh.error(entity.location,
-                         "duplicate definition, previous definition at %s" %
-                         mh.cross_file_reference(existing.location),
-                         explanation="rename or remove one of the two "
-                         "declarations so each sub-package has a unique name")
+                mh.error(
+                    entity.location,
+                    "duplicate definition, previous definition at %s"
+                    % mh.cross_file_reference(existing.location),
+                    explanation="rename or remove one of the two "
+                    "declarations so each sub-package has a unique name",
+                )
             else:
-                mh.error(entity.location,
-                         "%s is too similar to %s, declared at %s" %
-                         (entity.name,
-                          existing.name,
-                          mh.cross_file_reference(existing.location)),
-                         explanation="package names must be sufficiently "
-                         "distinct (case and underscores are ignored); "
-                         "rename one of the two packages")
+                mh.error(
+                    entity.location,
+                    "%s is too similar to %s, declared at %s"
+                    % (
+                        entity.name,
+                        existing.name,
+                        mh.cross_file_reference(existing.location),
+                    ),
+                    explanation="package names must be sufficiently "
+                    "distinct (case and underscores are ignored); "
+                    "rename one of the two packages",
+                )
         else:
             self.table[simple_key] = entity
 
