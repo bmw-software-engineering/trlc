@@ -1,0 +1,14 @@
+package a.b
+
+tuple Coord {
+  x Integer
+  y Integer
+}
+
+type R {
+  c Coord
+}
+
+checks R {
+  c.x >= 0, "x must be non-negative"
+}
