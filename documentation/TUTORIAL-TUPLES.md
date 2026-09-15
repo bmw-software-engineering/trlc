@@ -8,7 +8,7 @@ TRLC allows you to create user-defined algebraic datatypes, generally
 referred to as "tuples". For example:
 
 ```
-type Coordinate {
+tuple Coordinate {
    x Decimal
    y Decimal
 }
