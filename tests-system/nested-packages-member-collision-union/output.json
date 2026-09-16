@@ -1,0 +1,4 @@
+package foo.Alpha
+        ^^^ nested-packages-member-collision-union/foo_alpha.rsl:1: error: sub-package Alpha clashes with a type or object of the same name in package foo
+          | rename the sub-package or the conflicting type so that qualified-name resolution is unambiguous
+Processed 2 models and 0 requirement files and found 1 error

@@ -1,0 +1,6 @@
+package app
+import com.shared.*
+
+com.shared.si.Force F_001 {
+  v = 10
+}
