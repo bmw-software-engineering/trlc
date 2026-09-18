@@ -32,6 +32,10 @@ generated in the following situations:
   Supports comma, `<br>`, and newline separation, and all LRM separator
   kinds (`@`, `:`, `;`, identifier). Bracket notation is not supported.
 
+* [TRLC] Fix `--verify` crashing with a `KeyError` in the CVC5 backend
+  when a `checks` block dereferences a record field whose type has an
+  enum or tuple component that was not otherwise referenced first.
+
 ### 3.0.1
 
 * [TRLC] Add experimental feature to parse markdown files and interpret their content as trlc objects.
