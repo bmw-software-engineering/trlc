@@ -1,0 +1,9 @@
+package Test1
+
+Item a {
+  colors = [Color.Green]
+}
+
+Container c {
+  items = [a]
+}

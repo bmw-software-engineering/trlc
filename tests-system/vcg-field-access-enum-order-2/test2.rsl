@@ -1,0 +1,21 @@
+package Test2
+
+enum Color {
+  Red
+  Green
+}
+
+type Item {
+  colors Color [1 .. *]
+  next   optional Item
+}
+
+type Container {
+  items optional Item [1 .. *]
+}
+
+checks Container {
+  items != null implies
+    (forall item in items => item.next == null),
+    warning "an item in the container has a successor"
+}

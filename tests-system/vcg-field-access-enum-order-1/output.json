@@ -1,0 +1,14 @@
+{
+  "a": {
+    "colors": [
+      "Green"
+    ],
+    "next": null
+  },
+  "c": {
+    "items": [
+      "Test1.a"
+    ]
+  }
+}
+Processed 1 model and 1 requirement file and found no issues
