@@ -1,0 +1,4 @@
+import ns.base
+       ^ markdown-duplicate-import/requirements.trlc.md:4: warning: duplicate import of package ns.base
+       | remove this redundant import statement, the package is already imported
+Processed 2 models and 1 requirement file and found 1 warning

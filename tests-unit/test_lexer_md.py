@@ -47,6 +47,16 @@ def token_pairs(lexer):
     return pairs
 
 
+def all_tokens(lexer):
+    tokens = []
+    while True:
+        token = lexer.token()
+        if token is None:
+            break
+        tokens.append(token)
+    return tokens
+
+
 def make_record_type(record_name="ReqType"):
     builtin_stab = trlc_ast.Symbol_Table()
     package = trlc_ast.Package("DemoPkg", Location("test"), builtin_stab, False)
@@ -348,6 +358,102 @@ class TestLexerMd(unittest.TestCase):
                 ("C_KET", None),
             ],
         )
+
+    def test_preamble_nested_package_and_wildcard_import(self):
+        # lobster-trace: LRM.Nested_Package_Names
+        # lobster-trace: LRM.Wildcard_Import
+        content = "\n".join(
+            [
+                "# ns.app",
+                "import ns.base",
+                "import ns.*",
+                "",
+                "<hr>",
+            ]
+        )
+
+        lexer = MD_Lexer(self.mh, "test.trlc.md", content)
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("KEYWORD", "#"),
+                ("IDENTIFIER", "ns"),
+                ("DOT", None),
+                ("IDENTIFIER", "app"),
+                ("KEYWORD", "import"),
+                ("IDENTIFIER", "ns"),
+                ("DOT", None),
+                ("IDENTIFIER", "base"),
+                ("KEYWORD", "import"),
+                ("IDENTIFIER", "ns"),
+                ("DOT", None),
+                ("OPERATOR", "*"),
+            ],
+        )
+
+    def test_preamble_package_name_tokens_have_per_segment_locations(self):
+        # lobster-trace: LRM.Nested_Package_Names
+        # Each segment/dot of a nested package name must carry its own
+        # location, so diagnostics later on (e.g. an unknown symbol in
+        # "ns.app") point a caret at the offending segment instead of a
+        # single location shared by the whole name.
+        lexer = MD_Lexer(self.mh, "test.trlc.md", "# ns.app\n")
+        cols = [
+            (token.kind, token.value, token.location.line_no, token.location.col_no)
+            for token in all_tokens(lexer)
+        ]
+        self.assertEqual(
+            cols,
+            [
+                ("KEYWORD", "#", 1, 1),
+                ("IDENTIFIER", "ns", 1, 3),
+                ("DOT", None, 1, 5),
+                ("IDENTIFIER", "app", 1, 6),
+            ],
+        )
+
+    def test_preamble_import_name_offset_not_confused_by_keyword_substring(self):
+        # lobster-trace: LRM.Nested_Package_Names
+        # The package name "rt" also occurs as a substring inside the
+        # "import" keyword itself (at index 4). The offset of the
+        # imported name must be computed positionally, not via a
+        # substring search that could match that unrelated occurrence.
+        lexer = MD_Lexer(self.mh, "test.trlc.md", "# app\n\nimport rt\n")
+        tokens = all_tokens(lexer)
+        import_ident = tokens[-1]
+        self.assertEqual((import_ident.kind, import_ident.value), ("IDENTIFIER", "rt"))
+        self.assertEqual(import_ident.location.line_no, 3)
+        self.assertEqual(import_ident.location.col_no, 8)
+
+    def test_preamble_invalid_segment_in_nested_name_points_at_offending_char(self):
+        # lobster-trace: LRM.Nested_Package_Names
+        # Regression test for the caret fix: the error must point at the
+        # invalid character within the second segment, not at the start
+        # of the whole package name.
+        with self.assertRaises(TRLC_Error):
+            MD_Lexer(self.mh, "test.trlc.md", "# ns.1bad\n")
+        location, kind, message = self.mh.pop_message()
+        self.assertEqual(kind, Kind.SYS_ERROR)
+        self.assertEqual(message, "unexpected character '1'")
+        self.assertEqual(location.line_no, 1)
+        self.assertEqual(location.col_no, 6)
+
+    def test_preamble_invalid_package_name(self):
+        # lobster-trace: LRM.Nested_Package_Names
+        with self.assertRaises(TRLC_Error):
+            MD_Lexer(self.mh, "test.trlc.md", "# ns..app\n")
+        location, kind, message = self.mh.pop_message()
+        self.assertEqual(kind, Kind.SYS_ERROR)
+        self.assertEqual(message, "expected identifier")
+        self.assertEqual(location.line_no, 1)
+
+    def test_preamble_package_heading_must_be_single_word(self):
+        # lobster-trace: LRM.Nested_Package_Names
+        with self.assertRaises(TRLC_Error):
+            MD_Lexer(self.mh, "test.trlc.md", "# ns app\n")
+        _, kind, message = self.mh.pop_message()
+        self.assertEqual(kind, Kind.SYS_ERROR)
+        self.assertEqual(message, "package heading must be '# <PackageName>'")
 
     def test_type_row_tokens_use_type_row_location(self):
         content = "\n".join(

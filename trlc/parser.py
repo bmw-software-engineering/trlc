@@ -350,7 +350,12 @@ class Parser(Parser_Base):
         self.default_scope = ast.Scope()
         self.default_scope.push(self.stab)
 
-        # "rsl" or "trlc"; set by parse_preamble
+        # "rsl" or "trlc"; set by parse_preamble. Remains None only until
+        # parse_preamble runs; code that reads this (e.g.
+        # check_not_self_descendant) is only reachable from parse_rsl_file /
+        # parse_trlc_file, which the Source_Manager only calls on this same
+        # parser instance after its parse_preamble call has completed
+        # successfully, so it is never observed as None there.
         self.file_kind = None
 
     def parse_described_name(self):

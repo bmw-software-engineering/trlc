@@ -1,0 +1,4 @@
+nested-packages-wildcard-self-descendant-import/foo.rsl: error: circular inheritance between foo | foo.bar
+| foo is declared in foo.rsl
+| foo.bar is declared in foo_bar.rsl
+Processed 2 models and 0 requirement files and found 1 error

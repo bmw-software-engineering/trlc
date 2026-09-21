@@ -1,0 +1,2 @@
+nested-packages-self-descendant-import/foo.rsl: trlc error: circular inheritance between foo | foo.bar
+Processed 2 models and 0 requirement files and found 1 error

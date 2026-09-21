@@ -1,0 +1,5 @@
+package ns.base
+
+type Greeting {
+  message String
+}

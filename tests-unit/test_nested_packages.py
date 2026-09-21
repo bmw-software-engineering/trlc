@@ -342,6 +342,41 @@ class Test_Nested_Packages(unittest.TestCase):
             "Expected self-descendant error, got: %s" % mh.error_messages(),
         )
 
+    def test_rsl_explicit_import_of_own_sub_package_is_circular(self):
+        """A plain (non-wildcard) explicit import of a sub-package from an
+        rsl file creates a circular dependency: the sub-package already
+        implicitly depends on its parent, and the explicit import adds a
+        dependency in the other direction. Per LRM.Self_Descendant_Reference
+        this is intentionally left to the generic Circular_Dependencies
+        mechanism, rather than raising the "cannot refer to sub-package"
+        diagnostic used for wildcard-exposed references."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(self.write("foo.rsl", "package foo\nimport foo.bar\n"))
+        sm.register_rsl_file(
+            self.write("foo_bar.rsl", "package foo.bar\ntype T {\n  x String\n}\n")
+        )
+        self.process(sm)
+        self.assertTrue(
+            any("circular inheritance" in m for m in mh.error_messages()),
+            "Expected circular inheritance error, got: %s" % mh.error_messages(),
+        )
+
+    def test_rsl_wildcard_import_of_own_sub_package_is_circular(self):
+        """The same holds for a wildcard import of a sub-package: `import
+        foo.bar.*` from package foo is also rejected as a circular
+        dependency, not as a self-descendant reference, since foo does not
+        (yet) refer to any specific symbol from foo.bar."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(self.write("foo.rsl", "package foo\nimport foo.bar.*\n"))
+        sm.register_rsl_file(
+            self.write("foo_bar.rsl", "package foo.bar\ntype T {\n  x String\n}\n")
+        )
+        self.process(sm)
+        self.assertTrue(
+            any("circular inheritance" in m for m in mh.error_messages()),
+            "Expected circular inheritance error, got: %s" % mh.error_messages(),
+        )
+
     def test_trlc_may_reference_own_sub_package(self):
         """trlc files are processed after all rsl files, so a trlc file of
         package foo may refer to types declared in foo.bar."""

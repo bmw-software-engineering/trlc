@@ -33,6 +33,12 @@ The file structure maps to TRLC constructs as follows:
   import pkg
       → ``import pkg``
 
+  The package heading and the import lines are the markdown spelling of
+  the TRLC preamble, so they follow the ``package_name`` and
+  ``import_clause`` grammar of the language: the name may be a nested
+  package name (``# ns.app``, ``import ns.base``) and an import may be a
+  wildcard (``import ns.*``).
+
   ## Section name
       → ``section "Section name" {``
 
@@ -344,7 +350,9 @@ class MD_Lexer(TRLC_Lexer):
         if self._stab is None or not type_name:
             return None
         if "." in type_name:
-            pkg_name, local_name = type_name.split(".", 1)
+            # The package part may itself be dotted (nested packages), so
+            # only the last segment is the type name.
+            pkg_name, local_name = type_name.rsplit(".", 1)
         elif package_name:
             pkg_name, local_name = package_name, type_name
         else:
@@ -458,6 +466,15 @@ class MD_Lexer(TRLC_Lexer):
             return False
         return all(MD_Lexer._is_alnum(ch) or ch == "_" for ch in name[1:])
 
+    @staticmethod
+    def _skip_spaces(line, start):
+        """Return the 0-based offset of the first non-whitespace character
+        in *line* at or after *start*, so callers can locate a token
+        positionally instead of via a substring search that could match an
+        earlier, unrelated occurrence."""
+        rest = line[start:]
+        return start + (len(rest) - len(rest.lstrip()))
+
     def _validate_identifier(self, name, loc_line, heading_prefix_len, source_line=""):
         """Validate name against TRLC identifier rules.
 
@@ -517,6 +534,50 @@ class MD_Lexer(TRLC_Lexer):
             self._emit(location, "IDENTIFIER", part)
             if idx < len(parts) - 1:
                 self._emit(location, "DOT")
+
+    def _emit_package_name(
+        self, name, line_no, name_offset, source_line, allow_wildcard=False
+    ):
+        """Emit the token stream for a (possibly nested) package name.
+
+        Emits ``IDENTIFIER { DOT IDENTIFIER } [ DOT OPERATOR('*') ]``, i.e.
+        exactly what :meth:`trlc.parser.Parser.parse_dotted_name` and
+        :meth:`trlc.parser.Parser.parse_import_name` expect, so that
+        ``.trlc.md`` preambles share the TRLC grammar for package names.
+
+        *name_offset* is the 0-based column of *name* within *source_line*.
+        Each emitted token gets its own caret-capable location (rather than
+        one shared line-level location), so a parser error on e.g. the
+        second segment of ``ns.bad name`` points at that segment.
+
+        :returns: True if a trailing ``.*`` wildcard was emitted
+        """
+        # lobster-trace: LRM.Nested_Package_Names
+        # lobster-trace: LRM.Wildcard_Import
+        segments = name.split(".")
+        wildcard = allow_wildcard and len(segments) > 1 and segments[-1] == "*"
+        if wildcard:
+            segments = segments[:-1]
+
+        offset = name_offset
+        for idx, segment in enumerate(segments):
+            self._validate_identifier(segment, line_no, offset, source_line)
+            if idx:
+                self._emit(self._source_ref(line_no, offset, source_line), "DOT")
+            self._emit(
+                self._source_ref(line_no, offset + 1, source_line),
+                "IDENTIFIER",
+                segment,
+            )
+            offset += len(segment) + 1
+
+        if wildcard:
+            self._emit(self._source_ref(line_no, offset, source_line), "DOT")
+            self._emit(
+                self._source_ref(line_no, offset + 1, source_line), "OPERATOR", "*"
+            )
+
+        return wildcard
 
     # Separator symbol token kinds (mirrors TRLC_Lexer.PUNCTUATION).
     _SEPARATOR_PUNCTUATION = {"@": "AT", ":": "COLON", ";": "SEMICOLON"}
@@ -1175,17 +1236,13 @@ class MD_Lexer(TRLC_Lexer):
                 if len(parts) != 1:
                     self.mh.lex_error(loc, "package heading must be '# <PackageName>'")
                 package_name = parts[0]
-                if (
-                    not package_name
-                    or not MD_Lexer._is_alpha(package_name[0])
-                    or any(
-                        not (MD_Lexer._is_alnum(ch) or ch == "_")
-                        for ch in package_name[1:]
-                    )
-                ):
-                    self.mh.lex_error(loc, "invalid package name in markdown heading")
                 self._emit(loc, "KEYWORD", "#")
-                self._emit(loc, "IDENTIFIER", package_name)
+                # Package name starts right after the '#' and its following
+                # whitespace; computed positionally so a name that happens
+                # to reoccur earlier on the line (e.g. inside "##") can't
+                # be found at the wrong offset.
+                name_offset = MD_Lexer._skip_spaces(line, _h_level)
+                self._emit_package_name(package_name, line_no, name_offset, line)
                 current_package_name = package_name
                 continue
 
@@ -1309,8 +1366,24 @@ class MD_Lexer(TRLC_Lexer):
                 parts = stripped.split()
                 if len(parts) == 2:
                     self._emit(loc, "KEYWORD", "import")
-                    self._emit(loc, "IDENTIFIER", parts[1])
-                    imported_packages.append(parts[1])
+                    # The package name starts right after "import" and its
+                    # following whitespace; computed positionally so a name
+                    # that happens to also occur inside the keyword itself
+                    # (e.g. "rt" in "import rt") isn't found at the wrong
+                    # offset.
+                    indent = len(line) - len(line.lstrip())
+                    name_offset = MD_Lexer._skip_spaces(line, indent + len("import"))
+                    wildcard = self._emit_package_name(
+                        parts[1],
+                        line_no,
+                        name_offset,
+                        line,
+                        allow_wildcard=True,
+                    )
+                    # Only a plain import identifies a single package that
+                    # unqualified type names can be completed with.
+                    if not wildcard:
+                        imported_packages.append(parts[1])
                     continue
 
             # ── Everything else: delegate to TRLC_Lexer ──────────────────

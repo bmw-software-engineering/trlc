@@ -1,0 +1,5 @@
+# ns.app
+  ^ markdown-missing-parent-package/requirements.trlc.md:1: error: parent package ns of nested package ns.app has not been declared
+  | declare package ns (e.g. in its own .rsl file) before declaring ns.app
+markdown-missing-parent-package/requirements.trlc.md:10:1: error: unknown symbol ns
+Processed 0 models and 1 requirement file and found 2 errors
