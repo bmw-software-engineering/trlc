@@ -1,0 +1,22 @@
+package Test
+
+A a1 {
+  shared  = 5
+  details = [(1)]
+}
+
+B b1 {
+  shared = 3
+}
+
+Owner good {
+  refs = [a1 @ 1, b1 @ 1]
+}
+
+B b_bad {
+  shared = -1
+}
+
+Owner bad {
+  refs = [b_bad @ 1]
+}

@@ -1,0 +1,33 @@
+package Test
+
+// Regression test: A's `details` array-of-tuple field is not otherwise
+// used/declared before Ref's union field access below. Its declaration used
+// to be emitted mid-quantifier instead of at the VC preamble, crashing the
+// VCG with a KeyError in cvc5's record_mapping.
+tuple Detail {
+  x Integer
+}
+
+type A {
+  shared  Integer
+  details Detail[1 .. *]
+}
+
+type B {
+  shared Integer
+}
+
+tuple Ref {
+  item [A, B]
+  separator @
+  version Integer
+}
+
+type Owner {
+  refs Ref[1 .. *]
+}
+
+checks Owner {
+  (forall r in refs => r.item.shared > 0),
+    "all referenced shared values must be positive"
+}
