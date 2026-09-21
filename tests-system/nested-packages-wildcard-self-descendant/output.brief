@@ -1,0 +1,2 @@
+nested-packages-wildcard-self-descendant/foo_bar.rsl:8:13: trlc error: cannot refer to sub-package foo.bar.qux of the current package
+Processed 3 models and 0 requirement files and found 1 error

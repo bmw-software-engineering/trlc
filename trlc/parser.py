@@ -290,6 +290,10 @@ class Parser(Parser_Base):
     ADDING_OPERATOR = ("+", "-")
     MULTIPLYING_OPERATOR = ("*", "/", "%")
 
+    # Keyword that introduces the package indication; overridden by the
+    # markdown parser, where the H1 heading takes this role.
+    PACKAGE_KEYWORD = "package"
+
     def __init__(
         self,
         mh,
@@ -345,6 +349,9 @@ class Parser(Parser_Base):
         self.section = []
         self.default_scope = ast.Scope()
         self.default_scope.push(self.stab)
+
+        # "rsl" or "trlc"; set by parse_preamble
+        self.file_kind = None
 
     def parse_described_name(self):
         # lobster-trace: LRM.Described_Names
@@ -414,6 +421,30 @@ class Parser(Parser_Base):
 
         return ".".join(parts), first_location, tokens, is_wildcard
 
+    def check_not_self_descendant(self, pkg, t_pkg):
+        # lobster-trace: LRM.Self_Descendant_Reference
+        # An rsl file is always elaborated before the rsl files of its
+        # sub-packages, so their declarations do not exist yet. Without
+        # this check the user would get a confusing "unknown symbol"
+        # error for the member instead.
+        if self.file_kind != "rsl":
+            return
+        if not pkg.name.startswith(self.cu.package.name + "."):
+            return
+        self.mh.error(
+            t_pkg.location,
+            "cannot refer to sub-package %s of the current package" % pkg.name,
+            explanation="package %s is elaborated before its sub-packages, "
+            "so %s cannot be used here; move the declarations you need "
+            "into %s itself, or into a package outside the %s subtree"
+            % (
+                self.cu.package.name,
+                pkg.name,
+                self.cu.package.name,
+                self.cu.package.name,
+            ),
+        )
+
     def descend_sub_packages(self, pkg, t_pkg):
         # lobster-trace: LRM.Qualified_Name
         # lobster-trace: LRM.Nested_Visibility
@@ -443,6 +474,7 @@ class Parser(Parser_Base):
                         explanation="add 'import %s' to the "
                         "preamble of this file" % pkg.name,
                     )
+                self.check_not_self_descendant(pkg, t_pkg)
                 self.cu.mark_import_used(pkg)
                 return pkg, t_member
             child.set_ast_link(t_dot)
@@ -456,6 +488,7 @@ class Parser(Parser_Base):
                 "package must be imported before use",
                 explanation="add 'import %s' to the preamble of this file" % pkg.name,
             )
+        self.check_not_self_descendant(pkg, t_pkg)
         self.cu.mark_import_used(pkg)
         return pkg, self.ct
 
@@ -2093,9 +2126,11 @@ class Parser(Parser_Base):
         # lobster-trace: LRM.Layout
         # lobster-trace: LRM.Preamble
 
+        self.file_kind = kind
+
         # First, parse package indication, declaring the package if
         # needed
-        self.match_kw("package")
+        self.match_kw(self.PACKAGE_KEYWORD)
         t_pkg = self.ct
         pkg_name, pkg_location, pkg_tokens = self.parse_dotted_name()
 

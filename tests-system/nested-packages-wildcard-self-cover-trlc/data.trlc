@@ -1,0 +1,9 @@
+package foo
+
+// trlc files are processed after all rsl files, so unlike an rsl file of
+// package foo this may refer to types declared in the sub-package foo.bar.
+import foo.*
+
+foo.bar.T Obj {
+  x = 1
+}

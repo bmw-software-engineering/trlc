@@ -298,6 +298,90 @@ class Test_Nested_Packages(unittest.TestCase):
             "with its own child package, got: %s" % mh.error_messages(),
         )
 
+    def test_rsl_cannot_reference_own_sub_package(self):
+        """An rsl file of package foo may not refer to foo.bar, even when
+        the self-covering wildcard foo.* makes foo.bar visible."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "foo.rsl",
+                "package foo\nimport foo.*\ntype R {\n  c foo.bar.Color\n}\n",
+            )
+        )
+        sm.register_rsl_file(
+            self.write("foo_bar.rsl", "package foo.bar\nenum Color { a b }\n")
+        )
+        self.process(sm)
+        self.assertTrue(
+            any(
+                "cannot refer to sub-package foo.bar" in m for m in mh.error_messages()
+            ),
+            "Expected self-descendant error, got: %s" % mh.error_messages(),
+        )
+
+    def test_rsl_cannot_reference_own_descendant(self):
+        """The same applies to a descendant reached via an ancestor
+        wildcard: foo.bar may not refer to foo.bar.qux."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(self.write("foo.rsl", "package foo\n"))
+        sm.register_rsl_file(
+            self.write(
+                "foo_bar.rsl",
+                "package foo.bar\nimport foo.*\ntype R {\n  c foo.bar.qux.E\n}\n",
+            )
+        )
+        sm.register_rsl_file(
+            self.write("foo_bar_qux.rsl", "package foo.bar.qux\nenum E { a b }\n")
+        )
+        self.process(sm)
+        self.assertTrue(
+            any(
+                "cannot refer to sub-package foo.bar.qux" in m
+                for m in mh.error_messages()
+            ),
+            "Expected self-descendant error, got: %s" % mh.error_messages(),
+        )
+
+    def test_trlc_may_reference_own_sub_package(self):
+        """trlc files are processed after all rsl files, so a trlc file of
+        package foo may refer to types declared in foo.bar."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(self.write("foo.rsl", "package foo\n"))
+        sm.register_rsl_file(
+            self.write("foo_bar.rsl", "package foo.bar\ntype T {\n  x Integer\n}\n")
+        )
+        sm.register_trlc_file(
+            self.write(
+                "data.trlc",
+                "package foo\nimport foo.*\nfoo.bar.T Obj {\n  x = 1\n}\n",
+            )
+        )
+        stab = self.process(sm)
+        self.assertIsNotNone(stab)
+        self.assertFalse(mh.has_error(), mh.error_messages())
+
+    def test_trlc_self_cover_wildcard_pulls_in_descendants(self):
+        """A self-covering wildcard in a trlc file must pull the rsl files
+        of the covered sub-packages into the file-load closure."""
+        lib_dir = os.path.join(self.tmp, "lib")
+        os.mkdir(lib_dir)
+        with open(os.path.join(lib_dir, "foo.rsl"), "w", encoding="utf-8") as f:
+            f.write("package foo\n")
+        with open(os.path.join(lib_dir, "foo_bar.rsl"), "w", encoding="utf-8") as f:
+            f.write("package foo.bar\ntype T {\n  x Integer\n}\n")
+
+        sm, mh = make_source_manager()
+        sm.register_include(lib_dir)
+        sm.register_trlc_file(
+            self.write(
+                "data.trlc",
+                "package foo\nimport foo.*\nfoo.bar.T Obj {\n  x = 1\n}\n",
+            )
+        )
+        stab = self.process(sm)
+        self.assertIsNotNone(stab)
+        self.assertFalse(mh.has_error(), mh.error_messages())
+
     def test_wildcard_unused_lint(self):
         """An unused wildcard import is flagged by the linter."""
         sm, mh = make_source_manager()

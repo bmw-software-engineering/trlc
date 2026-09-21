@@ -374,32 +374,37 @@ class Source_Manager:
 
                 # A wildcard import depends on the whole subtree rooted at
                 # the wildcard root, so the file-load closure pulls in every
-                # descendant package. Only for a self-covering wildcard
-                # (root is the current package or an ancestor of it, see
-                # LRM.Wildcard_Self_Cover) is the current package and its
-                # own descendants excluded: those already have an implicit
-                # dependency on the current package's rsl file, which
-                # would otherwise be reported as a spurious cycle. A
+                # descendant package. Two things are excluded: the current
+                # package itself (a node may not depend on itself), and,
+                # for rsl files only, the descendants of the current
+                # package. An rsl file is always elaborated before the rsl
+                # files of its sub-packages, so such an edge would be a
+                # spurious cycle; see LRM.Self_Descendant_Reference, which
+                # makes referring to those sub-packages illegal anyway. A
                 # wildcard root that is a genuine descendant of the current
                 # package must still create the dependency, so that a real
                 # cycle is reported instead of silently ignored.
                 # lobster-trace: LRM.Wildcard_Import
                 # lobster-trace: LRM.Wildcard_Self_Cover
-                if parser.cu.wildcard_roots:
-                    for root in parser.cu.wildcard_roots:
-                        self_cover = pkg_name == root.name or pkg_name.startswith(
+                # lobster-trace: LRM.Self_Descendant_Reference
+                for root in parser.cu.wildcard_roots:
+                    self_cover = pkg_name == root.name or pkg_name.startswith(
+                        root.name + "."
+                    )
+                    for other in all_packages:
+                        if other.name != root.name and not other.name.startswith(
                             root.name + "."
-                        )
-                        for other in all_packages:
-                            if self_cover and (
-                                other.name == pkg_name
-                                or other.name.startswith(pkg_name + ".")
-                            ):
-                                continue
-                            if other.name == root.name or other.name.startswith(
-                                root.name + "."
-                            ):
-                                graph[(pkg_name, kind)].add((other.name, kind))
+                        ):
+                            continue
+                        if other.name == pkg_name:
+                            continue
+                        if (
+                            self_cover
+                            and kind == "rsl"
+                            and other.name.startswith(pkg_name + ".")
+                        ):
+                            continue
+                        graph[(pkg_name, kind)].add((other.name, kind))
 
         # Build the package hierarchy for nested packages. Parents are
         # always registered already (in the flat global table), so the

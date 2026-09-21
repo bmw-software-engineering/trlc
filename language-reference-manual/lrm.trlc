@@ -358,6 +358,18 @@ wildcard_import ::= package_name '.' '*'
               (see Self_Imports).'''
   }
 
+  Static_Semantics Self_Descendant_Reference {
+    text = '''A package is elaborated before its sub-packages. An `rsl`
+              file therefore may not refer to an entity declared in a
+              descendant of its current package, even if that descendant
+              is visible through a wildcard import (see
+              Wildcard_Self_Cover). An explicit import of such a
+              descendant is a circular dependency and is rejected by the
+              Circular_Dependencies rule. `trlc` files are processed after
+              all `rsl` files and may refer to types declared in
+              descendants of their current package.'''
+  }
+
   Static_Semantics Subpackage_Member_Distinct {
     text = '''Within a package, the leaf name of a direct sub-package must be
               sufficiently distinct (see Sufficiently_Distinct) from the

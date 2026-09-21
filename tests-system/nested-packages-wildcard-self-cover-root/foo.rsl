@@ -1,0 +1,11 @@
+package foo
+
+// The wildcard root is the current package itself. This is a legal
+// self-covering wildcard, but it does not make the sub-packages of foo
+// usable here: foo is elaborated before foo.bar, so the reference below
+// is rejected.
+import foo.*
+
+type R {
+  c foo.bar.Color
+}
