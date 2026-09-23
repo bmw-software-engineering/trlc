@@ -1,0 +1,9 @@
+package foo.bar
+
+// foo.* makes foo.bar.qux visible, but foo.bar is elaborated before its
+// own sub-package foo.bar.qux, so the reference below is rejected.
+import foo.*
+
+type R {
+  c foo.bar.qux.E
+}

@@ -2,7 +2,7 @@
 
 ## Language support
 
-Up to date with version 3.3 of [TRLC language reference
+Up to date with version 3.4 of [TRLC language reference
 manual](https://bmw-software-engineering.github.io/trlc/lrm.html).
 
 ## Limitations
@@ -31,6 +31,38 @@ generated in the following situations:
 * [TRLC] Add support for tuple-reference arrays in `.trlc.md` files.
   Supports comma, `<br>`, and newline separation, and all LRM separator
   kinds (`@`, `:`, `;`, identifier). Bracket notation is not supported.
+
+* [TRLC] Add support for nested (dotted) packages, e.g. `package
+  com.bigcorp.safety`, and for wildcard imports (`import foo.*`) that
+  bring an entire package subtree into scope.
+
+* [TRLC] Extend the `unused_imports` lint check with new sub-checks for
+  the nested-packages and wildcard-import features: redundant explicit
+  imports already covered by a wildcard import, unused wildcard
+  imports, and trivial wildcard imports (i.e. a wildcard import of a
+  package with no sub-packages, which can be replaced by a plain
+  import).
+
+* [TRLC] An `rsl` file that refers to a sub-package of its own package
+  now gets a dedicated error explaining that a package is elaborated
+  before its sub-packages, instead of a confusing "unknown symbol"
+  error.
+
+* [TRLC] Fix `trlc` files not finding types declared in sub-packages of
+  their own package when those sub-packages were only reachable through
+  an include directory (`-I`).
+
+* [TRLC] Markdown (`.trlc.md`) files now share the TRLC preamble
+  grammar: the `# PackageName` heading may name a nested package and
+  `import` may name a nested package or use a wildcard.
+
+* [TRLC] Fix a crash when a markdown (`.trlc.md`) file contains an
+  `import` statement.
+
+* [TRLC] Fix error carets pointing at the wrong column for nested
+  package names and imports in markdown (`.trlc.md`) files (e.g. an
+  invalid character in the second segment of `# ns.1bad` now points at
+  that character instead of the start of the heading).
 
 ### 3.0.1
 

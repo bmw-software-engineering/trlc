@@ -1,0 +1,12 @@
+package foo.bar
+
+// The wildcard root foo covers the current package foo.bar (self-cover),
+// and foo.bar itself has a child package foo.bar.qux. The implicit
+// parent dependency (foo.bar.qux rsl -> foo.bar rsl) must not clash with
+// the wildcard-induced dependency here: foo.bar must not be made to
+// depend on its own descendant foo.bar.qux.
+import foo.*
+
+type R {
+  c foo.baz.Color
+}

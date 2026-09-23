@@ -219,8 +219,18 @@ class Compilation_Unit(Node):
     :attribute package: the main package this file declares or contributes to
     :type: Package
 
-    :attribute imports: package imported by this file
-    :type: list[Package]
+    :attribute imports: packages explicitly imported by this file
+    :type: set[Package]
+
+    :attribute wildcard_roots: roots of wildcard imports (``import foo.*``)
+    :type: set[Package]
+
+    :attribute raw_imports: unresolved imports as (name, location, \
+      is_wildcard, tokens)
+    :type: list[tuple[str, Location, bool, list[Token]]]
+
+    :attribute referenced_imports: imports actually used in this file
+    :type: set[Package]
 
     :attribute items: list of
     :type: list[Node]
@@ -231,15 +241,23 @@ class Compilation_Unit(Node):
         # lobster-exclude: Constructor only declares variables
         super().__init__(Location(file_name))
         self.package = None
-        self.imports = None
+        # Both default to empty sets (rather than None) so is_visible()
+        # behaves consistently even if called before resolve_imports()
+        # has run (e.g. only self-visibility is granted at that point).
+        self.imports = set()
+        self.wildcard_roots = set()
+        # list of (name : str, location : Location, is_wildcard : bool,
+        #          tokens : list[Token])
         self.raw_imports = []
+        self.referenced_imports = set()
         self.items = []
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
         self.write_indent(indent, f"Compilation_Unit ({self.location.file_name})")
-        for t_import in self.raw_imports:
-            self.write_indent(indent + 1, f"Import: {t_import.value}")
+        for name, _location, is_wildcard, _tokens in self.raw_imports:
+            suffix = ".*" if is_wildcard else ""
+            self.write_indent(indent + 1, f"Import: {name}{suffix}")
         for n_item in self.items:
             n_item.dump(indent + 1)
 
@@ -248,48 +266,107 @@ class Compilation_Unit(Node):
         assert isinstance(pkg, Package)
         self.package = pkg
 
-    def add_import(self, mh, t_import):
+    def add_import(self, mh, name, location, is_wildcard=False, tokens=None):
         # lobster-trace: LRM.Import_Visibility
         # lobster-trace: LRM.Self_Imports
+        # lobster-trace: LRM.Wildcard_Import
+        # lobster-trace: LRM.Wildcard_Self_Cover
         assert isinstance(mh, Message_Handler)
-        assert isinstance(t_import, Token)
-        assert t_import.kind == "IDENTIFIER"
+        assert isinstance(name, str)
+        assert isinstance(location, Location)
+        assert isinstance(is_wildcard, bool)
+        assert tokens is None or isinstance(tokens, list)
+        if tokens is None:
+            tokens = []
 
-        if t_import.value == self.package.name:
+        # An explicit self-import is an error. A wildcard whose root
+        # covers the current package is permitted: the current package
+        # stays implicitly visible (Wildcard_Self_Cover).
+        if name == self.package.name and not is_wildcard:
             mh.error(
-                t_import.location, "package %s cannot import itself" % self.package.name
+                location,
+                "package %s cannot import itself" % self.package.name,
+                explanation="a package always has access to its own "
+                "types and objects; remove this import statement",
             )
 
-        # Skip duplicates
-        for t_previous in self.raw_imports:
-            if t_previous.value == t_import.value:
+        # Skip duplicates (same name and same wildcard flavour)
+        for prev_name, _prev_location, prev_wildcard, _prev_tokens in self.raw_imports:
+            if prev_name == name and prev_wildcard == is_wildcard:
                 mh.warning(
-                    t_import.location, "duplicate import of package %s" % t_import.value
+                    location,
+                    "duplicate import of package %s%s"
+                    % (name, ".*" if is_wildcard else ""),
+                    explanation="remove this redundant import "
+                    "statement, the package is already imported",
                 )
                 return
 
-        self.raw_imports.append(t_import)
+        self.raw_imports.append((name, location, is_wildcard, tokens))
 
     def resolve_imports(self, mh, stab):
         # lobster-trace: LRM.Import_Visibility
+        # lobster-trace: LRM.Wildcard_Import
         assert isinstance(mh, Message_Handler)
         assert isinstance(stab, Symbol_Table)
         self.imports = set()
-        for t_import in self.raw_imports:
+        self.wildcard_roots = set()
+        for name, location, is_wildcard, tokens in self.raw_imports:
             # We can ignore errors here, because that just means we
             # generate more error later.
             try:
-                a_import = stab.lookup(mh, t_import, Package)
-                self.imports.add(a_import)
-                a_import.set_ast_link(t_import)
+                a_import = stab.lookup_direct(mh, name, location, Package)
             except TRLC_Error:
-                pass
+                continue
+            # Link the import clause's tokens to the resolved package,
+            # so tooling (e.g. go-to-definition) can navigate to it.
+            for token in tokens:
+                a_import.set_ast_link(token)
+            if is_wildcard:
+                self.wildcard_roots.add(a_import)
+            else:
+                self.imports.add(a_import)
+
+    def covered_by_wildcard(self, pkg):
+        # lobster-trace: LRM.Wildcard_Import
+        # A package is covered by a wildcard root if it is the root
+        # itself or any descendant of it.
+        assert isinstance(pkg, Package)
+        for root in self.wildcard_roots:
+            if pkg == root or pkg.name.startswith(root.name + "."):
+                return root
+        return None
+
+    def mark_import_used(self, pkg):
+        """Record that a package was actually referenced in this file.
+
+        Called during qualified-name resolution so the lint pass can
+        detect unused imports. If the package is visible through a
+        wildcard import, the wildcard root is marked used as well. A
+        reference to the current package itself never counts as using a
+        wildcard import, even if the wildcard's root covers the current
+        package (see LRM.Wildcard_Self_Cover): the current package is
+        always implicitly visible, not "imported" by the wildcard.
+
+        :param pkg: the package that was used
+        :type pkg: Package
+        """
+        assert isinstance(pkg, Package)
+        self.referenced_imports.add(pkg)
+        if pkg is self.package:
+            return
+        root = self.covered_by_wildcard(pkg)
+        if root is not None:
+            self.referenced_imports.add(root)
 
     def is_visible(self, n_pkg):
         # lobster-trace: LRM.Import_Visibility
-        assert self.imports is not None
+        # lobster-trace: LRM.Wildcard_Import
+        # lobster-trace: LRM.Nested_Visibility
         assert isinstance(n_pkg, Package)
-        return n_pkg == self.package or n_pkg in self.imports
+        if n_pkg == self.package or n_pkg in self.imports:
+            return True
+        return self.covered_by_wildcard(n_pkg) is not None
 
     def add_item(self, node):
         # lobster-trace: LRM.RSL_File
@@ -2846,6 +2923,12 @@ class Package(Entity):
     :attribute symbols: symbol table of the package
     :type: Symbol_Table
 
+    :attribute sub_packages: direct child packages of this package
+    :type: Symbol_Table
+
+    :attribute parent: the parent package, or None for top-level packages
+    :type: Package
+
     """
 
     def __init__(self, name, location, builtin_stab, declared_late):
@@ -2856,6 +2939,8 @@ class Package(Entity):
         self.symbols = Symbol_Table()
         self.symbols.make_visible(builtin_stab)
         self.declared_late = declared_late
+        self.sub_packages = Symbol_Table()
+        self.parent = None
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
@@ -3578,6 +3663,76 @@ class Symbol_Table:
 
         else:
             self.table[simple_name] = entity
+
+    def register_with_key(self, mh, entity, key_name):
+        """Register an entity under a different key name (leaf name).
+
+        Used to register nested packages in their parent's ``sub_packages``
+        table keyed by their leaf segment rather than their full name.
+
+        :param mh: The message handler to use
+        :type mh: Message_Handler
+
+        :param entity: the entity to register
+        :type entity: Entity
+
+        :param key_name: the name to use as the lookup key
+        :type key_name: str
+        """
+        # lobster-trace: LRM.Sufficiently_Distinct
+        assert isinstance(mh, Message_Handler)
+        assert isinstance(entity, Entity)
+        assert isinstance(key_name, str)
+
+        simple_key = self.simplified_name(key_name)
+
+        if simple_key in self.table:
+            existing = self.table[simple_key]
+            if existing.name == entity.name:
+                mh.error(
+                    entity.location,
+                    "duplicate definition, previous definition at %s"
+                    % mh.cross_file_reference(existing.location),
+                    explanation="rename or remove one of the two "
+                    "declarations so each sub-package has a unique name",
+                )
+            else:
+                mh.error(
+                    entity.location,
+                    "%s is too similar to %s, declared at %s"
+                    % (
+                        entity.name,
+                        existing.name,
+                        mh.cross_file_reference(existing.location),
+                    ),
+                    explanation="package names must be sufficiently "
+                    "distinct (case and underscores are ignored); "
+                    "rename one of the two packages",
+                )
+        else:
+            self.table[simple_key] = entity
+
+    def lookup_sub_package(self, segment):
+        """Look up a direct child package by its leaf segment name.
+
+        Used for traversing the nested package hierarchy, where the table
+        key is the simplified leaf segment but the entity name is the full
+        dotted package name.
+
+        :param segment: the leaf name to look for (e.g. ``"bar"`` for \
+          ``foo.bar``)
+        :type segment: str
+
+        :returns: the child Package, or None if not found
+        :rtype: Package or None
+        """
+        assert isinstance(segment, str)
+        simple_key = self.simplified_name(segment)
+        if simple_key in self.table:
+            entity = self.table[simple_key]
+            if isinstance(entity, Package):
+                return entity
+        return None
 
     def __contains__(self, name):
         # lobster-trace: LRM.Described_Name_Equality

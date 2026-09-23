@@ -1,0 +1,6 @@
+package foo
+
+// foo is elaborated before its own sub-package foo.bar, so importing
+// foo.bar here creates a circular dependency, even without foo.bar
+// importing foo back explicitly.
+import foo.bar

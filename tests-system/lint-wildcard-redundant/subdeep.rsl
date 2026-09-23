@@ -1,0 +1,5 @@
+package sub.deep
+
+type U {
+  v Integer
+}

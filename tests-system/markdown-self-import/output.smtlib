@@ -1,0 +1,4 @@
+import ns
+       ^ markdown-self-import/requirements.trlc.md:3: error: package ns cannot import itself
+       | a package always has access to its own types and objects; remove this import statement
+Processed 1 model and 1 requirement file and found 1 error

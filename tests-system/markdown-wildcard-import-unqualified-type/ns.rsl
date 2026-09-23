@@ -1,0 +1,5 @@
+package ns
+
+type T {
+  x String
+}

@@ -1,0 +1,4 @@
+import sub.deep
+       ^^^ lint-wildcard-redundant/foobar.rsl:3: issue: redundant import sub.deep, already covered by wildcard import sub.* [unused_imports]
+         | Consider deleting this import statement.
+Processed 4 models and 0 requirement files and found 1 warning

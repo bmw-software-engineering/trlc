@@ -1,0 +1,2 @@
+nested-packages-wildcard-self-cover-root/foo.rsl:10:9: trlc error: cannot refer to sub-package foo.bar of the current package
+Processed 2 models and 0 requirement files and found 1 error

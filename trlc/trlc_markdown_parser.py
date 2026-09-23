@@ -30,6 +30,10 @@ class TrlcMarkdownParser(Parser):
     overrides markdown-specific preamble/section entry points.
     """
 
+    # The H1 heading takes the role of the 'package' keyword, so the
+    # inherited preamble parsing applies unchanged to markdown files.
+    PACKAGE_KEYWORD = "#"
+
     # Markdown-friendly aliases that intentionally map to TRLC block tokens.
     MD_SECTION_START_TOKEN = "C_BRA"
     MD_SECTION_END_TOKEN = "C_KET"
@@ -59,36 +63,7 @@ class TrlcMarkdownParser(Parser):
     def parse_preamble(self, kind):
         # markdown files are routed through TRLC flow in Source_Manager
         assert kind == "trlc"
-
-        # H1: '# PackageName'
-        self.match_kw("#")
-        t_pkg = self.ct
-        self.match("IDENTIFIER")
-
-        declare_package = not self.stab.contains(self.ct.value)
-        if declare_package:
-            pkg = ast.Package(
-                name=self.ct.value,
-                location=self.ct.location,
-                builtin_stab=self.stab,
-                declared_late=True,
-            )
-            self.stab.register(self.mh, pkg)
-        else:
-            pkg = self.stab.lookup(self.mh, self.ct, ast.Package)
-
-        pkg.set_ast_link(t_pkg)
-        pkg.set_ast_link(self.ct)
-
-        self.cu.set_package(pkg)
-        self.default_scope.push(self.cu.package.symbols)
-
-        # Optional import list right after H1
-        while self.peek_kw("import"):
-            self.match_kw("import")
-            pkg.set_ast_link(self.ct)
-            self.match("IDENTIFIER")
-            self.cu.add_import(self.mh, self.ct)
+        super().parse_preamble(kind)
 
     def parse_section_declaration(self):
         # H2: '## Section Name'

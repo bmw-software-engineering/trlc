@@ -1,0 +1,6 @@
+package foo
+
+// A wildcard import of a sub-package is subject to the same implicit
+// parent-before-child ordering as a plain import, so this also creates
+// a circular dependency.
+import foo.bar.*

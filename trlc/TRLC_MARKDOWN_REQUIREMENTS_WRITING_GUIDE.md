@@ -38,8 +38,8 @@ You can continue writing text on multiple lines.
 
 | Markdown construct                    | Meaning                                    | Rule / Constraint                                                                                                                                     | Description                                                                                                                                                                                         |
 | ------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `# PackageName`                       | Package declaration                        | Must be exactly one identifier-safe token (letters/digits/underscore, starting with letter).                                                          | Groups and organizes all requirements defined in the file under one namespace. Can be imported by other `.trlc.md` files to reference its types and values.                                         |
-| `import pkg`                          | Import package declaration                 | Allows zero or more imports, directly after the package declaration.                                                                                  | Makes the types and enum values defined in another package available in current files. Each `import` statement accepts exactly one package name; use multiple `import` lines for multiple packages. |
+| `# PackageName`                       | Package declaration                        | Must be exactly one whitespace-free token. May be a nested package name, i.e. identifier-safe segments separated by `.` (for example `# ns.app`).     | Groups and organizes all requirements defined in the file under one namespace. Can be imported by other `.trlc.md` files to reference its types and values.                                         |
+| `import pkg`                          | Import package declaration                 | Allows zero or more imports, directly after the package declaration. Nested names (`import ns.base`) and wildcards (`import ns.*`) are supported.      | Makes the types and enum values defined in another package available in current files. Each `import` statement accepts exactly one package name; use multiple `import` lines for multiple packages. |
 | `## SectionName`                      | Section declaration                        | Optional. Opens a TRLC section block; previous section is closed automatically.                                                                       | Acts as a logical grouping container within a package. All `###` requirements that follow belong to this section until a new section.                                                               |
 | `### RequirementName`                 | Requirement/record name declaration        | Heading text must already be a valid TRLC identifier.                                                                                                 | Declares a named requirement object. The name is the unique identifier of this requirement within the package and section.                                                                          |
 | Requirement property table            | Requirement property and field assignments | Mandatory under each `###`. Table should follow this format: `\| Property \| Value \|`, `\|----\|----\|`, then one or more `\| key \| value \|` rows. | Defines key-value properties for the requirement/record. The header and separator are for table structure/readability, and each data row maps to a field assignment.                                |
@@ -50,9 +50,44 @@ You can continue writing text on multiple lines.
 | `<hr><br><hr>`                        | Visual separator between requirements      | No parsing effect.                                                                                                                                    | Improves readability only.                                                                                                                                                                          |
 | Anchors and URLs                      | Plain string content                       | Preserves full literal text exactly.                                                                                                                  | Link syntax is stored as literal text; URLs are not resolved or validated by parser logic.                                                                                                          |
 
+## Packages and Imports
+
+The `# PackageName` heading and the `import` lines that follow it are the
+markdown spelling of the TRLC preamble: the heading replaces the `package`
+keyword, everything else follows the `package_name` and `import_clause`
+grammar of the language reference manual. This means `.trlc.md` files have
+the same package semantics as `.trlc` files:
+
+- nested package names, e.g. `# ns.app` or `import ns.base`
+- wildcard imports, e.g. `import ns.*`, which make `ns` and every package
+  below it visible
+- the same diagnostics, e.g. importing the current package, importing the
+  same package twice, or referring to an unknown package
+
+Unlike a plain `import ns`, a wildcard import `import ns.*` does not enable
+using an **unqualified** type name for records declared directly in `ns`.
+Types reached through a wildcard import must always use their full
+package-qualified name (e.g. `ns.Greeting`, not `Greeting`) in the `type`
+row of a requirement's property table.
+
+```md
+# ns.app
+
+import ns.*
+
+### Hello_World
+| Property | Value            |
+|----------|------------------|
+| type     | ns.base.Greeting |
+```
+
+As in `.trlc` files, every parent package must exist, so `ns` must be
+declared before `ns.app` can be used.
+
 ## Writing Rules to Follow
 
 - Use identifier-safe names for `#`, `###`, and `####` headings.
+- A `#` heading may additionally contain `.` to name a nested package.
 - Always include a requirement property table under each `###` record.
 - Always include a `type` row in that table.
 - A property can be defined either in the property table (`| key | value |`) or using a `#### FieldName` block.

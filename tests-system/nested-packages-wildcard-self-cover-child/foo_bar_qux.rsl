@@ -1,0 +1,3 @@
+package foo.bar.qux
+
+enum E { a b }

@@ -1,4 +1,5 @@
 import Foo
        ^^^ duplicate-imports/bar.trlc:4: warning: duplicate import of package Foo
+         | remove this redundant import statement, the package is already imported
 {}
 Processed 1 model and 1 requirement file and found 1 warning
