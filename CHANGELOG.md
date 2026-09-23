@@ -67,6 +67,13 @@ generated in the following situations:
   invalid character in the second segment of `# ns.1bad` now points at
   that character instead of the start of the heading).
 
+* [TRLC] Fix `--verify` crashing with a `KeyError` in the CVC5 backend
+  when a `checks` block dereferences a record field whose type has an
+  enum or tuple component that was not otherwise referenced first.
+  This could happen when a tuple or enumeration type is first referenced while
+  translating a  quantifier body (e.g. `forall` over an array whose element is
+  a tuple with a union-record-typed or abstract-record-typed item field).
+
 ### 3.0.1
 
 * [TRLC] Add experimental feature to parse markdown files and interpret their content as trlc objects.

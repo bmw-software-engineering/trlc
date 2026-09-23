@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # TRLC - Treat Requirements Like Code
-# Copyright (C) 2023 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+# Copyright (C) 2023-2026 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
 # Copyright (C) 2023-2025 Florian Schanda
 #
 # This file is part of the TRLC Python Reference Implementation.
@@ -695,7 +695,7 @@ class VCG:
                 for n_lit in n_type.literals.values():
                     s_sort.add_literal(n_lit.name)
                 self.enumerations[n_type] = s_sort
-                self.start.add_statement(
+                self.preamble.add_statement(
                     smt.Enumeration_Declaration(
                         s_sort,
                         "enumeration %s from %s"
@@ -716,7 +716,7 @@ class VCG:
                             n_component.name + ".valid", smt.BUILTIN_BOOLEAN
                         )
                 self.tuples[n_type] = s_sort
-                self.start.add_statement(
+                self.preamble.add_statement(
                     smt.Record_Declaration(
                         s_sort,
                         "tuple %s from %s" % (n_type.name, n_type.location.to_string()),
