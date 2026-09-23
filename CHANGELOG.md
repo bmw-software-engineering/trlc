@@ -24,48 +24,47 @@ generated in the following situations:
 
 ## Changelog
 
-### 3.0.2-dev
+### 3.1.0
 
 * [TRLC] Drop support for Python versions below 3.10. TRLC now requires
   Python 3.10 through 3.14.
 
-* [TRLC_RST] Fix trlc_rst rendering plain-String description fields as broken field lists
+* [TRLC_RST] Fix trlc_rst rendering plain-String description fields as broken
+  field lists
 
 * [TRLC] Add support for tuple-reference arrays in `.trlc.md` files.
   Supports comma, `<br>`, and newline separation, and all LRM separator
   kinds (`@`, `:`, `;`, identifier). Bracket notation is not supported.
 
-* [TRLC] Add support for nested (dotted) packages, e.g. `package
+* [LRM, TRLC] Add support for nested (dotted) packages, e.g. `package
   com.bigcorp.safety`, and for wildcard imports (`import foo.*`) that
-  bring an entire package subtree into scope.
+  bring an entire package subtree into scope. Every prefix package must
+  be declared before a nested package using it can be declared, and the
+  `unused_imports` lint check now also flags a wildcard import that is
+  unused, redundant with an existing explicit import, or equivalent to
+  a plain import because the target package has no sub-packages. See
+  the [Subpackages tutorial](documentation/TUTORIAL-PACKAGE.md#subpackages)
+  for more detail. For example:
 
-* [TRLC] Extend the `unused_imports` lint check with new sub-checks for
-  the nested-packages and wildcard-import features: redundant explicit
-  imports already covered by a wildcard import, unused wildcard
-  imports, and trivial wildcard imports (i.e. a wildcard import of a
-  package with no sub-packages, which can be replaced by a plain
-  import).
+  ```
+  package com.bigcorp.safety
 
-* [TRLC] An `rsl` file that refers to a sub-package of its own package
-  now gets a dedicated error explaining that a package is elaborated
-  before its sub-packages, instead of a confusing "unknown symbol"
-  error.
+  enum ASIL_Level { QM A B C D }
+  ```
 
-* [TRLC] Fix `trlc` files not finding types declared in sub-packages of
-  their own package when those sub-packages were only reachable through
-  an include directory (`-I`).
+  ```
+  package com.bigcorp.brakes
+  import com.bigcorp.safety.*
+
+  type Brake_Requirement {
+    level com.bigcorp.safety.ASIL_Level
+  }
+  ```
 
 * [TRLC] Markdown (`.trlc.md`) files now share the TRLC preamble
   grammar: the `# PackageName` heading may name a nested package and
-  `import` may name a nested package or use a wildcard.
-
-* [TRLC] Fix a crash when a markdown (`.trlc.md`) file contains an
-  `import` statement.
-
-* [TRLC] Fix error carets pointing at the wrong column for nested
-  package names and imports in markdown (`.trlc.md`) files (e.g. an
-  invalid character in the second segment of `# ns.1bad` now points at
-  that character instead of the start of the heading).
+  `import` may name a nested package or use a wildcard, with the same
+  diagnostics as `.rsl`/`.trlc` files.
 
 * [TRLC] Fix `--verify` crashing with a `KeyError` in the CVC5 backend
   when a `checks` block dereferences a record field whose type has an
