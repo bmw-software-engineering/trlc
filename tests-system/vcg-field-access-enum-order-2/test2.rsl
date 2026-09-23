@@ -6,7 +6,7 @@ enum Color {
 }
 
 type Item {
-  colors Color [1 .. *]
+  colors Color [1 .. *]  // having this component is essential for the test - do not remove!
   next   optional Item
 }
 
