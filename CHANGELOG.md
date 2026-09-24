@@ -67,6 +67,12 @@ generated in the following situations:
   invalid character in the second segment of `# ns.1bad` now points at
   that character instead of the start of the heading).
 
+* [TRLC] Fix a markdown (`.trlc.md`) `type` property being wrongly
+  qualified with a single plain `import`ed package even when the type
+  is actually declared in the file's own package. The file's own
+  package is now checked first, and the import is only used as a
+  fallback.
+
 * [TRLC] Fix `--verify` crashing with a `KeyError` in the CVC5 backend
   when a `checks` block dereferences a record field whose type has an
   enum or tuple component that was not otherwise referenced first.

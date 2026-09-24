@@ -1,0 +1,4 @@
+import base
+       ^ markdown-import-own-type/requirements.trlc.md:3: issue: unused import base [unused_imports]
+       | Consider deleting this import statement if not needed.
+Processed 2 models and 1 requirement file and found 1 warning

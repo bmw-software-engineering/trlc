@@ -337,9 +337,7 @@ class TestLexerMd(unittest.TestCase):
         # Inherited tuple-array field: unqualified (same-package) references
         # must still be recognised as an array, not fall back to STRING.
         lexer = MD_Lexer(self.mh, "test", "")
-        lexer._emit_field_value(
-            "item_a @ 1", Location("test"), child_type, "refs"
-        )
+        lexer._emit_field_value("item_a @ 1", Location("test"), child_type, "refs")
         self.assertEqual(
             token_pairs(lexer),
             [
@@ -348,6 +346,41 @@ class TestLexerMd(unittest.TestCase):
                 ("AT", None),
                 ("INTEGER", 1),
                 ("S_KET", None),
+            ],
+        )
+
+    def test_type_row_prefers_own_package_type_over_single_import(self):
+        # Regression test: a single plain import must not shadow a type
+        # that is actually declared in the file's own package.
+        stab, _own_type = make_record_type(record_name="Requirement")
+        other_pkg = trlc_ast.Package(
+            "OtherPkg", Location("test"), trlc_ast.Symbol_Table(), False
+        )
+        stab.table[trlc_ast.Symbol_Table.simplified_name(other_pkg.name)] = other_pkg
+
+        content = "\n".join(
+            [
+                "# DemoPkg",
+                "import OtherPkg",
+                "",
+                "### Req_1",
+                "| Property | Value |",
+                "|----------|-------|",
+                "| type | Requirement |",
+                "",
+            ]
+        )
+
+        lexer = MD_Lexer(self.mh, "test.trlc.md", content)
+        lexer.prepare_phase2(stab)
+
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("IDENTIFIER", "Requirement"),
+                ("IDENTIFIER", "Req_1"),
+                ("C_BRA", None),
+                ("C_KET", None),
             ],
         )
 

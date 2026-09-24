@@ -1322,7 +1322,15 @@ class MD_Lexer(TRLC_Lexer):
                     # Emit:  RecordType  RecordName  {
                     type_name = value.strip()
                     if "." not in type_name and len(imported_packages) == 1:
-                        type_name = imported_packages[0] + "." + type_name
+                        # Only fall back to the single plain import if the
+                        # type is not itself declared in the file's own
+                        # package - an import must not shadow the current
+                        # package's own types.
+                        own_type = self._resolve_record_type(
+                            type_name, package_name=current_package_name
+                        )
+                        if own_type is None:
+                            type_name = imported_packages[0] + "." + type_name
                     self._emit_qualified_identifier(loc, type_name)
                     self._emit(pending_name_loc, "IDENTIFIER", pending_name)
                     self._emit(pending_name_loc, "C_BRA")
