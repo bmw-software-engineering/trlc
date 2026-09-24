@@ -110,6 +110,24 @@ def make_record_type(record_name="ReqType"):
     return stab, record_type
 
 
+def make_derived_record_type(parent_name="ParentType", child_name="ChildType"):
+    """Like make_record_type(), but "notes"/"refs" are declared on the
+    parent and returns the child, which inherits them via ``extends``."""
+    stab, parent_type = make_record_type(parent_name)
+    child_type = trlc_ast.Record_Type(
+        child_name,
+        None,
+        Location("test"),
+        parent_type.n_package,
+        parent_type,
+        False,
+    )
+    parent_type.n_package.symbols.table[
+        trlc_ast.Symbol_Table.simplified_name(child_name)
+    ] = child_type
+    return stab, child_type
+
+
 class TestLexerMd(unittest.TestCase):
     def setUp(self):
         self.mh = ListHandler()
@@ -302,6 +320,36 @@ class TestLexerMd(unittest.TestCase):
         lexer = MD_Lexer(self.mh, "test", "")
         lexer._emit_value("item_a @ 1", Location("test"))
         self.assertEqual(token_pairs(lexer), [("STRING", "item_a @ 1")])
+
+    def test_type_aware_field_emission_finds_inherited_fields(self):
+        # Regression test: "notes"/"refs" are declared on the parent type
+        # only, so _get_field_type must walk up the components chain
+        # (record_type.components.parent) instead of looking at the
+        # child's own (empty) components table.
+        _stab, child_type = make_derived_record_type()
+
+        # Inherited string field: single word must stay a STRING, not be
+        # misread as a bare IDENTIFIER by the untyped _emit_value fallback.
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("word", Location("test"), child_type, "notes")
+        self.assertEqual(token_pairs(lexer), [("STRING", "word")])
+
+        # Inherited tuple-array field: unqualified (same-package) references
+        # must still be recognised as an array, not fall back to STRING.
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(
+            "item_a @ 1", Location("test"), child_type, "refs"
+        )
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("IDENTIFIER", "item_a"),
+                ("AT", None),
+                ("INTEGER", 1),
+                ("S_KET", None),
+            ],
+        )
 
     def test_process_preamble_section_and_record(self):
         content = "\n".join(

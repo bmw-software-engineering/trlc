@@ -369,12 +369,22 @@ class MD_Lexer(TRLC_Lexer):
 
     @staticmethod
     def _get_field_type(record_type_ast, field_name):
-        """Return the declared type of *field_name*, or None."""
+        """Return the declared type of *field_name*, or None.
+
+        Walks up the component symbol table chain so fields declared on a
+        parent record type (i.e. inherited via ``extends``) are found too,
+        not just fields declared directly on *record_type_ast*.
+        """
         if record_type_ast is None:
             return None
         simple = trlc_ast.Symbol_Table.simplified_name(field_name)
-        component = record_type_ast.components.table.get(simple)
-        return component.n_typ if component is not None else None
+        components = record_type_ast.components
+        while components is not None:
+            component = components.table.get(simple)
+            if component is not None:
+                return component.n_typ
+            components = components.parent
+        return None
 
     @staticmethod
     def _is_tuple_array_field(record_type_ast, field_name):

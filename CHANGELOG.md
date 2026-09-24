@@ -74,6 +74,11 @@ generated in the following situations:
   translating a  quantifier body (e.g. `forall` over an array whose element is
   a tuple with a union-record-typed or abstract-record-typed item field).
 
+* [TRLC] Fix markdown (`.trlc.md`) field values not being recognised as a
+  string or a tuple-reference array when the field is inherited from a
+  parent record type (e.g. via `extends`) instead of being declared
+  directly on the record's own type.
+
 ### 3.0.1
 
 * [TRLC] Add experimental feature to parse markdown files and interpret their content as trlc objects.
