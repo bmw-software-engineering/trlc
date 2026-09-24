@@ -1369,3 +1369,101 @@ functions in VCG to do so:
   some value)
 * `attach_empty_assumption` just creates a new do-nothing node. This
   is used in quantifier elimination.
+
+---
+
+## TRLC Formatter
+
+The formatter is a [Prettier](https://prettier.io/) plugin that produces
+canonical, diff-friendly `.trlc` and `.rsl` files.  It lives under
+`tools/formatter/` and uses a pure-JavaScript recursive-descent + Pratt
+expression parser (`trlc-parser-impl.js`) — no native C extension or
+tree-sitter binding is required at runtime.
+
+### Bazel build graph
+
+The parser is pure JavaScript, so no C compilation step is needed.  The
+`js_library` target bundles all sources directly.
+
+```mermaid
+graph TD
+    sources["`**src/\*.js**
+    trlc-lexer, trlc-node,
+    trlc-parser-impl, printer,
+    parser, language, options, index`"]
+    plugin["`**js_library :prettier_plugin_lib**`"]
+    prettier_bin["`**prettier_binary**
+    :prettier_trlc_formatter`"]
+    unit_test["`**js_test :unit_test**`"]
+    fmt["`**format_multirun :format**`"]
+
+    sources --> plugin
+    plugin  --> prettier_bin
+    plugin  --> unit_test
+    prettier_bin --> fmt
+```
+
+Step by step:
+
+1. **`js_library :prettier_plugin_lib`** — bundles all JS sources under
+   `src/`.  The only runtime dependency is the `prettier` npm package
+   (no native addons, no `tree-sitter`, no `node-gyp`).
+
+2. **`prettier_binary :prettier_trlc_formatter`** and **`js_test :unit_test`**
+   both depend on `:prettier_plugin_lib`.  Bazel places them in a hermetic
+   sandbox with the npm packages from `pnpm-lock.yaml`.
+
+3. **`format_multirun :format`** wraps the `prettier_binary` as a `multirun`
+   command so it can be invoked via `bazel run //:format.fix` and
+   `bazel run //:format.check`.
+
+### Parser design
+
+`trlc-parser-impl.js` implements a recursive-descent parser for the full
+TRLC/RSL grammar with a Pratt sub-parser for expressions.  It produces a CST
+of `CSTNode` objects whose API surface deliberately mirrors tree-sitter's
+`SyntaxNode` interface (`type`, `text`, `startIndex`, `endIndex`,
+`startPosition`, `endPosition`, `children`, `namedChildren`,
+`childForFieldName`, `childrenForFieldName`).  This means `printer.js` can
+consume the hand-written CST without modification.
+
+On any lex or parse error the parser returns a `source_file` node with
+`hasError = true`.  The printer then passes the original text through
+verbatim — files with errors are never reformatted or corrupted.
+
+### Printer design
+
+Prettier's FastPath recursion (`path.call` / `path.map`) is deliberately not
+used inside declarations.  The `print()` entry point calls
+`printNode(node, options)` directly, which walks the CST recursively.  This
+avoids an AST-conversion layer and keeps comment handling simple: comments are
+named children at their lexical position and are handled inline.
+
+Consequence: range formatting and cursor tracking are not supported.  This is
+an acceptable trade-off for a whole-file formatter.
+
+Key design rules enforced by the printer:
+
+| Rule | Description |
+|------|-------------|
+| R01 | Indentation via `tabWidth` / `useTabs` (Prettier built-ins) |
+| R02 | Trailing whitespace removed from line comments |
+| R03 | Blank line between top-level declarations |
+| R04 | Blank line after `package` declaration |
+| R05 | No blank lines between consecutive `import` clauses |
+| R06 | `extends` on same line as type name |
+| R07 | No blank lines inside type / record bodies |
+| R08 | Single space between attribute name and type (`trlcNormalizeAttributes`) |
+| R09 | Space around `=` in field assignments |
+| R10 | No blank line before `{` |
+| R15 | No space between `section` keyword and name |
+| R16 | Space before `{` |
+| R17 | Comma-space between array elements |
+
+### Robustness guarantee
+
+If the input file has any syntax error (`node.hasError` is true on the root),
+the printer returns `options.originalText` unchanged.  Files with errors are
+never reformatted or corrupted.  Individual grammar fields that are absent
+(e.g. due to a grammar/printer version mismatch) raise a descriptive error via
+the `safeField()` helper rather than crashing with a null-pointer message.

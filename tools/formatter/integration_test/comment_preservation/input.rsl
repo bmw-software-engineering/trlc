@@ -1,0 +1,13 @@
+package TestPkg
+
+// A type with comments at block level and inside declarations
+type Requirement {
+// description field comment
+description String
+}
+
+/* Block comment between declarations */
+
+type AssumedReq {
+name String
+}

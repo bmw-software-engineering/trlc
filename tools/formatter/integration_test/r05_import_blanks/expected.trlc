@@ -1,0 +1,10 @@
+package Kitchen
+
+import ApplianceRequirements
+import PlatformRequirements
+import ReqSpec
+
+ReqSpec.FeatReq SupportForScheduledBrewing {
+    version = 1
+    safety = ReqSpec.Asil.B
+}
