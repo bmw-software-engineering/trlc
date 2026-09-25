@@ -46,6 +46,9 @@ generated in the following situations:
   `import` may name a nested package or use a wildcard, with the same
   diagnostics as `.rsl`/`.trlc` files.
 
+* [TRLC] Fix a crash when a markdown (`.trlc.md`) file contains an
+  `import` statement.
+
 * [TRLC] Fix `--verify` crashing with a `KeyError` in the CVC5 backend
   when a `checks` block dereferences a record field whose type has an
   enum or tuple component that was not otherwise referenced first.
