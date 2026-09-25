@@ -36,30 +36,10 @@ generated in the following situations:
   Supports comma, `<br>`, and newline separation, and all LRM separator
   kinds (`@`, `:`, `;`, identifier). Bracket notation is not supported.
 
-* [LRM, TRLC] Add support for nested (dotted) packages, e.g. `package
-  com.bigcorp.safety`, and for wildcard imports (`import foo.*`) that
-  bring an entire package subtree into scope. Every prefix package must
-  be declared before a nested package using it can be declared, and the
-  `unused_imports` lint check now also flags a wildcard import that is
-  unused, redundant with an existing explicit import, or equivalent to
-  a plain import because the target package has no sub-packages. See
-  the [Subpackages tutorial](documentation/TUTORIAL-PACKAGE.md#subpackages)
-  for more detail. For example:
-
-  ```
-  package com.bigcorp.safety
-
-  enum ASIL_Level { QM A B C D }
-  ```
-
-  ```
-  package com.bigcorp.brakes
-  import com.bigcorp.safety.*
-
-  type Brake_Requirement {
-    level com.bigcorp.safety.ASIL_Level
-  }
-  ```
+* [LRM, TRLC] Add support for nested (dotted) packages, e.g.
+  `import package com.bigcorp.safety` or `import foo.*`.
+  See the [Subpackages Tutorial](documentation/TUTORIAL-PACKAGE.md#subpackages)
+  for more detail.
 
 * [TRLC] Markdown (`.trlc.md`) files now share the TRLC preamble
   grammar: the `# PackageName` heading may name a nested package and
