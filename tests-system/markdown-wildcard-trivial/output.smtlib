@@ -1,0 +1,4 @@
+import foo.*
+       ^ markdown-wildcard-trivial/requirements.trlc.md:3: issue: wildcard import foo.* is equivalent to import foo since foo has no sub-packages [unused_imports]
+       | Consider replacing with: import foo
+Processed 1 model and 1 requirement file and found 1 warning

@@ -67,12 +67,23 @@ generated in the following situations:
   invalid character in the second segment of `# ns.1bad` now points at
   that character instead of the start of the heading).
 
+* [TRLC] Fix a markdown (`.trlc.md`) `type` property being wrongly
+  qualified with a single plain `import`ed package even when the type
+  is actually declared in the file's own package. The file's own
+  package is now checked first, and the import is only used as a
+  fallback.
+
 * [TRLC] Fix `--verify` crashing with a `KeyError` in the CVC5 backend
   when a `checks` block dereferences a record field whose type has an
   enum or tuple component that was not otherwise referenced first.
   This could happen when a tuple or enumeration type is first referenced while
   translating a  quantifier body (e.g. `forall` over an array whose element is
   a tuple with a union-record-typed or abstract-record-typed item field).
+
+* [TRLC] Fix markdown (`.trlc.md`) field values not being recognised as a
+  string or a tuple-reference array when the field is inherited from a
+  parent record type (e.g. via `extends`) instead of being declared
+  directly on the record's own type.
 
 ### 3.0.1
 

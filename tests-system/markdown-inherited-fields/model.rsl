@@ -1,0 +1,19 @@
+package inherit_test
+
+type Base_Req {
+  description String
+}
+
+tuple Ref {
+  item      Base_Req
+  separator @
+  version   Integer
+}
+
+type Mid_Req extends Base_Req {
+  refs Ref [1 .. *]
+}
+
+type Child_Req extends Mid_Req {
+  note String
+}

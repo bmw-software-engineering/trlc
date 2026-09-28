@@ -1,0 +1,16 @@
+{
+  "Anchor": {
+    "description": "anchor"
+  },
+  "Derived": {
+    "description": "single_word",
+    "note": "Extra note field declared directly on Child_Req.",
+    "refs": [
+      {
+        "item": "inherit_test.Anchor",
+        "version": 1
+      }
+    ]
+  }
+}
+Processed 1 model and 1 requirement file and found no issues
