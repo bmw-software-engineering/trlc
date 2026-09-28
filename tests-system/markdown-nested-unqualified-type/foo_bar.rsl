@@ -1,0 +1,22 @@
+package foo.bar
+
+enum Color {
+  RED
+  GREEN
+}
+
+type Item {
+  x String
+}
+
+tuple Ref {
+  item      Item
+  separator @
+  version   Integer
+}
+
+type T {
+  x    String
+  c    optional Color
+  refs optional Ref [1 .. *]
+}

@@ -1,0 +1,23 @@
+{
+  "Obj": {
+    "c": "GREEN",
+    "refs": [
+      {
+        "item": "foo.bar.it1",
+        "version": 1
+      },
+      {
+        "item": "foo.bar.it2",
+        "version": 2
+      }
+    ],
+    "x": "hi"
+  },
+  "it1": {
+    "x": "i1"
+  },
+  "it2": {
+    "x": "i2"
+  }
+}
+Processed 2 models and 2 requirement files and found no issues

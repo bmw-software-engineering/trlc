@@ -1,0 +1,5 @@
+package foo.bar
+
+type T {
+  x String
+}

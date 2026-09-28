@@ -1,0 +1,3 @@
+markdown-nested-unimported/requirements.trlc.md:6:1: error: package must be imported before use
+| add 'import foo.bar' to the preamble of this file
+Processed 2 models and 1 requirement file and found 1 error

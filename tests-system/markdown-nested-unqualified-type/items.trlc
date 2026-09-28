@@ -1,0 +1,9 @@
+package foo.bar
+
+Item it1 {
+  x = "i1"
+}
+
+Item it2 {
+  x = "i2"
+}
