@@ -36,8 +36,7 @@ generated in the following situations:
   Supports comma, `<br>`, and newline separation, and all LRM separator
   kinds (`@`, `:`, `;`, identifier). Bracket notation is not supported.
 
-* [LRM, TRLC] Add support for nested (dotted) packages, e.g.
-  `package com.bigcorp.safety`, and wildcard imports such as `import foo.*`.
+* [LRM, TRLC] Add support for nested package hierarchies and wildcard imports.
   See the [Subpackages Tutorial](documentation/TUTORIAL-PACKAGE.md#subpackages)
   for more detail.
 
