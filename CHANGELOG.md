@@ -37,7 +37,7 @@ generated in the following situations:
   kinds (`@`, `:`, `;`, identifier). Bracket notation is not supported.
 
 * [LRM, TRLC] Add support for nested (dotted) packages, e.g.
-  `import package com.bigcorp.safety` or `import foo.*`.
+  `package com.bigcorp.safety`, and wildcard imports such as `import foo.*`.
   See the [Subpackages Tutorial](documentation/TUTORIAL-PACKAGE.md#subpackages)
   for more detail.
 
