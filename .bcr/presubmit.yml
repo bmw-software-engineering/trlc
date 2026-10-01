@@ -18,8 +18,6 @@ tasks:
     name: "Verify api-examples"
     platform: ${{ platform }}
     bazel: ${{ bazel }}
-    build_targets:
-    - "@trlc//api-examples/..."
     test_flags:
     - "--@@rules_python+//python/config_settings:python_version=3.12"
     test_targets:

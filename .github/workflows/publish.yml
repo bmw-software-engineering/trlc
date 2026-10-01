@@ -34,6 +34,8 @@ jobs:
       draft: false
       attest: true
       tag_prefix: "trlc-"
+      author_name: "bmw-software-engineering-bot"
+      author_email: "296796306+bmw-software-engineering-bot@users.noreply.github.com"
     permissions:
       contents: write
       id-token: write
