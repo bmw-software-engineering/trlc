@@ -210,3 +210,19 @@ Would discover trlc files in `global` and analyse their dependencies
 and then only pull in the files that are required to understand
 `myfile.trlc`. This can massively improve performance, if the
 interconnections between the packages are not too dense.
+
+## Excludes
+
+Sometimes a repository contains files or directories that must not be
+processed at all, for example a folder with a known copy of
+requirements that intentionally duplicates IDs from elsewhere. The
+`--exclude` switch can be used to skip such files or directories:
+
+```bash
+$ trlc --exclude requirements/archive --show-file-list requirements
+```
+
+Anything under an excluded directory is skipped as well. The switch
+can be specified more than once to exclude several files or
+directories. Use `--show-file-list` to verify which files remain in
+scope after applying exclusions.

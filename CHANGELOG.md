@@ -27,6 +27,10 @@ generated in the following situations:
 
 ### 3.1.1-dev
 
+* [TRLC] Add a `--exclude PATH` command line option to skip specific
+  files or directories from processing. Can be specified more than
+  once; anything under an excluded directory is skipped as well.
+
 
 ### 3.1.0
 
