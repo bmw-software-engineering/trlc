@@ -7,6 +7,12 @@ py_test(
 )
 
 py_test(
+    name = "test_exclude",
+    srcs = ["test_exclude.py"],
+    deps = ["//trlc"],
+)
+
+py_test(
     name = "test_lexer",
     srcs = ["test_lexer.py"],
     deps = ["//trlc"],
@@ -34,6 +40,7 @@ test_suite(
     name = "unit_tests",
     tests = [
         ":test_ast_bysection",
+        ":test_exclude",
         ":test_lexer",
         ":test_lexer_base",
         ":test_lexer_md",

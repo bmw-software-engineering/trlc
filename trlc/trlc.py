@@ -110,6 +110,7 @@ class Source_Manager:
         self.error_recovery = error_recovery
 
         self.exclude_patterns = []
+        self.excluded_paths = set()
         self.common_root = None
 
         self.progress_current = 0
@@ -186,6 +187,33 @@ class Source_Manager:
             lexer=lexer,
         )
 
+    def exclude_path(self, path_name):
+        """Exclude a file or directory from processing.
+
+        Anything under an excluded directory is skipped as well.
+
+        :param path_name: name of the file or directory to exclude
+        :type path_name: str
+        """
+        if not isinstance(path_name, str):
+            raise TypeError("path_name must be a string")
+        self.excluded_paths.add(os.path.normpath(os.path.abspath(path_name)))
+
+    def is_path_excluded(self, path_name):
+        """Check if a file or directory was excluded.
+
+        :param path_name: name of the file or directory to check
+        :type path_name: str
+        :rtype: bool
+        """
+        if not isinstance(path_name, str):
+            raise TypeError("path_name must be a string")
+        abs_path = os.path.normpath(os.path.abspath(path_name))
+        return any(
+            abs_path == excluded or abs_path.startswith(excluded + os.sep)
+            for excluded in self.excluded_paths
+        )
+
     def register_include(self, dir_name):
         """Make contents of a directory available for automatic inclusion
 
@@ -202,6 +230,8 @@ class Source_Manager:
                     if exclude_pattern.match(dirname):
                         keep = False
                         break
+                if keep and self.is_path_excluded(os.path.join(path, dirname)):
+                    keep = False
                 if not keep:
                     del dirs[n]
 
@@ -212,6 +242,7 @@ class Source_Manager:
                         os.path.join(path, file_name)
                         for file_name in files
                         if os.path.splitext(file_name)[1] in (".rsl", ".trlc")
+                        and not self.is_path_excluded(os.path.join(path, file_name))
                     )
                 }
             )
@@ -284,15 +315,20 @@ class Source_Manager:
                     if exclude_pattern.match(dirname):
                         keep = False
                         break
+                if keep and self.is_path_excluded(os.path.join(path, dirname)):
+                    keep = False
                 if not keep:
                     del dirs[n]
 
             for file_name in sorted(files):
+                full_name = os.path.join(path, file_name)
+                if self.is_path_excluded(full_name):
+                    continue
                 if os.path.splitext(file_name)[1] in (
                     ".rsl",
                     ".trlc",
                 ) or file_name.endswith(MARKDOWN_EXTENSION):
-                    ok &= self.register_file(os.path.join(path, file_name))
+                    ok &= self.register_file(full_name)
         return ok
 
     def register_rsl_file(self, file_name, file_content=None, primary=True):
@@ -811,6 +847,18 @@ def trlc():
         ),
         default=[],
     )
+    og_input.add_argument(
+        "--exclude",
+        action="append",
+        dest="exclude_items",
+        metavar="PATH",
+        help=(
+            "Exclude a file or directory from processing."
+            " Anything under an excluded directory is skipped"
+            " as well. Can be specified more than once."
+        ),
+        default=[],
+    )
 
     og_output = ap.add_argument_group("output options")
     og_output.add_argument(
@@ -939,6 +987,13 @@ def trlc():
     if not options.include_bazel_dirs:  # pragma: no cover
         sm.exclude_patterns.append(re.compile("^bazel-.*$"))
 
+    # Process excludes
+    for path_name in options.exclude_items:
+        if not (os.path.isdir(path_name) or os.path.isfile(path_name)):
+            ap.error("exclude path %s is not a file or directory" % path_name)
+    for path_name in options.exclude_items:
+        sm.exclude_path(path_name)
+
     # Process includes
     ok = True
     for path_name in options.include_dirs:
@@ -956,6 +1011,8 @@ def trlc():
             ap.error("%s is not a file or directory" % path_name)
     if options.items:
         for path_name in options.items:
+            if sm.is_path_excluded(path_name):
+                continue
             if os.path.isdir(path_name):
                 ok &= sm.register_directory(path_name)
             else:  # pragma: no cover
