@@ -226,3 +226,13 @@ Anything under an excluded directory is skipped as well. The switch
 can be specified more than once to exclude several files or
 directories. Use `--show-file-list` to verify which files remain in
 scope after applying exclusions.
+
+For many exclusions, list them in a text file, one path per line
+(empty lines and lines starting with `#` are ignored), and pass it
+with `--exclude-from-file`:
+
+```bash
+$ trlc --exclude-from-file excludes.txt requirements
+```
+
+Paths are relative to the directory where `trlc` is run.
