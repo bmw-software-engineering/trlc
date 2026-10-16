@@ -25,7 +25,7 @@ generated in the following situations:
 ## Changelog
 
 
-### 3.1.1-dev
+### 3.1.1
 
 * [TRLC] Add `--exclude PATH` and `--exclude-from-file FILE` command line
   options to skip specific files or directories from processing.
