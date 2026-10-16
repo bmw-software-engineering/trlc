@@ -57,3 +57,12 @@ jobs:
         env:
           TAG: ${{ inputs.tag_name || github.ref_name }}
           GH_TOKEN: ${{ github.token }}
+
+  pypi:
+    needs: finalize
+    uses: ./.github/workflows/package.yml
+    with:
+      tag_name: ${{ inputs.tag_name || github.ref_name }}
+    permissions:
+      id-token: write
+      contents: read
