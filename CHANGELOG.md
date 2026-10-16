@@ -27,6 +27,13 @@ generated in the following situations:
 
 ### 3.1.1-dev
 
+* [TRLC] Add `--exclude PATH` and `--exclude-from-file FILE` command line
+  options to skip specific files or directories from processing.
+  `--exclude` takes a single path; `--exclude-from-file` reads paths from a
+  text file, one per line (empty lines and lines starting with `#` are
+  ignored). Both can be specified more than once and combined; anything
+  under an excluded directory is skipped as well.
+
 
 ### 3.1.0
 
