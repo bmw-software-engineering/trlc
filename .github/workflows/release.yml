@@ -51,18 +51,16 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+      actions: write
     steps:
       - name: Publish draft release
         run: gh release edit "$TAG" --draft=false --repo "$GITHUB_REPOSITORY"
         env:
           TAG: ${{ inputs.tag_name || github.ref_name }}
           GH_TOKEN: ${{ github.token }}
-
-  pypi:
-    needs: finalize
-    uses: ./.github/workflows/package.yml
-    with:
-      tag_name: ${{ inputs.tag_name || github.ref_name }}
-    permissions:
-      id-token: write
-      contents: read
+      # GITHUB_TOKEN-created release events start no workflows, but dispatches do.
+      - name: Trigger PyPI publish
+        run: gh workflow run package.yml --ref "$TAG" --repo "$GITHUB_REPOSITORY"
+        env:
+          TAG: ${{ inputs.tag_name || github.ref_name }}
+          GH_TOKEN: ${{ github.token }}

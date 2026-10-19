@@ -14,9 +14,12 @@ Releases are automated through GitHub Actions:
 3. Workflow [`publish.yml`](../.github/workflows/publish.yml) opens a Bazel Central
    Registry PR through
    [publish-to-bcr](https://github.com/bazel-contrib/publish-to-bcr).
-4. After BCR publish succeeds, the release is finalized (published),
-   which triggers [`package.yml`](../.github/workflows/package.yml) to publish wheels to
-   PyPI.
+4. After BCR publish succeeds, the release is finalized (published).
+5. `release.yml` then dispatches [`package.yml`](../.github/workflows/package.yml)
+   on the release tag to publish wheels to PyPI. (The `GITHUB_TOKEN` used to
+   finalize does not trigger a `release: published` event, so the dispatch is
+   explicit. `package.yml` must stay a top-level workflow: PyPI Trusted
+   Publishing does not support reusable workflows.)
 
 ## Required Repository Secret
 
