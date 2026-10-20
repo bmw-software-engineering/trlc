@@ -1,0 +1,26 @@
+package Test
+
+type Empty {
+}
+
+tuple Link {
+  source Empty
+  target Empty
+}
+
+type Link_Pair {
+  first  Link
+  second Link
+}
+
+type Link_Array {
+  links Link [2 .. *]
+}
+
+checks Link_Pair {
+  first != second, "first and second must be different links"
+}
+
+checks Link_Array {
+  links[0] != links[1], "first two links must be different"
+}

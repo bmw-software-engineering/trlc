@@ -1,0 +1,9 @@
+Empty_Pair empty_pair_bad {
+           ^^^^^^^^^^^^^^ record-equality-identity/test.trlc:23: check error: first and second must be different objects
+Frozen_Pair frozen_pair_bad {
+            ^^^^^^^^^^^^^^^ record-equality-identity/test.trlc:53: check error: first and second must be different objects
+Mixed_Pair mixed_pair_bad {
+           ^^^^^^^^^^^^^^ record-equality-identity/test.trlc:33: check error: base and ext must be different objects
+Same_Pair same_pair_bad {
+          ^^^^^^^^^^^^^ record-equality-identity/test.trlc:43: check error: base and ext must be the same object
+Processed 1 model and 1 requirement file and found 4 errors

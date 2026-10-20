@@ -1,0 +1,37 @@
+package Test
+
+Base b1 {
+  level = 1
+}
+
+Leaf l1 {
+  level = 2
+  mid = 3
+  detail = 4
+}
+
+Leaf l2 {
+  level = 5
+  mid = 6
+  detail = 7
+}
+
+Eq_Req eq_ok {
+  base_ref = l1
+  leaf_ref = l1
+}
+
+Eq_Req eq_bad {
+  base_ref = b1
+  leaf_ref = l2
+}
+
+Neq_Req neq_ok {
+  base_ref = b1
+  leaf_ref = l1
+}
+
+Neq_Req neq_bad {
+  base_ref = l1
+  leaf_ref = l1
+}

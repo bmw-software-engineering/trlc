@@ -1,0 +1,25 @@
+package Test
+
+Empty_A a1 {
+}
+
+Empty_A a2 {
+}
+
+Empty_B b1 {
+}
+
+Req same_type_ok {
+  left  = a1
+  right = a2
+}
+
+Req same_type_bad {
+  left  = a1
+  right = a1
+}
+
+Req other_type_ok {
+  left  = a1
+  right = b1
+}

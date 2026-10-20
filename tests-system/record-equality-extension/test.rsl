@@ -1,0 +1,33 @@
+package Test
+
+type Base {
+  level Integer
+}
+
+type Mid extends Base {
+  mid Integer
+}
+
+type Leaf extends Mid {
+  detail Integer
+}
+
+type Eq_Req {
+  base_ref Base
+  leaf_ref Leaf
+}
+
+type Neq_Req {
+  base_ref Base
+  leaf_ref Leaf
+}
+
+checks Eq_Req {
+  base_ref == leaf_ref, "base_ref must equal leaf_ref"
+  leaf_ref == base_ref, "leaf_ref must equal base_ref"
+}
+
+checks Neq_Req {
+  base_ref != leaf_ref, "base_ref must differ from leaf_ref"
+  leaf_ref != base_ref, "leaf_ref must differ from base_ref"
+}

@@ -1,0 +1,5 @@
+Link_Array array_bad {
+           ^^^^^^^^^ tuple-equality-record-identity/test.trlc:26: check error: first two links must be different
+Link_Pair pair_bad {
+          ^^^^^^^^ tuple-equality-record-identity/test.trlc:17: check error: first and second must be different links
+Processed 1 model and 1 requirement file and found 2 errors

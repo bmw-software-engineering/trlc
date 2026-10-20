@@ -1,0 +1,5 @@
+array-membership-record-identity/test.trlc:27:12: trlc check error: probe must be one of the items
+array-membership-record-identity/test.trlc:47:16: trlc check error: probe must not be one of the items
+array-membership-record-identity/test.trlc:17:8: trlc check error: probe must be one of the items
+array-membership-record-identity/test.trlc:37:12: trlc check error: probe must not be one of the items
+Processed 1 model and 1 requirement file and found 4 errors

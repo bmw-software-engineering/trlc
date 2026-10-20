@@ -1,0 +1,5 @@
+record-equality-identity/test.trlc:23:12: trlc check error: first and second must be different objects
+record-equality-identity/test.trlc:53:13: trlc check error: first and second must be different objects
+record-equality-identity/test.trlc:33:12: trlc check error: base and ext must be different objects
+record-equality-identity/test.trlc:43:11: trlc check error: base and ext must be the same object
+Processed 1 model and 1 requirement file and found 4 errors

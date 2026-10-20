@@ -1,0 +1,50 @@
+package Test
+
+Empty e1 {
+}
+
+Empty e2 {
+}
+
+Empty_Ext x1 {
+}
+
+Member member_ok {
+  items = [e1, e2]
+  probe = e2
+}
+
+Member member_bad {
+  items = [e1]
+  probe = e2
+}
+
+Ext_Member ext_member_ok {
+  items = [e1, x1]
+  probe = x1
+}
+
+Ext_Member ext_member_bad {
+  items = [e1, e2]
+  probe = x1
+}
+
+Non_Member non_member_ok {
+  items = [e1]
+  probe = e2
+}
+
+Non_Member non_member_bad {
+  items = [e1]
+  probe = e1
+}
+
+Ext_Non_Member ext_non_member_ok {
+  items = [e1]
+  probe = x1
+}
+
+Ext_Non_Member ext_non_member_bad {
+  items = [e1, x1]
+  probe = x1
+}

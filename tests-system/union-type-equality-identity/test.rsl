@@ -1,0 +1,16 @@
+package Test
+
+type Empty_A {
+}
+
+type Empty_B {
+}
+
+type Req {
+  left  [Empty_A, Empty_B]
+  right [Empty_A, Empty_B]
+}
+
+checks Req {
+  left != right, "left and right must be different objects"
+}

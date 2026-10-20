@@ -1,0 +1,19 @@
+package Test
+
+Base b1 {
+  level = 1
+}
+
+Leaf l1 {
+  level = 2
+  detail = 3
+}
+
+Req r1 {
+  a = b1
+  b = l1
+}
+
+Req r2 {
+  a = l1
+}

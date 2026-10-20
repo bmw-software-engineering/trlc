@@ -1,0 +1,3 @@
+base_ref == other_ref, "unrelated record types are a type error"
+         ^^ record-equality-unrelated/test.rsl:17: error: type mismatch: Base and Other do not match
+Processed 1 model and 0 requirement files and found 1 error

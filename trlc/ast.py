@@ -63,7 +63,7 @@ class Value:
 
     :attribute value: the value or None (for null values)
     :type: str, int, bool, fractions.Fraction, list[Value], \
-    Record_Reference, Enumeration_Literal_Spec
+    Record_Object, Enumeration_Literal_Spec
 
     :attribute typ: type of the value (or None for null values)
     :type: Type
@@ -80,7 +80,7 @@ class Value:
                 list,  # for arrays
                 dict,  # for tuples
                 Fraction,
-                Record_Reference,
+                Record_Object,
                 Enumeration_Literal_Spec,
             ),
         )
@@ -92,16 +92,16 @@ class Value:
         self.typ = typ
 
     def __eq__(self, other):
+        # lobster-trace: LRM.Equality_On_Record_References
+        if isinstance(self.value, Record_Object) or isinstance(
+            other.value, Record_Object
+        ):
+            # typ is the static type of the reference, not of the object
+            return self.value is other.value
         return self.typ == other.typ and self.value == other.value
 
     def __repr__(self):  # pragma: no cover
         return "Value(%s)" % self.value
-
-    def resolve_references(self, mh):
-        assert isinstance(mh, Message_Handler)
-
-        if isinstance(self.value, Record_Reference):
-            self.value.resolve(mh)
 
 
 ##############################################################################
@@ -1247,7 +1247,7 @@ class Record_Reference(Expression):
         assert isinstance(mh, Message_Handler)
         assert context is None or isinstance(context, dict)
         assert gstab is None or isinstance(gstab, Symbol_Table)
-        return Value(self.location, copy(self.target.field), self.typ)
+        return Value(self.location, self.target, self.typ)
 
     def resolve_references(self, mh):
         # lobster-trace: LRM.References_To_Extensions
@@ -1572,6 +1572,7 @@ class Binary_Expression(Expression):
             self.n_rhs.ensure_type(mh, Builtin_Boolean)
 
         elif operator in (Binary_Operator.COMP_EQ, Binary_Operator.COMP_NEQ):
+            # lobster-trace: LRM.Equality_Domain
             # lobster-trace: LRM.Union_Type_Equality
             # lobster-trace: LRM.Union_Type_Equality_Domain
             if (self.n_lhs.typ is None) or (self.n_rhs.typ is None):
@@ -1615,9 +1616,19 @@ class Binary_Expression(Expression):
                             "type mismatch: %s and %s do not match"
                             % (self.n_lhs.typ.name, self.n_rhs.typ.name),
                         )
-            elif self.n_lhs.typ != self.n_rhs.typ:
+            elif not (
+                self.n_lhs.typ == self.n_rhs.typ
+                or (
+                    isinstance(self.n_lhs.typ, Record_Type)
+                    and isinstance(self.n_rhs.typ, Record_Type)
+                    and (
+                        self.n_lhs.typ.is_subclass_of(self.n_rhs.typ)
+                        or self.n_rhs.typ.is_subclass_of(self.n_lhs.typ)
+                    )
+                )
+            ):
                 # Otherwise we can compare anything, as long as the
-                # types match
+                # types match or are related record extensions
                 mh.error(
                     self.location,
                     "type mismatch: %s and %s do not match"
@@ -1733,6 +1744,8 @@ class Binary_Expression(Expression):
     def evaluate(self, mh, context, gstab):
         # lobster-trace: LRM.Null_Equivalence
         # lobster-trace: LRM.Null_Is_Invalid
+        # lobster-trace: LRM.Equality_On_Record_References
+        # lobster-trace: LRM.Array_Membership_Semantics
         # lobster-trace: LRM.Signature_String_End_Functions
         # lobster-trace: LRM.Signature_Matches
         # lobster-trace: LRM.Startswith_Semantics
@@ -2040,6 +2053,8 @@ class Field_Access_Expression(Expression):
 
         # lobster-trace: LRM.Union_Type_Partial_Field_Access
         # lobster-trace: LRM.Union_Type_Partial_Field_Null
+        if isinstance(v_prefix, Record_Object):
+            v_prefix = v_prefix.field
         if self.n_field.name not in v_prefix:
             return Value(self.location, None, None)
 

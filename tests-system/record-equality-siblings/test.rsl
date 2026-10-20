@@ -1,0 +1,22 @@
+package Test
+
+type Base {
+  level Integer
+}
+
+type Left extends Base {
+  left Integer
+}
+
+type Right extends Base {
+  right Integer
+}
+
+type Req {
+  left_ref Left
+  right_ref Right
+}
+
+checks Req {
+  left_ref != right_ref, "sibling extensions are a type error"
+}
