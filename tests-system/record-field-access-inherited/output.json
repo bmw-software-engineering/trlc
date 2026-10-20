@@ -1,0 +1,9 @@
+ref = l_bad
+      ^^^^^ record-field-access-inherited/test.trlc:22: check error: level too low
+ref = l_bad
+      ^^^^^ record-field-access-inherited/test.trlc:22: check error: extra is negative
+ref = l_bad
+      ^^^^^ record-field-access-inherited/test.trlc:22: check error: detail is negative
+ref = l_bad
+      ^^^^^ record-field-access-inherited/test.trlc:22: check error: note is negative
+Processed 1 model and 1 requirement file and found 4 errors

@@ -1,0 +1,5 @@
+ids = [l_ok@1, l_low@1, l_neg@1]
+      ^ record-field-access-inherited-tuple/test.trlc:27: check error: level too low
+ids = [l_ok@1, l_low@1, l_neg@1]
+      ^ record-field-access-inherited-tuple/test.trlc:27: check error: rank is negative
+Processed 1 model and 1 requirement file and found 2 errors

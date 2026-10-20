@@ -1,0 +1,5 @@
+package PkgBase
+
+type Base {
+  level Integer
+}

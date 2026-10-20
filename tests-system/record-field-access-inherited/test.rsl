@@ -1,0 +1,26 @@
+package Test
+
+type Base {
+  level Integer
+  note  optional Integer
+}
+
+type Mid extends Base {
+  extra Integer
+}
+
+type Leaf extends Mid {
+  detail Integer
+}
+
+type Req {
+  ref Leaf
+  min Integer
+}
+
+checks Req {
+  ref.level >= min, error "level too low", ref
+  ref.extra >= 0, error "extra is negative", ref
+  ref.detail >= 0, error "detail is negative", ref
+  ref.note == null or ref.note >= 0, error "note is negative", ref
+}

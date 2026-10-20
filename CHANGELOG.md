@@ -25,6 +25,15 @@ generated in the following situations:
 ## Changelog
 
 
+### 3.1.2-dev
+
+* [TRLC] Fix `expected expression of type X, got Y instead` when accessing a
+  component inherited from a parent record through a reference to an
+  extension of that record. For example `ref.level`, where `level` is
+  declared in `Base` and `ref` references a `Leaf` that extends `Base`
+  (directly or transitively).
+
+
 ### 3.1.1
 
 * [TRLC] Add `--exclude PATH` and `--exclude-from-file FILE` command line

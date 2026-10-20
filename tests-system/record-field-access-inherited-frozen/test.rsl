@@ -1,0 +1,19 @@
+package Test
+
+type Base {
+  kind  String
+  value Integer
+}
+
+type Leaf extends Base {
+  freeze kind = "leaf"
+}
+
+type Req {
+  ref Leaf
+}
+
+checks Req {
+  ref.kind == "leaf", error "kind is not leaf", ref
+  ref.kind == "other", error "kind is not other", ref
+}
