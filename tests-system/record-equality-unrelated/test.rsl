@@ -1,0 +1,18 @@
+package Test
+
+type Base {
+  level Integer
+}
+
+type Other {
+  level Integer
+}
+
+type Req {
+  base_ref Base
+  other_ref Other
+}
+
+checks Req {
+  base_ref == other_ref, "unrelated record types are a type error"
+}

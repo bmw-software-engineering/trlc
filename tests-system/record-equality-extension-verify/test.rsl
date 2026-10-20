@@ -1,0 +1,19 @@
+package Test
+
+type Base {
+  level Integer
+}
+
+type Leaf extends Base {
+  detail Integer
+}
+
+type Req {
+  a optional Base
+  b optional Leaf
+}
+
+checks Req {
+  a == null or b == null or a != b, "a and b must differ"
+  a == null or b == null or b != a, "b and a must differ"
+}

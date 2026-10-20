@@ -25,6 +25,15 @@ generated in the following situations:
 ## Changelog
 
 
+### 3.1.2-dev
+
+* [TRLC] Allow `==` and `!=` between a record reference and a reference
+  to a (transitive) extension of that record type, as required by the
+  LRM. Previously this was rejected with `type mismatch: Base and Leaf do
+  not match`. Unrelated record types, including sibling extensions of a
+  common parent, are still rejected.
+
+
 ### 3.1.1
 
 * [TRLC] Add `--exclude PATH` and `--exclude-from-file FILE` command line

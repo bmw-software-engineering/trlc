@@ -1572,6 +1572,7 @@ class Binary_Expression(Expression):
             self.n_rhs.ensure_type(mh, Builtin_Boolean)
 
         elif operator in (Binary_Operator.COMP_EQ, Binary_Operator.COMP_NEQ):
+            # lobster-trace: LRM.Equality_Domain
             # lobster-trace: LRM.Union_Type_Equality
             # lobster-trace: LRM.Union_Type_Equality_Domain
             if (self.n_lhs.typ is None) or (self.n_rhs.typ is None):
@@ -1615,9 +1616,19 @@ class Binary_Expression(Expression):
                             "type mismatch: %s and %s do not match"
                             % (self.n_lhs.typ.name, self.n_rhs.typ.name),
                         )
-            elif self.n_lhs.typ != self.n_rhs.typ:
+            elif not (
+                self.n_lhs.typ == self.n_rhs.typ
+                or (
+                    isinstance(self.n_lhs.typ, Record_Type)
+                    and isinstance(self.n_rhs.typ, Record_Type)
+                    and (
+                        self.n_lhs.typ.is_subclass_of(self.n_rhs.typ)
+                        or self.n_rhs.typ.is_subclass_of(self.n_lhs.typ)
+                    )
+                )
+            ):
                 # Otherwise we can compare anything, as long as the
-                # types match
+                # types match or are related record extensions
                 mh.error(
                     self.location,
                     "type mismatch: %s and %s do not match"

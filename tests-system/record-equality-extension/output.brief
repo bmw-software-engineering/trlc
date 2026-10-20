@@ -1,0 +1,5 @@
+record-equality-extension/test.trlc:24:8: trlc check error: base_ref must equal leaf_ref
+record-equality-extension/test.trlc:24:8: trlc check error: leaf_ref must equal base_ref
+record-equality-extension/test.trlc:34:9: trlc check error: base_ref must differ from leaf_ref
+record-equality-extension/test.trlc:34:9: trlc check error: leaf_ref must differ from base_ref
+Processed 1 model and 1 requirement file and found 4 errors

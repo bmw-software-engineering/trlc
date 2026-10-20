@@ -1,0 +1,9 @@
+Eq_Req eq_bad {
+       ^^^^^^ record-equality-extension/test.trlc:24: check error: base_ref must equal leaf_ref
+Eq_Req eq_bad {
+       ^^^^^^ record-equality-extension/test.trlc:24: check error: leaf_ref must equal base_ref
+Neq_Req neq_bad {
+        ^^^^^^^ record-equality-extension/test.trlc:34: check error: base_ref must differ from leaf_ref
+Neq_Req neq_bad {
+        ^^^^^^^ record-equality-extension/test.trlc:34: check error: leaf_ref must differ from base_ref
+Processed 1 model and 1 requirement file and found 4 errors
