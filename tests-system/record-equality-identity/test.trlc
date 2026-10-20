@@ -1,0 +1,56 @@
+package Test
+
+Empty e1 {
+}
+
+Empty e2 {
+}
+
+Empty_Ext x1 {
+}
+
+Frozen_Ext f1 {
+}
+
+Frozen_Ext f2 {
+}
+
+Empty_Pair empty_pair_ok {
+  first  = e1
+  second = e2
+}
+
+Empty_Pair empty_pair_bad {
+  first  = e1
+  second = e1
+}
+
+Mixed_Pair mixed_pair_ok {
+  base = e1
+  ext  = x1
+}
+
+Mixed_Pair mixed_pair_bad {
+  base = x1
+  ext  = x1
+}
+
+Same_Pair same_pair_ok {
+  base = x1
+  ext  = x1
+}
+
+Same_Pair same_pair_bad {
+  base = e1
+  ext  = x1
+}
+
+Frozen_Pair frozen_pair_ok {
+  first  = f1
+  second = f2
+}
+
+Frozen_Pair frozen_pair_bad {
+  first  = f1
+  second = f1
+}

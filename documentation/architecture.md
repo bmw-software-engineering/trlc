@@ -523,8 +523,8 @@ values).
 * `list` of `Value` (for `Array_Type`)
 * `dict` of `str` -> `Value` (for `Tuple_Aggregate`)
 * `fractions.Fraction` (for `Builtin_Decimal`)
-* `Record_Reference` (for `Record_Type` or `Union_Type`; i.e. we store
-  the reference itself not the object referred to)
+* `Record_Object` (for `Record_Type` or `Union_Type`; the referenced
+  object itself, so record values are compared by identity)
 * `Enumeration_Literal_Spec` (for `Enumeration_Type`)
 
 Evaluation itself is pretty simple, we just apply the relevant python
@@ -589,12 +589,11 @@ all types immediately.
 ### Union type field access evaluation
 
 When a `Field_Access_Expression` with `is_union_access=True` is
-evaluated, the prefix yields a `Value` whose `.value` is a
-`dict[str, Expression]` drawn from the concrete `Record_Object.field`
-of the referenced object. `Record_Object.field` is populated at parse
-time with `Implicit_Null` for every field declared by *that specific
-type*, so a field absent from the concrete type is simply not a key
-in the dict.
+evaluated, the prefix yields a `Value` whose `.value` is the
+referenced `Record_Object`. The field lookup uses
+`Record_Object.field`, which is populated at parse time with
+`Implicit_Null` for every field declared by *that specific type*, so a
+field absent from the concrete type is simply not a key in that dict.
 
 Two distinct null situations arise inside
 `Field_Access_Expression.evaluate`:

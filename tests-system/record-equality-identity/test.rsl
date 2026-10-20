@@ -1,0 +1,51 @@
+package Test
+
+type Empty {
+}
+
+type Empty_Ext extends Empty {
+}
+
+type Frozen_Base {
+  level Integer
+}
+
+type Frozen_Ext extends Frozen_Base {
+  freeze level = 1
+}
+
+type Empty_Pair {
+  first  Empty
+  second Empty
+}
+
+type Mixed_Pair {
+  base Empty
+  ext  Empty_Ext
+}
+
+type Same_Pair {
+  base Empty
+  ext  Empty_Ext
+}
+
+type Frozen_Pair {
+  first  Frozen_Ext
+  second Frozen_Ext
+}
+
+checks Empty_Pair {
+  first != second, "first and second must be different objects"
+}
+
+checks Mixed_Pair {
+  base != ext, "base and ext must be different objects"
+}
+
+checks Same_Pair {
+  base == ext, "base and ext must be the same object"
+}
+
+checks Frozen_Pair {
+  first != second, "first and second must be different objects"
+}

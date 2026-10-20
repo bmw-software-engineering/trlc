@@ -1,0 +1,43 @@
+package Test
+
+type Empty {
+}
+
+type Empty_Ext extends Empty {
+}
+
+type Member {
+  items Empty [1 .. *]
+  probe Empty
+}
+
+type Ext_Member {
+  items Empty [1 .. *]
+  probe Empty_Ext
+}
+
+type Non_Member {
+  items Empty [1 .. *]
+  probe Empty
+}
+
+type Ext_Non_Member {
+  items Empty [1 .. *]
+  probe Empty_Ext
+}
+
+checks Member {
+  probe in items, "probe must be one of the items"
+}
+
+checks Ext_Member {
+  probe in items, "probe must be one of the items"
+}
+
+checks Non_Member {
+  probe not in items, "probe must not be one of the items"
+}
+
+checks Ext_Non_Member {
+  probe not in items, "probe must not be one of the items"
+}

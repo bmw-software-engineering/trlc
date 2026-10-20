@@ -33,6 +33,13 @@ generated in the following situations:
   not match`. Unrelated record types, including sibling extensions of a
   common parent, are still rejected.
 
+* [TRLC, API] Compare record references by object identity, as required
+  by the LRM. Previously field values were compared, so distinct records
+  without components could be reported as equal, and a reference never
+  matched an array element declared as a parent record type.
+  `Record_Reference.evaluate()` now returns the `Record_Object`, and the
+  unused `Value.resolve_references()` was removed.
+
 
 ### 3.1.1
 

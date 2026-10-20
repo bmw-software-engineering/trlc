@@ -1,0 +1,9 @@
+Ext_Member ext_member_bad {
+           ^^^^^^^^^^^^^^ array-membership-record-identity/test.trlc:27: check error: probe must be one of the items
+Ext_Non_Member ext_non_member_bad {
+               ^^^^^^^^^^^^^^^^^^ array-membership-record-identity/test.trlc:47: check error: probe must not be one of the items
+Member member_bad {
+       ^^^^^^^^^^ array-membership-record-identity/test.trlc:17: check error: probe must be one of the items
+Non_Member non_member_bad {
+           ^^^^^^^^^^^^^^ array-membership-record-identity/test.trlc:37: check error: probe must not be one of the items
+Processed 1 model and 1 requirement file and found 4 errors

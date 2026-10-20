@@ -1,0 +1,28 @@
+package Test
+
+Empty e1 {
+}
+
+Empty e2 {
+}
+
+Empty e3 {
+}
+
+Link_Pair pair_ok {
+  first  = (e1, e2)
+  second = (e1, e3)
+}
+
+Link_Pair pair_bad {
+  first  = (e1, e2)
+  second = (e1, e2)
+}
+
+Link_Array array_ok {
+  links = [(e1, e2), (e1, e3)]
+}
+
+Link_Array array_bad {
+  links = [(e1, e2), (e1, e2)]
+}
