@@ -1,0 +1,5 @@
+record-field-access-inherited/test.trlc:22:9: trlc check error: level too low
+record-field-access-inherited/test.trlc:22:9: trlc check error: extra is negative
+record-field-access-inherited/test.trlc:22:9: trlc check error: detail is negative
+record-field-access-inherited/test.trlc:22:9: trlc check error: note is negative
+Processed 1 model and 1 requirement file and found 4 errors

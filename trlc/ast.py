@@ -2017,9 +2017,6 @@ class Field_Access_Expression(Expression):
         self.is_union_access = is_union_access
         self.is_universal = is_universal
 
-        if not is_union_access:
-            self.n_prefix.ensure_type(mh, self.n_field.member_of)
-
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature
         self.write_indent(indent, f"Field_Access ({self.n_field.name})")
