@@ -372,9 +372,13 @@ class MD_Lexer(TRLC_Lexer):
         """Return the declared type of *field_name*, or None."""
         if record_type_ast is None:
             return None
+        table = record_type_ast.components.table
         simple = trlc_ast.Symbol_Table.simplified_name(field_name)
-        component = record_type_ast.components.table.get(simple)
-        return component.n_typ if component is not None else None
+        for candidate in (field_name, simple):
+            component = table.get(candidate)
+            if component is not None:
+                return component.n_typ
+        return None
 
     @staticmethod
     def _is_tuple_array_field(record_type_ast, field_name):
@@ -389,6 +393,11 @@ class MD_Lexer(TRLC_Lexer):
         """Return True when *field_name* is declared as a plain String."""
         typ = MD_Lexer._get_field_type(record_type_ast, field_name)
         return typ is not None and isinstance(typ, trlc_ast.Builtin_String)
+
+    @staticmethod
+    def _is_declared_field(record_type_ast, field_name):
+        """Return True when *field_name* matches a component on *record_type_ast*."""
+        return MD_Lexer._get_field_type(record_type_ast, field_name) is not None
 
     def _emit_field_value(
         self, raw_value, location, record_type_ast=None, field_name=None
@@ -587,6 +596,7 @@ class MD_Lexer(TRLC_Lexer):
         """Normalize array value by converting various separators to comma format.
 
         Handles:
+        - markdown links (``[text](url)`` -> ``text``)
         - <br> tags (converted to newlines, then normalized)
         - Multiple spaces around @, :, ; separators (normalized to single space)
         - Identifier separators (multiple spaces collapsed to single space)
@@ -595,8 +605,8 @@ class MD_Lexer(TRLC_Lexer):
         Returns normalized string with tuple refs as
         ``"identifier <sep> integer, ..."``.
         """
-        # Replace <br> and <BR> tags with newlines for uniform processing
-        normalized = re.sub(r"<[Bb][Rr]\s*/?>", "\n", raw_value)
+        normalized = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", raw_value)
+        normalized = re.sub(r"<[Bb][Rr]\s*/?>", "\n", normalized)
 
         # Split on newlines and commas, trim each part
         parts = []
@@ -661,20 +671,45 @@ class MD_Lexer(TRLC_Lexer):
         Expected format (separator may be @, :, ;, or any identifier)::
 
           identifier[.identifier]* sep integer
+          identifier[.identifier]*
           [, identifier[.identifier]* sep integer]*
 
+        Within Markdown requirement docs, a value may also appear wrapped in a
+        markdown link, e.g. ``[req@7](doc.md#req)`` or ``[req](doc.md#req)``.
+        The link text is parsed as the reference and the URL target is ignored.
+
         When *allow_unqualified* is True, unqualified same-package references
-        (e.g. ``item @ 1``) are also accepted.  Only pass True when the field
-        type is confirmed as a tuple-reference array.
+        (e.g. ``item @ 1`` or ``item``) are also accepted. Only pass True when
+        the field type is confirmed as a tuple-reference array.
         """
         normalized = MD_Lexer._normalize_array_value(raw_value)
         parts = [p.strip() for p in normalized.split(",") if p.strip()]
-        pattern = (
-            MD_Lexer._TUPLE_REF_FLEXIBLE_RE
-            if allow_unqualified
-            else MD_Lexer._TUPLE_REF_RE
+        if not parts:
+            return False
+        return all(
+            MD_Lexer._matches_array_reference(part, allow_unqualified) for part in parts
         )
-        return bool(parts) and all(pattern.match(part) for part in parts)
+
+    @staticmethod
+    def _matches_array_reference(part, allow_unqualified=False):
+        """Return True when *part* is a reference, optionally versioned."""
+        candidate = part.strip()
+        if not candidate:
+            return False
+
+        qualified_ref = r"[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*"
+        ref_match = re.fullmatch(qualified_ref, candidate)
+        if ref_match is not None:
+            return allow_unqualified
+
+        versioned_ref = (
+            rf"(?P<ref>{qualified_ref})\s+(?P<sep>[@:;]|[a-zA-Z_]\w*)\s*"
+            rf"(?P<ver>\d+)"
+        )
+        match = re.fullmatch(versioned_ref, candidate)
+        if match is None:
+            return False
+        return allow_unqualified or "." in match.group("ref")
 
     @staticmethod
     def _looks_like_simple_tuple(raw_value):
@@ -860,16 +895,13 @@ class MD_Lexer(TRLC_Lexer):
         """Try to emit array tokens for tuple-reference format.
 
         When *allow_unqualified* is True, unqualified same-package references
-        (e.g. ``item @ 1``) are also accepted.  Only safe when the field type
-        is confirmed as a tuple-reference array (Phase 2 path).
+        (e.g. ``item @ 1`` or ``item``) are also accepted. Only safe when the
+        field type is confirmed as a tuple-reference array (Phase 2 path).
 
         Recognises values of the form::
 
           Package.item sep integer [, Package.item sep integer]*
-
-        The reference must be package-qualified (contain at least one dot)
-        so that plain free-text values (e.g. ``Revision : 12``) are never
-        misinterpreted as tuple-reference arrays.
+          item [sep integer]
 
         Returns True if array was emitted, False for STRING fallback.
         """
@@ -879,36 +911,42 @@ class MD_Lexer(TRLC_Lexer):
         normalized = self._normalize_array_value(raw_value)
         parts = [p.strip() for p in normalized.split(",")]
         self._emit(location, "S_BRA")
-        pattern = (
-            MD_Lexer._TUPLE_REF_FLEXIBLE_RE
-            if allow_unqualified
-            else MD_Lexer._TUPLE_REF_RE
-        )
 
         for idx, part in enumerate(parts):
             if idx > 0:
                 self._emit(location, "COMMA")
 
-            match = pattern.match(part)
-            if match:
-                qual_ident = match.group("ref")
-                sep = match.group("sep")
-                integer = int(match.group("ver"))
+            candidate = part.strip()
+            versioned_ref = re.fullmatch(
+                r"(?P<ref>[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)\s+"
+                r"(?P<sep>[@:;]|[a-zA-Z_]\w*)\s*(?P<ver>\d+)",
+                candidate,
+            )
+            if versioned_ref is not None:
+                qual_ident = versioned_ref.group("ref")
+                sep = versioned_ref.group("sep")
+                integer = int(versioned_ref.group("ver"))
 
-                # Emit qualified identifier (Pkg.item → IDENTIFIER DOT IDENTIFIER)
                 ident_parts = qual_ident.split(".")
                 for i, ident_part in enumerate(ident_parts):
                     self._emit(location, "IDENTIFIER", ident_part)
                     if i < len(ident_parts) - 1:
                         self._emit(location, "DOT")
 
-                # Emit separator: @→AT, :→COLON, ;→SEMICOLON, word→IDENTIFIER
                 sep_kind = MD_Lexer._SEPARATOR_PUNCTUATION.get(sep, "IDENTIFIER")
                 sep_val = sep if sep_kind == "IDENTIFIER" else None
                 self._emit(location, sep_kind, sep_val)
-
-                # Emit version integer
                 self._emit(location, "INTEGER", integer)
+                continue
+
+            bare_ref = re.fullmatch(r"[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*", candidate)
+            if bare_ref is not None:
+                ident_parts = candidate.split(".")
+                for i, ident_part in enumerate(ident_parts):
+                    self._emit(location, "IDENTIFIER", ident_part)
+                    if i < len(ident_parts) - 1:
+                        self._emit(location, "DOT")
+                continue
 
         self._emit(location, "S_KET")
         return True
@@ -1256,9 +1294,28 @@ class MD_Lexer(TRLC_Lexer):
                 open_section(_h_content, loc)
                 continue
 
-            # ── H3: record heading ───────────────────────────────────────
+            # ── H3: record heading or field heading within an open record ─
 
             if _h_level == 3:
+                if in_record and current_record_type_ast is not None:
+                    field_name = _h_content.strip()
+                    if self._is_declared_field(current_record_type_ast, field_name):
+                        # A heading-based property within an already-open record.
+                        # This supports the inline markdown form used for
+                        # tuple-array fields such as ``### derived_from``
+                        # followed by reference lines.
+                        flush_string_field()
+                        str_field_name = field_name
+                        self._validate_identifier(
+                            str_field_name, line_no, _h_level + 1, line
+                        )
+                        str_field_loc = loc
+                        str_field_lines = []
+                        str_field_first_content_line = None
+                        str_field_first_content_col = 1
+                        in_string_field = True
+                        continue
+
                 flush_record(loc)
                 pending_name = _h_content.strip()
                 # heading_prefix_len = level(3) + 1 space
