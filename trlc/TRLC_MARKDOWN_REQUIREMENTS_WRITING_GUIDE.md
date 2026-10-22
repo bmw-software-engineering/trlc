@@ -120,6 +120,9 @@ item_b @ 2
 // Mixed — qualified (cross-package) and unqualified (same-package) in one array
 ### refs
 item_a @ 1, OtherPkg.item_b @ 2
+
+// Markdown link text is accepted; the URL target is ignored.
+| derived_from | [req1@26](doc.md#req1), req2, [req3](ignored.md#req3) |
 ```
 
 All LRM separator kinds are supported: `@`, `:`, `;`, and plain identifier (e.g. `covers`).
@@ -131,6 +134,9 @@ All LRM separator kinds are supported: `@`, `:`, `;`, and plain identifier (e.g.
   - Use the qualified form when referencing an item from a **different package**.
   - Both forms can be mixed in the same array.
 - Do **not** use bracket notation `[...]` — it conflicts with Markdown URL syntax and produces an error.
+- An entry may be written as a Markdown link `[label](target)`. The label is parsed as the reference (for example `req1@26` or `req2`); the target is **ignored** in this version and is not checked.
+- The label must be a valid identifier, optionally followed by a separator and an integer version. An invalid entry (for example `[req 1](doc.md)`) is reported as an error.
+- A reference without a version (`req2`) is only valid if the tuple declares its version component as `optional`.
 
 ## Troubleshooting
 

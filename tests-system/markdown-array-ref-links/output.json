@@ -1,0 +1,55 @@
+{
+  "leaf_a": {
+    "description": "first leaf requirement"
+  },
+  "leaf_b": {
+    "description": "second leaf requirement"
+  },
+  "req_parent_heading": {
+    "derived_from": [
+      {
+        "item": "MdRefs.leaf_a",
+        "version": 26
+      },
+      {
+        "item": "MdRefs.leaf_b",
+        "version": null
+      }
+    ],
+    "description": "parent requirement heading form",
+    "some_other_array_field": [
+      {
+        "item": "MdRefs.leaf_a",
+        "version": 26
+      },
+      {
+        "item": "MdRefs.leaf_b",
+        "version": null
+      }
+    ]
+  },
+  "req_parent_table": {
+    "derived_from": [
+      {
+        "item": "MdRefs.leaf_a",
+        "version": 26
+      },
+      {
+        "item": "MdRefs.leaf_b",
+        "version": null
+      }
+    ],
+    "description": "parent requirement",
+    "some_other_array_field": [
+      {
+        "item": "MdRefs.leaf_a",
+        "version": 26
+      },
+      {
+        "item": "MdRefs.leaf_b",
+        "version": null
+      }
+    ]
+  }
+}
+Processed 1 model and 1 requirement file and found no issues
