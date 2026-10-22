@@ -223,6 +223,48 @@ class TestLexerMd(unittest.TestCase):
             "bracket notation for tuple-reference arrays is not supported",
         )
 
+    def test_markdown_requirement_reference_array(self):
+        _stab, record_type = make_record_type()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(
+            "[requ1@26](document.md#requ1), requ2@27, requ3@28, "
+            "[requ4@29](to-be-ignored.md#whatever), requ5, "
+            "[requ6](also-to-be-ignored.md#whatever), "
+            "[requ7](some totally unrelated string)",
+            Location("test"),
+            record_type,
+            "refs",
+        )
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("IDENTIFIER", "requ1"),
+                ("AT", None),
+                ("INTEGER", 26),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ2"),
+                ("AT", None),
+                ("INTEGER", 27),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ3"),
+                ("AT", None),
+                ("INTEGER", 28),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ4"),
+                ("AT", None),
+                ("INTEGER", 29),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ5"),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ6"),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ7"),
+                ("S_KET", None),
+            ],
+        )
+
     def test_type_aware_field_emission(self):
         _stab, record_type = make_record_type()
 
