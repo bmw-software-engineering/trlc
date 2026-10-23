@@ -25,6 +25,10 @@ generated in the following situations:
 ## Changelog
 
 
+### 3.1.2-dev
+
+
+
 ### 3.1.1
 
 * [TRLC] Add `--exclude PATH` and `--exclude-from-file FILE` command line
