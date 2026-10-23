@@ -1,0 +1,17 @@
+package MdRefs
+
+type Requirement_Leaf {
+  description String
+}
+
+tuple Derived_From_Trlc_Type {
+  item Requirement_Leaf
+  separator @
+  version optional Integer
+}
+
+type Requirement {
+  description String
+  derived_from optional Derived_From_Trlc_Type [0 .. *]
+  some_other_array_field optional Derived_From_Trlc_Type [0 .. *]
+}

@@ -125,6 +125,9 @@ item_b @ 2
 // Mixed — qualified (cross-package) and unqualified (same-package) in one array
 #### refs
 item_a @ 1, OtherPkg.item_b @ 2
+
+// Markdown link text is accepted; the URL target is ignored.
+| derived_from | [req1@26](doc.md#req1), req2, [req3](ignored.md#req3) |
 ```
 
 All LRM separator kinds are supported: `@`, `:`, `;`, and plain identifier (e.g. `covers`).
