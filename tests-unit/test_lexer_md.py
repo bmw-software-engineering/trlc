@@ -223,6 +223,48 @@ class TestLexerMd(unittest.TestCase):
             "bracket notation for tuple-reference arrays is not supported",
         )
 
+    def test_markdown_requirement_reference_array(self):
+        _stab, record_type = make_record_type()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(
+            "[requ1@26](document.md#requ1), requ2@27, requ3@28, "
+            "[requ4@29](to-be-ignored.md#whatever), requ5, "
+            "[requ6](also-to-be-ignored.md#whatever), "
+            "[requ7](some totally unrelated string)",
+            Location("test"),
+            record_type,
+            "refs",
+        )
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("IDENTIFIER", "requ1"),
+                ("AT", None),
+                ("INTEGER", 26),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ2"),
+                ("AT", None),
+                ("INTEGER", 27),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ3"),
+                ("AT", None),
+                ("INTEGER", 28),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ4"),
+                ("AT", None),
+                ("INTEGER", 29),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ5"),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ6"),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ7"),
+                ("S_KET", None),
+            ],
+        )
+
     def test_type_aware_field_emission(self):
         _stab, record_type = make_record_type()
 
@@ -358,6 +400,77 @@ class TestLexerMd(unittest.TestCase):
                 ("C_KET", None),
             ],
         )
+
+    def test_process_heading_based_tuple_array_fields(self):
+        content = "\n".join(
+            [
+                "# DemoPkg",
+                "",
+                "## Requirements",
+                "",
+                "### req_parent",
+                "| Property | Value |",
+                "|----------|-------|",
+                "| type | Requirement |",
+                "| description | parent requirement |",
+                "",
+                "### derived_from",
+                "[requ1@26](document.md#requ1)",
+                "requ2@27",
+                "requ3@28",
+                "[requ4@29](to-be-ignored.md#whatever)",
+                "requ5",
+                "[requ6](also-to-be-ignored.md#whatever)",
+                "[requ7](some totally unrelated string shall also be ignored in this first MVP)",
+                "",
+                "### some_other_array_field",
+                "requ1, requ2, requ3, [requ4@29](to-be-ignored.md#whatever), requ5, [requ6](also-to-be-ignored.md#whatever), [requ7](abcdef)",
+            ]
+        )
+
+        lexer = MD_Lexer(self.mh, "test.trlc.md", content)
+
+        stab = trlc_ast.Symbol_Table()
+        package = trlc_ast.Package("DemoPkg", Location("test"), stab, False)
+        record_type = trlc_ast.Record_Type(
+            "Requirement", None, Location("test"), package, None, False
+        )
+
+        for name in ("derived_from", "some_other_array_field"):
+            tuple_type = trlc_ast.Tuple_Type(
+                "TupleType", None, Location("test"), package
+            )
+            array_type = trlc_ast.Array_Type(
+                Location("test"),
+                tuple_type,
+                Location("test"),
+                0,
+                Location("test"),
+                None,
+            )
+            record_type.components.table[name] = trlc_ast.Composite_Component(
+                name,
+                None,
+                Location("test"),
+                record_type,
+                array_type,
+                False,
+            )
+
+        package.symbols.table[trlc_ast.Symbol_Table.simplified_name("Requirement")] = (
+            record_type
+        )
+        stab.table[trlc_ast.Symbol_Table.simplified_name(package.name)] = package
+
+        lexer.prepare_phase2(stab)
+        pairs = token_pairs(lexer)
+
+        self.assertIn(("IDENTIFIER", "derived_from"), pairs)
+        self.assertIn(("IDENTIFIER", "some_other_array_field"), pairs)
+        self.assertIn(("INTEGER", 26), pairs)
+        self.assertIn(("INTEGER", 27), pairs)
+        self.assertIn(("INTEGER", 29), pairs)
+        self.assertIn(("S_BRA", None), pairs)
 
     def test_preamble_nested_package_and_wildcard_import(self):
         # lobster-trace: LRM.Nested_Package_Names
