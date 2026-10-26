@@ -27,6 +27,14 @@ generated in the following situations:
 
 ### 3.1.2-dev
 
+* [BAZEL] `trlc_requirements_test` and `trlc_specification_test` accept an
+  `args` list with extra TRLC command-line arguments (for example
+  `--error-on-warnings`). Previously passing `args` failed because the
+  macros set it themselves.
+
+* [BAZEL] The default entry point and library of `trlc_requirements_test`
+  and `trlc_specification_test` are resolved relative to the TRLC module,
+  so a dependent module may import TRLC under a different repository name.
 
 
 ### 3.1.1
