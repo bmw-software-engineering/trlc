@@ -47,7 +47,7 @@ imported packages.
 
 ---
 
-### `trlc_requirements_test(name, reqs, srcs=…, main=…)`
+### `trlc_requirements_test(name, reqs, srcs=…, main=…, args=…)`
 
 Runs `trlc --verify`. The test passes when TRLC reports no errors.
 Pass a custom `srcs`/`main` to run your own Python script instead
@@ -59,14 +59,15 @@ of the built-in CLI (see [TUTORIAL-API.md](TUTORIAL-API.md)).
 | `reqs` | `trlc_requirements` targets to validate. |
 | `srcs` | Override the entry-point script (optional). |
 | `main` | Filename of the entry point (required when `srcs` is set). |
+| `args` | Extra command-line arguments, e.g. `["--error-on-warnings"]`; placed after `--verify` and before the requirement files (optional). |
 
 ---
 
-### `trlc_specification_test(name, reqs)`
+### `trlc_specification_test(name, reqs, args=…)`
 
 Like `trlc_requirements_test` but passes `--skip-trlc-files`. Use
 this to check the RSL schema is consistent before any `.trlc` data
-files exist.
+files exist. Accepts the same `args`.
 
 ---
 

@@ -1,0 +1,9 @@
+package Args
+
+type Requirement {
+    description String
+}
+
+checks Requirement {
+    len(description) > 0, "description must not be empty"
+}

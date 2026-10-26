@@ -19,14 +19,14 @@ _trlc_specification = rule(
 def trlc_specification(**kwargs):
     _trlc_specification(**kwargs)
 
-def trlc_specification_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc.py", **kwargs):
+def trlc_specification_test(name, reqs, srcs = [Label("//:trlc.py")], main = "trlc.py", args = [], **kwargs):
     native.py_test(
         name = name,
         srcs = srcs,
-        args = ["--verify", "--skip-trlc-files"] +
+        args = ["--verify", "--skip-trlc-files"] + args +
                ["$(locations %s)" % req for req in reqs],
         main = main,
-        deps = ["@trlc//trlc:trlc"],
+        deps = [Label("//trlc")],
         data = reqs,
         **kwargs
     )
@@ -68,14 +68,14 @@ _trlc_requirement = rule(
 def trlc_requirements(**kwargs):
     _trlc_requirement(**kwargs)
 
-def trlc_requirements_test(name, reqs, srcs = ["@trlc//:trlc.py"], main = "trlc.py", **kwargs):
+def trlc_requirements_test(name, reqs, srcs = [Label("//:trlc.py")], main = "trlc.py", args = [], **kwargs):
     native.py_test(
         name = name,
         srcs = srcs,
-        args = ["--verify"] +
+        args = ["--verify"] + args +
                ["$(locations %s)" % req for req in reqs],
         main = main,
-        deps = ["@trlc//trlc:trlc"],
+        deps = [Label("//trlc")],
         data = reqs,
         **kwargs
     )
