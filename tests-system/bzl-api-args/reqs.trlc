@@ -1,0 +1,6 @@
+package Args
+
+// Violates the check in schema.rsl; passes only when TRLC files are skipped.
+Requirement REQ_001 {
+    description = ""
+}

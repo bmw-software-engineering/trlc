@@ -7,6 +7,7 @@ load("//bazel/_private:system_test.bzl", "trlc_system_test")
 # that contains an ``output`` golden file is treated as a test.  Sub-packages
 # (the bzl-api-* directories) have their own BUILD files and are excluded.
 _SUBPACKAGES = [
+    "bzl-api-args",
     "bzl-api-deps",
     "bzl-api-simple",
     "bzl-api-spec-check",
@@ -42,6 +43,8 @@ test_suite(
 test_suite(
     name = "bzl_api",
     tests = [
+        "//tests-system/bzl-api-args:bzl-api-args-spec-test",
+        "//tests-system/bzl-api-args:bzl-api-args-test",
         "//tests-system/bzl-api-deps:bzl-api-deps-test",
         "//tests-system/bzl-api-simple:bzl-api-simple-test",
         "//tests-system/bzl-api-spec-check:bzl-api-spec-check-test",
