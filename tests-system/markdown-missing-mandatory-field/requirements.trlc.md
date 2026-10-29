@@ -1,10 +1,6 @@
 # pizza_hq
 
-## Emergency_Snack_Protocol
-
-<hr>
-
-### Send_Pizza_Now
+## Send_Pizza_Now
 | Property | Value       |
 |----------|-------------|
 | type     | Pizza_Order |

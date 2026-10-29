@@ -39,28 +39,22 @@ The file structure maps to TRLC constructs as follows:
   package name (``# ns.app``, ``import ns.base``) and an import may be a
   wildcard (``import ns.*``).
 
-  ## Section name
-      → ``section "Section name" {``
-
-  <hr>
-      → Record separator (closes any open record within the section)
-
-  ### Record heading
+  ## Record heading
       → Starts a record; the heading text becomes the record identifier
         (spaces and non-alphanumeric characters are replaced with ``_``).
 
-  Property table (under the ``###`` heading):
+  Property table (under the ``##`` heading):
 
     | Property | Value |
     |----------|-------|
     | type     | Foo   |   ← ``type`` row gives the record type name
     | field    | value |   ← subsequent rows are ``field = value`` assignments
 
-  #### Field heading
+  ### Field heading
       → Starts a free-text / string field whose name is the (lowercased)
         heading identifier.  All content that follows—including any Markdown
         tables—is collected verbatim and emitted as a single STRING token.
-        The string field ends when the next heading (``##``/``###``/``####``),
+        The string field ends when the next heading (``##``/``###``),
         ``<hr>``, or end-of-file is reached.
 
 Value inference
@@ -117,7 +111,7 @@ class MD_Lexer(TRLC_Lexer):
     """
 
     # Boolean / null keywords  (mirrors TRLC_Lexer.KEYWORDS)
-    KEYWORDS = frozenset(["true", "false", "null", "#", "##", "import"])
+    KEYWORDS = frozenset(["true", "false", "null", "#", "import"])
 
     # Markdown-friendly aliases that map to TRLC block tokens.
     MD_SECTION_START_TOKEN = "C_BRA"
@@ -1064,8 +1058,6 @@ class MD_Lexer(TRLC_Lexer):
         lines = content.splitlines()
         total_lines = len(lines)
 
-        # ── Section tracking ─────────────────────────────────────────── #
-        in_section = False
         imported_packages = []
 
         # ── Type tracking for Phase 2 ─────────────────────────────────── #
@@ -1183,19 +1175,6 @@ class MD_Lexer(TRLC_Lexer):
             record_type_found = False
             props_first_row = False
 
-        def open_section(name, loc):
-            nonlocal in_section
-            self._emit(loc, "KEYWORD", "##")
-            self._emit(loc, "STRING", name)
-            self._emit(loc, self.MD_SECTION_START_TOKEN)
-            in_section = True
-
-        def close_section(loc):
-            nonlocal in_section
-            if in_section:
-                self._emit(loc, self.MD_SECTION_END_TOKEN)
-                in_section = False
-
         # ── Line-by-line scan ─────────────────────────────────────────── #
 
         for i, line in enumerate(lines):
@@ -1207,12 +1186,12 @@ class MD_Lexer(TRLC_Lexer):
 
             if in_string_field:
                 level, _ = MD_Lexer._parse_heading(line)
-                if level in (2, 3, 4) or MD_Lexer._is_hr(stripped):
+                if level in (2, 3) or MD_Lexer._is_hr(stripped):
                     flush_string_field()
                     # fall through so the line is processed normally
                 elif not in_record and stripped.startswith("|"):
-                    # A property table row arrived while collecting a ####
-                    # string field but before "type" is known.  Close the
+                    # A property table row arrived while collecting a ###
+                    # string field but before "type" is known. Close the
                     # string field (buffering its content) so the table row
                     # is processed normally below.
                     flush_string_field()
@@ -1225,7 +1204,7 @@ class MD_Lexer(TRLC_Lexer):
                     str_field_lines.append(line)
                     continue
 
-            # ── Heading dispatch (H1–H4) ─────────────────────────────────
+            # ── Heading dispatch (H1–H3) ─────────────────────────────────
 
             _h_level, _h_content = MD_Lexer._parse_heading(line)
 
@@ -1246,22 +1225,13 @@ class MD_Lexer(TRLC_Lexer):
                 current_package_name = package_name
                 continue
 
-            # ── H2: section ──────────────────────────────────────────────
+            # ── H2: record heading ────────────────────────────────────────
             # _parse_heading already distinguishes the levels by exact count
             # of leading "#" characters, so no prefix-collision is possible.
 
             if _h_level == 2:
                 flush_record(loc)
-                close_section(loc)
-                open_section(_h_content, loc)
-                continue
-
-            # ── H3: record heading ───────────────────────────────────────
-
-            if _h_level == 3:
-                flush_record(loc)
                 pending_name = _h_content.strip()
-                # heading_prefix_len = level(3) + 1 space
                 self._validate_identifier(pending_name, line_no, _h_level + 1, line)
                 pending_name_loc = loc
                 pending_props = []
@@ -1269,18 +1239,25 @@ class MD_Lexer(TRLC_Lexer):
                 props_first_row = True  # skip the column-header row
                 continue
 
-            # ── H4: string field heading ─────────────────────────────────
+            # ── H3: string field heading ─────────────────────────────────
 
-            if _h_level == 4:
+            if _h_level == 3:
                 # flush_string_field already called at the top of the loop
                 str_field_name = _h_content.strip()
-                # heading_prefix_len = level(4) + 1 space
                 self._validate_identifier(str_field_name, line_no, _h_level + 1, line)
                 str_field_loc = loc
                 str_field_lines = []
                 str_field_first_content_line = None
                 str_field_first_content_col = 1
                 in_string_field = True
+                continue
+
+            if _h_level >= 4:
+                self.mh.lex_error(
+                    loc,
+                    "heading level 4 is not valid in .trlc.md; use '##' for "
+                    "records and '###' for fields",
+                )
                 continue
 
             # ── Horizontal rule ──────────────────────────────────────────
@@ -1406,4 +1383,3 @@ class MD_Lexer(TRLC_Lexer):
 
         eof_loc = self._loc(total_lines + 1)
         flush_record(eof_loc)
-        close_section(eof_loc)

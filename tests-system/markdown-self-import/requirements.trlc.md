@@ -2,16 +2,12 @@
 
 import ns
 
-## Greetings
-
-<hr>
-
-### Hello_World
+## Hello_World
 | Property | Value |
 |----------|-------|
-| type     | ns.T  |
+| type     | Greeting |
 
-#### x
+### x
 Hello, world!
 
 <hr><br><hr>

@@ -1,8 +1,6 @@
 # MdArrayTest
 
-## Requirements
-
-### REQ_TABLE_B_COMMA
+## REQ_TABLE_B_COMMA
 
 | identifier | REQ_TABLE_B_COMMA         |
 |------------|---------------------------|

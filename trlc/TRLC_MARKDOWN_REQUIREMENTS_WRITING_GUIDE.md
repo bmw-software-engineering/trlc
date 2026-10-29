@@ -14,38 +14,33 @@ Use `.trlc.md` when you want to define TRLC requirements in Markdown while keepi
 # PackageName
 import SomePackage
 
-## Section title
-
-<hr>
-
-### RecordIdentifier
+## RecordIdentifier
 | Property | Value |
 |----------|-------|
 | type     | Requirement |
 | asil     | SomePackage.ASIL.B |
 
-#### top_level
+### top_level
 true
 
-#### description
+### description
 This is a multi-line field value.
 You can continue writing text on multiple lines.
 
 <hr><br><hr>
 ```
 
-## Supported Syntax and Behavior
+# Supported Syntax and Behavior
 
 | Markdown construct                    | Meaning                                    | Rule / Constraint                                                                                                                                     | Description                                                                                                                                                                                         |
 | ------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `# PackageName`                       | Package declaration                        | Must be exactly one whitespace-free token. May be a nested package name, i.e. identifier-safe segments separated by `.` (for example `# ns.app`).     | Groups and organizes all requirements defined in the file under one namespace. Can be imported by other `.trlc.md` files to reference its types and values.                                         |
 | `import pkg`                          | Import package declaration                 | Allows zero or more imports, directly after the package declaration. Nested names (`import ns.base`) and wildcards (`import ns.*`) are supported.      | Makes the types and enum values defined in another package available in current files. Each `import` statement accepts exactly one package name; use multiple `import` lines for multiple packages. |
-| `## SectionName`                      | Section declaration                        | Optional. Opens a TRLC section block; previous section is closed automatically.                                                                       | Acts as a logical grouping container within a package. All `###` requirements that follow belong to this section until a new section.                                                               |
-| `### RequirementName`                 | Requirement/record name declaration        | Heading text must already be a valid TRLC identifier.                                                                                                 | Declares a named requirement object. The name is the unique identifier of this requirement within the package and section.                                                                          |
-| Requirement property table            | Requirement property and field assignments | Mandatory under each `###`. Table should follow this format: `\| Property \| Value \|`, `\|----\|----\|`, then one or more `\| key \| value \|` rows. | Defines key-value properties for the requirement/record. The header and separator are for table structure/readability, and each data row maps to a field assignment.                                |
+| `## RequirementName`                 | Requirement/record name declaration        | Heading text must already be a valid TRLC identifier.                                                                                                 | Declares a named requirement object. The name is the unique identifier of this requirement within the package and section.                                                                          |
+| Requirement property table            | Requirement property and field assignments | Mandatory under each `##`. Table should follow this format: `\| Property \| Value \|`, `\|----\|----\|`, then one or more `\| key \| value \|` rows. | Defines key-value properties for the requirement/record. The header and separator are for table structure/readability, and each data row maps to a field assignment.                                |
 | `type` property row                   | Requirement/record type declaration        | Mandatory once per requirement block; value must match the record type name defined in RSL (case-sensitive).                                          | Record is opened only when the `type` row is found. Without it, the requirement block is skipped.                                                                                                   |
-| `#### FieldName` + single scalar line | Field assignment (scalar)                  | One-line scalar values can be inferred as enum/boolean/number.                                                                                        | Useful for short typed values.                                                                                                                                                                      |
-| `#### FieldName` + multi-line block   | Field assignment (string block)            | Preserves raw paragraph/list/table/link content as one string block; trims only leading/trailing blank lines.                                         | Useful for long-form fields such as descriptions.                                                                                                                                                   |
+| `### FieldName` + single scalar line | Field assignment (scalar)                  | One-line scalar values can be inferred as enum/boolean/number.                                                                                        | Useful for short typed values.                                                                                                                                                                      |
+| `### FieldName` + multi-line block   | Field assignment (string block)            | Preserves raw paragraph/list/table/link content as one string block; trims only leading/trailing blank lines.                                         | Useful for long-form fields such as descriptions.                                                                                                                                                   |
 | `<hr>`                                | Visual separator                           | No parsing effect.                                                                                                                                    | Improves readability only.                                                                                                                                                                          |
 | `<hr><br><hr>`                        | Visual separator between requirements      | No parsing effect.                                                                                                                                    | Improves readability only.                                                                                                                                                                          |
 | Anchors and URLs                      | Plain string content                       | Preserves full literal text exactly.                                                                                                                  | Link syntax is stored as literal text; URLs are not resolved or validated by parser logic.                                                                                                          |
@@ -86,11 +81,11 @@ declared before `ns.app` can be used.
 
 ## Writing Rules to Follow
 
-- Use identifier-safe names for `#`, `###`, and `####` headings.
+- Use identifier-safe names for `#`, `##`, and `###` headings.
 - A `#` heading may additionally contain `.` to name a nested package.
-- Always include a requirement property table under each `###` record.
+- Always include a requirement property table under each `##` record.
 - Always include a `type` row in that table.
-- A property can be defined either in the property table (`| key | value |`) or using a `#### FieldName` block.
+- A property can be defined either in the property table (`| key | value |`) or using a `### FieldName` block.
 - Keep the first table row as a header row (`Property | Value`).
 - Use `<hr>` and `<hr><br><hr>` only for readability.
 
@@ -108,22 +103,22 @@ Fields declared as an array of tuples can be written directly in Markdown.
 | refs | Pkg.item_a @ 1 <br> Pkg.item_b @ 2 |
 
 // Field block — one per line (flexible whitespace around separator)
-#### refs
+### refs
 Pkg.item_a @ 1
 Pkg.item_b @ 2
 Pkg.item_c         @         3
 
 // Field block — comma-separated
-#### refs
+### refs
 Pkg.item_a @ 1, Pkg.item_b @ 2
 
 // Unqualified — same-package item, package prefix may be omitted
-#### refs
+### refs
 item_a @ 1
 item_b @ 2
 
 // Mixed — qualified (cross-package) and unqualified (same-package) in one array
-#### refs
+### refs
 item_a @ 1, OtherPkg.item_b @ 2
 ```
 
@@ -141,7 +136,7 @@ All LRM separator kinds are supported: `@`, `:`, `;`, and plain identifier (e.g.
 
 ### Error: unexpected character in heading
 
-- Cause: `###` or `####` heading is not identifier-safe.
+- Cause: `##` or `###` heading is not identifier-safe.
 - Fix: rename heading to a TRLC-style identifier (for example `My_Record_Name`).
 
 ### Record skipped due to missing type
@@ -152,7 +147,7 @@ All LRM separator kinds are supported: `@`, `:`, `;`, and plain identifier (e.g.
 ### Value not typed as expected
 
 - Cause: value does not match scalar pattern, or body is multi-line.
-- Fix: keep typed scalar values on a single line under `#### FieldName`.
+- Fix: keep typed scalar values on a single line under `### FieldName`.
 
 ### Error: bracket notation for tuple-reference arrays is not supported
 

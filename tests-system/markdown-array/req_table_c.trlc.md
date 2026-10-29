@@ -1,8 +1,6 @@
 # MdArrayTest
 
-## Requirements
-
-### REQ_TABLE_C_BR
+## REQ_TABLE_C_BR
 
 | identifier | REQ_TABLE_C_BR            |
 |------------|---------------------------|

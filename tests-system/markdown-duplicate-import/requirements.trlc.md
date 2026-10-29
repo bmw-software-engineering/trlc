@@ -3,16 +3,12 @@
 import ns.base
 import ns.base
 
-## Greetings
-
-<hr>
-
-### Hello_World
+## Hello_World
 | Property | Value            |
 |----------|------------------|
 | type     | ns.base.Greeting |
 
-#### message
+### message
 Hello, world!
 
 <hr><br><hr>

@@ -1,10 +1,6 @@
 # ns..app
 
-## Greetings
-
-<hr>
-
-### Hello_World
+## Hello_World
 | Property | Value |
 |----------|-------|
 | type     | ns.T  |
