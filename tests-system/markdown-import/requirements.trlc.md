@@ -2,16 +2,12 @@
 
 import base
 
-## Greetings
-
-<hr>
-
-### Hello_World
+## Hello_World
 | Property | Value    |
 |----------|----------|
 | type     | Greeting |
 
-#### message
+### message
 Hello, world!
 
 <hr><br><hr>
