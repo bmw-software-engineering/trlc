@@ -65,39 +65,14 @@ class TrlcMarkdownParser(Parser):
         assert kind == "trlc"
         super().parse_preamble(kind)
 
-    def parse_section_declaration(self):
-        # H2: '## Section Name'
-        self.match_kw("##")
-        t_section = self.ct
-        self.match("STRING")
-        sec = ast.Section(
-            name=self.ct.value,
-            location=self.ct.location,
-            parent=self.section[-1] if self.section else None,
-        )
-        sec.set_ast_link(self.ct)
-        sec.set_ast_link(t_section)
-        self.section.append(sec)
-
-        self.match(self.MD_SECTION_START_TOKEN)
-        sec.set_ast_link(self.ct)
-        while not self.peek(self.MD_SECTION_END_TOKEN):
-            self.parse_trlc_entry()
-        self.match(self.MD_SECTION_END_TOKEN)
-        sec.set_ast_link(self.ct)
-        self.section.pop()
-
     def parse_trlc_entry(self):
-        if self.peek_kw("##"):
-            self.parse_section_declaration()
-        else:
-            self.cu.add_item(self.parse_record_object_declaration())
+        self.cu.add_item(self.parse_record_object_declaration())
 
     def parse_trlc_file(self):
         assert self.cu.package is not None
 
         ok = True
-        while self.peek_kw("##") or self.peek("IDENTIFIER"):
+        while self.peek("IDENTIFIER"):
             try:
                 self.parse_trlc_entry()
             except TRLC_Error as err:
@@ -109,15 +84,7 @@ class TrlcMarkdownParser(Parser):
                 # Mirror TRLC recovery style: scan until likely new entry.
                 self.skip_until_newline()
                 while not self.peek_eof():
-                    if self.peek_kw("##"):
-                        break
-                    elif self.peek(self.MD_SECTION_END_TOKEN):
-                        # Markdown lexer auto-emits section closing tokens.
-                        # If we reached one during recovery, consume it to
-                        # avoid a secondary "expected end-of-file" error.
-                        self.advance()
-                        break
-                    elif not self.peek("IDENTIFIER"):
+                    if not self.peek("IDENTIFIER"):
                         pass
                     elif self.stab.contains(self.nt.value):
                         n_sym = self.stab.lookup_assuming(self.mh, self.nt.value)
@@ -131,12 +98,6 @@ class TrlcMarkdownParser(Parser):
                             break
                     self.advance()
                     self.skip_until_newline()
-
-        # Markdown lexer emits section close tokens at EOF for open H2 blocks.
-        # After recovery from earlier semantic errors, these can remain
-        # unconsumed and otherwise surface as secondary EOF/brace errors.
-        while self.peek(self.MD_SECTION_END_TOKEN):
-            self.match(self.MD_SECTION_END_TOKEN)
 
         self.match_eof()
 

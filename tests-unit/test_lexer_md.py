@@ -122,8 +122,8 @@ class TestLexerMd(unittest.TestCase):
         )
 
     def test_heading_and_rule_helpers(self):
-        self.assertEqual(MD_Lexer._parse_heading("### Record Name"), (3, "Record Name"))
-        self.assertEqual(MD_Lexer._parse_heading("## Section"), (2, "Section"))
+        self.assertEqual(MD_Lexer._parse_heading("## Record Name"), (2, "Record Name"))
+        self.assertEqual(MD_Lexer._parse_heading("### Field Name"), (3, "Field Name"))
         self.assertEqual(MD_Lexer._parse_heading("###"), (0, None))
         self.assertEqual(MD_Lexer._parse_heading("#NotAHeading"), (0, None))
 
@@ -309,15 +309,13 @@ class TestLexerMd(unittest.TestCase):
                 "# DemoPkg",
                 "import OtherPkg",
                 "",
-                "## Overview",
-                "",
-                "### Req_1",
+                "## Req_1",
                 "| Property | Value |",
                 "|----------|-------|",
                 "| type | Requirement |",
                 "| priority | 7 |",
                 "",
-                "#### notes",
+                "### notes",
                 "Hello, world!",
                 "",
                 "<hr>",
@@ -340,9 +338,6 @@ class TestLexerMd(unittest.TestCase):
         self.assertEqual(
             token_pairs(lexer),
             [
-                ("KEYWORD", "##"),
-                ("STRING", "Overview"),
-                ("C_BRA", None),
                 ("IDENTIFIER", "OtherPkg"),
                 ("DOT", None),
                 ("IDENTIFIER", "Requirement"),
@@ -354,7 +349,6 @@ class TestLexerMd(unittest.TestCase):
                 ("IDENTIFIER", "notes"),
                 ("ASSIGN", None),
                 ("STRING", "Hello, world!"),
-                ("C_KET", None),
                 ("C_KET", None),
             ],
         )
@@ -460,9 +454,7 @@ class TestLexerMd(unittest.TestCase):
             [
                 "# DemoPkg",
                 "",
-                "## Overview",
-                "",
-                "### Req_1",
+                "## Req_1",
                 "",
                 "| Property | Value |",
                 "|----------|-------|",
@@ -481,8 +473,8 @@ class TestLexerMd(unittest.TestCase):
                 break
             tokens.append(token)
 
-        type_row_tokens = [token for token in tokens if token.location.line_no == 9]
-        heading_tokens = [token for token in tokens if token.location.line_no == 5]
+        type_row_tokens = [token for token in tokens if token.location.line_no == 7]
+        heading_tokens = [token for token in tokens if token.location.line_no == 3]
 
         self.assertEqual(
             [(token.kind, token.value) for token in type_row_tokens],
