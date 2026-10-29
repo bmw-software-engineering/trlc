@@ -1,7 +1,5 @@
 # demo_pkg
 
-## Intro
-
 <hr>
 
 ### Welcome_Requirement
