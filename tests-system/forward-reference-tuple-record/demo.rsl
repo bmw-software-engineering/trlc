@@ -1,0 +1,12 @@
+package demo
+
+tuple RequirementId {
+  item Requirement
+  separator @
+  version Integer
+}
+
+type Requirement {
+  description String
+  derived_from RequirementId [0 .. *]
+}

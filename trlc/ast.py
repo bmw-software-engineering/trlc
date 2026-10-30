@@ -28,7 +28,7 @@ from enum import Enum, auto
 from collections import OrderedDict
 from fractions import Fraction
 
-from trlc.errors import TRLC_Error, Location, Message_Handler
+from trlc.errors import TRLC_Error, Kind, Location, Message_Handler
 from trlc.lexer import Token
 from trlc import math
 
@@ -1582,6 +1582,9 @@ class Binary_Expression(Expression):
             ):
                 # For union types, we allow comparison if both
                 # sides are record-like (Record_Type or Union_Type)
+                for n_side in (self.n_lhs, self.n_rhs):
+                    if isinstance(n_side.typ, Union_Type):
+                        n_side.typ.ensure_record_members()
                 lhs_is_record = isinstance(self.n_lhs.typ, (Record_Type, Union_Type))
                 rhs_is_record = isinstance(self.n_rhs.typ, (Record_Type, Union_Type))
                 if not (lhs_is_record and rhs_is_record):
@@ -1596,12 +1599,12 @@ class Binary_Expression(Expression):
                     # of the other. This implements Equality_Domain for
                     # union types: an unrelated record type is rejected.
                     lhs_members = (
-                        self.n_lhs.typ.types
+                        self.n_lhs.typ.record_members()
                         if isinstance(self.n_lhs.typ, Union_Type)
                         else [self.n_lhs.typ]
                     )
                     rhs_members = (
-                        self.n_rhs.typ.types
+                        self.n_rhs.typ.record_members()
                         if isinstance(self.n_rhs.typ, Union_Type)
                         else [self.n_rhs.typ]
                     )
@@ -2583,6 +2586,7 @@ class Concrete_Type(Type, metaclass=ABCMeta):
         self.n_package = n_package
         self._is_forward_decl = False
         self._forward_decl_context = None
+        self._forward_union_use = None
 
     def mark_forward_decl(self):
         """Mark this definition as a temporary forward declaration."""
@@ -2603,6 +2607,18 @@ class Concrete_Type(Type, metaclass=ABCMeta):
     def get_forward_decl_context(self):
         """Return parser bookkeeping for the forward-declaration origin."""
         return getattr(self, "_forward_decl_context", None)
+
+    def set_forward_union_use(self, location):
+        """Remember where this forward declaration was used as a union member.
+
+        Only the first use is kept.
+        """
+        if self._forward_union_use is None:
+            self._forward_union_use = location
+
+    def get_forward_union_use(self):
+        """Return the location of the first union-member use, if any."""
+        return getattr(self, "_forward_union_use", None)
 
     def fully_qualified_name(self):
         """Return the FQN for this type (i.e. PACKAGE.NAME)
@@ -2781,6 +2797,35 @@ class Union_Type(Type):
         self.types = types
         self._field_map = None
 
+    def record_members(self):
+        """Return the members that are actually record types.
+
+        A forward-declared record placeholder may later turn out to be
+        some other kind of type (e.g. an enumeration). That is reported
+        as an error by the linter, but until then such members must
+        not be treated as records.
+
+        :rtype: list[Record_Type]
+        """
+        return [t for t in self.types if isinstance(t, Record_Type)]
+
+    def ensure_record_members(self):
+        """Abort the current construct if a member is not a record type.
+
+        Such a member is a forward-declared stub that turned out to be
+        an enumeration or tuple. The parser already printed an error
+        when that happened, so this raises without printing again.
+
+        :raises TRLC_Error: if any member is not a record type
+        """
+        for t in self.types:
+            if not isinstance(t, Record_Type):
+                raise TRLC_Error(
+                    self.location,
+                    Kind.SYS_ERROR,
+                    f"{t.__class__.__name__} {t.name} is not a Record_Type",
+                )
+
     def get_field_map(self):
         # lobster-trace: LRM.Union_Type_Field_Access
         """Compute accessible fields across all union members.
@@ -2798,8 +2843,9 @@ class Union_Type(Type):
         if self._field_map is not None:
             return self._field_map
 
+        members = self.record_members()
         field_map = {}
-        for record_type in self.types:
+        for record_type in members:
             seen_in_type = set()
             for comp in record_type.all_components():
                 if comp.name in seen_in_type:
@@ -2810,7 +2856,7 @@ class Union_Type(Type):
                         "component": comp,
                         "n_typ": comp.n_typ,
                         "count": 1,
-                        "total": len(self.types),
+                        "total": len(members),
                         "optional_in_any": comp.optional,
                     }
                 else:
@@ -2856,10 +2902,7 @@ class Union_Type(Type):
         """
         if not isinstance(record_type, Record_Type):
             return False
-        return any(
-            isinstance(t, Record_Type) and record_type.is_subclass_of(t)
-            for t in self.types
-        )
+        return any(record_type.is_subclass_of(t) for t in self.record_members())
 
     def get_example_value(self):
         # lobster-exclude: utility method

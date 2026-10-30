@@ -128,7 +128,7 @@ class Test_Parser_Forward_References(unittest.TestCase):
             )
         )
         stab = self.process(sm)
-        self.assertIsNotNone(stab)
+        self.assertIsNone(stab)
         self.assertTrue(any("is not a Record_Type" in msg for _, msg in mh.messages))
 
     def test_union_member_cannot_forward_reference_enum(self):
@@ -148,8 +148,68 @@ class Test_Parser_Forward_References(unittest.TestCase):
             )
         )
         stab = self.process(sm)
-        self.assertIsNotNone(stab)
+        self.assertIsNone(stab)
         self.assertTrue(any("is not a Record_Type" in msg for _, msg in mh.messages))
+
+    def test_union_forward_non_record_is_error_without_lint(self):
+        """--no-lint must not make an enum or tuple union member valid."""
+        cases = {
+            "Enumeration_Type": "enum Severity {\n  HIGH\n}\n",
+            "Tuple_Type": "tuple Severity {\n  x Integer\n  y Integer\n}\n",
+        }
+        for kind, declaration in cases.items():
+            for lint_mode in (True, False):
+                with self.subTest(kind=kind, lint_mode=lint_mode):
+                    sm, mh = make_source_manager(lint_mode=lint_mode)
+                    sm.register_rsl_file(
+                        self.write(
+                            "forward_union_no_lint.rsl",
+                            "package demo\ntype A {\n  b [Severity]\n}\n" + declaration,
+                        )
+                    )
+                    sm.process()
+                    self.assertEqual(
+                        mh.error_messages(),
+                        [f"{kind} Severity is not a Record_Type"],
+                    )
+
+    def test_union_forward_enum_field_access_does_not_crash(self):
+        """Field access on a union whose member later became an enum is an error."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "forward_union_enum_access.rsl",
+                "package demo\n"
+                "type A {\n  choice [Severity]\n}\n"
+                "enum Severity {\n  HIGH\n}\n"
+                'checks A {\n  choice.foo == 1, "bad"\n}\n',
+            )
+        )
+        stab = self.process(sm)
+        self.assertIsNone(stab)
+        self.assertIn(
+            "Enumeration_Type Severity is not a Record_Type",
+            mh.error_messages(),
+        )
+
+    def test_union_forward_enum_equality_reports_root_cause(self):
+        """Comparing a union whose member later became an enum names the enum."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "forward_union_enum_eq.rsl",
+                "package demo\n"
+                "type A {\n  choice [Severity]\n}\n"
+                "enum Severity {\n  HIGH\n}\n"
+                'checks A {\n  choice == choice, "bad"\n}\n',
+            )
+        )
+        stab = self.process(sm)
+        self.assertIsNone(stab)
+        self.assertEqual(
+            mh.error_messages(),
+            ["Enumeration_Type Severity is not a Record_Type"],
+        )
 
     def test_tuple_field_cannot_forward_reference_enum(self):
         """Tuple fields may not reference an enum declared later in the same file."""
@@ -176,6 +236,21 @@ class Test_Parser_Forward_References(unittest.TestCase):
             "unknown symbol Severity",
             "\n".join(mh.error_messages()),
         )
+
+    def test_mutually_recursive_tuples_are_rejected(self):
+        """Tuples may not form a cycle via a forward reference to a later tuple."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "mutual_tuples.rsl",
+                "package demo\n"
+                "tuple A {\n  item B\n  version Integer\n}\n"
+                "tuple B {\n  item A\n  version Integer\n}\n",
+            )
+        )
+        stab = self.process(sm)
+        self.assertIsNone(stab)
+        self.assertEqual(mh.error_messages(), ["unknown symbol B"])
 
     def test_tuple_type_self_reference_is_rejected(self):
         """A tuple may not reference itself while it is still being declared."""

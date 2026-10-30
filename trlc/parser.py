@@ -593,12 +593,22 @@ class Parser(Parser_Base):
                     fatal=False,
                 )
             enum = existing
+            union_use = existing.get_forward_union_use()
             enum.__class__ = ast.Enumeration_Type
             enum.clear_forward_decl()
             enum.description = description
             enum.location = name.location
             if not hasattr(enum, "literals"):
                 enum.literals = ast.Symbol_Table()
+            if union_use is not None:
+                # Reported here, rather than only by the linter, so that
+                # --no-lint cannot make an invalid union valid. Fatal, so
+                # later checks never see the enum inside a union.
+                self.mh.error(
+                    union_use,
+                    f"Enumeration_Type {name.value} is not a Record_Type",
+                    explanation=("all members of a union type must be record types"),
+                )
         else:
             enum = ast.Enumeration_Type(
                 name=name.value,
@@ -696,6 +706,9 @@ class Parser(Parser_Base):
             self.mh, name.value, ast.Concrete_Type
         )
         if existing is not None and existing.is_forward_decl():
+            used_by_tuple_field = existing.get_forward_decl_context() == "tuple_field"
+            union_use = existing.get_forward_union_use()
+            forward_use_location = existing.location
             n_tuple = existing
             n_tuple.__class__ = ast.Tuple_Type
             n_tuple.clear_forward_decl()
@@ -703,6 +716,28 @@ class Parser(Parser_Base):
             n_tuple.location = name.location
             n_tuple.components = ast.Symbol_Table()
             n_tuple.separators = []
+            if used_by_tuple_field:
+                # A tuple field may not refer forward to a tuple. This
+                # also rules out cycles between tuples (A -> B -> A),
+                # which would have infinite size. The error must be
+                # fatal: continuing would leave a cyclic type graph
+                # behind for the linter and VCG to trip over. The stub
+                # was converted above so that it is not additionally
+                # reported as never declared.
+                self.mh.error(
+                    forward_use_location,
+                    f"unknown symbol {name.value}",
+                    explanation=(
+                        f"tuple {name.value} is declared later in the file; "
+                        "declare it before the tuple field that uses it"
+                    ),
+                )
+            if union_use is not None:
+                self.mh.error(
+                    union_use,
+                    f"Tuple_Type {name.value} is not a Record_Type",
+                    explanation=("all members of a union type must be record types"),
+                )
         else:
             n_tuple = ast.Tuple_Type(
                 name=name.value,
@@ -805,6 +840,8 @@ class Parser(Parser_Base):
             self.default_scope, ast.Record_Type, allow_forward=True
         )
         first_type.set_ast_link(self.ct)
+        if isinstance(first_type, ast.Record_Type) and first_type.is_forward_decl():
+            first_type.set_forward_union_use(self.ct.location)
         if not isinstance(first_type, ast.Record_Type):
             self.mh.error(
                 self.ct.location,
@@ -821,6 +858,8 @@ class Parser(Parser_Base):
                 self.default_scope, ast.Record_Type, allow_forward=True
             )
             next_type.set_ast_link(self.ct)
+            if isinstance(next_type, ast.Record_Type) and next_type.is_forward_decl():
+                next_type.set_forward_union_use(self.ct.location)
             if not isinstance(next_type, ast.Record_Type):
                 self.mh.error(
                     self.ct.location,
@@ -1766,6 +1805,10 @@ class Parser(Parser_Base):
                     # lobster-trace: LRM.Union_Type_Field_Type_Conflict
                     # lobster-trace: LRM.Union_Type_Field_Access_Validity
                     field_name = t_field.value
+                    # A forward-declared stub may have turned into a
+                    # non-record type (already reported); abort this
+                    # check instead of inspecting that member.
+                    n_name.typ.ensure_record_members()
                     field_map = n_name.typ.get_field_map()
                     if field_name not in field_map:
                         self.mh.error(

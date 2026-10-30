@@ -1,0 +1,2 @@
+tuple-separator-nesting/demo.rsl:10:3: trlc error: tuple type Outer, which contains separators, may not contain another tuple with separators
+Processed 1 model and 0 requirement files and found 1 error
