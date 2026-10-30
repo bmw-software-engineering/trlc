@@ -17,25 +17,44 @@ user-defined check rules.
 
 ### Language note
 
-TRLC allows same-file forward references for record component types, tuple field types, and union member types in .rsl files, except that a tuple may not reference itself while it is still being declared, a tuple field or union member may not reference an enum declared later in the same file, and a tuple with separators may not contain another tuple with separators. Truly missing declarations are still reported as errors.
+In a `.rsl` file, a type may be used before the place where it is
+declared in the same file. This is allowed for:
+
+* the type of a record component,
+* the type of a tuple field,
+* a record type used as a member of a union type.
+
+The following are still errors:
+
+* Using a type that is never declared in its package (reported as
+  `unknown symbol`).
+* A tuple that refers to itself.
+* A tuple field that refers to a tuple declared later in the file. This
+  includes mutually recursive tuples (`A` contains `B`, `B` contains
+  `A`). Declare the inner tuple first.
+* An enum used as the type of a tuple field, if the enum is declared
+  later in the file. Declare it earlier.
+* An enum used as a union member is an error regardless of declaration
+  order; union members must be record types.
+* A record that extends a type declared later in the file. Declare
+  the base type earlier.
 
 Example:
 
 ```rsl
 package demo
 
-type User {
-  manager [Person]
+type Requirement {
+  position Coordinate
 }
 
-tuple Person {
-  item User
-  separator @
-  version Integer
+tuple Coordinate {
+  x Integer
+  y Integer
 }
 ```
 
-This is valid because `User` and `Person` are references to declarations that appear later in the same file, while the tuple restriction still applies to self-recursive and nested separated-tuple cases.
+This is valid: `Requirement` uses `Coordinate` before the line that declares it.
 
 The Python implementation can be used for several purposes:
 

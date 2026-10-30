@@ -1,0 +1,14 @@
+package demo
+
+type A {
+  choice [Severity]
+}
+
+enum Severity {
+  HIGH
+  LOW
+}
+
+checks A {
+  choice == choice, "unreachable"
+}

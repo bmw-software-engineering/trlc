@@ -1,0 +1,11 @@
+package demo
+
+Requirement req_1 {
+  description  = "first"
+  derived_from = []
+}
+
+Requirement req_2 {
+  description  = "second"
+  derived_from = [req_1 @ 1]
+}
