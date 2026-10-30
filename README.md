@@ -15,6 +15,28 @@ correct in following the language definition. The tools also include a
 powerful static analysis tool to find issues with types and
 user-defined check rules.
 
+### Language note
+
+TRLC allows same-file forward references for record component types, tuple field types, and union member types in .rsl files, except that a tuple may not reference itself while it is still being declared, a tuple field or union member may not reference an enum declared later in the same file, and a tuple with separators may not contain another tuple with separators. Truly missing declarations are still reported as errors.
+
+Example:
+
+```rsl
+package demo
+
+type User {
+  manager [Person]
+}
+
+tuple Person {
+  item User
+  separator @
+  version Integer
+}
+```
+
+This is valid because `User` and `Person` are references to declarations that appear later in the same file, while the tuple restriction still applies to self-recursive and nested separated-tuple cases.
+
 The Python implementation can be used for several purposes:
 
 * It can be used to validate other TRLC implementations.

@@ -1,0 +1,3 @@
+item A
+^^^^ mutually-recursive-tuples/demo.rsl:10: error: tuple type B, which contains separators, may not contain another tuple with separators
+Processed 1 model and 0 requirement files and found 1 error

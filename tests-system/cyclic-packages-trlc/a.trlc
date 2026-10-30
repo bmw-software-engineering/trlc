@@ -1,0 +1,8 @@
+package A
+import B
+import Base
+
+Base.Req one {
+  text = "one"
+  link = B.two
+}

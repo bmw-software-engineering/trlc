@@ -2581,6 +2581,28 @@ class Concrete_Type(Type, metaclass=ABCMeta):
         super().__init__(name, location)
         assert isinstance(n_package, Package)
         self.n_package = n_package
+        self._is_forward_decl = False
+        self._forward_decl_context = None
+
+    def mark_forward_decl(self):
+        """Mark this definition as a temporary forward declaration."""
+        self._is_forward_decl = True
+
+    def clear_forward_decl(self):
+        """Clear the temporary forward-declaration marker."""
+        self._is_forward_decl = False
+
+    def is_forward_decl(self):
+        """Return whether this type is still only a forward declaration."""
+        return self._is_forward_decl
+
+    def set_forward_decl_context(self, context):
+        """Set parser bookkeeping for the forward-declaration origin."""
+        self._forward_decl_context = context
+
+    def get_forward_decl_context(self):
+        """Return parser bookkeeping for the forward-declaration origin."""
+        return getattr(self, "_forward_decl_context", None)
 
     def fully_qualified_name(self):
         """Return the FQN for this type (i.e. PACKAGE.NAME)
@@ -2832,11 +2854,17 @@ class Union_Type(Type):
         :returns: true if the type is or extends one of the union members
         :rtype: bool
         """
-        assert isinstance(record_type, Record_Type)
-        return any(record_type.is_subclass_of(t) for t in self.types)
+        if not isinstance(record_type, Record_Type):
+            return False
+        return any(
+            isinstance(t, Record_Type) and record_type.is_subclass_of(t)
+            for t in self.types
+        )
 
     def get_example_value(self):
         # lobster-exclude: utility method
+        if not self.types:
+            return "record_instance"
         return "%s_instance" % self.types[0].name
 
 

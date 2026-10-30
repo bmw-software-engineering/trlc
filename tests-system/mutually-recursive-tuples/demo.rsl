@@ -1,0 +1,13 @@
+package demo
+
+tuple A {
+  item B
+  separator @
+  version Integer
+}
+
+tuple B {
+  item A
+  separator @
+  version Integer
+}
