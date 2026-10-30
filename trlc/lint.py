@@ -81,6 +81,17 @@ class Linter:
             self.verify_array_type(n_typ)
 
         elif isinstance(n_typ, ast.Union_Type):
+            invalid_members = [
+                t for t in n_typ.types if not isinstance(t, ast.Record_Type)
+            ]
+            if invalid_members:
+                for t in invalid_members:
+                    self.mh.error(
+                        n_typ.location,
+                        f"{t.__class__.__name__} {t.name} is not a Record_Type",
+                        fatal=False,
+                    )
+                return
             # lobster-trace: LRM.Union_Type_Minimum_Members
             if len(n_typ.types) == 1:
                 self.mh.check(
@@ -92,7 +103,13 @@ class Linter:
             # lobster-trace: LRM.Union_Type_No_Subtype_Relations
             for i, t_i in enumerate(n_typ.types):
                 for j, t_j in enumerate(n_typ.types):
-                    if i != j and t_i is not t_j and t_i.is_subclass_of(t_j):
+                    if (
+                        i != j
+                        and isinstance(t_i, ast.Record_Type)
+                        and isinstance(t_j, ast.Record_Type)
+                        and t_i is not t_j
+                        and t_i.is_subclass_of(t_j)
+                    ):
                         self.mh.check(
                             n_typ.location,
                             "%s is a subtype of %s which is already"

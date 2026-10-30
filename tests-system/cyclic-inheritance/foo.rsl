@@ -1,0 +1,5 @@
+package foo
+
+type MyType1 extends MyType1 {
+        name String
+}

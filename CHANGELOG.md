@@ -27,7 +27,13 @@ generated in the following situations:
 
 ### 3.1.2-dev
 
-
+* [TRLC] Add support for forward references in same `.rsl` files:
+  record component types, tuple field types, and union member types may
+  be referenced before their later declaration, while genuinely missing
+  declarations are still reported as errors. A tuple may not reference
+  itself while it is still being declared, a tuple field or union member
+  may not reference an enum declared later in the same file, and a
+  tuple with separators may not contain another tuple with separators.
 
 ### 3.1.1
 

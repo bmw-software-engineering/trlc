@@ -1,0 +1,4 @@
+b B
+  ^ forward-reference-missing/demo.rsl:4: error: unknown symbol B
+  | B is used here but never declared;
+Processed 1 model and 0 requirement files and found 1 error
