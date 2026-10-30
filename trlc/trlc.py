@@ -628,6 +628,33 @@ class Source_Manager:
 
         return ok
 
+    def verify_unresolved_forward_types(self) -> bool:
+        """Check that temporary forward-declaration stubs were filled in.
+
+        This is only used for same-file forward references while a record type
+        is still being parsed, and should be resolved before the compilation
+        unit ends. Any leftover placeholder indicates a genuinely missing type.
+        """
+        ok = True
+        for package in self.stab.values(ast.Package):
+            for typ in list(package.symbols.values(ast.Concrete_Type)):
+                if typ.is_forward_decl():
+                    ok = False
+                    self.mh.error(
+                        location=typ.location,
+                        message=(
+                            "type %s is used before its declaration, but no "
+                            "matching declaration was found" % typ.name
+                        ),
+                        explanation=(
+                            "declare %s in this package before using it, or move "
+                            "the reference to a point after the actual declaration"
+                            % typ.name
+                        ),
+                        fatal=False,
+                    )
+        return ok
+
     def verify_subpackage_distinctness(self) -> bool:
         """Check that sub-package leaf names are sufficiently distinct from
         types declared in the same parent package.
@@ -733,6 +760,9 @@ class Source_Manager:
         # Parse RSL files (topologically sorted, in order to deal with
         # dependencies)
         ok &= self.parse_rsl_files()
+
+        # Unresolved forward placeholders indicate a real missing declaration.
+        ok &= self.verify_unresolved_forward_types()
 
         # Now that all type declarations are known, check that sub-package
         # names do not clash with members of their parent package.
