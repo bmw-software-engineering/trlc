@@ -2581,6 +2581,19 @@ class Concrete_Type(Type, metaclass=ABCMeta):
         super().__init__(name, location)
         assert isinstance(n_package, Package)
         self.n_package = n_package
+        self._is_forward_decl = False
+
+    def mark_forward_decl(self):
+        """Mark this definition as a temporary forward declaration."""
+        self._is_forward_decl = True
+
+    def clear_forward_decl(self):
+        """Clear the temporary forward-declaration marker."""
+        self._is_forward_decl = False
+
+    def is_forward_decl(self):
+        """Return whether this type is still only a forward declaration."""
+        return self._is_forward_decl
 
     def fully_qualified_name(self):
         """Return the FQN for this type (i.e. PACKAGE.NAME)

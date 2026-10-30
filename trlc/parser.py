@@ -507,6 +507,27 @@ class Parser(Parser_Base):
 
         if match_ident:
             self.match("IDENTIFIER")
+
+        if not scope.contains(self.ct.value):
+            if (
+                required_subclass is not None
+                and issubclass(required_subclass, ast.Type)
+                and self.cu.package is not None
+                and self.cu.package.symbols is not None
+            ):
+                forward_decl = ast.Record_Type(
+                    name=self.ct.value,
+                    description=None,
+                    location=self.ct.location,
+                    package=self.cu.package,
+                    n_parent=None,
+                    is_abstract=False,
+                )
+                forward_decl.mark_forward_decl()
+                self.cu.package.symbols.register(self.mh, forward_decl)
+                forward_decl.set_ast_link(self.ct)
+                return forward_decl
+
         sym = scope.lookup(self.mh, self.ct)
         sym.set_ast_link(self.ct)
 
@@ -534,13 +555,25 @@ class Parser(Parser_Base):
         t_enum = self.ct
         name, description, t_description = self.parse_described_name()
 
-        enum = ast.Enumeration_Type(
-            name=name.value,
-            description=description,
-            location=name.location,
-            package=self.cu.package,
+        existing = self.cu.package.symbols.lookup_assuming(
+            self.mh, name.value, ast.Concrete_Type
         )
-        self.cu.package.symbols.register(self.mh, enum)
+        if existing is not None and existing.is_forward_decl():
+            enum = existing
+            enum.__class__ = ast.Enumeration_Type
+            enum.clear_forward_decl()
+            enum.description = description
+            enum.location = name.location
+            if not hasattr(enum, "literals"):
+                enum.literals = ast.Symbol_Table()
+        else:
+            enum = ast.Enumeration_Type(
+                name=name.value,
+                description=description,
+                location=name.location,
+                package=self.cu.package,
+            )
+            self.cu.package.symbols.register(self.mh, enum)
         enum.set_ast_link(t_enum)
         enum.set_ast_link(name)
         if t_description:
@@ -621,12 +654,25 @@ class Parser(Parser_Base):
         t_tuple = self.ct
         name, description, t_descr = self.parse_described_name()
 
-        n_tuple = ast.Tuple_Type(
-            name=name.value,
-            description=description,
-            location=name.location,
-            package=self.cu.package,
+        existing = self.cu.package.symbols.lookup_assuming(
+            self.mh, name.value, ast.Concrete_Type
         )
+        if existing is not None and existing.is_forward_decl():
+            n_tuple = existing
+            n_tuple.__class__ = ast.Tuple_Type
+            n_tuple.clear_forward_decl()
+            n_tuple.description = description
+            n_tuple.location = name.location
+            n_tuple.components = ast.Symbol_Table()
+            n_tuple.separators = []
+        else:
+            n_tuple = ast.Tuple_Type(
+                name=name.value,
+                description=description,
+                location=name.location,
+                package=self.cu.package,
+            )
+            self.cu.package.symbols.register(self.mh, n_tuple)
 
         n_tuple.set_ast_link(t_tuple)
         n_tuple.set_ast_link(name)
@@ -698,10 +744,6 @@ class Parser(Parser_Base):
                         "tuple type %s, which contains separators,"
                         " may not contain another tuple with separators" % n_tuple.name,
                     )
-
-        # Late registration to avoid recursion in tuples
-        # lobster-trace: LRM.Tuple_Field_Types
-        self.cu.package.symbols.register(self.mh, n_tuple)
 
         return n_tuple
 
@@ -856,15 +898,42 @@ class Parser(Parser_Base):
                 ),
             )
 
-        record = ast.Record_Type(
-            name=name.value,
-            description=description,
-            location=name.location,
-            package=self.cu.package,
-            n_parent=root_record,
-            is_abstract=is_abstract,
+        existing = self.cu.package.symbols.lookup_assuming(
+            self.mh, name.value, ast.Concrete_Type
         )
-        self.cu.package.symbols.register(self.mh, record)
+        if existing is not None and existing.is_forward_decl():
+            record = existing
+            record.clear_forward_decl()
+            record.parent = root_record
+            record.is_abstract = is_abstract
+            record.description = description
+            record.location = name.location
+            record.components = ast.Symbol_Table(
+                root_record.components if root_record else None
+            )
+            record.frozen = {}
+            record.is_final = root_record.is_final if root_record else False
+        else:
+            record = ast.Record_Type(
+                name=name.value,
+                description=description,
+                location=name.location,
+                package=self.cu.package,
+                n_parent=root_record,
+                is_abstract=is_abstract,
+            )
+            self.cu.package.symbols.register(self.mh, record)
+
+        record.parent = root_record
+        record.is_abstract = is_abstract
+        record.description = description
+        record.location = name.location
+        if root_record is not None:
+            record.components = ast.Symbol_Table(root_record.components)
+        else:
+            record.components = ast.Symbol_Table()
+        record.frozen = {}
+        record.is_final = root_record.is_final if root_record else False
         if is_abstract:
             record.set_ast_link(t_abstract)
         if is_final:
