@@ -2,7 +2,7 @@ package LRM
 
 Versioning Version {
   major = 3
-  minor = 4
+  minor = 5
 }
 
 GFDL_License License {
@@ -770,16 +770,6 @@ section "Type declarations" {
               defined the same component, and they may even
               have different types. But you cannot re-define
               a component from a parent type.)*'''
-    }
-
-    Static_Semantics Valid_Component_Type {
-      text = '''Each component type shall refer to a valid type, or to the
-              name of the record type itself. It is an error
-              to refer to a type that has not been declared
-              yet. *(As there are no forward declarations in
-              the language, this forces the user type
-              hierarchy to be a DAG, but permitting
-              self-references.)*'''
     }
 
     Recommendation Union_Type_Minimum_Members {
@@ -2201,4 +2191,46 @@ section "Acyclic Dependency" {
               to itself directly or indirectly creates ambiguities.'''
   } 
  
+}
+
+section "Forward declarations in '.rsl' file" {
+
+  Static_Semantics Forward_Declaration_Record_Types {
+    text = '''It is allowed for a record type to refer to a record type
+              declared later in the same `.rsl` file, regardless of the
+              order in which types are declared.'''              
+  }
+
+  Static_Semantics Forward_Declaration_Tuple_Types {
+    text = '''It is allowed for a tuple field to refer to a record type
+              declared later in the same `.rsl` file, regardless of the
+              order in which types are declared.'''
+  }
+
+  Static_Semantics Forward_Declaration_Union_Types {
+    text = '''It is allowed for a union type to refer to a record type
+              declared later in the same `.rsl` file, regardless of the
+              order in which types are declared.'''
+  }  
+
+  Static_Semantics Forward_Declaration_Checks {
+    text = '''The `check` statement in an `.rsl` file cannot refer to a 
+              record type declared later in the same `.rsl` file.'''
+  }
+
+  Recommendation Forward_Declaration_Resolution_Order {
+    text = '''It is recommended to resolve the forward references in an
+              implementation. If the referenced type cannot be found, 
+              the implementation shall report a static error instead of 
+              accepting an unresolved or recursive reference.'''
+  }
+
+  Recommendation Forward_Reference_Resolution {
+    text = '''It is recommended that the implementation must resolve every
+              referenced name that is declared later in the same '.rsl' 
+              file before a type, record object, or check is accepted in 
+              '.rsl' file. The implementation shall report a static error 
+              if any required declaration cannot be found.'''
+  }
+
 }
