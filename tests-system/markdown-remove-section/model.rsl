@@ -1,0 +1,6 @@
+package demo_pkg
+
+type DemoGreeting {
+  summary  String
+  severity Integer
+}

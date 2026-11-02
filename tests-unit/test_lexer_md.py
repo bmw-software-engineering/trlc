@@ -4,6 +4,7 @@ from fractions import Fraction
 from trlc import ast as trlc_ast
 from trlc.errors import Location, Message_Handler, TRLC_Error, Kind
 from trlc.lexer_md import MD_Lexer
+from trlc.trlc_markdown_parser import TrlcMarkdownParser
 
 
 class ListHandler(Message_Handler):
@@ -122,10 +123,11 @@ class TestLexerMd(unittest.TestCase):
         )
 
     def test_heading_and_rule_helpers(self):
-        self.assertEqual(MD_Lexer._parse_heading("### Record Name"), (3, "Record Name"))
-        self.assertEqual(MD_Lexer._parse_heading("## Section"), (2, "Section"))
+        self.assertEqual(MD_Lexer._parse_heading("## Record Name"), (2, "Record Name"))
+        self.assertEqual(MD_Lexer._parse_heading("### Field Name"), (3, "Field Name"))
         self.assertEqual(MD_Lexer._parse_heading("###"), (0, None))
         self.assertEqual(MD_Lexer._parse_heading("#NotAHeading"), (0, None))
+        self.assertEqual(MD_Lexer._parse_heading("#### NotAllowed"), (4, "NotAllowed"))
 
         self.assertTrue(MD_Lexer._is_hr("<hr>"))
         self.assertTrue(MD_Lexer._is_hr("<hr><br><hr/>"))
@@ -303,21 +305,19 @@ class TestLexerMd(unittest.TestCase):
         lexer._emit_value("item_a @ 1", Location("test"))
         self.assertEqual(token_pairs(lexer), [("STRING", "item_a @ 1")])
 
-    def test_process_preamble_section_and_record(self):
+    def test_process_preamble_and_record(self):
         content = "\n".join(
             [
                 "# DemoPkg",
                 "import OtherPkg",
                 "",
-                "## Overview",
-                "",
-                "### Req_1",
+                "## Req_1",
                 "| Property | Value |",
                 "|----------|-------|",
                 "| type | Requirement |",
                 "| priority | 7 |",
                 "",
-                "#### notes",
+                "### notes",
                 "Hello, world!",
                 "",
                 "<hr>",
@@ -340,9 +340,6 @@ class TestLexerMd(unittest.TestCase):
         self.assertEqual(
             token_pairs(lexer),
             [
-                ("KEYWORD", "##"),
-                ("STRING", "Overview"),
-                ("C_BRA", None),
                 ("IDENTIFIER", "OtherPkg"),
                 ("DOT", None),
                 ("IDENTIFIER", "Requirement"),
@@ -355,8 +352,197 @@ class TestLexerMd(unittest.TestCase):
                 ("ASSIGN", None),
                 ("STRING", "Hello, world!"),
                 ("C_KET", None),
-                ("C_KET", None),
             ],
+        )
+
+    def test_markdown_recovery_skips_bad_record_and_keeps_valid_one(self):
+        # lobster-trace: LRM.TRLC_Files
+        # Recovery must skip a broken record and resume at the next valid record without
+        # producing a second EOF/unexpected-brace error in the parser.
+        stab = trlc_ast.Symbol_Table.create_global_table(self.mh)
+        package = trlc_ast.Package("DemoPkg", Location("test"), stab, False)
+        stab.table[trlc_ast.Symbol_Table.simplified_name(package.name)] = package
+
+        record_type = trlc_ast.Record_Type(
+            "Requirement",
+            None,
+            Location("test"),
+            package,
+            None,
+            False,
+        )
+        package.symbols.table[trlc_ast.Symbol_Table.simplified_name("Requirement")] = (
+            record_type
+        )
+        record_type.components.table["priority"] = trlc_ast.Composite_Component(
+            "priority",
+            None,
+            Location("test"),
+            record_type,
+            trlc_ast.Builtin_Integer(),
+            False,
+        )
+        record_type.components.table["notes"] = trlc_ast.Composite_Component(
+            "notes",
+            None,
+            Location("test"),
+            record_type,
+            trlc_ast.Builtin_String(),
+            False,
+        )
+
+        content = "\n".join(
+            [
+                "# DemoPkg",
+                "",
+                "## Bad_Req",
+                "| Property | Value |",
+                "|----------|-------|",
+                "| priority | 7 |",
+                "",
+                "## Good_Req",
+                "| Property | Value |",
+                "|----------|-------|",
+                "| type | Requirement |",
+                "| priority | 7 |",
+                "",
+                "### notes",
+                "ok",
+                "",
+                "<hr>",
+            ]
+        )
+
+        lexer = MD_Lexer(self.mh, "test.trlc.md", content)
+        parser = TrlcMarkdownParser(
+            self.mh,
+            stab,
+            "test.trlc.md",
+            lint_mode=True,
+            error_recovery=True,
+            primary_file=True,
+            lexer=lexer,
+        )
+        parser.parse_preamble("trlc")
+        lexer.prepare_phase2(stab)
+        parser.ct = None
+        parser.advance()
+
+        self.assertTrue(parser.parse_trlc_file())
+        self.assertEqual([obj.name for obj in parser.cu.items], ["Good_Req"])
+        self.assertEqual(
+            len(self.mh.messages),
+            1,
+        )
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "record heading 'Bad_Req' has no 'type' property in its property table; record will be skipped",
+        )
+
+    def test_two_valid_records_are_separated_by_second_record_heading(self):
+        stab = trlc_ast.Symbol_Table.create_global_table(self.mh)
+        package = trlc_ast.Package("DemoPkg", Location("test"), stab, False)
+        stab.table[trlc_ast.Symbol_Table.simplified_name(package.name)] = package
+
+        for name in ("Requirement",):
+            record_type = trlc_ast.Record_Type(
+                name,
+                None,
+                Location("test"),
+                package,
+                None,
+                False,
+            )
+            package.symbols.table[trlc_ast.Symbol_Table.simplified_name(name)] = (
+                record_type
+            )
+            record_type.components.table["priority"] = trlc_ast.Composite_Component(
+                "priority",
+                None,
+                Location("test"),
+                record_type,
+                trlc_ast.Builtin_Integer(),
+                False,
+            )
+            record_type.components.table["notes"] = trlc_ast.Composite_Component(
+                "notes",
+                None,
+                Location("test"),
+                record_type,
+                trlc_ast.Builtin_String(),
+                False,
+            )
+
+        content = "\n".join(
+            [
+                "# DemoPkg",
+                "",
+                "## Req_1",
+                "| Property | Value |",
+                "|----------|-------|",
+                "| type | Requirement |",
+                "| priority | 7 |",
+                "",
+                "### notes",
+                "first",
+                "",
+                "<hr>",
+                "",
+                "## Req_2",
+                "| Property | Value |",
+                "|----------|-------|",
+                "| type | Requirement |",
+                "| priority | 9 |",
+                "",
+                "### notes",
+                "second",
+                "",
+                "<hr>",
+            ]
+        )
+
+        lexer = MD_Lexer(self.mh, "test.trlc.md", content)
+        parser = TrlcMarkdownParser(
+            self.mh,
+            stab,
+            "test.trlc.md",
+            lint_mode=True,
+            error_recovery=True,
+            primary_file=True,
+            lexer=lexer,
+        )
+        parser.parse_preamble("trlc")
+        lexer.prepare_phase2(stab)
+        parser.ct = None
+        parser.advance()
+
+        self.assertTrue(parser.parse_trlc_file())
+        self.assertEqual([obj.name for obj in parser.cu.items], ["Req_1", "Req_2"])
+
+    def test_invalid_top_level_h4_heading_is_rejected(self):
+        lexer = MD_Lexer(self.mh, "test.trlc.md", "# DemoPkg\n\n#### NotAllowed\n")
+
+        with self.assertRaises(TRLC_Error) as exc:
+            lexer.prepare_phase2(trlc_ast.Symbol_Table())
+
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "heading level 4 and above is not valid in .trlc.md; use '##' for records and '###' for fields",
+        )
+        self.assertEqual(
+            exc.exception.message,
+            "heading level 4 and above is not valid in .trlc.md; use '##' for records and '###' for fields",
+        )
+
+    def test_invalid_h4_heading_outside_field_is_rejected(self):
+        lexer = MD_Lexer(self.mh, "test.trlc.md", "# DemoPkg\n\n#### NotAllowed\n")
+
+        with self.assertRaises(TRLC_Error):
+            lexer.prepare_phase2(trlc_ast.Symbol_Table())
+
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "heading level 4 and above is not valid in .trlc.md; use '##' for records and '###' for fields",
         )
 
     def test_preamble_nested_package_and_wildcard_import(self):
@@ -460,9 +646,7 @@ class TestLexerMd(unittest.TestCase):
             [
                 "# DemoPkg",
                 "",
-                "## Overview",
-                "",
-                "### Req_1",
+                "## Req_1",
                 "",
                 "| Property | Value |",
                 "|----------|-------|",
@@ -481,8 +665,8 @@ class TestLexerMd(unittest.TestCase):
                 break
             tokens.append(token)
 
-        type_row_tokens = [token for token in tokens if token.location.line_no == 9]
-        heading_tokens = [token for token in tokens if token.location.line_no == 5]
+        type_row_tokens = [token for token in tokens if token.location.line_no == 7]
+        heading_tokens = [token for token in tokens if token.location.line_no == 3]
 
         self.assertEqual(
             [(token.kind, token.value) for token in type_row_tokens],
