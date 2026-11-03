@@ -12,7 +12,8 @@ Use `.trlc.md` when you want to define TRLC requirements in Markdown while keepi
 
 ```md
 # PackageName
-import SomePackage
+import SomePackage <br>
+import AnotherPackage
 
 ## RecordIdentifier
 | Property | Value |
@@ -35,7 +36,7 @@ You can continue writing text on multiple lines.
 | Markdown construct                    | Meaning                                    | Rule / Constraint                                                                                                                                     | Description                                                                                                                                                                                         |
 | ------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `# PackageName`                       | Package declaration                        | Must be exactly one whitespace-free token. May be a nested package name, i.e. identifier-safe segments separated by `.` (for example `# ns.app`).     | Groups and organizes all requirements defined in the file under one namespace. Can be imported by other `.trlc.md` files to reference its types and values.                                         |
-| `import pkg`                          | Import package declaration                 | Allows zero or more imports, directly after the package declaration. Nested names (`import ns.base`) and wildcards (`import ns.*`) are supported.      | Makes the types and enum values defined in another package available in current files. Each `import` statement accepts exactly one package name; use multiple `import` lines for multiple packages. |
+| `import pkg`                          | Import package declaration                 | Allows zero or more imports, directly after the package declaration. Nested names (`import ns.base`) and wildcards (`import ns.*`) are supported. See "Packages and Imports" below for how `<br>` tags between imports are handled. | Makes the types and enum values defined in another package available in current files. Each `import` statement accepts exactly one package name; use multiple `import` lines for multiple packages. |
 | `## RequirementName`                 | Requirement/record name declaration        | Heading text must already be a valid TRLC identifier.                                                                                                 | Declares a named requirement object. The name is the unique identifier of this requirement within the package.                                                                                       | 
 | Requirement property table            | Requirement property and field assignments | Mandatory under each `##`. Table should follow this format: `\| Property \| Value \|`, `\|----\|----\|`, then one or more `\| key \| value \|` rows. | Defines key-value properties for the requirement/record. The header and separator are for table structure/readability, and each data row maps to a field assignment.                                |
 | `type` property row                   | Requirement/record type declaration        | Mandatory once per requirement block; value must match the record type name defined in RSL (case-sensitive).                                          | Record is opened only when the `type` row is found. Without it, the requirement block is skipped.                                                                                                   |
@@ -58,6 +59,14 @@ the same package semantics as `.trlc` files:
   below it visible
 - the same diagnostics, e.g. importing the current package, importing the
   same package twice, or referring to an unknown package
+
+Some Markdown exporters write adjacent imports on one line, joined by an
+HTML break tag, e.g. `import base<br>import support`. A genuine `<br>`,
+`<br/>`, or `<BR>` tag between two `import` clauses is treated exactly like
+a newline, so this is accepted as if it were two separate `import` lines.
+Only a real break tag is recognized this way; any other `<...>` markup is
+left as-is and will be rejected as an invalid package name, the same as it
+would be on a single `import` line.
 
 Unlike a plain `import ns`, a wildcard import `import ns.*` does not enable
 using an **unqualified** type name for records declared directly in `ns`.
@@ -87,7 +96,7 @@ declared before `ns.app` can be used.
 - Always include a `type` row in that table.
 - A property can be defined either in the property table (`| key | value |`) or using a `### FieldName` block.
 - Keep the first table row as a header row (`Property | Value`).
-- Use `<hr>` and `<hr><br><hr>` only for readability.
+- Use `<hr>` and `<hr><br><hr>` for readability; `<br>` is also accepted as a line-break for import statements.
 
 ## Tuple-Reference Arrays
 

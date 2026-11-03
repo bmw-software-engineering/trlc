@@ -1,0 +1,5 @@
+package support
+
+type Status {
+  state String
+}

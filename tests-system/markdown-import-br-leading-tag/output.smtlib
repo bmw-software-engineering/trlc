@@ -1,0 +1,2 @@
+import <br> base
+       ^ markdown-import-br-leading-tag/requirements.trlc.md:3: error: a <br> tag is not allowed between 'import' and the package name
