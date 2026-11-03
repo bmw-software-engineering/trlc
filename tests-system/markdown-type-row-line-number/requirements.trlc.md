@@ -1,8 +1,6 @@
 # TypeRowLineTest
 
-## Requirements
-
-### REQ_001
+## REQ_001
 
 | Property    | Value                                  |
 |-------------|----------------------------------------|
