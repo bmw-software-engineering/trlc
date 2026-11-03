@@ -1,16 +1,12 @@
 # hello_pkg
 
-## Greetings
-
-<hr>
-
-### Hello_World
+## Hello_World
 | Property | Value    |
 |----------|----------|
 | type     | Greeting |
 | priority | 1        |
 
-#### message
+### message
 Hello, world!
 
 <hr><br><hr>

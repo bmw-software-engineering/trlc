@@ -1,8 +1,6 @@
 # MdArrayTest
 
-## Requirements
-
-### REQ_TABLE_A_BRACKET
+## REQ_TABLE_A_BRACKET
 
 | identifier  | REQ_TABLE_A_BRACKET                             |
 |-------------|--------------------------------------------------|

@@ -1,4 +1,4 @@
-# Treat Requirements Like Code (TRLC)
+# Treat Requirements Like Code (TRLC)n
 TRLC is a domain-specific language developed at BMW for writing (and
 linking) requirements with meta-data.
 
