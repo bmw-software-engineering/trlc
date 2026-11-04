@@ -642,15 +642,8 @@ class Source_Manager:
                     ok = False
                     self.mh.error(
                         location=typ.location,
-                        message=(
-                            "type %s is used before its declaration, but no "
-                            "matching declaration was found" % typ.name
-                        ),
-                        explanation=(
-                            "declare %s in this package before using it, or move "
-                            "the reference to a point after the actual declaration"
-                            % typ.name
-                        ),
+                        message=f"unknown symbol {typ.name}",
+                        explanation=(f"{typ.name} is used here but never declared; "),
                         fatal=False,
                     )
         return ok
