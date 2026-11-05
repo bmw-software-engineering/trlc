@@ -349,6 +349,7 @@ class Parser(Parser_Base):
         self.section = []
         self.default_scope = ast.Scope()
         self.default_scope.push(self.stab)
+        self.unavailable_tuple_types = set()
 
         # "rsl" or "trlc"; set by parse_preamble. Remains None only until
         # parse_preamble runs; code that reads this (e.g.
@@ -497,7 +498,9 @@ class Parser(Parser_Base):
         self.cu.mark_import_used(pkg)
         return pkg, self.ct
 
-    def parse_qualified_name(self, scope, required_subclass=None, match_ident=True):
+    def parse_qualified_name(
+        self, scope, required_subclass=None, match_ident=True, allow_forward=False
+    ):
         # lobster-trace: LRM.Qualified_Name
         # lobster-trace: LRM.Valid_Qualifier
         # lobster-trace: LRM.Valid_Name
@@ -507,15 +510,60 @@ class Parser(Parser_Base):
 
         if match_ident:
             self.match("IDENTIFIER")
+
+        if not scope.contains(self.ct.value):
+            if (
+                allow_forward
+                and self.file_kind == "rsl"
+                and required_subclass in (ast.Type, ast.Record_Type)
+                and self.ct.value not in self.unavailable_tuple_types
+                and self.cu.package is not None
+                and self.cu.package.symbols is not None
+            ):
+                forward_decl = ast.Record_Type(
+                    name=self.ct.value,
+                    description=None,
+                    location=self.ct.location,
+                    package=self.cu.package,
+                    n_parent=None,
+                    is_abstract=False,
+                )
+                forward_decl.mark_forward_decl()
+                forward_decl.set_forward_decl_context(None)
+                self.cu.package.symbols.register(self.mh, forward_decl)
+                forward_decl.set_ast_link(self.ct)
+                return forward_decl
+
         sym = scope.lookup(self.mh, self.ct)
         sym.set_ast_link(self.ct)
 
         if isinstance(sym, ast.Package):
             pkg, t_member = self.descend_sub_packages(sym, self.ct)
-            return pkg.symbols.lookup(self.mh, t_member, required_subclass)
+            sym = pkg.symbols.lookup(self.mh, t_member, required_subclass)
         else:
-            # Easiest way to generate the correct error message
-            return scope.lookup(self.mh, self.ct, required_subclass)
+            sym = scope.lookup(self.mh, self.ct, required_subclass)
+
+        if (
+            isinstance(sym, ast.Concrete_Type)
+            and sym.n_package is self.cu.package
+            and sym.name in self.unavailable_tuple_types
+        ):
+            self.mh.error(
+                self.ct.location,
+                f"unknown symbol {self.ct.value}",
+                explanation=f"declare {self.ct.value} before using it here",
+            )
+        if (
+            isinstance(sym, ast.Concrete_Type)
+            and sym.is_forward_decl()
+            and not allow_forward
+        ):
+            self.mh.error(
+                self.ct.location,
+                f"unknown symbol {self.ct.value}",
+                explanation=f"declare {self.ct.value} before using it here",
+            )
+        return sym
 
     def parse_type_declaration(self):
         # lobster-trace: LRM.Type_Declarations
@@ -534,13 +582,41 @@ class Parser(Parser_Base):
         t_enum = self.ct
         name, description, t_description = self.parse_described_name()
 
-        enum = ast.Enumeration_Type(
-            name=name.value,
-            description=description,
-            location=name.location,
-            package=self.cu.package,
+        existing = self.cu.package.symbols.lookup_assuming(
+            self.mh, name.value, ast.Concrete_Type
         )
-        self.cu.package.symbols.register(self.mh, enum)
+        if existing is not None and existing.is_forward_decl():
+            if existing.get_forward_decl_context() == "tuple_field":
+                self.mh.error(
+                    existing.location,
+                    f"unknown symbol {name.value}",
+                    fatal=False,
+                )
+            enum = existing
+            union_use = existing.get_forward_union_use()
+            enum.__class__ = ast.Enumeration_Type
+            enum.clear_forward_decl()
+            enum.description = description
+            enum.location = name.location
+            if not hasattr(enum, "literals"):
+                enum.literals = ast.Symbol_Table()
+            if union_use is not None:
+                # Reported here, rather than only by the linter, so that
+                # --no-lint cannot make an invalid union valid. Fatal, so
+                # later checks never see the enum inside a union.
+                self.mh.error(
+                    union_use,
+                    f"Enumeration_Type {name.value} is not a Record_Type",
+                    explanation=("all members of a union type must be record types"),
+                )
+        else:
+            enum = ast.Enumeration_Type(
+                name=name.value,
+                description=description,
+                location=name.location,
+                package=self.cu.package,
+            )
+            self.cu.package.symbols.register(self.mh, enum)
         enum.set_ast_link(t_enum)
         enum.set_ast_link(name)
         if t_description:
@@ -598,7 +674,11 @@ class Parser(Parser_Base):
             # lobster-trace: LRM.union_type
             field_type = self.parse_union_type()
         else:
-            field_type = self.parse_qualified_name(self.default_scope, ast.Type)
+            field_type = self.parse_qualified_name(
+                self.default_scope, ast.Type, allow_forward=True
+            )
+            if isinstance(field_type, ast.Record_Type) and field_type.is_forward_decl():
+                field_type.set_forward_decl_context("tuple_field")
         comp = ast.Composite_Component(
             name=field_name.value,
             description=field_description,
@@ -620,13 +700,51 @@ class Parser(Parser_Base):
         self.match_kw("tuple")
         t_tuple = self.ct
         name, description, t_descr = self.parse_described_name()
+        self.unavailable_tuple_types.add(name.value)
 
-        n_tuple = ast.Tuple_Type(
-            name=name.value,
-            description=description,
-            location=name.location,
-            package=self.cu.package,
+        existing = self.cu.package.symbols.lookup_assuming(
+            self.mh, name.value, ast.Concrete_Type
         )
+        if existing is not None and existing.is_forward_decl():
+            used_by_tuple_field = existing.get_forward_decl_context() == "tuple_field"
+            union_use = existing.get_forward_union_use()
+            forward_use_location = existing.location
+            n_tuple = existing
+            n_tuple.__class__ = ast.Tuple_Type
+            n_tuple.clear_forward_decl()
+            n_tuple.description = description
+            n_tuple.location = name.location
+            n_tuple.components = ast.Symbol_Table()
+            n_tuple.separators = []
+            if used_by_tuple_field:
+                # A tuple field may not refer forward to a tuple. This
+                # also rules out cycles between tuples (A -> B -> A),
+                # which would have infinite size. The error must be
+                # fatal: continuing would leave a cyclic type graph
+                # behind for the linter and VCG to trip over. The stub
+                # was converted above so that it is not additionally
+                # reported as never declared.
+                self.mh.error(
+                    forward_use_location,
+                    f"unknown symbol {name.value}",
+                    explanation=(
+                        f"tuple {name.value} is declared later in the file; "
+                        "declare it before the tuple field that uses it"
+                    ),
+                )
+            if union_use is not None:
+                self.mh.error(
+                    union_use,
+                    f"Tuple_Type {name.value} is not a Record_Type",
+                    explanation=("all members of a union type must be record types"),
+                )
+        else:
+            n_tuple = ast.Tuple_Type(
+                name=name.value,
+                description=description,
+                location=name.location,
+                package=self.cu.package,
+            )
 
         n_tuple.set_ast_link(t_tuple)
         n_tuple.set_ast_link(name)
@@ -699,9 +817,9 @@ class Parser(Parser_Base):
                         " may not contain another tuple with separators" % n_tuple.name,
                     )
 
-        # Late registration to avoid recursion in tuples
-        # lobster-trace: LRM.Tuple_Field_Types
-        self.cu.package.symbols.register(self.mh, n_tuple)
+        self.unavailable_tuple_types.remove(name.value)
+        if existing is not n_tuple:
+            self.cu.package.symbols.register(self.mh, n_tuple)
 
         return n_tuple
 
@@ -718,15 +836,39 @@ class Parser(Parser_Base):
         t_s_bra = self.ct
 
         union_type_entries = []  # list of (Record_Type, Location)
-        first_type = self.parse_qualified_name(self.default_scope, ast.Record_Type)
+        first_type = self.parse_qualified_name(
+            self.default_scope, ast.Record_Type, allow_forward=True
+        )
         first_type.set_ast_link(self.ct)
-        union_type_entries.append((first_type, self.ct.location))
+        if isinstance(first_type, ast.Record_Type) and first_type.is_forward_decl():
+            first_type.set_forward_union_use(self.ct.location)
+        if not isinstance(first_type, ast.Record_Type):
+            self.mh.error(
+                self.ct.location,
+                f"{first_type.__class__.__name__} {first_type.name} "
+                "is not a Record_Type",
+                fatal=False,
+            )
+        else:
+            union_type_entries.append((first_type, self.ct.location))
 
         while self.peek("COMMA"):
             self.match("COMMA")
-            next_type = self.parse_qualified_name(self.default_scope, ast.Record_Type)
+            next_type = self.parse_qualified_name(
+                self.default_scope, ast.Record_Type, allow_forward=True
+            )
             next_type.set_ast_link(self.ct)
-            union_type_entries.append((next_type, self.ct.location))
+            if isinstance(next_type, ast.Record_Type) and next_type.is_forward_decl():
+                next_type.set_forward_union_use(self.ct.location)
+            if not isinstance(next_type, ast.Record_Type):
+                self.mh.error(
+                    self.ct.location,
+                    f"{next_type.__class__.__name__} {next_type.name} "
+                    "is not a Record_Type",
+                    fatal=False,
+                )
+            else:
+                union_type_entries.append((next_type, self.ct.location))
 
         self.match("S_KET")
         t_s_ket = self.ct
@@ -761,7 +903,9 @@ class Parser(Parser_Base):
         if self.peek("S_BRA"):
             c_typ = self.parse_union_type()
         else:
-            c_typ = self.parse_qualified_name(self.default_scope, ast.Type)
+            c_typ = self.parse_qualified_name(
+                self.default_scope, ast.Type, allow_forward=True
+            )
             c_typ.set_ast_link(self.ct)
 
         if self.peek("S_BRA"):
@@ -856,15 +1000,42 @@ class Parser(Parser_Base):
                 ),
             )
 
-        record = ast.Record_Type(
-            name=name.value,
-            description=description,
-            location=name.location,
-            package=self.cu.package,
-            n_parent=root_record,
-            is_abstract=is_abstract,
+        existing = self.cu.package.symbols.lookup_assuming(
+            self.mh, name.value, ast.Concrete_Type
         )
-        self.cu.package.symbols.register(self.mh, record)
+        if existing is not None and existing.is_forward_decl():
+            record = existing
+            record.clear_forward_decl()
+            record.parent = root_record
+            record.is_abstract = is_abstract
+            record.description = description
+            record.location = name.location
+            record.components = ast.Symbol_Table(
+                root_record.components if root_record else None
+            )
+            record.frozen = {}
+            record.is_final = root_record.is_final if root_record else False
+        else:
+            record = ast.Record_Type(
+                name=name.value,
+                description=description,
+                location=name.location,
+                package=self.cu.package,
+                n_parent=root_record,
+                is_abstract=is_abstract,
+            )
+            self.cu.package.symbols.register(self.mh, record)
+
+        record.parent = root_record
+        record.is_abstract = is_abstract
+        record.description = description
+        record.location = name.location
+        if root_record is not None:
+            record.components = ast.Symbol_Table(root_record.components)
+        else:
+            record.components = ast.Symbol_Table()
+        record.frozen = {}
+        record.is_final = root_record.is_final if root_record else False
         if is_abstract:
             record.set_ast_link(t_abstract)
         if is_final:
@@ -1634,6 +1805,10 @@ class Parser(Parser_Base):
                     # lobster-trace: LRM.Union_Type_Field_Type_Conflict
                     # lobster-trace: LRM.Union_Type_Field_Access_Validity
                     field_name = t_field.value
+                    # A forward-declared stub may have turned into a
+                    # non-record type (already reported); abort this
+                    # check instead of inspecting that member.
+                    n_name.typ.ensure_record_members()
                     field_map = n_name.typ.get_field_map()
                     if field_name not in field_map:
                         self.mh.error(

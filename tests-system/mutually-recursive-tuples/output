@@ -1,0 +1,4 @@
+item B
+     ^ mutually-recursive-tuples/demo.rsl:4: error: unknown symbol B
+     | tuple B is declared later in the file; declare it before the tuple field that uses it
+Processed 1 model and 0 requirement files and found 1 error

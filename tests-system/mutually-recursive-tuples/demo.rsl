@@ -1,0 +1,11 @@
+package demo
+
+tuple A {
+  item B
+  version Integer
+}
+
+tuple B {
+  item A
+  version Integer
+}

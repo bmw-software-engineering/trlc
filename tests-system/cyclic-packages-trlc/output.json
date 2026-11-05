@@ -1,0 +1,11 @@
+{
+  "one": {
+    "link": "B.two",
+    "text": "one"
+  },
+  "two": {
+    "link": "A.one",
+    "text": "two"
+  }
+}
+Processed 1 model and 2 requirement files and found no issues

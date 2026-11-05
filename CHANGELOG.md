@@ -27,7 +27,9 @@ generated in the following situations:
 
 ### 3.1.2-dev
 
-
+* [TRLC] A type may now be used before its declaration within the same
+  `.rsl` file, as the type of a record component, the type of a tuple
+  field, or a member of a union type.
 
 ### 3.1.1
 

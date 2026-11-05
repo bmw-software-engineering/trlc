@@ -1,0 +1,6 @@
+package Base
+
+type Req {
+  text String
+  link optional Req
+}

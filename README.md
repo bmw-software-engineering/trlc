@@ -15,6 +15,48 @@ correct in following the language definition. The tools also include a
 powerful static analysis tool to find issues with types and
 user-defined check rules.
 
+### Language note
+
+In a `.rsl` file, a type may be used before the place where it is
+declared in the same file. This is allowed for:
+
+* the type of a record component,
+* the type of a tuple field, if that type is a record,
+* a record type used as a member of a union type.
+
+Example:
+
+```rsl
+package demo
+
+type Requirement {
+  position Coordinate
+}
+
+tuple Coordinate {
+  x Integer
+  y Integer
+}
+```
+
+This is valid: `Requirement` uses `Coordinate` before the line that declares it.
+
+The following are not supported:
+
+* A tuple field that refers to a tuple declared later in the file. This
+  includes mutually recursive tuples (`A` contains `B`, `B` contains
+  `A`). Declare the inner tuple first.
+* A record that extends a type declared later in the file. Declare
+  the base type earlier.
+* A check that uses a field of a record type declared after the check.
+  Declare the record type first.
+
+Note:
+
+* Tuples remain acyclic (because they are inline objects)
+* Type inheritance graph remains acyclic
+* Package import graph remains acyclic
+
 The Python implementation can be used for several purposes:
 
 * It can be used to validate other TRLC implementations.

@@ -19,6 +19,12 @@ py_test(
 )
 
 py_test(
+    name = "test_parser",
+    srcs = ["test_parser.py"],
+    deps = ["//trlc"],
+)
+
+py_test(
     name = "test_lexer_base",
     srcs = ["test_lexer_base.py"],
     deps = ["//trlc"],
@@ -45,5 +51,6 @@ test_suite(
         ":test_lexer_base",
         ":test_lexer_md",
         ":test_nested_packages",
+        ":test_parser",
     ],
 )
