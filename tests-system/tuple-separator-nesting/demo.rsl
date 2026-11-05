@@ -1,0 +1,13 @@
+package demo
+
+tuple Inner {
+  item Integer
+  separator @
+  version Integer
+}
+
+tuple Outer {
+  item Inner
+  separator @
+  version Integer
+}

@@ -151,6 +151,44 @@ class Test_Parser_Forward_References(unittest.TestCase):
         self.assertIsNotNone(stab)
         self.assertTrue(any("is not a Record_Type" in msg for _, msg in mh.messages))
 
+    def test_union_forward_enum_field_access_does_not_crash(self):
+        """Field access on a union whose member later became an enum is an error."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "forward_union_enum_access.rsl",
+                "package demo\n"
+                "type A {\n  choice [Severity]\n}\n"
+                "enum Severity {\n  HIGH\n}\n"
+                'checks A {\n  choice.foo == 1, "bad"\n}\n',
+            )
+        )
+        stab = self.process(sm)
+        self.assertIsNone(stab)
+        self.assertIn(
+            "Enumeration_Type Severity is not a Record_Type",
+            mh.error_messages(),
+        )
+
+    def test_union_forward_enum_equality_reports_root_cause(self):
+        """Comparing a union whose member later became an enum names the enum."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "forward_union_enum_eq.rsl",
+                "package demo\n"
+                "type A {\n  choice [Severity]\n}\n"
+                "enum Severity {\n  HIGH\n}\n"
+                'checks A {\n  choice == choice, "bad"\n}\n',
+            )
+        )
+        stab = self.process(sm)
+        self.assertIsNone(stab)
+        self.assertEqual(
+            mh.error_messages(),
+            ["Enumeration_Type Severity is not a Record_Type"],
+        )
+
     def test_tuple_field_cannot_forward_reference_enum(self):
         """Tuple fields may not reference an enum declared later in the same file."""
         sm, mh = make_source_manager()
@@ -176,6 +214,21 @@ class Test_Parser_Forward_References(unittest.TestCase):
             "unknown symbol Severity",
             "\n".join(mh.error_messages()),
         )
+
+    def test_mutually_recursive_tuples_are_rejected(self):
+        """Tuples may not form a cycle via a forward reference to a later tuple."""
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "mutual_tuples.rsl",
+                "package demo\n"
+                "tuple A {\n  item B\n  version Integer\n}\n"
+                "tuple B {\n  item A\n  version Integer\n}\n",
+            )
+        )
+        stab = self.process(sm)
+        self.assertIsNone(stab)
+        self.assertEqual(mh.error_messages(), ["unknown symbol B"])
 
     def test_tuple_type_self_reference_is_rejected(self):
         """A tuple may not reference itself while it is still being declared."""

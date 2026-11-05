@@ -1,0 +1,16 @@
+{
+  "req_1": {
+    "derived_from": [],
+    "description": "first"
+  },
+  "req_2": {
+    "derived_from": [
+      {
+        "item": "demo.req_1",
+        "version": 1
+      }
+    ],
+    "description": "second"
+  }
+}
+Processed 1 model and 1 requirement file and found no issues
