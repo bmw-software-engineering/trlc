@@ -1,0 +1,9 @@
+package demo
+
+type A {
+  b B
+}
+
+type C {
+  d Integer
+}
