@@ -74,8 +74,8 @@ import re
 from fractions import Fraction
 
 from trlc import ast as trlc_ast
-from trlc.lexer import Token, TRLC_Lexer
 from trlc.errors import Location, Message_Handler
+from trlc.lexer import Token, TRLC_Lexer
 from trlc.location_md import MD_Location
 
 
@@ -375,6 +375,26 @@ class MD_Lexer(TRLC_Lexer):
         )
 
     @staticmethod
+    def _integer_tuple_array_arity(record_type_ast, field_name):
+        """Return the arity of a separator-form array of integer tuples."""
+        typ = MD_Lexer._get_field_type(record_type_ast, field_name)
+        if not isinstance(typ, trlc_ast.Array_Type) or not isinstance(
+            typ.element_type, trlc_ast.Tuple_Type
+        ):
+            return None
+
+        tuple_type = typ.element_type
+        components = list(tuple_type.components.table.values())
+        if not tuple_type.has_separators() or not components:
+            return None
+        if not all(
+            isinstance(component.n_typ, trlc_ast.Builtin_Integer)
+            for component in components
+        ):
+            return None
+        return len(components)
+
+    @staticmethod
     def _is_string_field(record_type_ast, field_name):
         """Return True when *field_name* is declared as a plain String."""
         typ = MD_Lexer._get_field_type(record_type_ast, field_name)
@@ -397,12 +417,27 @@ class MD_Lexer(TRLC_Lexer):
                 self._emit(location, "STRING", raw_value.strip())
                 return
             if self._is_tuple_array_field(record_type_ast, field_name):
-                if self._check_bracket_array(raw_value, location):
+                integer_tuple_arity = self._integer_tuple_array_arity(
+                    record_type_ast, field_name
+                )
+                if self._check_bracket_array(raw_value, location, integer_tuple_arity):
+                    return
+                if integer_tuple_arity is not None:
+                    if self._maybe_emit_integer_tuple_array(
+                        raw_value, location, integer_tuple_arity
+                    ):
+                        return
+                    self._report_invalid_array_entry(
+                        raw_value,
+                        location,
+                        field_name,
+                        integer_tuple_arity,
+                    )
                     return
                 if not self._maybe_emit_array(
                     raw_value, location, allow_unqualified=True
                 ):
-                    self._emit(location, "STRING", raw_value.strip())
+                    self._report_invalid_array_entry(raw_value, location, field_name)
                 return
         self._emit_value(raw_value, location)
 
@@ -573,10 +608,42 @@ class MD_Lexer(TRLC_Lexer):
     _SEPARATOR_PUNCTUATION = {"@": "AT", ":": "COLON", ";": "SEMICOLON"}
 
     @staticmethod
+    def _strip_array_link_targets(raw_value):
+        """Keep link labels, skipping balanced and escaped destination parentheses."""
+        parts = []
+        cursor = 0
+        pattern = re.compile(r"\[([^\]]+)\]\(")
+        while cursor < len(raw_value):
+            match = pattern.search(raw_value, cursor)
+            if match is None:
+                break
+            start = match.start()
+            end = match.end()
+            depth = 1
+            while end < len(raw_value) and depth:
+                character = raw_value[end]
+                if character == "\\":
+                    end += 2
+                    continue
+                if character == "(":
+                    depth += 1
+                elif character == ")":
+                    depth -= 1
+                end += 1
+            if depth:
+                break
+            parts.append(raw_value[cursor:start])
+            parts.append(match.group(1))
+            cursor = end
+        parts.append(raw_value[cursor:])
+        return "".join(parts)
+
+    @staticmethod
     def _normalize_array_value(raw_value):
         """Normalize array value by converting various separators to comma format.
 
         Handles:
+        - markdown links (``[text](url)`` -> ``text``)
         - <br> tags (converted to newlines, then normalized)
         - Multiple spaces around @, :, ; separators (normalized to single space)
         - Identifier separators (multiple spaces collapsed to single space)
@@ -585,8 +652,8 @@ class MD_Lexer(TRLC_Lexer):
         Returns normalized string with tuple refs as
         ``"identifier <sep> integer, ..."``.
         """
-        # Replace <br> and <BR> tags with newlines for uniform processing
-        normalized = re.sub(r"<[Bb][Rr]\s*/?>", "\n", raw_value)
+        normalized = MD_Lexer._strip_array_link_targets(raw_value)
+        normalized = re.sub(r"<[Bb][Rr]\s*/?>", "\n", normalized)
 
         # Split on newlines and commas, trim each part
         parts = []
@@ -607,31 +674,12 @@ class MD_Lexer(TRLC_Lexer):
 
         return ", ".join(normalized_parts)
 
-    # Tuple-reference pattern: package-qualified identifier, separator, integer.
-    # The reference MUST contain at least one dot (Package.name) so that plain
-    # free-text values are never falsely matched.
-    # Separator is @, :, ; or a plain identifier.
-    _TUPLE_REF_RE = re.compile(
-        r"^"
-        r"(?P<ref>[a-zA-Z_]\w*\.[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)"
-        r" "
-        r"(?P<sep>[@:;]|[a-zA-Z_]\w*)"
-        r" "
-        r"(?P<ver>\d+)"
-        r"$"
-    )
-
-    # Like _TUPLE_REF_RE but the dot is optional, so unqualified same-package
-    # references (e.g. ``item @ 1``) are also accepted.  Only safe in the
-    # Phase 2 type-aware path where the field type is already known.
-    _TUPLE_REF_FLEXIBLE_RE = re.compile(
-        r"^"
+    # One tuple-reference entry: identifier (optionally package-qualified)
+    # with an optional separator and version, e.g. ``Pkg.item @ 1``,
+    # ``item @ 1`` or ``item``. The separator is @, :, ; or a plain identifier.
+    _ARRAY_REF_RE = re.compile(
         r"(?P<ref>[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*)"
-        r" "
-        r"(?P<sep>[@:;]|[a-zA-Z_]\w*)"
-        r" "
-        r"(?P<ver>\d+)"
-        r"$"
+        r"(?:\s+(?P<sep>[@:;]|[a-zA-Z_]\w*)\s*(?P<ver>\d+))?"
     )
 
     # Chunk patterns for the multi-separator tuple scanner.
@@ -651,23 +699,49 @@ class MD_Lexer(TRLC_Lexer):
         Expected format (separator may be @, :, ;, or any identifier)::
 
           identifier[.identifier]* sep integer
+          identifier[.identifier]*
           [, identifier[.identifier]* sep integer]*
 
+        Within Markdown requirement docs, a value may also appear wrapped in a
+        markdown link, e.g. ``[req@7](doc.md#req)`` or ``[req](doc.md#req)``.
+        The link text is parsed as the reference and the URL target is ignored.
+
         When *allow_unqualified* is True, unqualified same-package references
-        (e.g. ``item @ 1``) are also accepted.  Only pass True when the field
-        type is confirmed as a tuple-reference array.
+        (e.g. ``item @ 1`` or ``item``) are also accepted. Only pass True when
+        the field type is confirmed as a tuple-reference array.
         """
         normalized = MD_Lexer._normalize_array_value(raw_value)
         parts = [p.strip() for p in normalized.split(",") if p.strip()]
-        pattern = (
-            MD_Lexer._TUPLE_REF_FLEXIBLE_RE
-            if allow_unqualified
-            else MD_Lexer._TUPLE_REF_RE
+        if not parts:
+            return False
+        return all(
+            MD_Lexer._matches_array_reference(part, allow_unqualified) for part in parts
         )
-        return bool(parts) and all(pattern.match(part) for part in parts)
 
     @staticmethod
-    def _looks_like_simple_tuple(raw_value):
+    def _matches_array_reference(part, allow_unqualified=False):
+        """Return True when *part* is a reference, optionally versioned."""
+        return MD_Lexer._match_array_reference(part, allow_unqualified) is not None
+
+    @staticmethod
+    def _match_array_reference(part, allow_unqualified=False):
+        """Return the match for one array entry, or None when it is invalid.
+
+        Without *allow_unqualified* (type unknown) an entry must be
+        package-qualified and versioned, so that free text is never
+        mistaken for a reference.
+        """
+        match = MD_Lexer._ARRAY_REF_RE.fullmatch(part.strip())
+        if match is None:
+            return None
+        if not allow_unqualified and (
+            match.group("sep") is None or "." not in match.group("ref")
+        ):
+            return None
+        return match
+
+    @staticmethod
+    def _looks_like_simple_tuple(raw_value, expected_components=None):
         """Check if value looks like a separator-form tuple: num [sep num]+.
 
         Handles multi-separator patterns like 0x500:12345@6.1 or 1@2:3;4.
@@ -689,6 +763,7 @@ class MD_Lexer(TRLC_Lexer):
             return False
         pos = m.end()
         has_sep = False
+        component_count = 1
         while pos < n:
             skip_ws()
             if pos >= n:
@@ -703,7 +778,12 @@ class MD_Lexer(TRLC_Lexer):
             if not m:
                 return False
             pos = m.end()
-        return pos == n and has_sep
+            component_count += 1
+        return (
+            pos == n
+            and has_sep
+            and (expected_components is None or component_count == expected_components)
+        )
 
     def _maybe_emit_simple_tuple(self, raw_value, location):
         """Try to emit tokens for a separator-form tuple: num [sep num]+.
@@ -817,7 +897,7 @@ class MD_Lexer(TRLC_Lexer):
         except ValueError:
             return None
 
-    def _check_bracket_array(self, raw_value, location):
+    def _check_bracket_array(self, raw_value, location, integer_tuple_arity=None):
         """Detect bracket notation for tuple arrays and emit a clear error.
 
         Bracket syntax like ``[Pkg.item @ 1, Pkg.item @ 2]`` is not supported
@@ -832,7 +912,10 @@ class MD_Lexer(TRLC_Lexer):
         inner = value[1:-1].strip()
         # Only reject if the content inside the brackets actually looks like
         # tuple references – avoids false positives on URLs containing '@'
-        if not MD_Lexer._looks_like_array(inner):
+        if not MD_Lexer._looks_like_array(inner) and not (
+            integer_tuple_arity is not None
+            and MD_Lexer._looks_like_integer_tuple_array(inner, integer_tuple_arity)
+        ):
             return False
         self.mh.error(
             location,
@@ -846,20 +929,43 @@ class MD_Lexer(TRLC_Lexer):
         )
         return True
 
+    @staticmethod
+    def _looks_like_integer_tuple_array(raw_value, expected_components):
+        normalized = MD_Lexer._normalize_array_value(raw_value)
+        parts = [part.strip() for part in normalized.split(",") if part.strip()]
+        return bool(parts) and all(
+            MD_Lexer._looks_like_simple_tuple(part, expected_components)
+            for part in parts
+        )
+
+    def _maybe_emit_integer_tuple_array(self, raw_value, location, expected_components):
+        normalized = MD_Lexer._normalize_array_value(raw_value)
+        parts = [part.strip() for part in normalized.split(",") if part.strip()]
+        if not parts or not all(
+            MD_Lexer._looks_like_simple_tuple(part, expected_components)
+            for part in parts
+        ):
+            return False
+
+        self._emit(location, "S_BRA")
+        for idx, part in enumerate(parts):
+            if idx:
+                self._emit(location, "COMMA")
+            self._maybe_emit_simple_tuple(part, location)
+        self._emit(location, "S_KET")
+        return True
+
     def _maybe_emit_array(self, raw_value, location, allow_unqualified=False):
         """Try to emit array tokens for tuple-reference format.
 
         When *allow_unqualified* is True, unqualified same-package references
-        (e.g. ``item @ 1``) are also accepted.  Only safe when the field type
-        is confirmed as a tuple-reference array (Phase 2 path).
+        (e.g. ``item @ 1`` or ``item``) are also accepted. Only safe when the
+        field type is confirmed as a tuple-reference array (Phase 2 path).
 
         Recognises values of the form::
 
           Package.item sep integer [, Package.item sep integer]*
-
-        The reference must be package-qualified (contain at least one dot)
-        so that plain free-text values (e.g. ``Revision : 12``) are never
-        misinterpreted as tuple-reference arrays.
+          item [sep integer]
 
         Returns True if array was emitted, False for STRING fallback.
         """
@@ -869,39 +975,77 @@ class MD_Lexer(TRLC_Lexer):
         normalized = self._normalize_array_value(raw_value)
         parts = [p.strip() for p in normalized.split(",")]
         self._emit(location, "S_BRA")
-        pattern = (
-            MD_Lexer._TUPLE_REF_FLEXIBLE_RE
-            if allow_unqualified
-            else MD_Lexer._TUPLE_REF_RE
-        )
 
         for idx, part in enumerate(parts):
             if idx > 0:
                 self._emit(location, "COMMA")
 
-            match = pattern.match(part)
-            if match:
-                qual_ident = match.group("ref")
-                sep = match.group("sep")
-                integer = int(match.group("ver"))
+            # _looks_like_array() has validated every entry already.
+            match = MD_Lexer._match_array_reference(part, allow_unqualified)
+            ident_parts = match.group("ref").split(".")
+            for i, ident_part in enumerate(ident_parts):
+                self._emit(location, "IDENTIFIER", ident_part)
+                if i < len(ident_parts) - 1:
+                    self._emit(location, "DOT")
 
-                # Emit qualified identifier (Pkg.item → IDENTIFIER DOT IDENTIFIER)
-                ident_parts = qual_ident.split(".")
-                for i, ident_part in enumerate(ident_parts):
-                    self._emit(location, "IDENTIFIER", ident_part)
-                    if i < len(ident_parts) - 1:
-                        self._emit(location, "DOT")
-
-                # Emit separator: @→AT, :→COLON, ;→SEMICOLON, word→IDENTIFIER
+            sep = match.group("sep")
+            if sep is not None:
                 sep_kind = MD_Lexer._SEPARATOR_PUNCTUATION.get(sep, "IDENTIFIER")
                 sep_val = sep if sep_kind == "IDENTIFIER" else None
                 self._emit(location, sep_kind, sep_val)
-
-                # Emit version integer
-                self._emit(location, "INTEGER", integer)
+                self._emit(location, "INTEGER", int(match.group("ver")))
 
         self._emit(location, "S_KET")
         return True
+
+    def _report_invalid_array_entry(
+        self, raw_value, location, field_name, integer_tuple_arity=None
+    ):
+        """Report the first entry of a tuple-array value that is not a reference.
+
+        Emits an empty array afterwards so the parser does not add a
+        misleading follow-up error for the same value.
+        """
+        normalized = self._normalize_array_value(raw_value)
+        parts = [p.strip() for p in normalized.split(",") if p.strip()]
+        if integer_tuple_arity is None:
+            invalid = next(
+                (p for p in parts if self._match_array_reference(p, True) is None),
+                raw_value.strip(),
+            )
+            message = (
+                f"invalid entry '{invalid}' in tuple-reference array field "
+                f"'{field_name}'"
+            )
+            explanation = (
+                "Use an identifier with an optional version, e.g. 'item' or "
+                "'item @ 1'. Identifiers may only contain letters, digits "
+                "and underscores."
+            )
+        else:
+            invalid = next(
+                (
+                    p
+                    for p in parts
+                    if not self._looks_like_simple_tuple(p, integer_tuple_arity)
+                ),
+                raw_value.strip(),
+            )
+            message = (
+                f"invalid entry '{invalid}' in integer tuple array field '{field_name}'"
+            )
+            explanation = (
+                "Use integer tuple values with the declared separators, "
+                "e.g. '1234 @ 25'."
+            )
+        self.mh.error(
+            location,
+            message,
+            explanation=explanation,
+            fatal=False,
+        )
+        self._emit(location, "S_BRA")
+        self._emit(location, "S_KET")
 
     def _emit_value(self, raw_value, location):
         """Emit one or more tokens representing a property value.

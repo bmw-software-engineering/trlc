@@ -2,7 +2,8 @@ import unittest
 from fractions import Fraction
 
 from trlc import ast as trlc_ast
-from trlc.errors import Location, Message_Handler, TRLC_Error, Kind
+from trlc.errors import Kind, Location, Message_Handler, TRLC_Error
+from trlc.lexer import Token
 from trlc.lexer_md import MD_Lexer
 from trlc.trlc_markdown_parser import TrlcMarkdownParser
 
@@ -224,6 +225,160 @@ class TestLexerMd(unittest.TestCase):
             self.mh.pop_message()[2],
             "bracket notation for tuple-reference arrays is not supported",
         )
+
+    def test_markdown_requirement_reference_array(self):
+        _stab, record_type = make_record_type()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(
+            "[requ1@26](document.md#requ1), requ2@27, requ3@28, "
+            "[requ4@29](to-be-ignored.md#whatever), requ5, "
+            "[requ6](also-to-be-ignored.md#whatever), "
+            "[requ7](some totally unrelated string)",
+            Location("test"),
+            record_type,
+            "refs",
+        )
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("IDENTIFIER", "requ1"),
+                ("AT", None),
+                ("INTEGER", 26),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ2"),
+                ("AT", None),
+                ("INTEGER", 27),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ3"),
+                ("AT", None),
+                ("INTEGER", 28),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ4"),
+                ("AT", None),
+                ("INTEGER", 29),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ5"),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ6"),
+                ("COMMA", None),
+                ("IDENTIFIER", "requ7"),
+                ("S_KET", None),
+            ],
+        )
+
+    def test_numeric_codebeamer_reference_array(self):
+        stab = trlc_ast.Symbol_Table()
+        package = trlc_ast.Package("DemoPkg", Location("test"), stab, False)
+        record_type = trlc_ast.Record_Type(
+            "Requirement", None, Location("test"), package, None, False
+        )
+        tuple_type = trlc_ast.Tuple_Type(
+            "Codebeamer_Reference", None, Location("test"), package
+        )
+        for index, name in enumerate(("item_id", "version")):
+            tuple_type.components.table[name] = trlc_ast.Composite_Component(
+                name,
+                None,
+                Location("test"),
+                tuple_type,
+                trlc_ast.Builtin_Integer(),
+                False,
+            )
+            if index == 0:
+                tuple_type.add_separator(
+                    trlc_ast.Separator(Token(Location("test"), "AT"))
+                )
+        array_type = trlc_ast.Array_Type(
+            Location("test"),
+            tuple_type,
+            Location("test"),
+            0,
+            Location("test"),
+            None,
+        )
+        record_type.components.table["references"] = trlc_ast.Composite_Component(
+            "references",
+            None,
+            Location("test"),
+            record_type,
+            array_type,
+            False,
+        )
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(
+            "[1234@25](codebeamer.md#1234),\n5678@26",
+            Location("test"),
+            record_type,
+            "references",
+        )
+
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("INTEGER", 1234),
+                ("AT", None),
+                ("INTEGER", 25),
+                ("COMMA", None),
+                ("INTEGER", 5678),
+                ("AT", None),
+                ("INTEGER", 26),
+                ("S_KET", None),
+            ],
+        )
+
+    def test_reference_link_destinations_with_parentheses(self):
+        _stab, record_type = make_record_type()
+        destinations = (
+            "docs/req_(legacy).md",
+            "docs/req_(legacy_(v2)).md",
+            r"docs/req_\(legacy\).md",
+            r"docs/req_legacy\).md",
+            "docs/req_(legacy,archived).md",
+        )
+        for destination in destinations:
+            for separator in (", ", "\n", "<br>"):
+                with self.subTest(destination=destination, separator=separator):
+                    lexer = MD_Lexer(self.mh, "test", "")
+                    lexer._emit_field_value(
+                        f"[requ1@26]({destination}){separator}[requ2](doc.md)",
+                        Location("test"),
+                        record_type,
+                        "refs",
+                    )
+                    self.assertEqual(
+                        token_pairs(lexer),
+                        [
+                            ("S_BRA", None),
+                            ("IDENTIFIER", "requ1"),
+                            ("AT", None),
+                            ("INTEGER", 26),
+                            ("COMMA", None),
+                            ("IDENTIFIER", "requ2"),
+                            ("S_KET", None),
+                        ],
+                    )
+
+    def test_reference_link_targets_preserve_unclosed_destinations(self):
+        for raw_value in (
+            "[requ1@26](docs/req_(legacy).md",
+            "[requ1@26](doc.md",
+            "[requ1@26](doc.md\\",
+        ):
+            with self.subTest(raw_value=raw_value):
+                self.assertEqual(
+                    MD_Lexer._strip_array_link_targets(raw_value), raw_value
+                )
+
+    def test_string_field_preserves_link_destination_parentheses(self):
+        _stab, record_type = make_record_type()
+        raw_value = "[requ1@26](docs/req_(legacy).md)"
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(raw_value, Location("test"), record_type, "notes")
+        self.assertEqual(token_pairs(lexer), [("STRING", raw_value)])
 
     def test_type_aware_field_emission(self):
         _stab, record_type = make_record_type()
@@ -543,6 +698,170 @@ class TestLexerMd(unittest.TestCase):
         self.assertEqual(
             self.mh.pop_message()[2],
             "heading level 4 and above is not valid in .trlc.md; use '##' for records and '###' for fields",
+        )
+
+    def test_process_heading_based_tuple_array_fields(self):
+        content = "\n".join(
+            [
+                "# DemoPkg",
+                "",
+                "## req_parent",
+                "| Property | Value |",
+                "|----------|-------|",
+                "| type | Requirement |",
+                "| description | parent requirement |",
+                "",
+                "### derived_from",
+                "[requ1@26](document.md#requ1)",
+                "requ2@27",
+                "requ3@28",
+                "[requ4@29](to-be-ignored.md#whatever)",
+                "requ5",
+                "[requ6](also-to-be-ignored.md#whatever)",
+                "[requ7](some totally unrelated string shall also be ignored in this first MVP)",
+                "",
+                "### some_other_array_field",
+                "requ1, requ2, requ3, [requ4@29](to-be-ignored.md#whatever), requ5, [requ6](also-to-be-ignored.md#whatever), [requ7](abcdef)",
+            ]
+        )
+
+        lexer = MD_Lexer(self.mh, "test.trlc.md", content)
+
+        stab = trlc_ast.Symbol_Table()
+        package = trlc_ast.Package("DemoPkg", Location("test"), stab, False)
+        record_type = trlc_ast.Record_Type(
+            "Requirement", None, Location("test"), package, None, False
+        )
+
+        for name in ("derived_from", "some_other_array_field"):
+            tuple_type = trlc_ast.Tuple_Type(
+                "TupleType", None, Location("test"), package
+            )
+            array_type = trlc_ast.Array_Type(
+                Location("test"),
+                tuple_type,
+                Location("test"),
+                0,
+                Location("test"),
+                None,
+            )
+            record_type.components.table[
+                trlc_ast.Symbol_Table.simplified_name(name)
+            ] = trlc_ast.Composite_Component(
+                name,
+                None,
+                Location("test"),
+                record_type,
+                array_type,
+                False,
+            )
+
+        package.symbols.table[trlc_ast.Symbol_Table.simplified_name("Requirement")] = (
+            record_type
+        )
+        stab.table[trlc_ast.Symbol_Table.simplified_name(package.name)] = package
+
+        lexer.prepare_phase2(stab)
+
+        def ref(name, version=None):
+            if version is None:
+                return [("IDENTIFIER", name)]
+            return [("IDENTIFIER", name), ("AT", None), ("INTEGER", version)]
+
+        def array(*entries):
+            result = [("S_BRA", None)]
+            for idx, entry in enumerate(entries):
+                if idx:
+                    result.append(("COMMA", None))
+                result.extend(entry)
+            result.append(("S_KET", None))
+            return result
+
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("IDENTIFIER", "Requirement"),
+                ("IDENTIFIER", "req_parent"),
+                ("C_BRA", None),
+                ("IDENTIFIER", "description"),
+                ("ASSIGN", None),
+                ("STRING", "parent requirement"),
+                ("IDENTIFIER", "derived_from"),
+                ("ASSIGN", None),
+            ]
+            + array(
+                ref("requ1", 26),
+                ref("requ2", 27),
+                ref("requ3", 28),
+                ref("requ4", 29),
+                ref("requ5"),
+                ref("requ6"),
+                ref("requ7"),
+            )
+            + [("IDENTIFIER", "some_other_array_field"), ("ASSIGN", None)]
+            + array(
+                ref("requ1"),
+                ref("requ2"),
+                ref("requ3"),
+                ref("requ4", 29),
+                ref("requ5"),
+                ref("requ6"),
+                ref("requ7"),
+            )
+            + [("C_KET", None)],
+        )
+
+    def test_untyped_heuristics_do_not_treat_bare_references_as_array(self):
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_value("item", Location("test"))
+        lexer._emit_value("Pkg.item", Location("test"))
+        lexer._emit_value("Revision : 12", Location("test"))
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("IDENTIFIER", "item"),
+                ("IDENTIFIER", "Pkg"),
+                ("DOT", None),
+                ("IDENTIFIER", "item"),
+                ("STRING", "Revision : 12"),
+            ],
+        )
+
+    def test_markdown_link_emission_depends_on_field_type(self):
+        _stab, record_type = make_record_type()
+        raw_value = "[Pkg.item @ 1](doc.md)"
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(raw_value, Location("test"), record_type, "refs")
+        lexer._emit_field_value(raw_value, Location("test"), record_type, "notes")
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("IDENTIFIER", "Pkg"),
+                ("DOT", None),
+                ("IDENTIFIER", "item"),
+                ("AT", None),
+                ("INTEGER", 1),
+                ("S_KET", None),
+                ("STRING", raw_value),
+            ],
+        )
+
+    def test_invalid_entry_in_tuple_array_field_is_reported(self):
+        _stab, record_type = make_record_type()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(
+            "[req 1](doc.md), requ2 @ 3",
+            Location("test"),
+            record_type,
+            "refs",
+        )
+        self.assertEqual(token_pairs(lexer), [("S_BRA", None), ("S_KET", None)])
+        self.assertEqual(len(self.mh.messages), 1)
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "invalid entry 'req 1' in tuple-reference array field 'refs'",
         )
 
     def test_preamble_nested_package_and_wildcard_import(self):

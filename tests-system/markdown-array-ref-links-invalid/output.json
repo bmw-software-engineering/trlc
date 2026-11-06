@@ -1,0 +1,20 @@
+markdown-array-ref-links-invalid/requirements.trlc.md:14:1: error: invalid entry 'leaf a @ 26' in tuple-reference array field 'derived_from'
+| Use an identifier with an optional version, e.g. 'item' or 'item @ 1'. Identifiers may only contain letters, digits and underscores.
+markdown-array-ref-links-invalid/requirements.trlc.md:23:1: error: invalid entry 'leaf-a' in tuple-reference array field 'derived_from'
+| Use an identifier with an optional version, e.g. 'item' or 'item @ 1'. Identifiers may only contain letters, digits and underscores.
+{
+  "leaf_a": {
+    "description": "first leaf requirement"
+  },
+  "req_parent_heading": {
+    "derived_from": [],
+    "description": "parent requirement heading form",
+    "some_other_array_field": null
+  },
+  "req_parent_table": {
+    "derived_from": [],
+    "description": "parent requirement",
+    "some_other_array_field": null
+  }
+}
+Processed 1 model and 1 requirement file and found 2 errors
