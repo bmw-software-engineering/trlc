@@ -74,8 +74,8 @@ import re
 from fractions import Fraction
 
 from trlc import ast as trlc_ast
-from trlc.lexer import Token, TRLC_Lexer
 from trlc.errors import Location, Message_Handler
+from trlc.lexer import Token, TRLC_Lexer
 from trlc.location_md import MD_Location
 
 
@@ -375,6 +375,26 @@ class MD_Lexer(TRLC_Lexer):
         )
 
     @staticmethod
+    def _integer_tuple_array_arity(record_type_ast, field_name):
+        """Return the arity of a separator-form array of integer tuples."""
+        typ = MD_Lexer._get_field_type(record_type_ast, field_name)
+        if not isinstance(typ, trlc_ast.Array_Type) or not isinstance(
+            typ.element_type, trlc_ast.Tuple_Type
+        ):
+            return None
+
+        tuple_type = typ.element_type
+        components = list(tuple_type.components.table.values())
+        if not tuple_type.has_separators() or not components:
+            return None
+        if not all(
+            isinstance(component.n_typ, trlc_ast.Builtin_Integer)
+            for component in components
+        ):
+            return None
+        return len(components)
+
+    @staticmethod
     def _is_string_field(record_type_ast, field_name):
         """Return True when *field_name* is declared as a plain String."""
         typ = MD_Lexer._get_field_type(record_type_ast, field_name)
@@ -397,7 +417,22 @@ class MD_Lexer(TRLC_Lexer):
                 self._emit(location, "STRING", raw_value.strip())
                 return
             if self._is_tuple_array_field(record_type_ast, field_name):
-                if self._check_bracket_array(raw_value, location):
+                integer_tuple_arity = self._integer_tuple_array_arity(
+                    record_type_ast, field_name
+                )
+                if self._check_bracket_array(raw_value, location, integer_tuple_arity):
+                    return
+                if integer_tuple_arity is not None:
+                    if self._maybe_emit_integer_tuple_array(
+                        raw_value, location, integer_tuple_arity
+                    ):
+                        return
+                    self._report_invalid_array_entry(
+                        raw_value,
+                        location,
+                        field_name,
+                        integer_tuple_arity,
+                    )
                     return
                 if not self._maybe_emit_array(
                     raw_value, location, allow_unqualified=True
@@ -573,6 +608,37 @@ class MD_Lexer(TRLC_Lexer):
     _SEPARATOR_PUNCTUATION = {"@": "AT", ":": "COLON", ";": "SEMICOLON"}
 
     @staticmethod
+    def _strip_array_link_targets(raw_value):
+        """Keep link labels, skipping balanced and escaped destination parentheses."""
+        parts = []
+        cursor = 0
+        pattern = re.compile(r"\[([^\]]+)\]\(")
+        while cursor < len(raw_value):
+            match = pattern.search(raw_value, cursor)
+            if match is None:
+                break
+            start = match.start()
+            end = match.end()
+            depth = 1
+            while end < len(raw_value) and depth:
+                character = raw_value[end]
+                if character == "\\":
+                    end += 2
+                    continue
+                if character == "(":
+                    depth += 1
+                elif character == ")":
+                    depth -= 1
+                end += 1
+            if depth:
+                break
+            parts.append(raw_value[cursor:start])
+            parts.append(match.group(1))
+            cursor = end
+        parts.append(raw_value[cursor:])
+        return "".join(parts)
+
+    @staticmethod
     def _normalize_array_value(raw_value):
         """Normalize array value by converting various separators to comma format.
 
@@ -586,7 +652,7 @@ class MD_Lexer(TRLC_Lexer):
         Returns normalized string with tuple refs as
         ``"identifier <sep> integer, ..."``.
         """
-        normalized = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", raw_value)
+        normalized = MD_Lexer._strip_array_link_targets(raw_value)
         normalized = re.sub(r"<[Bb][Rr]\s*/?>", "\n", normalized)
 
         # Split on newlines and commas, trim each part
@@ -675,7 +741,7 @@ class MD_Lexer(TRLC_Lexer):
         return match
 
     @staticmethod
-    def _looks_like_simple_tuple(raw_value):
+    def _looks_like_simple_tuple(raw_value, expected_components=None):
         """Check if value looks like a separator-form tuple: num [sep num]+.
 
         Handles multi-separator patterns like 0x500:12345@6.1 or 1@2:3;4.
@@ -697,6 +763,7 @@ class MD_Lexer(TRLC_Lexer):
             return False
         pos = m.end()
         has_sep = False
+        component_count = 1
         while pos < n:
             skip_ws()
             if pos >= n:
@@ -711,7 +778,12 @@ class MD_Lexer(TRLC_Lexer):
             if not m:
                 return False
             pos = m.end()
-        return pos == n and has_sep
+            component_count += 1
+        return (
+            pos == n
+            and has_sep
+            and (expected_components is None or component_count == expected_components)
+        )
 
     def _maybe_emit_simple_tuple(self, raw_value, location):
         """Try to emit tokens for a separator-form tuple: num [sep num]+.
@@ -825,7 +897,7 @@ class MD_Lexer(TRLC_Lexer):
         except ValueError:
             return None
 
-    def _check_bracket_array(self, raw_value, location):
+    def _check_bracket_array(self, raw_value, location, integer_tuple_arity=None):
         """Detect bracket notation for tuple arrays and emit a clear error.
 
         Bracket syntax like ``[Pkg.item @ 1, Pkg.item @ 2]`` is not supported
@@ -840,7 +912,10 @@ class MD_Lexer(TRLC_Lexer):
         inner = value[1:-1].strip()
         # Only reject if the content inside the brackets actually looks like
         # tuple references – avoids false positives on URLs containing '@'
-        if not MD_Lexer._looks_like_array(inner):
+        if not MD_Lexer._looks_like_array(inner) and not (
+            integer_tuple_arity is not None
+            and MD_Lexer._looks_like_integer_tuple_array(inner, integer_tuple_arity)
+        ):
             return False
         self.mh.error(
             location,
@@ -852,6 +927,32 @@ class MD_Lexer(TRLC_Lexer):
             ),
             fatal=False,
         )
+        return True
+
+    @staticmethod
+    def _looks_like_integer_tuple_array(raw_value, expected_components):
+        normalized = MD_Lexer._normalize_array_value(raw_value)
+        parts = [part.strip() for part in normalized.split(",") if part.strip()]
+        return bool(parts) and all(
+            MD_Lexer._looks_like_simple_tuple(part, expected_components)
+            for part in parts
+        )
+
+    def _maybe_emit_integer_tuple_array(self, raw_value, location, expected_components):
+        normalized = MD_Lexer._normalize_array_value(raw_value)
+        parts = [part.strip() for part in normalized.split(",") if part.strip()]
+        if not parts or not all(
+            MD_Lexer._looks_like_simple_tuple(part, expected_components)
+            for part in parts
+        ):
+            return False
+
+        self._emit(location, "S_BRA")
+        for idx, part in enumerate(parts):
+            if idx:
+                self._emit(location, "COMMA")
+            self._maybe_emit_simple_tuple(part, location)
+        self._emit(location, "S_KET")
         return True
 
     def _maybe_emit_array(self, raw_value, location, allow_unqualified=False):
@@ -897,7 +998,9 @@ class MD_Lexer(TRLC_Lexer):
         self._emit(location, "S_KET")
         return True
 
-    def _report_invalid_array_entry(self, raw_value, location, field_name):
+    def _report_invalid_array_entry(
+        self, raw_value, location, field_name, integer_tuple_arity=None
+    ):
         """Report the first entry of a tuple-array value that is not a reference.
 
         Emits an empty array afterwards so the parser does not add a
@@ -905,18 +1008,40 @@ class MD_Lexer(TRLC_Lexer):
         """
         normalized = self._normalize_array_value(raw_value)
         parts = [p.strip() for p in normalized.split(",") if p.strip()]
-        invalid = next(
-            (p for p in parts if self._match_array_reference(p, True) is None),
-            raw_value.strip(),
-        )
-        self.mh.error(
-            location,
-            f"invalid entry '{invalid}' in tuple-reference array field '{field_name}'",
-            explanation=(
+        if integer_tuple_arity is None:
+            invalid = next(
+                (p for p in parts if self._match_array_reference(p, True) is None),
+                raw_value.strip(),
+            )
+            message = (
+                f"invalid entry '{invalid}' in tuple-reference array field "
+                f"'{field_name}'"
+            )
+            explanation = (
                 "Use an identifier with an optional version, e.g. 'item' or "
                 "'item @ 1'. Identifiers may only contain letters, digits "
                 "and underscores."
-            ),
+            )
+        else:
+            invalid = next(
+                (
+                    p
+                    for p in parts
+                    if not self._looks_like_simple_tuple(p, integer_tuple_arity)
+                ),
+                raw_value.strip(),
+            )
+            message = (
+                f"invalid entry '{invalid}' in integer tuple array field '{field_name}'"
+            )
+            explanation = (
+                "Use integer tuple values with the declared separators, "
+                "e.g. '1234 @ 25'."
+            )
+        self.mh.error(
+            location,
+            message,
+            explanation=explanation,
             fatal=False,
         )
         self._emit(location, "S_BRA")

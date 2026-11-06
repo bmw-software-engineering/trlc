@@ -2,7 +2,8 @@ import unittest
 from fractions import Fraction
 
 from trlc import ast as trlc_ast
-from trlc.errors import Location, Message_Handler, TRLC_Error, Kind
+from trlc.errors import Kind, Location, Message_Handler, TRLC_Error
+from trlc.lexer import Token
 from trlc.lexer_md import MD_Lexer
 from trlc.trlc_markdown_parser import TrlcMarkdownParser
 
@@ -266,6 +267,118 @@ class TestLexerMd(unittest.TestCase):
                 ("S_KET", None),
             ],
         )
+
+    def test_numeric_codebeamer_reference_array(self):
+        stab = trlc_ast.Symbol_Table()
+        package = trlc_ast.Package("DemoPkg", Location("test"), stab, False)
+        record_type = trlc_ast.Record_Type(
+            "Requirement", None, Location("test"), package, None, False
+        )
+        tuple_type = trlc_ast.Tuple_Type(
+            "Codebeamer_Reference", None, Location("test"), package
+        )
+        for index, name in enumerate(("item_id", "version")):
+            tuple_type.components.table[name] = trlc_ast.Composite_Component(
+                name,
+                None,
+                Location("test"),
+                tuple_type,
+                trlc_ast.Builtin_Integer(),
+                False,
+            )
+            if index == 0:
+                tuple_type.add_separator(
+                    trlc_ast.Separator(Token(Location("test"), "AT"))
+                )
+        array_type = trlc_ast.Array_Type(
+            Location("test"),
+            tuple_type,
+            Location("test"),
+            0,
+            Location("test"),
+            None,
+        )
+        record_type.components.table["references"] = trlc_ast.Composite_Component(
+            "references",
+            None,
+            Location("test"),
+            record_type,
+            array_type,
+            False,
+        )
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(
+            "[1234@25](codebeamer.md#1234),\n5678@26",
+            Location("test"),
+            record_type,
+            "references",
+        )
+
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("INTEGER", 1234),
+                ("AT", None),
+                ("INTEGER", 25),
+                ("COMMA", None),
+                ("INTEGER", 5678),
+                ("AT", None),
+                ("INTEGER", 26),
+                ("S_KET", None),
+            ],
+        )
+
+    def test_reference_link_destinations_with_parentheses(self):
+        _stab, record_type = make_record_type()
+        destinations = (
+            "docs/req_(legacy).md",
+            "docs/req_(legacy_(v2)).md",
+            r"docs/req_\(legacy\).md",
+            r"docs/req_legacy\).md",
+            "docs/req_(legacy,archived).md",
+        )
+        for destination in destinations:
+            for separator in (", ", "\n", "<br>"):
+                with self.subTest(destination=destination, separator=separator):
+                    lexer = MD_Lexer(self.mh, "test", "")
+                    lexer._emit_field_value(
+                        f"[requ1@26]({destination}){separator}[requ2](doc.md)",
+                        Location("test"),
+                        record_type,
+                        "refs",
+                    )
+                    self.assertEqual(
+                        token_pairs(lexer),
+                        [
+                            ("S_BRA", None),
+                            ("IDENTIFIER", "requ1"),
+                            ("AT", None),
+                            ("INTEGER", 26),
+                            ("COMMA", None),
+                            ("IDENTIFIER", "requ2"),
+                            ("S_KET", None),
+                        ],
+                    )
+
+    def test_reference_link_targets_preserve_unclosed_destinations(self):
+        for raw_value in (
+            "[requ1@26](docs/req_(legacy).md",
+            "[requ1@26](doc.md",
+            "[requ1@26](doc.md\\",
+        ):
+            with self.subTest(raw_value=raw_value):
+                self.assertEqual(
+                    MD_Lexer._strip_array_link_targets(raw_value), raw_value
+                )
+
+    def test_string_field_preserves_link_destination_parentheses(self):
+        _stab, record_type = make_record_type()
+        raw_value = "[requ1@26](docs/req_(legacy).md)"
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(raw_value, Location("test"), record_type, "notes")
+        self.assertEqual(token_pairs(lexer), [("STRING", raw_value)])
 
     def test_type_aware_field_emission(self):
         _stab, record_type = make_record_type()
@@ -703,7 +816,6 @@ class TestLexerMd(unittest.TestCase):
         lexer._emit_value("item", Location("test"))
         lexer._emit_value("Pkg.item", Location("test"))
         lexer._emit_value("Revision : 12", Location("test"))
-        lexer._emit_value("[Pkg.item @ 1](doc.md)", Location("test"))
         self.assertEqual(
             token_pairs(lexer),
             [
@@ -712,6 +824,18 @@ class TestLexerMd(unittest.TestCase):
                 ("DOT", None),
                 ("IDENTIFIER", "item"),
                 ("STRING", "Revision : 12"),
+            ],
+        )
+
+    def test_markdown_link_emission_depends_on_field_type(self):
+        _stab, record_type = make_record_type()
+        raw_value = "[Pkg.item @ 1](doc.md)"
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(raw_value, Location("test"), record_type, "refs")
+        lexer._emit_field_value(raw_value, Location("test"), record_type, "notes")
+        self.assertEqual(
+            token_pairs(lexer),
+            [
                 ("S_BRA", None),
                 ("IDENTIFIER", "Pkg"),
                 ("DOT", None),
@@ -719,6 +843,7 @@ class TestLexerMd(unittest.TestCase):
                 ("AT", None),
                 ("INTEGER", 1),
                 ("S_KET", None),
+                ("STRING", raw_value),
             ],
         )
 
