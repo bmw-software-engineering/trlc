@@ -930,6 +930,115 @@ class TestLexerMd(unittest.TestCase):
         self.assertEqual(import_ident.location.line_no, 3)
         self.assertEqual(import_ident.location.col_no, 8)
 
+    def test_preamble_import_break_tags_are_treated_as_newlines(self):
+        lexer = MD_Lexer(
+            self.mh, "test.trlc.md", "# app\nimport first<br>import second\n"
+        )
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("KEYWORD", "#"),
+                ("IDENTIFIER", "app"),
+                ("KEYWORD", "import"),
+                ("IDENTIFIER", "first"),
+                ("KEYWORD", "import"),
+                ("IDENTIFIER", "second"),
+            ],
+        )
+
+    def test_preamble_import_break_tags_keep_per_import_locations(self):
+        lexer = MD_Lexer(
+            self.mh, "test.trlc.md", "# app\nimport first<br>import second\n"
+        )
+        cols = [
+            (token.kind, token.value, token.location.line_no, token.location.col_no)
+            for token in all_tokens(lexer)
+        ]
+        self.assertEqual(
+            cols,
+            [
+                ("KEYWORD", "#", 1, 1),
+                ("IDENTIFIER", "app", 1, 3),
+                ("KEYWORD", "import", 2, 1),
+                ("IDENTIFIER", "first", 2, 8),
+                ("KEYWORD", "import", 2, 17),
+                ("IDENTIFIER", "second", 2, 24),
+            ],
+        )
+
+    def test_preamble_import_extra_spaces_do_not_shift_name_location(self):
+        # Measure the offset from the real whitespace, not a fixed space count;
+        # otherwise the diagnostic points at the whitespace instead of the name.
+        lexer = MD_Lexer(self.mh, "test.trlc.md", "# app\nimport    base\n")
+        tokens = all_tokens(lexer)
+        import_ident = tokens[-1]
+        self.assertEqual(
+            (import_ident.kind, import_ident.value), ("IDENTIFIER", "base")
+        )
+        self.assertEqual(import_ident.location.line_no, 2)
+        self.assertEqual(import_ident.location.col_no, 11)
+
+    def test_preamble_import_break_tags_with_extra_spaces_keep_locations(self):
+        # Same regression as above, but for a later clause on a line that
+        # also uses a break tag, to make sure the per-clause offset isn't
+        # reused from the first clause's position either.
+        lexer = MD_Lexer(
+            self.mh, "test.trlc.md", "# app\nimport first<br>import    second\n"
+        )
+        cols = [
+            (token.kind, token.value, token.location.line_no, token.location.col_no)
+            for token in all_tokens(lexer)
+        ]
+        self.assertEqual(
+            cols,
+            [
+                ("KEYWORD", "#", 1, 1),
+                ("IDENTIFIER", "app", 1, 3),
+                ("KEYWORD", "import", 2, 1),
+                ("IDENTIFIER", "first", 2, 8),
+                ("KEYWORD", "import", 2, 17),
+                ("IDENTIFIER", "second", 2, 27),
+            ],
+        )
+
+    def test_preamble_import_only_genuine_break_tags_act_as_separators(self):
+        # Only real <br> tags may split import clauses; fake HTML-like tags
+        # should raise an error instead of being silently accepted.
+        with self.assertRaises(TRLC_Error):
+            MD_Lexer(self.mh, "test.trlc.md", "# app\nimport base<xyz>import support\n")
+
+        self.assertEqual(self.mh.pop_message()[2], "unexpected character '<'")
+
+    def test_preamble_import_break_tag_between_keyword_and_name_is_rejected(self):
+        # <br> is only a valid separator between/after complete "import
+        # <name>" clauses; it must not be silently accepted between the
+        # "import" keyword and the package name.
+        with self.assertRaises(TRLC_Error):
+            MD_Lexer(self.mh, "test.trlc.md", "# app\nimport <br> base\n")
+        location, kind, message = self.mh.pop_message()
+        self.assertEqual(kind, Kind.SYS_ERROR)
+        self.assertEqual(
+            message, "a <br> tag is not allowed between 'import' and the package name"
+        )
+        self.assertEqual(location.line_no, 2)
+        self.assertEqual(location.col_no, 8)
+
+    def test_preamble_import_break_tags_keyword_is_case_sensitive(self):
+        # Only a literal lowercase "import" may start a later clause; a
+        # case-insensitive match would wrongly accept "IMPORT".
+        lexer = MD_Lexer(
+            self.mh, "test.trlc.md", "# app\nimport first<br>IMPORT second\n"
+        )
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("KEYWORD", "#"),
+                ("IDENTIFIER", "app"),
+                ("KEYWORD", "import"),
+                ("IDENTIFIER", "first"),
+            ],
+        )
+
     def test_preamble_invalid_segment_in_nested_name_points_at_offending_char(self):
         # lobster-trace: LRM.Nested_Package_Names
         # Regression test for the caret fix: the error must point at the

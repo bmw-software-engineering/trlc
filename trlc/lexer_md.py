@@ -113,6 +113,17 @@ class MD_Lexer(TRLC_Lexer):
     # Boolean / null keywords  (mirrors TRLC_Lexer.KEYWORDS)
     KEYWORDS = frozenset(["true", "false", "null", "#", "import"])
 
+    # Matches a genuine HTML line-break tag (``<br>``, ``<br/>``, ``<BR>``,
+    # ``<Br  >``, ...). Used to recognize break tags as separators without
+    # also treating arbitrary ``<...>`` text the same way.
+    _BREAK_TAG_RE = re.compile(r"<[Bb][Rr]\s*/?>")
+
+    # Matches a ``<br>`` tag that sits directly between the ``import``
+    # keyword and the package name (e.g. ``import <br> base``). The ``<br>``
+    # separator feature is only valid *between or after* complete import
+    # clauses, never inside one, so this pattern is used to reject it.
+    _LEADING_BREAK_AFTER_IMPORT_RE = re.compile(r"\bimport\b\s*(<[Bb][Rr]\s*/?>)")
+
     # ------------------------------------------------------------------ #
     # Character classification (mirrors Lexer_Base / TRLC_Lexer helpers)  #
     # ------------------------------------------------------------------ #
@@ -223,6 +234,16 @@ class MD_Lexer(TRLC_Lexer):
         if not content:
             return 0, None
         return i, content
+
+    @staticmethod
+    def _blank_out_break_tags(line):
+        """Replace real ``<br>`` tags with spaces of the same length.
+
+        This keeps column offsets stable while treating a break tag as
+        whitespace for tokenization, without silently accepting arbitrary
+        ``<...>`` text as a separator.
+        """
+        return MD_Lexer._BREAK_TAG_RE.sub(lambda m: " " * len(m.group(0)), line)
 
     @staticmethod
     def _is_hr(stripped):
@@ -653,7 +674,7 @@ class MD_Lexer(TRLC_Lexer):
         ``"identifier <sep> integer, ..."``.
         """
         normalized = MD_Lexer._strip_array_link_targets(raw_value)
-        normalized = re.sub(r"<[Bb][Rr]\s*/?>", "\n", normalized)
+        normalized = MD_Lexer._BREAK_TAG_RE.sub("\n", normalized)
 
         # Split on newlines and commas, trim each part
         parts = []
@@ -1480,16 +1501,35 @@ class MD_Lexer(TRLC_Lexer):
             # ── Import statement ─────────────────────────────────────────
 
             if stripped.startswith("import "):
-                parts = stripped.split()
-                if len(parts) == 2:
-                    self._emit(loc, "KEYWORD", "import")
-                    # The package name starts right after "import" and its
-                    # following whitespace; computed positionally so a name
-                    # that happens to also occur inside the keyword itself
-                    # (e.g. "rt" in "import rt") isn't found at the wrong
-                    # offset.
-                    indent = len(line) - len(line.lstrip())
-                    name_offset = MD_Lexer._skip_spaces(line, indent + len("import"))
+                # A <br> tag is only a valid separator *between* or *after*
+                # complete "import <name>" clauses; reject one wedged
+                # between the "import" keyword and its package name (e.g.
+                # "import <br> base") instead of silently discarding it.
+                bad_tag = MD_Lexer._LEADING_BREAK_AFTER_IMPORT_RE.search(line)
+                if bad_tag is not None:
+                    self.mh.lex_error(
+                        self._source_ref(line_no, bad_tag.start(1) + 1, line),
+                        "a <br> tag is not allowed between 'import' and the"
+                        " package name",
+                    )
+
+                # Replace real HTML break tags with spaces so adjacent imports
+                # still parse as separate clauses without shifting column
+                # offsets; leave arbitrary "<...>" text alone.
+                scrubbed = MD_Lexer._blank_out_break_tags(line)
+                for match in re.finditer(r"import\s+\S+", scrubbed):
+                    import_text = match.group(0)
+                    parts = import_text.split()
+                    if len(parts) != 2:
+                        continue
+
+                    kw_loc = self._loc(line_no, match.start() + 1)
+                    self._emit(kw_loc, "KEYWORD", "import")
+                    # Compute each package offset from its own match so extra
+                    # whitespace after "import" does not skew locations.
+                    name_offset = MD_Lexer._skip_spaces(
+                        scrubbed, match.start() + len("import")
+                    )
                     wildcard = self._emit_package_name(
                         parts[1],
                         line_no,
@@ -1501,7 +1541,7 @@ class MD_Lexer(TRLC_Lexer):
                     # unqualified type names can be completed with.
                     if not wildcard:
                         imported_packages.append(parts[1])
-                    continue
+                continue
 
             # ── Everything else: delegate to TRLC_Lexer ──────────────────
             # Tokenize the raw line so the parser receives real tokens and
