@@ -28,7 +28,7 @@ from enum import Enum, auto
 from collections import OrderedDict
 from fractions import Fraction
 
-from trlc.errors import TRLC_Error, Location, Message_Handler
+from trlc.errors import TRLC_Error, Kind, Location, Message_Handler
 from trlc.lexer import Token
 from trlc import math
 
@@ -1584,20 +1584,7 @@ class Binary_Expression(Expression):
                 # sides are record-like (Record_Type or Union_Type)
                 for n_side in (self.n_lhs, self.n_rhs):
                     if isinstance(n_side.typ, Union_Type):
-                        for t_member in n_side.typ.types:
-                            if not isinstance(t_member, Record_Type):
-                                # A forward-declared placeholder that
-                                # later became e.g. an enumeration.
-                                mh.error(
-                                    n_side.typ.location,
-                                    f"{t_member.__class__.__name__} "
-                                    f"{t_member.name} is not a Record_Type",
-                                    explanation=(
-                                        "all members of a union type must be"
-                                        " record types, regardless of"
-                                        " declaration order"
-                                    ),
-                                )
+                        n_side.typ.ensure_record_members()
                 lhs_is_record = isinstance(self.n_lhs.typ, (Record_Type, Union_Type))
                 rhs_is_record = isinstance(self.n_rhs.typ, (Record_Type, Union_Type))
                 if not (lhs_is_record and rhs_is_record):
@@ -2599,6 +2586,7 @@ class Concrete_Type(Type, metaclass=ABCMeta):
         self.n_package = n_package
         self._is_forward_decl = False
         self._forward_decl_context = None
+        self._forward_union_use = None
 
     def mark_forward_decl(self):
         """Mark this definition as a temporary forward declaration."""
@@ -2619,6 +2607,18 @@ class Concrete_Type(Type, metaclass=ABCMeta):
     def get_forward_decl_context(self):
         """Return parser bookkeeping for the forward-declaration origin."""
         return getattr(self, "_forward_decl_context", None)
+
+    def set_forward_union_use(self, location):
+        """Remember where this forward declaration was used as a union member.
+
+        Only the first use is kept.
+        """
+        if self._forward_union_use is None:
+            self._forward_union_use = location
+
+    def get_forward_union_use(self):
+        """Return the location of the first union-member use, if any."""
+        return getattr(self, "_forward_union_use", None)
 
     def fully_qualified_name(self):
         """Return the FQN for this type (i.e. PACKAGE.NAME)
@@ -2808,6 +2808,23 @@ class Union_Type(Type):
         :rtype: list[Record_Type]
         """
         return [t for t in self.types if isinstance(t, Record_Type)]
+
+    def ensure_record_members(self):
+        """Abort the current construct if a member is not a record type.
+
+        Such a member is a forward-declared stub that turned out to be
+        an enumeration or tuple. The parser already printed an error
+        when that happened, so this raises without printing again.
+
+        :raises TRLC_Error: if any member is not a record type
+        """
+        for t in self.types:
+            if not isinstance(t, Record_Type):
+                raise TRLC_Error(
+                    self.location,
+                    Kind.SYS_ERROR,
+                    f"{t.__class__.__name__} {t.name} is not a Record_Type",
+                )
 
     def get_field_map(self):
         # lobster-trace: LRM.Union_Type_Field_Access

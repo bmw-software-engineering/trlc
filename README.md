@@ -21,23 +21,8 @@ In a `.rsl` file, a type may be used before the place where it is
 declared in the same file. This is allowed for:
 
 * the type of a record component,
-* the type of a tuple field,
+* the type of a tuple field, if that type is a record,
 * a record type used as a member of a union type.
-
-The following are still errors:
-
-* Using a type that is never declared in its package (reported as
-  `unknown symbol`).
-* A tuple that refers to itself.
-* A tuple field that refers to a tuple declared later in the file. This
-  includes mutually recursive tuples (`A` contains `B`, `B` contains
-  `A`). Declare the inner tuple first.
-* An enum used as the type of a tuple field, if the enum is declared
-  later in the file. Declare it earlier.
-* An enum used as a union member is an error regardless of declaration
-  order; union members must be record types.
-* A record that extends a type declared later in the file. Declare
-  the base type earlier.
 
 Example:
 
@@ -55,6 +40,22 @@ tuple Coordinate {
 ```
 
 This is valid: `Requirement` uses `Coordinate` before the line that declares it.
+
+The following are not supported:
+
+* A tuple field that refers to a tuple declared later in the file. This
+  includes mutually recursive tuples (`A` contains `B`, `B` contains
+  `A`). Declare the inner tuple first.
+* A record that extends a type declared later in the file. Declare
+  the base type earlier.
+* A check that uses a field of a record type declared after the check.
+  Declare the record type first.
+
+Note:
+
+* Tuples remain acyclic (because they are inline objects)
+* Type inheritance graph remains acyclic
+* Package import graph remains acyclic
 
 The Python implementation can be used for several purposes:
 

@@ -1,4 +1,4 @@
 choice [Severity]
-       ^ forward-reference-union-enum-equality/demo.rsl:4: error: Enumeration_Type Severity is not a Record_Type
-       | all members of a union type must be record types, regardless of declaration order
+        ^^^^^^^^ forward-reference-union-enum-equality/demo.rsl:4: error: Enumeration_Type Severity is not a Record_Type
+               | all members of a union type must be record types
 Processed 1 model and 0 requirement files and found 1 error
