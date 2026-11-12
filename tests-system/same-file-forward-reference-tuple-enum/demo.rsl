@@ -1,0 +1,12 @@
+package demo
+
+tuple RequirementId {
+  item Severity
+  separator @
+  version Integer
+}
+
+enum Severity {
+  HIGH
+  LOW
+}

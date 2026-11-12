@@ -1,0 +1,6 @@
+package req
+
+type Software_Requirement {
+  description String
+  derived_from optional Software_Requirement [0 .. *]
+}
