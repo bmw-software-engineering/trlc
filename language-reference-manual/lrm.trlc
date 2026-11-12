@@ -2186,5 +2186,19 @@ section "Null Values" {
               is null or not, but any other use will cause
               an error.)*'''
   }
+}  
 
+section "Acyclic Dependency" {
+
+  Static_Semantics Acyclic_Record_Extensions {
+    text = '''A record type shall not extend itself or another record 
+              type that extends it.''' 
+  }
+
+  Note Acyclic_Record_Graph {
+    text = '''A record may only extend a different record type that
+              does not eventually lead back to it. A record referring 
+              to itself directly or indirectly creates ambiguities.'''
+  } 
+ 
 }
