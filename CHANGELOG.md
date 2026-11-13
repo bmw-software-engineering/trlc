@@ -25,7 +25,7 @@ generated in the following situations:
 ## Changelog
 
 
-### 3.1.2-dev
+### 3.1.2
 
 * [TRLC] Tuple-reference arrays in `.trlc.md` files now accept entries
   written as Markdown links, e.g. `[req1@26](doc.md#req1)`, and entries
