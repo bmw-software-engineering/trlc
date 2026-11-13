@@ -27,14 +27,18 @@ generated in the following situations:
 
 ### 3.1.2
 
-* [TRLC] Tuple-reference arrays in `.trlc.md` files now accept entries
+* [LRM, TRLC] Tuple-reference arrays in `.trlc.md` files now accept entries
   written as Markdown links, e.g. `[req1@26](doc.md#req1)`, and entries
   without a version. The link target is ignored. An invalid entry in a
   tuple-reference array field is now reported with a dedicated error.
 
-* [TRLC] A type may now be used before its declaration within the same
+* [LRM, TRLC] A type may now be used before its declaration within the same
   `.rsl` file, as the type of a record component, the type of a tuple
   field, or a member of a union type.
+
+* [TRLC] Ignore </br> tags at the end of import statements in `trlc.md` files.
+
+* [TRLC] Dropped support for sections in `trlc.md` files.
 
 ### 3.1.1
 
