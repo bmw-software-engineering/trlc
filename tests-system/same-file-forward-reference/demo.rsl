@@ -1,0 +1,35 @@
+package demo
+
+abstract type Base {
+  description String
+}
+
+type A {
+  b B
+}
+
+type B {
+  a A
+}
+
+type UnionSource {
+  choices [C, D]
+}
+
+type C {
+  value Integer
+}
+
+type D {
+  value Integer
+}
+
+type Requirement extends Base {
+  derived_from RequirementId [0 .. *]
+}
+
+tuple RequirementId {
+  item Requirement
+  separator @
+  version Integer
+}

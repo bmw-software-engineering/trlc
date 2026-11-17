@@ -1,0 +1,13 @@
+package demo
+
+type User {
+  p Parent
+}
+
+type Child extends Parent {
+  y Integer
+}
+
+type Parent {
+  x Integer
+}

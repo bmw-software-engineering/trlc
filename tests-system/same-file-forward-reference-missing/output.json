@@ -1,0 +1,4 @@
+b B
+  ^ same-file-forward-reference-missing/demo.rsl:4: error: type B is used before its declaration, but no matching declaration was found
+  | declare B in this package before using it, or move the reference to a point after the actual declaration
+Processed 1 model and 0 requirement files and found 1 error
