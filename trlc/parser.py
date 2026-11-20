@@ -981,7 +981,22 @@ class Parser(Parser_Base):
         if self.peek_kw("extends"):
             self.match_kw("extends")
             t_extends = self.ct
-            root_record = self.parse_qualified_name(self.default_scope, ast.Record_Type)
+            self.match("IDENTIFIER")
+            if not self.default_scope.contains(self.ct.value) and not self.peek("DOT"):
+                self.mh.error(
+                    self.ct.location,
+                    f"cannot extend {self.ct.value} before it is declared",
+                    explanation=f"declare {self.ct.value} before the derived type",
+                )
+            root_record = self.parse_qualified_name(
+                self.default_scope, ast.Record_Type, match_ident=False, allow_forward=True
+            )
+            if root_record.is_forward_decl():
+                self.mh.error(
+                    self.ct.location,
+                    f"cannot extend {self.ct.value} before it is declared",
+                    explanation=f"declare {self.ct.value} before the derived type",
+                )
             root_record.set_ast_link(t_extends)
             root_record.set_ast_link(self.ct)
         else:

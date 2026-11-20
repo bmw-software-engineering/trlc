@@ -48,6 +48,39 @@ class Test_Parser_Forward_References(unittest.TestCase):
     def process(self, sm):
         return sm.process()
 
+    def test_inheritance_requires_parent_declared_first(self):
+        cases = {
+            "later": "type Child extends Parent {}\ntype Parent {}\n",
+            "forward_reference": (
+                "type User { p Parent }\n"
+                "type Child extends Parent {}\ntype Parent {}\n"
+            ),
+            "missing": "type Child extends Parent {}\n",
+        }
+        for case, declarations in cases.items():
+            for lint_mode in (True, False):
+                with self.subTest(case=case, lint_mode=lint_mode):
+                    sm, mh = make_source_manager(lint_mode=lint_mode)
+                    sm.register_rsl_file(
+                        self.write("inheritance.rsl", "package demo\n" + declarations)
+                    )
+                    self.assertIsNone(self.process(sm))
+                    self.assertEqual(
+                        mh.error_messages()[0],
+                        "cannot extend Parent before it is declared",
+                    )
+
+    def test_inheritance_accepts_parent_declared_first(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "inheritance.rsl",
+                "package demo\ntype Parent {}\ntype Child extends Parent {}\n",
+            )
+        )
+        self.assertIsNotNone(self.process(sm))
+        self.assertFalse(mh.has_error())
+
     def test_record_type_forward_reference(self):
         """A record type may be referenced before its later declaration in the same file."""
         sm, mh = make_source_manager()

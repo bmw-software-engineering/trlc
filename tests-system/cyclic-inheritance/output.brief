@@ -1,4 +1,4 @@
-cyclic-inheritance/bar.rsl:5:22: trlc error: unknown symbol MyType3
-cyclic-inheritance/bar.rsl:9:22: trlc error: unknown symbol MyType2
-cyclic-inheritance/foo.rsl:3:22: trlc error: unknown symbol MyType1
+cyclic-inheritance/bar.rsl:5:22: trlc error: cannot extend MyType3 before it is declared
+cyclic-inheritance/bar.rsl:9:22: trlc error: cannot extend MyType2 before it is declared
+cyclic-inheritance/foo.rsl:3:22: trlc error: cannot extend MyType1 before it is declared
 Processed 2 models and 0 requirement files and found 3 errors

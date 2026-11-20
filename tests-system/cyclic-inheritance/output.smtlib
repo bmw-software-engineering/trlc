@@ -1,7 +1,10 @@
 type MyType2 extends MyType3 {
-                     ^^^^^^^ cyclic-inheritance/bar.rsl:5: error: unknown symbol MyType3
+                     ^^^^^^^ cyclic-inheritance/bar.rsl:5: error: cannot extend MyType3 before it is declared
+                           | declare MyType3 before the derived type
 type MyType3 extends MyType2 {
-                     ^^^^^^^ cyclic-inheritance/bar.rsl:9: error: unknown symbol MyType2
+                     ^^^^^^^ cyclic-inheritance/bar.rsl:9: error: cannot extend MyType2 before it is declared
+                           | declare MyType2 before the derived type
 type MyType1 extends MyType1 {
-                     ^^^^^^^ cyclic-inheritance/foo.rsl:3: error: unknown symbol MyType1
+                     ^^^^^^^ cyclic-inheritance/foo.rsl:3: error: cannot extend MyType1 before it is declared
+                           | declare MyType1 before the derived type
 Processed 2 models and 0 requirement files and found 3 errors

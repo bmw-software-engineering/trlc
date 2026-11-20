@@ -1019,6 +1019,82 @@
             "bazel_tools"
           ]
         ]
+      },
+      "os:windows,arch:amd64": {
+        "bzlTransitiveDigest": "sr3D8IM7zQ20+n3pj3PLcUzppMUAHQH1dGrSU48lwVI=",
+        "usagesDigest": "igIBXyqNg9Be63Cuu6kZxOeoDRDMqxSv8BcoWiqSh3w=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "go_default_sdk": {
+            "repoRuleId": "@@rules_go+//go/private:sdk.bzl%go_download_sdk_rule",
+            "attributes": {
+              "goos": "",
+              "goarch": "",
+              "sdks": {},
+              "experiments": [],
+              "patches": [],
+              "patch_strip": 0,
+              "urls": [
+                "https://dl.google.com/go/{}"
+              ],
+              "version": "1.21.1",
+              "strip_prefix": "go"
+            }
+          },
+          "go_host_compatible_sdk_label": {
+            "repoRuleId": "@@rules_go+//go/private:extensions.bzl%host_compatible_toolchain",
+            "attributes": {
+              "toolchain": "@go_default_sdk//:ROOT"
+            }
+          },
+          "go_toolchains": {
+            "repoRuleId": "@@rules_go+//go/private:sdk.bzl%go_multiple_toolchains",
+            "attributes": {
+              "prefixes": [
+                "_0000_go_default_sdk_"
+              ],
+              "geese": [
+                ""
+              ],
+              "goarchs": [
+                ""
+              ],
+              "sdk_repos": [
+                "go_default_sdk"
+              ],
+              "sdk_types": [
+                "remote"
+              ],
+              "sdk_versions": [
+                "1.21.1"
+              ]
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "bazel_features+",
+            "bazel_features_globals",
+            "bazel_features++version_extension+bazel_features_globals"
+          ],
+          [
+            "bazel_features+",
+            "bazel_features_version",
+            "bazel_features++version_extension+bazel_features_version"
+          ],
+          [
+            "rules_go+",
+            "bazel_features",
+            "bazel_features+"
+          ],
+          [
+            "rules_go+",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
       }
     },
     "@@rules_go+//go/private:extensions.bzl%non_module_dependencies": {
@@ -1546,13 +1622,13 @@
         "bzlTransitiveDigest": "Vlnr5FIyCDsqSX/xieHwlzqVDrVjZckpyIaDvWZHT5Y=",
         "usagesDigest": "J7CwjPMb+OdYXvrcE6x53p0nBuSJUbKP4vIRtuFttFM=",
         "recordedFileInputs": {
-          "@@//requirements_dev_lock.txt": "0f541f0e9dbe5adb2e84f709dee44bb6aeedc4c1395357efad14b743022219bf",
-          "@@//requirements_lock_3_10.txt": "ac896df774280b0f3c8b808773a0f940d204944bd1a8f3f144bd5a6873824ebb",
-          "@@//requirements_lock_3_11.txt": "610e34dbd24ed61287a2e797e1d200c4aab172cb451dbf49cb0c401419a5d36c",
-          "@@//requirements_lock_3_12.txt": "84966575b4cd856a8c81e516237bb32b45e0a88d44cf05385bc4397a986d1641",
-          "@@//tools/sphinx/requirements_3_10.txt": "eb537c54c2fdae4a1015695f17a09119c7893361174d65606a94ac15acdae835",
-          "@@//tools/sphinx/requirements_3_11.txt": "dc1431857f9b75037c6679ce0b8c5a6df11ec10ad32bb477de75517ef27ac048",
-          "@@//tools/sphinx/requirements_3_12.txt": "3be166ec8493304fdd9ac5a6017c5d7bea7ae4eeb373cf664da2d87d60581cd4",
+          "@@//requirements_dev_lock.txt": "5facbaa28a792856c3048a5d2f36e3ba153f2cee64b4c39a2b0a4c512c26d795",
+          "@@//requirements_lock_3_10.txt": "aa585b42d49b8380952572261e74e78208d7e813db654919bf9480ca6f67e986",
+          "@@//requirements_lock_3_11.txt": "ca85ab9246307c650f111a4911e398e72dfbb77d586d3659edbaa321c910c4a3",
+          "@@//requirements_lock_3_12.txt": "507bed8259be1d3006330f99c4b6926bb77be80d8ad39d9116b5d2675b5349a3",
+          "@@//tools/sphinx/requirements_3_10.txt": "5fcc8bb0e85b85ccde9a37e517761e87083ae861a7db63e2bf60720a46b0dd12",
+          "@@//tools/sphinx/requirements_3_11.txt": "e5117d84cee4d1d25a3c68759e76507d4febb56ae9ce130f5e1ee53ca184b567",
+          "@@//tools/sphinx/requirements_3_12.txt": "231b06b176508f36387043e952b45e213a3f33a8855103075e2a22804213070d",
           "@@protobuf+//python/requirements.txt": "983be60d3cec4b319dcab6d48aeb3f5b2f7c3350f26b3a9e97486c37967c73c5",
           "@@rules_fuzzing+//fuzzing/requirements.txt": "ab04664be026b632a0d2a2446c4f65982b7654f5b6851d2f9d399a19b7242a5b",
           "@@rules_python+//tools/publish/requirements_darwin.txt": "095d4a4f3d639dce831cd493367631cd51b53665292ab20194bac2c0c6458fa8",
@@ -4185,7 +4261,7 @@
               "dep_template": "@trlc_dev_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
               "repo": "trlc_dev_dependencies_312",
-              "requirement": "certifi==2026.1.4 --hash=sha256:9943707519e4add1115f44c2bc244f782c0249876bf51b6599fee1ffbedd685c --hash=sha256:ac726dd470482006e014ad384921ed6438c457018f4b3d204aea4281258b2120"
+              "requirement": "certifi==2026.10.19 --hash=sha256:035c1e85572b141bf1c3a3eff0e33a8eb74917522f2559075ff8d2fea780a1ae --hash=sha256:42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b"
             }
           },
           "trlc_dev_dependencies_312_charset_normalizer": {
@@ -4455,7 +4531,7 @@
               "dep_template": "@trlc_dev_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
               "repo": "trlc_dev_dependencies_312",
-              "requirement": "urllib3==2.7.0 --hash=sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c --hash=sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"
+              "requirement": "urllib3==2.8.0 --hash=sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3 --hash=sha256:63bf2ead4c879426ebf22ef2a781eeb4aa3b4ae798a0435506f8687fd5bb9b63"
             }
           },
           "trlc_sphinx_dependencies_310_alabaster": {
@@ -4482,7 +4558,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_10_host//:python",
               "repo": "trlc_sphinx_dependencies_310",
-              "requirement": "certifi==2026.2.25 --hash=sha256:027692e4402ad994f1c42e52a4997a9763c646b73e4096e4d5d6db8af1d6f0fa --hash=sha256:e887ab5cee78ea814d3472169153c2d12cd43b14bd03329a39a9c6e2e80bfba7"
+              "requirement": "certifi==2026.10.19 --hash=sha256:035c1e85572b141bf1c3a3eff0e33a8eb74917522f2559075ff8d2fea780a1ae --hash=sha256:42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b"
             }
           },
           "trlc_sphinx_dependencies_310_charset_normalizer": {
@@ -4653,7 +4729,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_10_host//:python",
               "repo": "trlc_sphinx_dependencies_310",
-              "requirement": "urllib3==2.7.0 --hash=sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c --hash=sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"
+              "requirement": "urllib3==2.8.0 --hash=sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3 --hash=sha256:63bf2ead4c879426ebf22ef2a781eeb4aa3b4ae798a0435506f8687fd5bb9b63"
             }
           },
           "trlc_sphinx_dependencies_311_alabaster": {
@@ -4680,7 +4756,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
               "repo": "trlc_sphinx_dependencies_311",
-              "requirement": "certifi==2026.2.25 --hash=sha256:027692e4402ad994f1c42e52a4997a9763c646b73e4096e4d5d6db8af1d6f0fa --hash=sha256:e887ab5cee78ea814d3472169153c2d12cd43b14bd03329a39a9c6e2e80bfba7"
+              "requirement": "certifi==2026.10.19 --hash=sha256:035c1e85572b141bf1c3a3eff0e33a8eb74917522f2559075ff8d2fea780a1ae --hash=sha256:42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b"
             }
           },
           "trlc_sphinx_dependencies_311_charset_normalizer": {
@@ -4851,7 +4927,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_11_host//:python",
               "repo": "trlc_sphinx_dependencies_311",
-              "requirement": "urllib3==2.7.0 --hash=sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c --hash=sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"
+              "requirement": "urllib3==2.8.0 --hash=sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3 --hash=sha256:63bf2ead4c879426ebf22ef2a781eeb4aa3b4ae798a0435506f8687fd5bb9b63"
             }
           },
           "trlc_sphinx_dependencies_312_alabaster": {
@@ -4878,7 +4954,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
               "repo": "trlc_sphinx_dependencies_312",
-              "requirement": "certifi==2026.2.25 --hash=sha256:027692e4402ad994f1c42e52a4997a9763c646b73e4096e4d5d6db8af1d6f0fa --hash=sha256:e887ab5cee78ea814d3472169153c2d12cd43b14bd03329a39a9c6e2e80bfba7"
+              "requirement": "certifi==2026.10.19 --hash=sha256:035c1e85572b141bf1c3a3eff0e33a8eb74917522f2559075ff8d2fea780a1ae --hash=sha256:42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b"
             }
           },
           "trlc_sphinx_dependencies_312_charset_normalizer": {
@@ -5049,7 +5125,7 @@
               "dep_template": "@trlc_sphinx_dependencies//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
               "repo": "trlc_sphinx_dependencies_312",
-              "requirement": "urllib3==2.7.0 --hash=sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c --hash=sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"
+              "requirement": "urllib3==2.8.0 --hash=sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3 --hash=sha256:63bf2ead4c879426ebf22ef2a781eeb4aa3b4ae798a0435506f8687fd5bb9b63"
             }
           },
           "pip_deps": {
