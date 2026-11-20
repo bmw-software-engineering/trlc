@@ -12,9 +12,11 @@ class List_Handler(Message_Handler):
     def __init__(self):
         super().__init__()
         self.messages = []
+        self.explanations = []
 
     def emit(self, location, kind, message, fatal=True, extrainfo=None, category=None):
         self.messages.append((kind, message))
+        self.explanations.append(extrainfo)
         if fatal:
             raise TRLC_Error(location, kind, message)
 
@@ -47,6 +49,88 @@ class Test_Parser_Forward_References(unittest.TestCase):
 
     def process(self, sm):
         return sm.process()
+
+    def test_inheritance_requires_parent_declared_first(self):
+        cases = {
+            "later": ("type Child extends Parent {}\ntype Parent {}\n", "Parent"),
+            "forward_reference": (
+                "type User { p Parent }\ntype Child extends Parent {}\ntype Parent {}\n",
+                "Parent",
+            ),
+            "missing": ("type Child extends Parent {}\n", "Parent"),
+            "qualified_later": (
+                "type Child extends demo.Parent {}\ntype Parent {}\n",
+                "Parent",
+            ),
+            "qualified_forward_reference": (
+                "type User { p Parent }\n"
+                "type Child extends demo.Parent {}\ntype Parent {}\n",
+                "Parent",
+            ),
+        }
+        for case, (declarations, name) in cases.items():
+            for lint_mode in (True, False):
+                with self.subTest(case=case, lint_mode=lint_mode):
+                    sm, mh = make_source_manager(lint_mode=lint_mode)
+                    sm.register_rsl_file(
+                        self.write("inheritance.rsl", "package demo\n" + declarations)
+                    )
+                    self.assertIsNone(self.process(sm))
+                    # Later errors may follow for leftover forward stubs.
+                    self.assertEqual(
+                        mh.error_messages()[0],
+                        f"cannot extend {name} before it is declared",
+                    )
+                    self.assertEqual(
+                        mh.explanations[0],
+                        f"{name} is declared later or not at all; "
+                        "declare it before the derived type",
+                    )
+
+    def test_inheritance_from_unknown_package_is_unknown_symbol(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "inheritance.rsl",
+                "package demo\ntype Child extends Missing.Parent {}\n",
+            )
+        )
+        self.assertIsNone(self.process(sm))
+        self.assertEqual(mh.error_messages(), ["unknown symbol Missing"])
+
+    def test_inheritance_accepts_parent_from_imported_package(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(self.write("base.rsl", "package base\ntype Parent {}\n"))
+        sm.register_rsl_file(
+            self.write(
+                "derived.rsl",
+                "package derived\nimport base\ntype Child extends base.Parent {}\n",
+            )
+        )
+        self.assertIsNotNone(self.process(sm))
+        self.assertFalse(mh.has_error())
+
+    def test_inheritance_accepts_qualified_parent_declared_first(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "inheritance.rsl",
+                "package demo\ntype Parent {}\ntype Child extends demo.Parent {}\n",
+            )
+        )
+        self.assertIsNotNone(self.process(sm))
+        self.assertFalse(mh.has_error())
+
+    def test_inheritance_accepts_parent_declared_first(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "inheritance.rsl",
+                "package demo\ntype Parent {}\ntype Child extends Parent {}\n",
+            )
+        )
+        self.assertIsNotNone(self.process(sm))
+        self.assertFalse(mh.has_error())
 
     def test_record_type_forward_reference(self):
         """A record type may be referenced before its later declaration in the same file."""

@@ -1,0 +1,9 @@
+package demo
+
+type Child extends demo.Parent {
+  y Integer
+}
+
+type Parent {
+  x Integer
+}

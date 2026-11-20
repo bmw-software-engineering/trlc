@@ -1,4 +1,4 @@
 type Child extends Parent {
-                   ^^^^^^ forward-reference-extends/demo.rsl:7: error: unknown symbol Parent
-                        | declare Parent before using it here
+                   ^^^^^^ forward-reference-extends/demo.rsl:7: error: cannot extend Parent before it is declared
+                        | Parent is declared later or not at all; declare it before the derived type
 Processed 1 model and 0 requirement files and found 1 error

@@ -1,0 +1,5 @@
+package demo
+
+type Child extends Missing.Parent {
+  y Integer
+}
