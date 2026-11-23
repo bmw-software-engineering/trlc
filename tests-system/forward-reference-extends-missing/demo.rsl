@@ -1,0 +1,5 @@
+package demo
+
+type Child extends Parent {
+  y Integer
+}

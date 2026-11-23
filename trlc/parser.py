@@ -498,8 +498,25 @@ class Parser(Parser_Base):
         self.cu.mark_import_used(pkg)
         return pkg, self.ct
 
+    def error_extends_undeclared(self, t_name):
+        # The parser reads declarations in order, so it cannot tell a type
+        # declared later from one that is not declared at all.
+        self.mh.error(
+            t_name.location,
+            f"cannot extend {t_name.value} before it is declared",
+            explanation=(
+                f"{t_name.value} is declared later or not at all; "
+                "declare it before the derived type"
+            ),
+        )
+
     def parse_qualified_name(
-        self, scope, required_subclass=None, match_ident=True, allow_forward=False
+        self,
+        scope,
+        required_subclass=None,
+        match_ident=True,
+        allow_forward=False,
+        for_extends=False,
     ):
         # lobster-trace: LRM.Qualified_Name
         # lobster-trace: LRM.Valid_Qualifier
@@ -510,8 +527,11 @@ class Parser(Parser_Base):
 
         if match_ident:
             self.match("IDENTIFIER")
+        t_first = self.ct
 
         if not scope.contains(self.ct.value):
+            if for_extends and not self.peek("DOT"):
+                self.error_extends_undeclared(self.ct)
             if (
                 allow_forward
                 and self.file_kind == "rsl"
@@ -539,6 +559,16 @@ class Parser(Parser_Base):
 
         if isinstance(sym, ast.Package):
             pkg, t_member = self.descend_sub_packages(sym, self.ct)
+            # Qualified parent in the current package (e.g. demo.Parent):
+            # the member must already be declared, otherwise report the
+            # same forward-inheritance error as for unqualified names.
+            if (
+                for_extends
+                and t_member is not t_first
+                and pkg is self.cu.package
+                and not pkg.symbols.contains(t_member.value)
+            ):
+                self.error_extends_undeclared(t_member)
             sym = pkg.symbols.lookup(self.mh, t_member, required_subclass)
         else:
             sym = scope.lookup(self.mh, self.ct, required_subclass)
@@ -558,6 +588,8 @@ class Parser(Parser_Base):
             and sym.is_forward_decl()
             and not allow_forward
         ):
+            if for_extends:
+                self.error_extends_undeclared(self.ct)
             self.mh.error(
                 self.ct.location,
                 f"unknown symbol {self.ct.value}",
@@ -981,7 +1013,9 @@ class Parser(Parser_Base):
         if self.peek_kw("extends"):
             self.match_kw("extends")
             t_extends = self.ct
-            root_record = self.parse_qualified_name(self.default_scope, ast.Record_Type)
+            root_record = self.parse_qualified_name(
+                self.default_scope, ast.Record_Type, for_extends=True
+            )
             root_record.set_ast_link(t_extends)
             root_record.set_ast_link(self.ct)
         else:
