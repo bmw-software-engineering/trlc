@@ -82,22 +82,33 @@ class Linter:
 
         elif isinstance(n_typ, ast.Union_Type):
             invalid_members = [
-                t for t in n_typ.types if not isinstance(t, ast.Record_Type)
+                t
+                for t in n_typ.types
+                if not isinstance(t, (ast.Record_Type, ast.Tuple_Type))
             ]
             if invalid_members:
                 for t in invalid_members:
                     self.mh.error(
                         n_typ.location,
-                        f"{t.__class__.__name__} {t.name} is not a Record_Type",
+                        f"{t.__class__.__name__} {t.name} is not a Record_Type or Tuple_Type",
                         fatal=False,
                     )
                 return
             # lobster-trace: LRM.Union_Type_Minimum_Members
             if len(n_typ.types) == 1:
+                if isinstance(n_typ.types[0], ast.Record_Type):
+                    message = (
+                        "union type with a single member is equivalent to a"
+                        " plain record reference"
+                    )
+                else:
+                    message = (
+                        "union type with a single tuple member is equivalent to a"
+                        " plain tuple type"
+                    )
                 self.mh.check(
                     n_typ.location,
-                    "union type with a single member is equivalent to a"
-                    " plain record reference",
+                    message,
                     "union_single_type",
                 )
             # lobster-trace: LRM.Union_Type_No_Subtype_Relations

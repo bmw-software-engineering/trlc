@@ -5,8 +5,9 @@ This is part of the [TRLC Tutorial](TUTORIAL.md).
 ## Union types
 
 A *union type* allows a record attribute to accept a reference to any
-of several listed record types. Unlike inheritance, the types do not
-need to share a common base:
+of several listed record types, or an inline value of a listed tuple
+type. Unlike inheritance, record types do not need to share a common
+base:
 
 ```
 type Software_Requirement {
@@ -17,6 +18,10 @@ type Software_Requirement {
 
 See [References and Extensions](TUTORIAL-ADVANCED.md) for the full
 description with arrays and cross-package examples.
+
+Tuple alternatives must be declared before the union and are written
+using their normal tuple value syntax. Record alternatives retain their
+usual forward-reference behavior.
 
 ## Type Qualifiers
 

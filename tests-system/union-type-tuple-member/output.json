@@ -1,0 +1,15 @@
+{
+  "record_choice": {
+    "choice": "Test.record_value"
+  },
+  "record_value": {
+    "version": 3
+  },
+  "tuple_choice": {
+    "choice": {
+      "item": 1,
+      "version": 2
+    }
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

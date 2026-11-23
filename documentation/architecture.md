@@ -434,9 +434,10 @@ component holds a *reference* to an independently named object.
 
 `Union_Type` (`[T1, T2, ...]`) is *not a named type at all*. A
 `Union_Type` node is an anonymous, structurally created constraint
-attached to a single record component. It means: this field holds a
-reference to a named record object, and that object's concrete type
-must be one of the listed types (or a subtype thereof).
+attached to a single record component. Its members can be record types
+or previously declared tuple types. A record member accepts a reference
+to an object of that type or a subtype; a tuple member accepts an inline
+value of exactly that tuple type.
 
 ###### Key difference from Record_Type
 
@@ -450,13 +451,13 @@ fundamentally different in the AST:
   name, a position in the inheritance hierarchy, etc.
 * **`Union_Type` is a plain `Type`** — it does *not* inherit from
   `Composite_Type` and does *not* own any components. It has no
-  symbol table of its own, no package, no inheritance chain.
+  symbol table of its own, no package, no inheritance chain. Tuple
+  alternatives must precede the union; record alternatives retain their
+  usual forward-reference behavior.
 
-A `Union_Type` is essentially a *constraint on a reference*: "the
-target object's concrete type must be one of these record types". The
-record types listed as members are ordinary `Record_Type` objects that
-exist independently in the symbol table. The `Union_Type` merely
-points at them.
+A `Union_Type` is a constraint on an alternative value. Record and
+tuple members are ordinary declared types in the symbol table; the
+union points at them without owning their components.
 
 This distinction matters most for field access: on a `Record_Type`
 the set of accessible fields is simply `all_components()`. On a
@@ -468,8 +469,8 @@ the members' component lists — which is what `get_field_map()` does.
 `Union_Type` lazily computes a *field map* via `get_field_map()` to
 support field access (see the Parser and Evaluation sections for how
 the map is consumed). It is built on first access; it iterates each
-member type's `all_components()` (which traverses the full
-inheritance chain) and for each field name records:
+record member's `all_components()` (including inherited components)
+and each tuple member's components, then records each field name:
 
 | Key | Meaning |
 |---|---|
@@ -523,8 +524,10 @@ values).
 * `list` of `Value` (for `Array_Type`)
 * `dict` of `str` -> `Value` (for `Tuple_Aggregate`)
 * `fractions.Fraction` (for `Builtin_Decimal`)
-* `Record_Reference` (for `Record_Type` or `Union_Type`; i.e. we store
-  the reference itself not the object referred to)
+* `Record_Reference` (for `Record_Type` or a record alternative in a
+  `Union_Type`; i.e. we store the reference itself not the object referred to)
+* `Tuple_Aggregate` (for `Tuple_Type` or a tuple alternative in a
+  `Union_Type`)
 * `Enumeration_Literal_Spec` (for `Enumeration_Type`)
 
 Evaluation itself is pretty simple, we just apply the relevant python
@@ -590,11 +593,10 @@ all types immediately.
 
 When a `Field_Access_Expression` with `is_union_access=True` is
 evaluated, the prefix yields a `Value` whose `.value` is a
-`dict[str, Expression]` drawn from the concrete `Record_Object.field`
-of the referenced object. `Record_Object.field` is populated at parse
-time with `Implicit_Null` for every field declared by *that specific
-type*, so a field absent from the concrete type is simply not a key
-in the dict.
+`dict[str, Expression]`: for a record alternative it comes from the
+referenced object's `Record_Object.field`, and for a tuple alternative
+it comes from the `Tuple_Aggregate`. A field absent from the active
+alternative is simply not a key in the dict.
 
 Two distinct null situations arise inside
 `Field_Access_Expression.evaluate`:
@@ -1091,12 +1093,12 @@ actually access records in the check language. We just need to model
 that there are N different records the user could pick when
 referencing them.
 
-A union type is also modelled as an integer, for exactly the same
-reason. A union-typed component still holds a reference to a named
-record object — we just allow more than one possible concrete type for
-that object. The `tr_type` and `value_to_trlc` methods handle both
-`Record_Type` and `Union_Type` in a single branch, since both are
-encoded as `BUILTIN_INTEGER`.
+A union type is also modelled as an integer. This remains an
+abstraction for mixed unions: it represents either a record reference
+or a tuple alternative, while field access is modelled through an
+uninterpreted function over the accessible field map. This keeps the
+verification model conservative without conflating the runtime tuple
+and record representations.
 
 This means that a check like
 
@@ -1129,9 +1131,9 @@ is built:
 
 * **`Record_Type`**: iterates `all_components()`; a `.valid` flag is
   added when `component.optional` is `True`.
-* **`Union_Type`**: iterates the `get_field_map()`; a `.valid` flag
-  is added when the field is partial (`count < total`) or optional in
-  any member (`optional_in_any`).
+* **`Union_Type`**: iterates the `get_field_map()` across record and
+  tuple alternatives; a `.valid` flag is added when the field is partial
+  (`count < total`) or optional in any member (`optional_in_any`).
 
 After dereferencing, the field access is identical for both types:
 `Record_Access(UF(prefix), field + ".value")` for the value, and

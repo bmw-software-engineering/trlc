@@ -1,0 +1,2 @@
+union-type-tuple-member-forward-error/test.rsl:8:11: trlc error: Tuple_Type Later_Tuple must be declared before its use in a union
+Processed 1 model and 0 requirement files and found 1 error

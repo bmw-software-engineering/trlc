@@ -1,0 +1,4 @@
+choice [Later_Tuple, Record_A]
+        ^^^^^^^^^^^ union-type-tuple-member-forward-error/test.rsl:8: error: Tuple_Type Later_Tuple must be declared before its use in a union
+                  | declare the tuple type before the union that lists it
+Processed 1 model and 0 requirement files and found 1 error

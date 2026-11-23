@@ -31,6 +31,9 @@ generated in the following situations:
 
 ### 3.1.3
 
+* [LRM, TRLC] Union types can include previously declared tuple types as
+  alternatives alongside record types.
+
 * [BAZEL] `trlc_requirements_test` and `trlc_specification_test` accept an
   `args` list with extra TRLC command-line arguments (for example
   `--error-on-warnings`). Previously passing `args` failed because the

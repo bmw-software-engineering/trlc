@@ -152,6 +152,116 @@ class Test_Parser_Forward_References(unittest.TestCase):
         self.assertIs(a.components.lookup_assuming(mh, "b").n_typ, b)
         self.assertIs(b.components.lookup_assuming(mh, "a").n_typ, a)
 
+    def test_union_accepts_previously_declared_tuple_and_record(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "union_tuple.rsl",
+                "package demo\n"
+                "tuple RequirementId {\n"
+                "  item Integer\n"
+                "  separator @\n"
+                "  version Integer\n"
+                "}\n"
+                "tuple Coordinate {\n"
+                "  item Integer\n"
+                "  version Integer\n"
+                "}\n"
+                "type Record_A {\n"
+                "  version Integer\n"
+                "}\n"
+                "type A {\n"
+                "  choice [RequirementId, Coordinate, Record_A]\n"
+                "}\n"
+                'checks A {\n  choice.version >= 0, warning "negative version"\n}\n',
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "union_tuple.trlc",
+                "package demo\n"
+                "Record_A record_value { version = 3 }\n"
+                "A tuple_choice { choice = 1@2 }\n"
+                "A generic_choice { choice = (4, 5) }\n"
+                "A record_choice { choice = record_value }\n",
+            )
+        )
+
+        stab = self.process(sm)
+        self.assertIsNotNone(stab)
+        self.assertFalse(mh.has_error(), mh.error_messages())
+
+        pkg = stab.lookup_assuming(mh, "demo", ast.Package)
+        tuple_type = pkg.symbols.lookup_assuming(mh, "RequirementId", ast.Tuple_Type)
+        coordinate_type = pkg.symbols.lookup_assuming(mh, "Coordinate", ast.Tuple_Type)
+        tuple_choice = pkg.symbols.lookup_assuming(mh, "tuple_choice", ast.Record_Object)
+        generic_choice = pkg.symbols.lookup_assuming(
+            mh, "generic_choice", ast.Record_Object
+        )
+        record_choice = pkg.symbols.lookup_assuming(mh, "record_choice", ast.Record_Object)
+        record_value = pkg.symbols.lookup_assuming(mh, "record_value", ast.Record_Object)
+        tuple_value = tuple_choice.field["choice"]
+        record_reference = record_choice.field["choice"]
+
+        self.assertIsInstance(tuple_value, ast.Tuple_Aggregate)
+        self.assertIs(tuple_value.typ, tuple_type)
+        generic_tuple = generic_choice.field["choice"]
+        self.assertIsInstance(generic_tuple, ast.Tuple_Aggregate)
+        self.assertIs(generic_tuple.typ, coordinate_type)
+        self.assertIsInstance(record_reference, ast.Record_Reference)
+        self.assertIs(record_reference.target, record_value)
+
+    def test_tuple_union_member_must_be_declared_first(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "forward_union_tuple.rsl",
+                "package demo\n"
+                "type Record_A {}\n"
+                "type A { choice [Later_Tuple, Record_A] }\n"
+                "tuple Later_Tuple { item Integer }\n",
+            )
+        )
+
+        stab = self.process(sm)
+        self.assertIsNone(stab)
+        self.assertTrue(
+            any(
+                "Tuple_Type Later_Tuple must be declared before its use in a union"
+                in message
+                for message in mh.error_messages()
+            )
+        )
+
+    def test_union_keeps_forward_record_member_support(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "forward_union_record.rsl",
+                "package demo\n"
+                "tuple RequirementId { item Integer }\n"
+                "type A { choice [Record_A, RequirementId] }\n"
+                "type Record_A { version Integer }\n",
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "forward_union_record.trlc",
+                "package demo\n"
+                "Record_A record_value { version = 3 }\n"
+                "A choice_value { choice = record_value }\n",
+            )
+        )
+
+        stab = self.process(sm)
+        self.assertIsNotNone(stab)
+        self.assertFalse(mh.has_error(), mh.error_messages())
+        pkg = stab.lookup_assuming(mh, "demo", ast.Package)
+        union = pkg.symbols.lookup_assuming(mh, "A", ast.Record_Type)
+        union_type = union.components.lookup_assuming(mh, "choice").n_typ
+        self.assertIsInstance(union_type, ast.Union_Type)
+        self.assertIsInstance(union_type.types[0], ast.Record_Type)
+
     def test_tuple_type_forward_reference(self):
         """A tuple type may be referenced before its later declaration in the same file."""
         sm, mh = make_source_manager()
@@ -252,9 +362,14 @@ class Test_Parser_Forward_References(unittest.TestCase):
                         )
                     )
                     sm.process()
+                    expected_message = (
+                        "Tuple_Type Severity must be declared before its use in a union"
+                        if kind == "Tuple_Type"
+                        else f"{kind} Severity is not a Record_Type"
+                    )
                     self.assertEqual(
                         mh.error_messages(),
-                        [f"{kind} Severity is not a Record_Type"],
+                        [expected_message],
                     )
 
     def test_union_forward_enum_field_access_does_not_crash(self):
