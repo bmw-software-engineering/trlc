@@ -1604,14 +1604,10 @@ class Binary_Expression(Expression):
                     # Check that there is at least one pair of alternatives
                     # that can have the same value.
                     lhs_members = (
-                        self.n_lhs.typ.members()
-                        if lhs_is_union
-                        else [self.n_lhs.typ]
+                        self.n_lhs.typ.members() if lhs_is_union else [self.n_lhs.typ]
                     )
                     rhs_members = (
-                        self.n_rhs.typ.members()
-                        if rhs_is_union
-                        else [self.n_rhs.typ]
+                        self.n_rhs.typ.members() if rhs_is_union else [self.n_rhs.typ]
                     )
                     if not any(
                         (

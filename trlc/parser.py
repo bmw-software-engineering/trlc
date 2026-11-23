@@ -2324,13 +2324,11 @@ class Parser(Parser_Base):
             )
         if isinstance(typ, ast.Tuple_Type):
             return token.kind == "BRA" or (
-                typ.has_separators()
-                and self.tuple_has_first_separator(typ, offset)
+                typ.has_separators() and self.tuple_has_first_separator(typ, offset)
             )
         if isinstance(typ, ast.Union_Type):
             return any(
-                self.value_starts_with_type(member, offset)
-                for member in typ.members()
+                self.value_starts_with_type(member, offset) for member in typ.members()
             )
         if isinstance(typ, ast.Record_Type):
             return token.kind == "IDENTIFIER"
@@ -2389,9 +2387,7 @@ class Parser(Parser_Base):
                 "DECIMAL" if isinstance(typ, ast.Builtin_Decimal) else "INTEGER"
             )
             return (
-                start + 1
-                if token is not None and token.kind == expected_kind
-                else None
+                start + 1 if token is not None and token.kind == expected_kind else None
             )
 
         if isinstance(typ, (ast.Builtin_String, ast.Builtin_Markup_String)):

@@ -194,12 +194,18 @@ class Test_Parser_Forward_References(unittest.TestCase):
         pkg = stab.lookup_assuming(mh, "demo", ast.Package)
         tuple_type = pkg.symbols.lookup_assuming(mh, "RequirementId", ast.Tuple_Type)
         coordinate_type = pkg.symbols.lookup_assuming(mh, "Coordinate", ast.Tuple_Type)
-        tuple_choice = pkg.symbols.lookup_assuming(mh, "tuple_choice", ast.Record_Object)
+        tuple_choice = pkg.symbols.lookup_assuming(
+            mh, "tuple_choice", ast.Record_Object
+        )
         generic_choice = pkg.symbols.lookup_assuming(
             mh, "generic_choice", ast.Record_Object
         )
-        record_choice = pkg.symbols.lookup_assuming(mh, "record_choice", ast.Record_Object)
-        record_value = pkg.symbols.lookup_assuming(mh, "record_value", ast.Record_Object)
+        record_choice = pkg.symbols.lookup_assuming(
+            mh, "record_choice", ast.Record_Object
+        )
+        record_value = pkg.symbols.lookup_assuming(
+            mh, "record_value", ast.Record_Object
+        )
         tuple_value = tuple_choice.field["choice"]
         record_reference = record_choice.field["choice"]
 
