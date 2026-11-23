@@ -786,7 +786,8 @@ class Parser(Parser_Base):
             if union_use is not None:
                 self.mh.error(
                     union_use,
-                    f"Tuple_Type {name.value} must be declared before its use in a union",
+                    f"Tuple_Type {name.value} must be declared before its use "
+                    "in a union",
                     explanation=(
                         "declare the tuple type before the union that lists it"
                     ),
@@ -2387,7 +2388,11 @@ class Parser(Parser_Base):
             expected_kind = (
                 "DECIMAL" if isinstance(typ, ast.Builtin_Decimal) else "INTEGER"
             )
-            return start + 1 if token is not None and token.kind == expected_kind else None
+            return (
+                start + 1
+                if token is not None and token.kind == expected_kind
+                else None
+            )
 
         if isinstance(typ, (ast.Builtin_String, ast.Builtin_Markup_String)):
             return start + 1 if token.kind == "STRING" else None

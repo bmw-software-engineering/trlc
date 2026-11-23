@@ -90,7 +90,8 @@ class Linter:
                 for t in invalid_members:
                     self.mh.error(
                         n_typ.location,
-                        f"{t.__class__.__name__} {t.name} is not a Record_Type or Tuple_Type",
+                        f"{t.__class__.__name__} {t.name} is not a Record_Type "
+                        "or Tuple_Type",
                         fatal=False,
                     )
                 return

@@ -2841,7 +2841,8 @@ class Union_Type(Type):
                 raise TRLC_Error(
                     self.location,
                     Kind.SYS_ERROR,
-                    f"{t.__class__.__name__} {t.name} is not a Record_Type or Tuple_Type",
+                    f"{t.__class__.__name__} {t.name} is not a Record_Type "
+                    "or Tuple_Type",
                 )
 
     def get_field_map(self):
