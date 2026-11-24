@@ -1,0 +1,69 @@
+package trlc_req
+import req
+
+req.Software_Requirement Record_Types_May_Be_Forward_Referenced {
+  description = '''
+    A record type declared in an RSL file SHALL be usable in a component
+    declaration that appears earlier in the same file.
+
+    The implementation SHALL resolve the component to the later-declared
+    record type and SHALL successfully process mutually-referencing record
+    components.
+  '''
+  derived_from = []
+}
+
+req.Software_Requirement Tuple_Field_Types_May_Be_Forward_Referenced {
+  description = '''
+    A tuple type declared in an RSL file SHALL be usable as a record component
+    type when the component declaration appears earlier in the same file.
+
+    The implementation SHALL resolve the tuple field types to their declared
+    record types and SHALL successfully process the declarations.
+  '''
+  derived_from = []
+}
+
+req.Software_Requirement Union_Members_May_Be_Forward_Referenced {
+  description = '''
+    A record type declared in an RSL file SHALL be usable as a union member
+    when the union declaration appears earlier in the same file.
+
+    The implementation SHALL resolve the union member to the later-declared
+    record type and SHALL successfully process the declarations.
+  '''
+  derived_from = []
+}
+
+req.Software_Requirement Union_Members_Must_Be_Record_Types {
+  description = '''
+    Every type used as a union member SHALL be a record type. A later-declared
+    enumeration SHALL NOT be accepted as a union member.
+
+    When a union member resolves to a later-declared enumeration, the
+    implementation SHALL report that the member is not a record type. It
+    SHALL reject invalid field access and equality checks involving that
+    member with a diagnostic identifying the enumeration, rather than
+    crashing or reporting a misleading error.
+  '''
+  derived_from = []
+}
+
+req.Software_Requirement Tuple_Fields_Cannot_Forward_Reference_Enumerations {
+  description = '''
+    A tuple field SHALL NOT use an enumeration declared later in the same RSL
+    file as its type. The implementation SHALL report the later-declared
+    enumeration as an unresolved symbol.
+  '''
+  derived_from = []
+}
+
+req.Software_Requirement Tuple_Types_Cannot_Reference_Tuples_Cyclically {
+  description = '''
+    A tuple type SHALL NOT directly or indirectly reference itself through
+    tuple fields, including through a later-declared tuple type. The
+    implementation SHALL reject both direct self-reference and mutually
+    recursive tuple declarations as unresolved type references.
+  '''
+  derived_from = []
+}
