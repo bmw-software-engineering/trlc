@@ -1,0 +1,13 @@
+package Test
+
+tuple Item {
+  value Integer
+}
+
+tuple Other {
+  value String
+}
+
+type Selection {
+  choice [Item, Other, Item]
+}

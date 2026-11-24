@@ -1,0 +1,4 @@
+choice = (1, 2)
+         ^ union-type-tuple-ambiguous/test.trlc:4: error: tuple value is ambiguous for union type [First, Second]
+         | use tuple alternatives with distinct literal syntax so the intended tuple type can be identified
+Processed 1 model and 1 requirement file and found 1 error

@@ -1,0 +1,5 @@
+package Test
+
+Selection choice_value {
+  choice = (1, 2)
+}

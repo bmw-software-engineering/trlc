@@ -1,0 +1,33 @@
+{
+  "at_different": {
+    "choice": {
+      "item": 3,
+      "version": 4
+    }
+  },
+  "at_same": {
+    "choice": {
+      "item": 1,
+      "version": 2
+    }
+  },
+  "at_same_again": {
+    "choice": {
+      "item": 1,
+      "version": 2
+    }
+  },
+  "colon_different": {
+    "choice": {
+      "item": 5,
+      "version": 6
+    }
+  },
+  "colon_same": {
+    "choice": {
+      "item": 1,
+      "version": 2
+    }
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

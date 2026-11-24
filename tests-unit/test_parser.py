@@ -268,6 +268,115 @@ class Test_Parser_Forward_References(unittest.TestCase):
         self.assertIsInstance(union_type, ast.Union_Type)
         self.assertIsInstance(union_type.types[0], ast.Record_Type)
 
+    def test_union_distinguishes_tuple_types_with_same_and_different_values(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "tuple_union_values.rsl",
+                "package demo\n"
+                "tuple AtTuple {\n"
+                "  item Integer\n"
+                "  separator @\n"
+                "  version Integer\n"
+                "}\n"
+                "tuple ColonTuple {\n"
+                "  item Integer\n"
+                "  separator :\n"
+                "  version Integer\n"
+                "}\n"
+                "type Selection { choice [AtTuple, ColonTuple] }\n",
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "tuple_union_values.trlc",
+                "package demo\n"
+                "Selection at_same { choice = 1@2 }\n"
+                "Selection at_same_again { choice = 1@2 }\n"
+                "Selection colon_same { choice = 1:2 }\n"
+                "Selection at_different { choice = 3@4 }\n"
+                "Selection colon_different { choice = 5:6 }\n",
+            )
+        )
+
+        stab = self.process(sm)
+        self.assertIsNotNone(stab)
+        self.assertFalse(mh.has_error(), mh.error_messages())
+        pkg = stab.lookup_assuming(mh, "demo", ast.Package)
+        selections = {
+            name: pkg.symbols.lookup_assuming(mh, name, ast.Record_Object)
+            for name in (
+                "at_same",
+                "at_same_again",
+                "colon_same",
+                "at_different",
+                "colon_different",
+            )
+        }
+
+        at_same = selections["at_same"].field["choice"]
+        at_same_again = selections["at_same_again"].field["choice"]
+        colon_same = selections["colon_same"].field["choice"]
+        at_different = selections["at_different"].field["choice"]
+        colon_different = selections["colon_different"].field["choice"]
+
+        self.assertIsInstance(at_same, ast.Tuple_Aggregate)
+        self.assertIsInstance(at_same_again, ast.Tuple_Aggregate)
+        self.assertIsInstance(colon_same, ast.Tuple_Aggregate)
+        self.assertIsNot(at_same.typ, colon_same.typ)
+        self.assertIs(at_same.typ, at_same_again.typ)
+        self.assertEqual(at_same.value["item"].value, at_same_again.value["item"].value)
+        self.assertEqual(
+            at_same.value["version"].value, at_same_again.value["version"].value
+        )
+        self.assertEqual(at_same.value["item"].value, colon_same.value["item"].value)
+        self.assertEqual(
+            at_same.value["version"].value, colon_same.value["version"].value
+        )
+        self.assertEqual(at_different.value["item"].value, 3)
+        self.assertEqual(at_different.value["version"].value, 4)
+        self.assertEqual(colon_different.value["item"].value, 5)
+        self.assertEqual(colon_different.value["version"].value, 6)
+
+    def test_union_rejects_duplicate_tuple_member(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "duplicate_tuple_union.rsl",
+                "package demo\n"
+                "tuple Item { value Integer }\n"
+                "tuple Other { value String }\n"
+                "type Selection { choice [Item, Other, Item] }\n",
+            )
+        )
+
+        self.process(sm)
+        self.assertIn("duplicate type Item in union", mh.error_messages())
+
+    def test_union_rejects_ambiguous_generic_tuple_value(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "ambiguous_tuple_union.rsl",
+                "package demo\n"
+                "tuple First {\n  item Integer\n  version Integer\n}\n"
+                "tuple Second {\n  item Integer\n  version Integer\n}\n"
+                "type Selection { choice [First, Second] }\n",
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "ambiguous_tuple_union.trlc",
+                "package demo\nSelection choice_value { choice = (1, 2) }\n",
+            )
+        )
+
+        self.assertIsNone(self.process(sm))
+        self.assertIn(
+            "tuple value is ambiguous for union type [First, Second]",
+            mh.error_messages(),
+        )
+
     def test_tuple_type_forward_reference(self):
         """A tuple type may be referenced before its later declaration in the same file."""
         sm, mh = make_source_manager()
