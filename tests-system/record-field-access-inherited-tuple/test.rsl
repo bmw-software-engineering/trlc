@@ -1,0 +1,29 @@
+package Test
+
+abstract type Base {
+  level Integer
+}
+
+abstract type Mid extends Base {
+  rank Integer
+}
+
+type Leaf extends Mid {
+  detail Integer
+}
+
+tuple LeafId {
+  item Leaf
+  separator @
+  version Integer
+}
+
+type Req {
+  ids LeafId [1 .. *]
+  min Integer
+}
+
+checks Req {
+  (forall i in ids => i.item.level >= min), error "level too low", ids
+  (forall i in ids => i.item.rank >= 0), error "rank is negative", ids
+}

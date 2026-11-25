@@ -1,0 +1,26 @@
+package Test
+
+Node n_ok {
+  level = 3
+}
+
+Node n_low {
+  level = -2
+}
+
+Node n_chain {
+  level = 1
+  next  = n_low
+}
+
+Req r_ok {
+  ref = n_ok
+}
+
+Req r_low {
+  ref = n_low
+}
+
+Req r_chain {
+  ref = n_chain
+}

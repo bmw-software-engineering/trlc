@@ -1,0 +1,19 @@
+package Test
+
+type Base {
+  level Integer
+  note  optional Integer
+}
+
+type Leaf extends Base {
+  detail Integer
+}
+
+type Req {
+  ref Leaf
+}
+
+checks Req {
+  ref.note >= 0, error "note is negative", ref
+  10 / ref.level > 0, error "ratio is not positive", ref
+}

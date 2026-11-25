@@ -2021,7 +2021,12 @@ class Field_Access_Expression(Expression):
         self.is_universal = is_universal
 
         if not is_union_access:
-            self.n_prefix.ensure_type(mh, self.n_field.member_of)
+            # Component lookup only yields components of the prefix type
+            # or one of its parents.
+            if isinstance(n_prefix.typ, Record_Type):
+                assert n_prefix.typ.is_subclass_of(n_field.member_of)
+            else:
+                assert n_prefix.typ is n_field.member_of
 
     def dump(self, indent=0):  # pragma: no cover
         # lobster-exclude: Debugging feature

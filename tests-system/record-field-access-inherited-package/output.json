@@ -1,0 +1,5 @@
+ref = n_chain
+      ^^^^^^^ record-field-access-inherited-package/test.trlc:25: check error: next level is negative
+ref = n_low
+      ^^^^^ record-field-access-inherited-package/test.trlc:21: check error: level is negative
+Processed 2 models and 1 requirement file and found 2 errors

@@ -1,0 +1,24 @@
+package Test
+
+Leaf l_ok {
+  level  = 5
+  extra  = 1
+  detail = 1
+}
+
+Leaf l_bad {
+  level  = 1
+  extra  = -1
+  detail = -1
+  note   = -1
+}
+
+Req r_ok {
+  ref = l_ok
+  min = 3
+}
+
+Req r_bad {
+  ref = l_bad
+  min = 3
+}

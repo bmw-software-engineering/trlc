@@ -1,0 +1,18 @@
+package Test
+
+type Base {
+  level Integer
+}
+
+type Leaf extends Base {
+  detail Integer
+}
+
+type Req {
+  ref Base
+}
+
+checks Req {
+  ref.level >= 0, error "level is negative", ref
+  ref.detail >= 0, error "detail is negative", ref
+}
