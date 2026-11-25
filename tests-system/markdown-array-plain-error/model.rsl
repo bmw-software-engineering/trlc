@@ -1,0 +1,16 @@
+package MdPlainArrayTest
+
+type Item {
+  description String
+}
+
+type RequirementPlain {
+  description String
+  numbers     Integer [1 .. *]
+  refs        Item    [1 .. *]
+}
+
+type RequirementPair {
+  description String
+  pair        Integer [2 .. *]
+}

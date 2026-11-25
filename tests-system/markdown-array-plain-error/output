@@ -1,0 +1,16 @@
+markdown-array-plain-error/req_errors.trlc.md:9:1: error: bracket notation for array fields is not supported
+| Use comma-separated or newline-separated values without brackets instead, e.g. '1, 2, 3'.
+markdown-array-plain-error/req_errors.trlc.md:23:1: error: bracket notation for array fields is not supported
+| Use comma-separated or newline-separated values without brackets instead, e.g. '1, 2, 3'.
+markdown-array-plain-error/req_errors.trlc.md:33:1: error: invalid entry 'two' in array field 'numbers'
+| Expected a value of type 'Integer', separated by commas or newlines, e.g. '1, 2, 3'.
+markdown-array-plain-error/req_errors.trlc.md:44:1: error: invalid entry 'item_a @ 1' in array field 'refs'
+| Expected a value of type 'Item', separated by commas or newlines, e.g. 'item_a, item_b'.
+markdown-array-plain-error/req_errors.trlc.md:64:1: error: array field 'pair' has no elements
+| Provide at least one value of type 'Integer', separated by commas or newlines, e.g. '1, 2, 3'.
+markdown-array-plain-error/req_errors.trlc.md:3:1: error: required component refs (see model.rsl:10) is not defined
+markdown-array-plain-error/req_errors.trlc.md:13:1: error: required component refs (see model.rsl:10) is not defined
+markdown-array-plain-error/req_errors.trlc.md:27:1: error: required component refs (see model.rsl:10) is not defined
+markdown-array-plain-error/req_errors.trlc.md:44:1: error: this array requires at least 1 elements (only 0 provided)
+markdown-array-plain-error/req_errors.trlc.md:54:1: error: this array requires at least 2 elements (only 1 provided)
+Processed 1 model and 2 requirement files and found 10 errors

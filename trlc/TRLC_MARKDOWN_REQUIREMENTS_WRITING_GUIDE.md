@@ -147,6 +147,56 @@ All LRM separator kinds are supported: `@`, `:`, `;`, and plain identifier (e.g.
 - The label must be a valid identifier, optionally followed by a separator and an integer version. An invalid entry (for example `[req 1](doc.md)`) is reported as an error.
 - A reference without a version (`req2`) is only valid if the tuple declares its version component as `optional`.
 
+## Plain (Non-Tuple) Arrays
+
+Fields declared as an array of a non-tuple type -- `Integer`, `Decimal`,
+`Boolean`, `String`, an enum, or a plain record reference -- can also be
+written directly in Markdown, the same way as tuple-reference arrays.
+
+**Supported layouts:**
+
+```md
+// Table cell — comma-separated
+| numbers | 1, 2, 3 |
+
+// Table cell — <br>-separated
+| tags | "alpha" <br> "beta" |
+
+// Field block — one per line
+### numbers
+1
+2
+3
+
+// Field block — comma-separated
+### modes
+Mode.Fast, Mode.Slow
+
+// Plain record references — qualified or same-package unqualified
+### refs
+item_a, OtherPkg.item_b
+
+// A single value needs no comma
+### numbers
+42
+```
+
+**Rules:**
+
+- Each entry must match the field's declared element type:
+  - `Integer`/`Decimal`: a plain number, optionally signed (e.g. `-3`, `2.5`).
+  - `Boolean`: `true` or `false`.
+  - `String`: plain text, or a double-quoted string (e.g. `"alpha"`). Use quotes
+    if the value itself must contain a comma.
+  - An enum: `EnumType.Literal` (qualified the same way as a scalar enum value).
+  - A plain record reference: an identifier, qualified (`Pkg.item`) or
+    unqualified for the same package (`item`) -- **without** a tuple
+    separator/version suffix (that syntax is reserved for tuple-array fields).
+- Entries are separated by commas, newlines, or `<br>`, exactly like
+  tuple-reference arrays.
+- Do **not** use bracket notation `[...]` — it conflicts with Markdown URL
+  syntax and produces an error, same as for tuple-reference arrays.
+
 ## Troubleshooting
 
 ### Error: unexpected character in heading
@@ -169,8 +219,34 @@ All LRM separator kinds are supported: `@`, `:`, `;`, and plain identifier (e.g.
 - Cause: array value written with `[...]` (e.g. `[Pkg.item @ 1]`).
 - Fix: remove the brackets and use comma or newline separation instead.
 
+### Error: bracket notation for array fields is not supported
+
+- Cause: a plain (non-tuple) array value written with `[...]` (e.g. `[1, 2, 3]`).
+- Fix: remove the brackets and use comma or newline separation instead.
+
+### Error: invalid entry '...' in array field '...'
+
+- Cause: one of the comma/newline-separated entries does not match the
+  field's declared element type (for example `two` in an `Integer [1 .. *]`
+  field, or `item_a @ 1` in a plain record-reference array).
+- Fix: use a value matching the element type -- see "Plain (Non-Tuple)
+  Arrays" above.
+
+### Error: array field '...' has no elements
+
+- Cause: the field's declared array requires at least one element (its
+  lower bound is 1 or more), but the field is present (as a table row or
+  field block) with a blank value, e.g. `| numbers | |` or a
+  `### numbers` block with no content.
+- Fix: provide at least one value of the field's declared element type.
+- Note: if the field's array is declared with a lower bound of 0 (e.g.
+  `Integer [0 .. *]`), a blank value is accepted as a valid empty array
+  and does not raise this error.
+
 ### Array field parsed as plain string
 
-- Cause: the field type is not a tuple-reference array in the RSL model, so the value is stored as a string.
-- Fix: check that the RSL field is declared as an array of a tuple type (e.g. `refs ItemRef [1 .. *]`).
+- Cause: the field is not declared as an array in the RSL model (e.g. it is
+  a plain scalar `String`), so the whole value is stored as a single string.
+- Fix: check that the RSL field is declared with array bounds (e.g.
+  `refs ItemRef [1 .. *]` or `tags String [1 .. *]`).
 
