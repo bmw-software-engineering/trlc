@@ -27,6 +27,11 @@ generated in the following situations:
 
 ### 3.1.4-dev
 
+* [TRLC] Fix `expected expression of type X, got Y instead` when accessing a
+  component inherited from a parent record through a reference to an
+  extension of that record. For example `ref.level`, where `level` is
+  declared in `Base` and `ref` references a `Leaf` that extends `Base`
+  (directly or transitively).
 
 
 ### 3.1.3
@@ -55,6 +60,7 @@ generated in the following situations:
 * [TRLC] Ignore </br> tags at the end of import statements in `trlc.md` files.
 
 * [TRLC] Dropped support for sections in `trlc.md` files.
+
 
 ### 3.1.1
 

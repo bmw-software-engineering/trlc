@@ -1,0 +1,9 @@
+package Test
+
+Leaf l_1 {
+  value = 1
+}
+
+Req r_1 {
+  ref = l_1
+}

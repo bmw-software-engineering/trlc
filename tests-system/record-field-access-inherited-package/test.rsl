@@ -1,0 +1,16 @@
+package Test
+
+import PkgBase
+
+type Node extends PkgBase.Base {
+  next optional Node
+}
+
+type Req {
+  ref Node
+}
+
+checks Req {
+  ref.level >= 0, error "level is negative", ref
+  ref.next != null implies ref.next.level >= 0, error "next level is negative", ref
+}

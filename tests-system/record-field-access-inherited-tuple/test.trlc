@@ -1,0 +1,29 @@
+package Test
+
+Leaf l_ok {
+  level  = 5
+  rank   = 1
+  detail = 1
+}
+
+Leaf l_low {
+  level  = 1
+  rank   = 1
+  detail = 1
+}
+
+Leaf l_neg {
+  level  = 5
+  rank   = -1
+  detail = 1
+}
+
+Req r_ok {
+  ids = [l_ok@1]
+  min = 3
+}
+
+Req r_bad {
+  ids = [l_ok@1, l_low@1, l_neg@1]
+  min = 3
+}
