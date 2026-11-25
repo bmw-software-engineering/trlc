@@ -13,6 +13,7 @@ matrix:
   - windows
   bazel:
   - 8.x
+  - 9.x
 tasks:
   verify_api_examples:
     name: "Verify api-examples"
