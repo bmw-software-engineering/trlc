@@ -1,0 +1,68 @@
+package ReqSpec
+
+enum Asil {
+   QM
+   B
+   D
+}
+
+enum Status {
+    valid
+    invalid
+}
+
+abstract type Requirement {
+    description				String
+    version                 Integer
+	  safety                  Asil
+    note optional           String
+    status                  Status
+    freeze status =         Status.valid
+}
+
+tuple ReqId {
+   item                     Requirement
+   separator                @
+   version                  Integer
+}
+
+type PlatformReq extends Requirement {
+    rationale				String
+}
+
+tuple PlatformReqId {
+   item                     PlatformReq
+   separator                @
+   version                  Integer
+}
+
+type FeatReq extends Requirement {
+    derived_from			PlatformReqId[1 .. *]
+}
+
+tuple FeatReqId {
+   item                     FeatReq
+   separator                @
+   version                  Integer
+}
+
+type CompReq extends Requirement {
+    derived_from		    FeatReqId[1 .. *]
+}
+
+abstract type StdReq extends Requirement {
+}
+
+checks Requirement {
+
+    not matches(description, "(shall|should)"),
+        warning "The description must include (shall|should)",
+	    description
+
+}
+
+checks PlatformReq {
+
+    rationale != null implies len(rationale) >= 5, "rationale too short"
+
+}

@@ -1,0 +1,13 @@
+package TestPkg
+
+type FeatReq
+extends Requirement
+{
+  derived_from String
+}
+
+type CompReq
+    extends FeatReq
+{
+  component String
+}

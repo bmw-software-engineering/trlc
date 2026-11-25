@@ -1,0 +1,16 @@
+package Kitchen
+import ReqSpec
+section "kitchen" {
+section "Appliance_Interface" {
+section "Controller" {
+section "Functionality" {
+ReqSpec.FeatReq SupportForOfflineCache {
+    version = 1
+}
+ReqSpec.FeatReq SupportForRemoteControl {
+    version = 2
+}
+}
+}
+}
+}

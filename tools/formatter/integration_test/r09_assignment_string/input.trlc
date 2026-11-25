@@ -1,0 +1,10 @@
+package Kitchen
+import ReqSpec
+ReqSpec.FeatReq SupportForScheduledBrewing {
+    description="The communication framework shall provide API to support a time-based architecture."
+    version = 1
+}
+ReqSpec.FeatReq SupportForAutoRefill {
+    description="The communication framework shall provide API to support a data-driven architecture."
+    version=2
+}
