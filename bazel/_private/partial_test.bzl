@@ -1,6 +1,6 @@
 """Bazel macro for tests-large-partial/ golden-file tests.
 
-``trlc_partial_test(test_name)`` creates one ``native.py_test`` that reuses
+``trlc_partial_test(test_name)`` creates one ``py_test`` that reuses
 the shared ``mode_test.py`` runner from ``//bazel/_private``.
 
 The test subdirectory must contain:
@@ -17,6 +17,8 @@ Args forwarded via Bazel ``args`` to ``mode_test.py``:
     argv[2]  test_dir   plain string, e.g. "partial-1"
 """
 
+load("@rules_python//python:defs.bzl", "py_test")
+
 def trlc_partial_test(test_name):
     """Create a golden-file py_test for a tests-large-partial/ subdirectory.
 
@@ -32,7 +34,7 @@ def trlc_partial_test(test_name):
     # plain name preserves the short invocation style.
     test_target = test_name + "_test"
 
-    native.py_test(
+    py_test(
         name = test_target,
         srcs = ["//bazel/_private:mode_test.py"],
         main = "mode_test.py",

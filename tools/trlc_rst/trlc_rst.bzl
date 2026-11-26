@@ -1,3 +1,5 @@
+load("@rules_python//python:defs.bzl", "py_test")
+
 def trlc_rst_integration_test(test_dir):
     """Create a py_test and test_suite alias for a tools/trlc_rst/tests/ subdirectory.
 
@@ -11,7 +13,7 @@ def trlc_rst_integration_test(test_dir):
     srcs = native.glob([test_dir + "/**"])
     test_target = test_dir + "_test"
 
-    native.py_test(
+    py_test(
         name = test_target,
         srcs = [":converter_test.py"],
         main = "converter_test.py",

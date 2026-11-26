@@ -1,3 +1,5 @@
+load("@rules_python//python:defs.bzl", "py_test")
+
 TrlcProviderInfo = provider(
     fields = {
         "spec": "Holds the specification files (*.rsl) including transitive",
@@ -20,7 +22,7 @@ def trlc_specification(**kwargs):
     _trlc_specification(**kwargs)
 
 def trlc_specification_test(name, reqs, srcs = [Label("//:trlc.py")], main = "trlc.py", args = [], **kwargs):
-    native.py_test(
+    py_test(
         name = name,
         srcs = srcs,
         args = ["--verify", "--skip-trlc-files"] + args +
@@ -69,7 +71,7 @@ def trlc_requirements(**kwargs):
     _trlc_requirement(**kwargs)
 
 def trlc_requirements_test(name, reqs, srcs = [Label("//:trlc.py")], main = "trlc.py", args = [], **kwargs):
-    native.py_test(
+    py_test(
         name = name,
         srcs = srcs,
         args = ["--verify"] + args +

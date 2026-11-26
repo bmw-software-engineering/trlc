@@ -4,6 +4,8 @@ Runs trlc against each output* golden file in a test directory and diffs
 the results.  Extra flags may be provided via an optional ``options`` file.
 """
 
+load("@rules_python//python:defs.bzl", "py_test")
+
 def trlc_system_test(test_dir):
     """Create a py_test and test_suite alias for a tests-system/ subdirectory.
 
@@ -16,7 +18,7 @@ def trlc_system_test(test_dir):
     # a test_suite alias under the plain name allows: bazel test //tests-system:<dir>
     test_target = test_dir + "_test"
 
-    native.py_test(
+    py_test(
         name = test_target,
         srcs = ["//bazel/_private:mode_test.py"],
         main = "mode_test.py",
