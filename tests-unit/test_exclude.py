@@ -6,7 +6,7 @@ import sys
 import tempfile
 import unittest
 
-from trlc.errors import Kind, Message_Handler, TRLC_Error
+from trlc.errors import Kind, Location, Message_Handler, TRLC_Error
 from trlc.trlc import Source_Manager, trlc as trlc_main
 
 
@@ -107,6 +107,62 @@ class Test_Exclude(unittest.TestCase):
         self.assertTrue(ok, mh.error_messages())
         self.assertEqual(len(sm.rsl_files), 1)
         self.assertNotIn(os.path.abspath(bar_file), sm.rsl_files)
+
+    def test_register_directory_reports_bom_on_cp1252_stream(self):
+        self.write("model.rsl", "package Foo\n")
+        self.write("requirements.trlc", "\ufeffpackage Foo\n")
+        output = io.BytesIO()
+        with io.TextIOWrapper(output, encoding="cp1252", errors="strict") as stream:
+            mh = Message_Handler(out=stream)
+            mh.suppress(Kind.USER_WARNING)
+            mh.suppress(Kind.SYS_WARNING)
+            sm = Source_Manager(mh, error_recovery=True)
+
+            self.assertFalse(sm.register_directory(self.tmp))
+            stream.flush()
+            diagnostic = output.getvalue().decode("cp1252")
+
+        self.assertIn("requirements.trlc:1", diagnostic)
+        self.assertIn("UTF-8 byte order mark", diagnostic)
+        self.assertIn("without a byte order mark", diagnostic)
+        self.assertEqual(mh.errors, 1)
+
+    def test_register_directory_reports_other_unicode_on_cp1252_stream(self):
+        self.write("requirements.trlc", "\u2603package Foo\n")
+        output = io.BytesIO()
+        with io.TextIOWrapper(output, encoding="cp1252", errors="strict") as stream:
+            mh = Message_Handler(out=stream)
+            sm = Source_Manager(mh)
+
+            self.assertFalse(sm.register_directory(self.tmp))
+            stream.flush()
+            diagnostic = output.getvalue().decode("cp1252")
+
+        self.assertIn("unexpected character '\\u2603'", diagnostic)
+        self.assertEqual(mh.errors, 1)
+
+    def test_diagnostics_respect_output_encoding(self):
+        for encoding, brief in (("cp1252", False), ("cp1252", True), ("utf-8", False)):
+            with self.subTest(encoding=encoding, brief=brief):
+                output = io.BytesIO()
+                with io.TextIOWrapper(
+                    output, encoding=encoding, errors="strict"
+                ) as stream:
+                    mh = Message_Handler(out=stream, brief=brief)
+                    mh.error(
+                        Location("example.trlc", 1, 1),
+                        "bad \u2603",
+                        explanation="remove \u2603",
+                        fatal=False,
+                    )
+                    stream.flush()
+                    diagnostic = output.getvalue().decode(encoding)
+
+                expected = "\u2603" if encoding == "utf-8" else "\\u2603"
+                self.assertIn(f"bad {expected}", diagnostic)
+                if not brief:
+                    self.assertIn(f"remove {expected}", diagnostic)
+                self.assertEqual(mh.errors, 1)
 
     def test_register_include_skips_excluded_subdirectory(self):
         sm, mh = make_source_manager()

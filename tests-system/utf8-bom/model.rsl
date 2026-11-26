@@ -1,0 +1,5 @@
+package Bom_Repro
+
+type Requirement {
+    description String
+}
