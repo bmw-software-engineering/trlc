@@ -1,3 +1,4 @@
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
 load("@trlc_dependencies//:requirements.bzl", "requirement")
 
 py_library(

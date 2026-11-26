@@ -27,6 +27,9 @@ generated in the following situations:
 
 ### 3.1.4-dev
 
+* [BAZEL] Load `py_test`, `py_library`, and `py_binary` from
+  `@rules_python//python:defs.bzl` instead of relying on `native.py_test` or
+  built-in rule autoloading, so TRLC works with Bazel 9 out of the box.
 
 
 ### 3.1.3
