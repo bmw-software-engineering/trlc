@@ -1,27 +1,3 @@
-matches(name, "^D.*"), error "name must start with D", name
-        ^^^^ simple-info-warn-error/bar.rsl:8: issue: expression could be null [vcg-evaluation-of-null]
-           | example record_type triggering error:
-           |   MyType bad_potato {
-           |     /* name is null */
-           |   }
-matches(name, "^E.*"), error "name must start with E", name
-        ^^^^ simple-info-warn-error/bar.rsl:9: issue: expression could be null [vcg-evaluation-of-null]
-           | example record_type triggering error:
-           |   MyType bad_potato {
-           |     /* name is null */
-           |   }
-matches(name, "^W.*"), warning "name must start with W", name
-        ^^^^ simple-info-warn-error/bar.rsl:10: issue: expression could be null [vcg-evaluation-of-null]
-           | example record_type triggering error:
-           |   MyType bad_potato {
-           |     /* name is null */
-           |   }
-matches(name, "^I.*"),  warning "name must start with I", name
-        ^^^^ simple-info-warn-error/bar.rsl:11: issue: expression could be null [vcg-evaluation-of-null]
-           | example record_type triggering error:
-           |   MyType bad_potato {
-           |     /* name is null */
-           |   }
 name = "Qbert" // does start with Q
        ^^^^^^^ simple-info-warn-error/instances.trlc:5: check error: name must start with D
 name = "Qbert" // does start with Q
@@ -46,4 +22,4 @@ name = "BBert"
        ^^^^^^^ simple-info-warn-error/instances.trlc:13: check warning: name must start with W
 name = "BBert"
        ^^^^^^^ simple-info-warn-error/instances.trlc:13: check warning: name must start with I
-Processed 1 model and 1 requirement file and found 10 warnings and 6 errors
+Processed 1 model and 1 requirement file and found 6 warnings and 6 errors
