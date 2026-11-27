@@ -67,6 +67,3 @@ The TRLC tool returns 0 if there are no errors (there could be user or
 language warnings however).
 
 A status code of 1 is returned in all other cases.
-
-If you also want to treat warnings as errors, use the
-`--error-on-warnings` option.
