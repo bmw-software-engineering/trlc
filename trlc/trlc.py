@@ -1168,15 +1168,11 @@ def trlc():
                     file=mh.out,
                 )
 
-    if ok:
-        if mh.errors:  # pragma: no cover
-            rv = 1
-        else:
-            rv = 0
-    else:
-        rv = 1
     mh.close()
-    return rv
+
+    if not ok or mh.errors:
+        return 1
+    return 0
 
 
 def main():
