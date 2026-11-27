@@ -68,9 +68,9 @@ def _run_mode(mode):
     if mode in ("output", "output.smtlib"):
         args += ["--verify"]
     elif mode == "output.brief":
-        args += ["--no-lint", "--brief"]
+        args += ["--brief"]
     elif mode == "output.json":
-        args += ["--no-lint", "--debug-api-dump"]
+        args += ["--debug-api-dump"]
 
     args.extend(_get_extra_args())
     args.append(sources)

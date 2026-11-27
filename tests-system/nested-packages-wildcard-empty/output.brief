@@ -1,1 +1,2 @@
-Processed 1 model and 1 requirement file and found no issues
+nested-packages-wildcard-empty/data.trlc:2:8: trlc issue: wildcard import foo.* is equivalent to import foo since foo has no sub-packages [unused_imports]
+Processed 1 model and 1 requirement file and found 1 warning

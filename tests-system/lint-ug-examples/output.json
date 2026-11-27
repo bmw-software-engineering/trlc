@@ -1,2 +1,18 @@
+type Q extends T {
+     ^ lint-ug-examples/clarify_final.rsl:7: issue: consider clarifying that this record is final [clarify_final]
+-x / 3 < 0, "non-obvious meaning"
+^ lint-ug-examples/unary_minus_precedence.rsl:8: issue: expression means -(x / 3), place explicit brackets to clarify intent [unary_minus_precedence]
+x Integer [10 .. 3]
+                 ^ lint-ug-examples/impossible_array_types.rsl:4: issue: upper bound must be at least 10 [impossible_array_types]
+y Integer [0 .. 0]
+                ^ lint-ug-examples/impossible_array_types.rsl:5: issue: this array makes no sense [impossible_array_types]
+separator x
+          ^ lint-ug-examples/separator_based_literal_ambiguity.rsl:5: issue: x separator after integer component creates ambiguities [separator_based_literal_ambiguity]
+x Integer [1 .. 1]
+                ^ lint-ug-examples/weird_array_types.rsl:4: issue: array of fixed size 1 should not be an array [weird_array_types]
+y Integer [0 .. 1]
+                ^ lint-ug-examples/weird_array_types.rsl:5: issue: consider making this array an optional Integer [weird_array_types]
+abstract type T {
+              ^ lint-ug-examples/abstract_leaf_types.rsl:3: issue: abstract type T does not have any extensions [abstract_leaf_types]
 {}
-Processed 14 models and 0 requirement files and found no issues
+Processed 14 models and 0 requirement files and found 8 warnings

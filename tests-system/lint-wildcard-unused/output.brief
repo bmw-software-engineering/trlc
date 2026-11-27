@@ -1,1 +1,2 @@
-Processed 3 models and 0 requirement files and found no issues
+lint-wildcard-unused/foobar.rsl:2:8: trlc issue: unused wildcard import sub.* [unused_imports]
+Processed 3 models and 0 requirement files and found 1 warning

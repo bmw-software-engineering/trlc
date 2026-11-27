@@ -1,1 +1,2 @@
-Processed 1 model and 0 requirement files and found no issues
+rbt-abstract-type-not-extended/abstract.rsl:4:15: trlc issue: abstract type Ant does not have any extensions [abstract_leaf_types]
+Processed 1 model and 0 requirement files and found 1 warning

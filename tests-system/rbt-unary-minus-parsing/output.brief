@@ -1,1 +1,2 @@
-Processed 1 model and 0 requirement files and found no issues
+rbt-unary-minus-parsing/example.rsl:9:4: trlc issue: expression means -(a * b), place explicit brackets to clarify intent [unary_minus_precedence]
+Processed 1 model and 0 requirement files and found 1 warning

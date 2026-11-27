@@ -1,1 +1,2 @@
-Processed 2 models and 0 requirement files and found no issues
+type-qualifiers-4/foo.rsl:5:15: trlc issue: abstract type T2 does not have any extensions [abstract_leaf_types]
+Processed 2 models and 0 requirement files and found 1 warning

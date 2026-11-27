@@ -634,7 +634,8 @@ class Parser(Parser_Base):
                 enum.literals = ast.Symbol_Table()
             if union_use is not None:
                 # Reported here, rather than only by the linter, so that
-                # --no-lint cannot make an invalid union valid. Fatal, so
+                # linter settings cannot make an invalid union valid. Fatal,
+                # so
                 # later checks never see the enum inside a union.
                 self.mh.error(
                     union_use,

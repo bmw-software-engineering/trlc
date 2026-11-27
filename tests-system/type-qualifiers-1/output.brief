@@ -1,1 +1,2 @@
-Processed 1 model and 1 requirement file and found no issues
+type-qualifiers-1/foo.rsl:15:6: trlc issue: consider clarifying that this record is final [clarify_final]
+Processed 1 model and 1 requirement file and found 1 warning

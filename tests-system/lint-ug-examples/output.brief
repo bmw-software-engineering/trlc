@@ -1,1 +1,9 @@
-Processed 14 models and 0 requirement files and found no issues
+lint-ug-examples/clarify_final.rsl:7:6: trlc issue: consider clarifying that this record is final [clarify_final]
+lint-ug-examples/unary_minus_precedence.rsl:8:3: trlc issue: expression means -(x / 3), place explicit brackets to clarify intent [unary_minus_precedence]
+lint-ug-examples/impossible_array_types.rsl:4:20: trlc issue: upper bound must be at least 10 [impossible_array_types]
+lint-ug-examples/impossible_array_types.rsl:5:19: trlc issue: this array makes no sense [impossible_array_types]
+lint-ug-examples/separator_based_literal_ambiguity.rsl:5:13: trlc issue: x separator after integer component creates ambiguities [separator_based_literal_ambiguity]
+lint-ug-examples/weird_array_types.rsl:4:19: trlc issue: array of fixed size 1 should not be an array [weird_array_types]
+lint-ug-examples/weird_array_types.rsl:5:19: trlc issue: consider making this array an optional Integer [weird_array_types]
+lint-ug-examples/abstract_leaf_types.rsl:3:15: trlc issue: abstract type T does not have any extensions [abstract_leaf_types]
+Processed 14 models and 0 requirement files and found 8 warnings

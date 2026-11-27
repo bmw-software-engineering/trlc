@@ -1,2 +1,4 @@
+type-qualifiers-3/foo.rsl:15:6: trlc issue: consider clarifying that this record is final [clarify_final]
+type-qualifiers-3/foo.rsl:19:6: trlc issue: consider clarifying that this record is final [clarify_final]
 type-qualifiers-3/foo.rsl:20:3: trlc error: cannot declare new components in final record type
-Processed 1 model and 0 requirement files and found 1 error
+Processed 1 model and 0 requirement files and found 2 warnings and 1 error
