@@ -599,6 +599,13 @@ class TRLC_Lexer(Lexer_Base):
                     "unfinished base %u integer" % int_base,
                 )
 
+        elif self.cc == "\ufeff" and start_pos == 0:
+            self.mh.lex_error(
+                self.current_location(),
+                "unexpected UTF-8 byte order mark (U+FEFF); "
+                "save the file without a byte order mark",
+            )
+
         else:
             self.mh.lex_error(
                 self.current_location(), "unexpected character '%s'" % self.cc

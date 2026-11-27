@@ -241,6 +241,16 @@ class Message_Handler:
                 loc = loc[len(self.strip_prefix) :]
             return loc
 
+        def _print(text):
+            try:
+                print(text, file=self.out)
+            except UnicodeEncodeError:
+                encoding = getattr(self.out, "encoding", None) or "ascii"
+                escaped = text.encode(encoding, errors="backslashreplace").decode(
+                    encoding
+                )
+                print(escaped, file=self.out)
+
         if self.brief:
             context = None
             msg = "%s: trlc %s: %s" % (_loc_str(), str(kind), message)
@@ -258,10 +268,11 @@ class Message_Handler:
         else:
             if context:
                 assert len(context) == 2
-                print(context[0].replace("\t", " "), file=self.out)
-                print(context[1].replace("\t", " "), msg, file=self.out)
+                _print(context[0].replace("\t", " "))
+                pointer = context[1].replace("\t", " ")
+                _print(f"{pointer} {msg}")
             else:
-                print(msg, file=self.out)
+                _print(msg)
 
             if not self.brief and self.show_details and extrainfo:
                 if context:
@@ -269,7 +280,7 @@ class Message_Handler:
                 else:
                     indent = 0
                 for line in extrainfo.splitlines():
-                    print("%s| %s" % (" " * indent, line.rstrip()), file=self.out)
+                    _print(f"{' ' * indent}| {line.rstrip()}")
 
         if fatal:
             raise TRLC_Error(location, kind, message)
