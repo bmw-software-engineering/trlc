@@ -1,0 +1,9 @@
+package Test
+
+Selection string_value {
+  choice = (1, "hello")
+}
+
+Selection integer_value {
+  choice = (2, 3)
+}

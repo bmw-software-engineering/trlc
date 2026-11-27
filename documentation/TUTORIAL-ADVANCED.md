@@ -85,7 +85,7 @@ copying the type this was not possible.
 
 ## Union types
 
-Sometimes extending from a common base type is not possible. That´s why TRLC implements *union types* for record attributes. Instead of specifying a single type, you can list more types:
+Sometimes extending from a common base type is not possible. That´s why TRLC implements *union types* for record attributes. Instead of specifying a single type, you can list more record types, or a previously declared tuple type:
 
 ```
 type System_Requirement {
@@ -105,6 +105,24 @@ type Software_Requirement {
 The `derived_from` attribute now accepts a reference to either a
 `System_Requirement` or a `Codebeamer_Requirement`. Subclasses of
 any listed type are also accepted.
+
+A union may also combine a tuple value with record references:
+
+```
+tuple Requirement_Id {
+  item    Integer
+  separator @
+  version Integer
+}
+
+type Requirement_Link {
+  target [Requirement_Id, System_Requirement]
+}
+```
+
+The `target` field accepts either a tuple value such as `42@1` or a
+reference to a `System_Requirement` object. Tuple types must be declared
+before the union that uses them; record forward references are unchanged.
 
 You can also use cross-package types in union type declarations:
 

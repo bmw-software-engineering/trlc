@@ -1,0 +1,15 @@
+{
+  "with_version": {
+    "value": {
+      "id": 123,
+      "version": 1
+    }
+  },
+  "without_version": {
+    "value": {
+      "id": 123,
+      "version": null
+    }
+  }
+}
+Processed 1 model and 1 requirement file and found no issues

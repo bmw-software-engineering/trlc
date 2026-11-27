@@ -27,6 +27,8 @@ generated in the following situations:
 
 ### 3.1.4-dev
 
+* [LRM, TRLC] Union types can include previously declared tuple types as
+  alternatives alongside record types.
 
 
 ### 3.1.3

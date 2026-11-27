@@ -1,0 +1,15 @@
+package Test
+
+tuple First {
+  item Integer
+  version Integer
+}
+
+tuple Second {
+  item Integer
+  version Integer
+}
+
+type Selection {
+  choice [First, Second]
+}

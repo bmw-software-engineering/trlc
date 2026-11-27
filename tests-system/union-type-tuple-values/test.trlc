@@ -1,0 +1,21 @@
+package Test
+
+Selection at_same {
+  choice = 1@2
+}
+
+Selection at_same_again {
+  choice = 1@2
+}
+
+Selection colon_same {
+  choice = 1:2
+}
+
+Selection at_different {
+  choice = 3@4
+}
+
+Selection colon_different {
+  choice = 5:6
+}

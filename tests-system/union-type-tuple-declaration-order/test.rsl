@@ -1,0 +1,15 @@
+package Test
+
+type Requirement {}
+
+tuple Codebeamer_ID {
+  prefix String
+  separator :
+  id Integer
+  separator @
+  version optional Integer
+}
+
+type With_Union {
+  value [Requirement, Codebeamer_ID]
+}

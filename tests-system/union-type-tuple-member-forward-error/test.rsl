@@ -1,0 +1,13 @@
+package Test
+
+type Record_A {
+  version Integer
+}
+
+type Selection {
+  choice [Later_Tuple, Record_A]
+}
+
+tuple Later_Tuple {
+  item Integer
+}

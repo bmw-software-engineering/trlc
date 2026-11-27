@@ -1580,36 +1580,42 @@ class Binary_Expression(Expression):
             elif isinstance(self.n_lhs.typ, Union_Type) or isinstance(
                 self.n_rhs.typ, Union_Type
             ):
-                # For union types, we allow comparison if both
-                # sides are record-like (Record_Type or Union_Type)
+                # Union values can be records or tuples. Records compare
+                # by inheritance compatibility; tuple alternatives must
+                # have the same declared type.
                 for n_side in (self.n_lhs, self.n_rhs):
                     if isinstance(n_side.typ, Union_Type):
-                        n_side.typ.ensure_record_members()
-                lhs_is_record = isinstance(self.n_lhs.typ, (Record_Type, Union_Type))
-                rhs_is_record = isinstance(self.n_rhs.typ, (Record_Type, Union_Type))
-                if not (lhs_is_record and rhs_is_record):
+                        n_side.typ.ensure_supported_members()
+                lhs_is_union = isinstance(self.n_lhs.typ, Union_Type)
+                rhs_is_union = isinstance(self.n_rhs.typ, Union_Type)
+                lhs_is_union_value = lhs_is_union or isinstance(
+                    self.n_lhs.typ, (Record_Type, Tuple_Type)
+                )
+                rhs_is_union_value = rhs_is_union or isinstance(
+                    self.n_rhs.typ, (Record_Type, Tuple_Type)
+                )
+                if not (lhs_is_union_value and rhs_is_union_value):
                     mh.error(
                         self.location,
                         "type mismatch: %s and %s do not match"
                         % (self.n_lhs.typ.name, self.n_rhs.typ.name),
                     )
                 else:
-                    # Check that there is at least one pair of member
-                    # types (one from each side) where one is a subtype
-                    # of the other. This implements Equality_Domain for
-                    # union types: an unrelated record type is rejected.
+                    # Check that there is at least one pair of alternatives
+                    # that can have the same value.
                     lhs_members = (
-                        self.n_lhs.typ.record_members()
-                        if isinstance(self.n_lhs.typ, Union_Type)
-                        else [self.n_lhs.typ]
+                        self.n_lhs.typ.members() if lhs_is_union else [self.n_lhs.typ]
                     )
                     rhs_members = (
-                        self.n_rhs.typ.record_members()
-                        if isinstance(self.n_rhs.typ, Union_Type)
-                        else [self.n_rhs.typ]
+                        self.n_rhs.typ.members() if rhs_is_union else [self.n_rhs.typ]
                     )
                     if not any(
-                        lm.is_subclass_of(rm) or rm.is_subclass_of(lm)
+                        (
+                            isinstance(lm, Record_Type)
+                            and isinstance(rm, Record_Type)
+                            and (lm.is_subclass_of(rm) or rm.is_subclass_of(lm))
+                        )
+                        or (isinstance(lm, Tuple_Type) and lm is rm)
                         for lm in lhs_members
                         for rm in rhs_members
                     ):
@@ -2775,7 +2781,7 @@ class Union_Type(Type):
     # lobster-trace: LRM.union_type
     # lobster-trace: LRM.Union_Type_Minimum_Members
     # lobster-trace: LRM.Union_Type_Record_Types_Only
-    """Anonymous union type for record references.
+    """Anonymous union type for record references and tuple values.
 
     These are declared implicitly when a record component specifies
     multiple allowed record types using bracket syntax::
@@ -2783,15 +2789,15 @@ class Union_Type(Type):
       parent [Systemrequirement, Codebeamerrequirement]
              ^
 
-    :attribute types: the allowed record types
-    :type: list[Record_Type]
+    :attribute types: the allowed record and tuple types
+    :type: list[Record_Type | Tuple_Type]
 
     """
 
     def __init__(self, location, types):
         assert isinstance(types, list)
         assert len(types) >= 1
-        assert all(isinstance(t, Record_Type) for t in types)
+        assert all(isinstance(t, (Record_Type, Tuple_Type)) for t in types)
         name = "[%s]" % ", ".join(t.name for t in types)
         super().__init__(name, location)
         self.types = types
@@ -2809,21 +2815,30 @@ class Union_Type(Type):
         """
         return [t for t in self.types if isinstance(t, Record_Type)]
 
-    def ensure_record_members(self):
-        """Abort the current construct if a member is not a record type.
+    def tuple_members(self):
+        """Return the tuple types that are members of this union."""
+        return [t for t in self.types if isinstance(t, Tuple_Type)]
+
+    def members(self):
+        """Return all valid record and tuple alternatives."""
+        return [t for t in self.types if isinstance(t, (Record_Type, Tuple_Type))]
+
+    def ensure_supported_members(self):
+        """Abort the current construct if a member is not a record or tuple.
 
         Such a member is a forward-declared stub that turned out to be
-        an enumeration or tuple. The parser already printed an error
+        an enumeration or another unsupported type. The parser already printed an error
         when that happened, so this raises without printing again.
 
-        :raises TRLC_Error: if any member is not a record type
+        :raises TRLC_Error: if any member is unsupported
         """
         for t in self.types:
-            if not isinstance(t, Record_Type):
+            if not isinstance(t, (Record_Type, Tuple_Type)):
                 raise TRLC_Error(
                     self.location,
                     Kind.SYS_ERROR,
-                    f"{t.__class__.__name__} {t.name} is not a Record_Type",
+                    f"{t.__class__.__name__} {t.name} is not a Record_Type "
+                    "or Tuple_Type",
                 )
 
     def get_field_map(self):
@@ -2843,11 +2858,11 @@ class Union_Type(Type):
         if self._field_map is not None:
             return self._field_map
 
-        members = self.record_members()
+        members = self.members()
         field_map = {}
-        for record_type in members:
+        for member_type in members:
             seen_in_type = set()
-            for comp in record_type.all_components():
+            for comp in member_type.all_components():
                 if comp.name in seen_in_type:
                     continue
                 seen_in_type.add(comp.name)
@@ -2882,13 +2897,27 @@ class Union_Type(Type):
             self.write_indent(indent + 1, t.name)
 
     def perform_type_checks(self, mh, value, gstab):
-        # Union types have no checks of their own; type validation
-        # happens in Record_Reference.resolve_references() via
-        # is_compatible().  Returning True unconditionally is
-        # intentional.
+        # Record reference compatibility is checked during reference
+        # resolution. Tuple values need an explicit membership check here.
         assert isinstance(mh, Message_Handler)
         assert isinstance(value, Expression)
         assert isinstance(gstab, Symbol_Table)
+        if isinstance(value, Tuple_Aggregate):
+            if value.typ not in self.tuple_members():
+                mh.error(
+                    value.location,
+                    "expected one of the tuple types in %s, but value is of type %s"
+                    % (self.name, value.typ.name),
+                )
+                return False
+            return value.typ.perform_type_checks(mh, value, gstab)
+        elif isinstance(value, Record_Reference):
+            if value.target is not None and not self.is_compatible(value.target.n_typ):
+                mh.error(
+                    value.location,
+                    "expected reference of type %s, but %s is of type %s"
+                    % (self.name, value.name, value.target.n_typ.name),
+                )
         return True
 
     def is_compatible(self, record_type):
@@ -3272,6 +3301,14 @@ class Tuple_Type(Composite_Type):
         # lobster-trace: LRM.Tuple_Declaration
         super().__init__(name, description, location, package)
         self.separators = []
+        self.declaration_order = []
+
+    def iter_components(self):
+        """Iterate over tuple components in declaration order."""
+        if self.declaration_order:
+            yield from self.declaration_order
+        else:
+            yield from self.components.table.values()
 
     def add_separator(self, n_separator):
         # lobster-exclude: utility method
@@ -3288,12 +3325,12 @@ class Tuple_Type(Composite_Type):
         """Iterate over all components and separators in syntactic order"""
         # lobster-exclude: utility method
         if self.separators:
-            for i, n_component in enumerate(self.components.table.values()):
+            for i, n_component in enumerate(self.iter_components()):
                 yield n_component
                 if i < len(self.separators):
                     yield self.separators[i]
         else:
-            yield from self.components.table.values()
+            yield from self.iter_components()
 
     def has_separators(self):
         """Returns true if a tuple type requires separators"""

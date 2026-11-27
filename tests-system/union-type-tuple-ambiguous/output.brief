@@ -1,0 +1,2 @@
+union-type-tuple-ambiguous/test.trlc:4:12: trlc error: tuple value is ambiguous for union type [First, Second]
+Processed 1 model and 1 requirement file and found 1 error

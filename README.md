@@ -41,11 +41,36 @@ tuple Coordinate {
 
 This is valid: `Requirement` uses `Coordinate` before the line that declares it.
 
+Previously declared tuple types can also be used as union members:
+
+```rsl
+package demo
+
+tuple RequirementId {
+  item Integer
+  separator @
+  version Integer
+}
+
+type Requirement {
+  choice [RequirementId, Record_A]
+}
+
+type Record_A {
+  version Integer
+}
+```
+
+Tuple types used in unions must be declared before the union. Record types
+remain eligible for forward references as union members.
+
 The following are not supported:
 
 * A tuple field that refers to a tuple declared later in the file. This
   includes mutually recursive tuples (`A` contains `B`, `B` contains
   `A`). Declare the inner tuple first.
+* A tuple used as a union member before that tuple is declared. Declare the
+  tuple first; record types may still be forward-referenced in unions.
 * A record that extends a type declared later in the file. Declare
   the base type earlier.
 * A check that uses a field of a record type declared after the check.

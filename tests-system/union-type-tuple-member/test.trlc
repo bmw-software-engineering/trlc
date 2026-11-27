@@ -1,0 +1,13 @@
+package Test
+
+Selection tuple_choice {
+  choice = 1@2
+}
+
+Record_A record_value {
+  version = 3
+}
+
+Selection record_choice {
+  choice = record_value
+}

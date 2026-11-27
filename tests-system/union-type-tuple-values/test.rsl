@@ -1,0 +1,22 @@
+package Test
+
+tuple AtTuple {
+  item Integer
+  separator @
+  version Integer
+}
+
+tuple ColonTuple {
+  item Integer
+  separator :
+  version Integer
+}
+
+type Selection {
+  choice [AtTuple, ColonTuple]
+}
+
+checks Selection {
+  choice.item >= 0, "tuple item is non-negative"
+  choice.version >= 0, "tuple version is non-negative"
+}

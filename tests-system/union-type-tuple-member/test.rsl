@@ -1,0 +1,15 @@
+package Test
+
+tuple RequirementId {
+  item Integer
+  separator @
+  version Integer
+}
+
+type Selection {
+  choice [RequirementId, Record_A]
+}
+
+type Record_A {
+  version Integer
+}

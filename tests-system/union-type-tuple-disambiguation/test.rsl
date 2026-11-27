@@ -1,0 +1,15 @@
+package Test
+
+tuple Integer_String {
+  first Integer
+  second String
+}
+
+tuple Integer_Integer {
+  first Integer
+  second Integer
+}
+
+type Selection {
+  choice [Integer_String, Integer_Integer]
+}

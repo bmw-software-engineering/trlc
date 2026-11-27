@@ -135,15 +135,32 @@ class Parser_Base:
 
         self.ct = None
         self.nt = None
+        self.lookahead = []
         self.advance()
+
+    def next_token(self):
+        while True:
+            token = self.lexer.token()
+            if token is None or token.kind != "COMMENT":
+                return token
 
     def advance(self):
         # lobster-trace: LRM.Comments
         self.ct = self.nt
-        while True:
-            self.nt = self.lexer.token()
-            if self.nt is None or self.nt.kind != "COMMENT":
-                break
+        if self.lookahead:
+            self.nt = self.lookahead.pop(0)
+        else:
+            self.nt = self.next_token()
+
+    def peek_ahead(self, distance):
+        """Return a token after the current token without consuming it."""
+        assert isinstance(distance, int) and distance >= 1
+        while len(self.lookahead) < distance:
+            token = self.next_token()
+            if token is None:
+                return None
+            self.lookahead.append(token)
+        return self.lookahead[distance - 1]
 
     def skip_until_newline(self):
         if self.ct is None:
@@ -639,7 +656,9 @@ class Parser(Parser_Base):
                 self.mh.error(
                     union_use,
                     f"Enumeration_Type {name.value} is not a Record_Type",
-                    explanation=("all members of a union type must be record types"),
+                    explanation=(
+                        "all members of a union type must be record or tuple types"
+                    ),
                 )
         else:
             enum = ast.Enumeration_Type(
@@ -748,6 +767,7 @@ class Parser(Parser_Base):
             n_tuple.location = name.location
             n_tuple.components = ast.Symbol_Table()
             n_tuple.separators = []
+            n_tuple.declaration_order = []
             if used_by_tuple_field:
                 # A tuple field may not refer forward to a tuple. This
                 # also rules out cycles between tuples (A -> B -> A),
@@ -767,8 +787,11 @@ class Parser(Parser_Base):
             if union_use is not None:
                 self.mh.error(
                     union_use,
-                    f"Tuple_Type {name.value} is not a Record_Type",
-                    explanation=("all members of a union type must be record types"),
+                    f"Tuple_Type {name.value} must be declared before its use "
+                    "in a union",
+                    explanation=(
+                        "declare the tuple type before the union that lists it"
+                    ),
                 )
         else:
             n_tuple = ast.Tuple_Type(
@@ -792,6 +815,7 @@ class Parser(Parser_Base):
             optional_required=False,
         )
         n_tuple.components.register(self.mh, n_field)
+        n_tuple.declaration_order.append(n_field)
 
         has_separators = False
         optional_required = False
@@ -828,6 +852,7 @@ class Parser(Parser_Base):
                 optional_required=optional_required,
             )
             n_tuple.components.register(self.mh, n_field)
+            n_tuple.declaration_order.append(n_field)
             # lobster-trace: LRM.Tuple_Optional_Fields
             optional_required |= n_field.optional
 
@@ -867,19 +892,18 @@ class Parser(Parser_Base):
         self.match("S_BRA")
         t_s_bra = self.ct
 
-        union_type_entries = []  # list of (Record_Type, Location)
+        union_type_entries = []  # list of (Record_Type or Tuple_Type, Location)
         first_type = self.parse_qualified_name(
-            self.default_scope, ast.Record_Type, allow_forward=True
+            self.default_scope, ast.Type, allow_forward=True
         )
         first_type.set_ast_link(self.ct)
         if isinstance(first_type, ast.Record_Type) and first_type.is_forward_decl():
             first_type.set_forward_union_use(self.ct.location)
-        if not isinstance(first_type, ast.Record_Type):
+        if not isinstance(first_type, (ast.Record_Type, ast.Tuple_Type)):
             self.mh.error(
                 self.ct.location,
                 f"{first_type.__class__.__name__} {first_type.name} "
                 "is not a Record_Type",
-                fatal=False,
             )
         else:
             union_type_entries.append((first_type, self.ct.location))
@@ -887,17 +911,16 @@ class Parser(Parser_Base):
         while self.peek("COMMA"):
             self.match("COMMA")
             next_type = self.parse_qualified_name(
-                self.default_scope, ast.Record_Type, allow_forward=True
+                self.default_scope, ast.Type, allow_forward=True
             )
             next_type.set_ast_link(self.ct)
             if isinstance(next_type, ast.Record_Type) and next_type.is_forward_decl():
                 next_type.set_forward_union_use(self.ct.location)
-            if not isinstance(next_type, ast.Record_Type):
+            if not isinstance(next_type, (ast.Record_Type, ast.Tuple_Type)):
                 self.mh.error(
                     self.ct.location,
                     f"{next_type.__class__.__name__} {next_type.name} "
                     "is not a Record_Type",
-                    fatal=False,
                 )
             else:
                 union_type_entries.append((next_type, self.ct.location))
@@ -1842,7 +1865,7 @@ class Parser(Parser_Base):
                     # A forward-declared stub may have turned into a
                     # non-record type (already reported); abort this
                     # check instead of inspecting that member.
-                    n_name.typ.ensure_record_members()
+                    n_name.typ.ensure_supported_members()
                     field_map = n_name.typ.get_field_map()
                     if field_name not in field_map:
                         self.mh.error(
@@ -2121,6 +2144,17 @@ class Parser(Parser_Base):
             rv.set_ast_link(self.ct)
             return rv
 
+        elif isinstance(typ, ast.Union_Type):
+            tuple_type = self.select_union_tuple_type(typ)
+            if tuple_type is not None:
+                return self.parse_value(tuple_type)
+            if not typ.record_members():
+                self.mh.error(
+                    self.nt.location if self.nt else typ.location,
+                    "expected a value for one of the tuple types in %s" % typ.name,
+                )
+            return self.parse_record_reference(typ)
+
         elif isinstance(typ, ast.Array_Type):
             self.match("S_BRA")
             rv = ast.Array_Aggregate(self.ct.location, typ)
@@ -2172,27 +2206,7 @@ class Parser(Parser_Base):
             return ast.Enumeration_Literal(self.ct.location, lit)
 
         elif isinstance(typ, (ast.Record_Type, ast.Union_Type)):
-            self.match("IDENTIFIER")
-            t_name = self.ct
-            if self.peek("DOT"):
-                # Parse a (potentially nested) package prefix followed by
-                # the object name via a greedy sub-package descent.
-                the_pkg = self.stab.lookup(self.mh, t_name, ast.Package)
-                the_pkg.set_ast_link(t_name)
-                the_pkg, t_name = self.descend_sub_packages(the_pkg, t_name)
-            else:
-                the_pkg = self.cu.package
-
-            rv = ast.Record_Reference(
-                location=t_name.location, name=t_name.value, typ=typ, package=the_pkg
-            )
-            rv.set_ast_link(t_name)
-
-            # We can do an early lookup if the target is known
-            if the_pkg.symbols.contains(t_name.value):
-                rv.resolve_references(self.mh)
-
-            return rv
+            return self.parse_record_reference(typ)
 
         elif isinstance(typ, ast.Tuple_Type) and typ.has_separators():
             # lobster-trace: LRM.Tuple_Separator_Form
@@ -2249,6 +2263,236 @@ class Parser(Parser_Base):
                 self.ct.location,
                 "logic error: unexpected type %s" % typ.__class__.__name__,
             )
+
+    def select_union_tuple_type(self, union_type):
+        """Identify a tuple alternative from its tuple literal syntax."""
+        tuple_types = union_type.tuple_members()
+        if not tuple_types:
+            return None
+
+        if self.peek("BRA"):
+            candidates = [t for t in tuple_types if not t.has_separators()]
+        else:
+            candidates = [
+                t
+                for t in tuple_types
+                if t.has_separators() and self.value_end_offset(t) is not None
+            ]
+
+        candidates = [t for t in candidates if self.value_end_offset(t) is not None]
+        if len(candidates) == 1:
+            return candidates[0]
+        if len(candidates) > 1:
+            self.mh.error(
+                self.nt.location,
+                "tuple value is ambiguous for union type %s" % union_type.name,
+                explanation=(
+                    "use tuple alternatives with distinct literal syntax so "
+                    "the intended tuple type can be identified"
+                ),
+            )
+        return None
+
+    def value_starts_with_type(self, typ, offset=0):
+        """Check whether the current token can start a value of *typ*."""
+        token = self.token_at_offset(offset)
+        if token is None:
+            return False
+        if isinstance(typ, ast.Builtin_Integer):
+            return token.kind == "INTEGER" or (
+                token.kind == "OPERATOR" and token.value in Parser.ADDING_OPERATOR
+            )
+        if isinstance(typ, ast.Builtin_Decimal):
+            return token.kind == "DECIMAL" or (
+                token.kind == "OPERATOR" and token.value in Parser.ADDING_OPERATOR
+            )
+        if isinstance(typ, (ast.Builtin_String, ast.Builtin_Markup_String)):
+            return token.kind == "STRING"
+        if isinstance(typ, ast.Builtin_Boolean):
+            return token.kind == "KEYWORD" and token.value in ("true", "false")
+        if isinstance(typ, ast.Enumeration_Type):
+            return (
+                token.kind == "IDENTIFIER"
+                and self.token_at_offset(offset + 1) is not None
+                and self.token_at_offset(offset + 1).kind == "DOT"
+            )
+        if isinstance(typ, ast.Tuple_Type):
+            return token.kind == "BRA" or (
+                typ.has_separators() and self.tuple_has_first_separator(typ, offset)
+            )
+        if isinstance(typ, ast.Union_Type):
+            return any(
+                self.value_starts_with_type(member, offset) for member in typ.members()
+            )
+        if isinstance(typ, ast.Record_Type):
+            return token.kind == "IDENTIFIER"
+        return False
+
+    def has_tuple_separators(self, tuple_type):
+        return self.tuple_has_first_separator(tuple_type)
+
+    def tuple_has_first_separator(self, tuple_type, start=0):
+        """Check whether the first separator follows the tuple's first value."""
+        first_component = next(
+            (
+                item
+                for item in tuple_type.iter_sequence()
+                if isinstance(item, ast.Composite_Component)
+            ),
+            None,
+        )
+        first_separator = next(
+            (
+                item
+                for item in tuple_type.iter_sequence()
+                if isinstance(item, ast.Separator)
+            ),
+            None,
+        )
+        if first_component is None or first_separator is None:
+            return False
+
+        end = self.value_end_offset(first_component.n_typ, start)
+        if end is None:
+            return False
+        token = self.token_at_offset(end)
+        return (
+            token is not None
+            and token.kind == first_separator.token.kind
+            and token.value == first_separator.token.value
+        )
+
+    def token_at_offset(self, offset):
+        if offset == 0:
+            return self.nt
+        return self.peek_ahead(offset)
+
+    def value_end_offset(self, typ, start=0):
+        """Return the token offset immediately after a value of *typ*."""
+        token = self.token_at_offset(start)
+        if token is None:
+            return None
+
+        if isinstance(typ, ast.Builtin_Numeric_Type):
+            if token.kind == "OPERATOR" and token.value in Parser.ADDING_OPERATOR:
+                token = self.token_at_offset(start + 1)
+                start += 1
+            expected_kind = (
+                "DECIMAL" if isinstance(typ, ast.Builtin_Decimal) else "INTEGER"
+            )
+            return (
+                start + 1 if token is not None and token.kind == expected_kind else None
+            )
+
+        if isinstance(typ, (ast.Builtin_String, ast.Builtin_Markup_String)):
+            return start + 1 if token.kind == "STRING" else None
+
+        if isinstance(typ, ast.Builtin_Boolean):
+            return (
+                start + 1
+                if token.kind == "KEYWORD" and token.value in ("true", "false")
+                else None
+            )
+
+        if isinstance(typ, ast.Enumeration_Type):
+            return self.qualified_value_end_offset(start)
+
+        if isinstance(typ, ast.Record_Type):
+            return self.qualified_value_end_offset(start)
+
+        if isinstance(typ, ast.Tuple_Type):
+            if typ.has_separators():
+                offset = start
+                sequence = list(typ.iter_sequence())
+                for index, item in enumerate(sequence):
+                    if isinstance(item, ast.Composite_Component):
+                        offset = self.value_end_offset(item.n_typ, offset)
+                        if offset is None:
+                            return None
+                    elif isinstance(item, ast.Separator):
+                        separator = self.token_at_offset(offset)
+                        if (
+                            separator is None
+                            or separator.kind != item.token.kind
+                            or separator.value != item.token.value
+                        ):
+                            if (
+                                index + 1 < len(sequence)
+                                and isinstance(
+                                    sequence[index + 1],
+                                    ast.Composite_Component,
+                                )
+                                and sequence[index + 1].optional
+                            ):
+                                return offset
+                            return None
+                        offset += 1
+                return offset
+
+            if token.kind != "BRA":
+                return None
+            offset = start + 1
+            for index, component in enumerate(typ.iter_components()):
+                if index:
+                    comma = self.token_at_offset(offset)
+                    if comma is None or comma.kind != "COMMA":
+                        return None
+                    offset += 1
+                offset = self.value_end_offset(component.n_typ, offset)
+                if offset is None:
+                    return None
+            closing = self.token_at_offset(offset)
+            return offset + 1 if closing is not None and closing.kind == "KET" else None
+
+        if isinstance(typ, ast.Union_Type):
+            tuple_ends = {
+                end
+                for tuple_type in typ.tuple_members()
+                if (end := self.value_end_offset(tuple_type, start)) is not None
+            }
+            if len(tuple_ends) == 1:
+                return tuple_ends.pop()
+            if token.kind == "IDENTIFIER":
+                return self.qualified_value_end_offset(start)
+        return None
+
+    def qualified_value_end_offset(self, start):
+        token = self.token_at_offset(start)
+        if token is None or token.kind != "IDENTIFIER":
+            return None
+        offset = start + 1
+        while True:
+            dot = self.token_at_offset(offset)
+            if dot is None or dot.kind != "DOT":
+                break
+            name = self.token_at_offset(offset + 1)
+            if name is None or name.kind != "IDENTIFIER":
+                return None
+            offset += 2
+        return offset
+
+    def parse_record_reference(self, typ):
+        self.match("IDENTIFIER")
+        t_name = self.ct
+        if self.peek("DOT"):
+            # Parse a (potentially nested) package prefix followed by
+            # the object name via a greedy sub-package descent.
+            the_pkg = self.stab.lookup(self.mh, t_name, ast.Package)
+            the_pkg.set_ast_link(t_name)
+            the_pkg, t_name = self.descend_sub_packages(the_pkg, t_name)
+        else:
+            the_pkg = self.cu.package
+
+        rv = ast.Record_Reference(
+            location=t_name.location, name=t_name.value, typ=typ, package=the_pkg
+        )
+        rv.set_ast_link(t_name)
+
+        # We can do an early lookup if the target is known
+        if the_pkg.symbols.contains(t_name.value):
+            rv.resolve_references(self.mh)
+
+        return rv
 
     def parse_markup_string(self):
         # lobster-trace: LRM.Markup_String_Values

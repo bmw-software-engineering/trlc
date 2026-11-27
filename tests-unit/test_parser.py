@@ -152,6 +152,344 @@ class Test_Parser_Forward_References(unittest.TestCase):
         self.assertIs(a.components.lookup_assuming(mh, "b").n_typ, b)
         self.assertIs(b.components.lookup_assuming(mh, "a").n_typ, a)
 
+    def test_union_accepts_previously_declared_tuple_and_record(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "union_tuple.rsl",
+                "package demo\n"
+                "tuple RequirementId {\n"
+                "  item Integer\n"
+                "  separator @\n"
+                "  version Integer\n"
+                "}\n"
+                "tuple Coordinate {\n"
+                "  item Integer\n"
+                "  version Integer\n"
+                "}\n"
+                "type Record_A {\n"
+                "  version Integer\n"
+                "}\n"
+                "type A {\n"
+                "  choice [RequirementId, Coordinate, Record_A]\n"
+                "}\n"
+                'checks A {\n  choice.version >= 0, warning "negative version"\n}\n',
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "union_tuple.trlc",
+                "package demo\n"
+                "Record_A record_value { version = 3 }\n"
+                "A tuple_choice { choice = 1@2 }\n"
+                "A generic_choice { choice = (4, 5) }\n"
+                "A record_choice { choice = record_value }\n",
+            )
+        )
+
+        stab = self.process(sm)
+        self.assertIsNotNone(stab)
+        self.assertFalse(mh.has_error(), mh.error_messages())
+
+        pkg = stab.lookup_assuming(mh, "demo", ast.Package)
+        tuple_type = pkg.symbols.lookup_assuming(mh, "RequirementId", ast.Tuple_Type)
+        coordinate_type = pkg.symbols.lookup_assuming(mh, "Coordinate", ast.Tuple_Type)
+        tuple_choice = pkg.symbols.lookup_assuming(
+            mh, "tuple_choice", ast.Record_Object
+        )
+        generic_choice = pkg.symbols.lookup_assuming(
+            mh, "generic_choice", ast.Record_Object
+        )
+        record_choice = pkg.symbols.lookup_assuming(
+            mh, "record_choice", ast.Record_Object
+        )
+        record_value = pkg.symbols.lookup_assuming(
+            mh, "record_value", ast.Record_Object
+        )
+        tuple_value = tuple_choice.field["choice"]
+        record_reference = record_choice.field["choice"]
+
+        self.assertIsInstance(tuple_value, ast.Tuple_Aggregate)
+        self.assertIs(tuple_value.typ, tuple_type)
+        generic_tuple = generic_choice.field["choice"]
+        self.assertIsInstance(generic_tuple, ast.Tuple_Aggregate)
+        self.assertIs(generic_tuple.typ, coordinate_type)
+        self.assertIsInstance(record_reference, ast.Record_Reference)
+        self.assertIs(record_reference.target, record_value)
+
+    def test_tuple_union_member_must_be_declared_first(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "forward_union_tuple.rsl",
+                "package demo\n"
+                "type Record_A {}\n"
+                "type A { choice [Later_Tuple, Record_A] }\n"
+                "tuple Later_Tuple { item Integer }\n",
+            )
+        )
+
+        stab = self.process(sm)
+        self.assertIsNone(stab)
+        self.assertTrue(
+            any(
+                "Tuple_Type Later_Tuple must be declared before its use in a union"
+                in message
+                for message in mh.error_messages()
+            )
+        )
+
+    def test_union_keeps_forward_record_member_support(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "forward_union_record.rsl",
+                "package demo\n"
+                "tuple RequirementId { item Integer }\n"
+                "type A { choice [Record_A, RequirementId] }\n"
+                "type Record_A { version Integer }\n",
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "forward_union_record.trlc",
+                "package demo\n"
+                "Record_A record_value { version = 3 }\n"
+                "A choice_value { choice = record_value }\n",
+            )
+        )
+
+        stab = self.process(sm)
+        self.assertIsNotNone(stab)
+        self.assertFalse(mh.has_error(), mh.error_messages())
+        pkg = stab.lookup_assuming(mh, "demo", ast.Package)
+        union = pkg.symbols.lookup_assuming(mh, "A", ast.Record_Type)
+        union_type = union.components.lookup_assuming(mh, "choice").n_typ
+        self.assertIsInstance(union_type, ast.Union_Type)
+        self.assertIsInstance(union_type.types[0], ast.Record_Type)
+
+    def test_union_distinguishes_tuple_types_with_same_and_different_values(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "tuple_union_values.rsl",
+                "package demo\n"
+                "tuple AtTuple {\n"
+                "  item Integer\n"
+                "  separator @\n"
+                "  version Integer\n"
+                "}\n"
+                "tuple ColonTuple {\n"
+                "  item Integer\n"
+                "  separator :\n"
+                "  version Integer\n"
+                "}\n"
+                "type Selection { choice [AtTuple, ColonTuple] }\n",
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "tuple_union_values.trlc",
+                "package demo\n"
+                "Selection at_same { choice = 1@2 }\n"
+                "Selection at_same_again { choice = 1@2 }\n"
+                "Selection colon_same { choice = 1:2 }\n"
+                "Selection at_different { choice = 3@4 }\n"
+                "Selection colon_different { choice = 5:6 }\n",
+            )
+        )
+
+        stab = self.process(sm)
+        self.assertIsNotNone(stab)
+        self.assertFalse(mh.has_error(), mh.error_messages())
+        pkg = stab.lookup_assuming(mh, "demo", ast.Package)
+        selections = {
+            name: pkg.symbols.lookup_assuming(mh, name, ast.Record_Object)
+            for name in (
+                "at_same",
+                "at_same_again",
+                "colon_same",
+                "at_different",
+                "colon_different",
+            )
+        }
+
+        at_same = selections["at_same"].field["choice"]
+        at_same_again = selections["at_same_again"].field["choice"]
+        colon_same = selections["colon_same"].field["choice"]
+        at_different = selections["at_different"].field["choice"]
+        colon_different = selections["colon_different"].field["choice"]
+
+        self.assertIsInstance(at_same, ast.Tuple_Aggregate)
+        self.assertIsInstance(at_same_again, ast.Tuple_Aggregate)
+        self.assertIsInstance(colon_same, ast.Tuple_Aggregate)
+        self.assertIsNot(at_same.typ, colon_same.typ)
+        self.assertIs(at_same.typ, at_same_again.typ)
+        self.assertEqual(at_same.value["item"].value, at_same_again.value["item"].value)
+        self.assertEqual(
+            at_same.value["version"].value, at_same_again.value["version"].value
+        )
+        self.assertEqual(at_same.value["item"].value, colon_same.value["item"].value)
+        self.assertEqual(
+            at_same.value["version"].value, colon_same.value["version"].value
+        )
+        self.assertEqual(at_different.value["item"].value, 3)
+        self.assertEqual(at_different.value["version"].value, 4)
+        self.assertEqual(colon_different.value["item"].value, 5)
+        self.assertEqual(colon_different.value["version"].value, 6)
+
+    def test_union_rejects_duplicate_tuple_member(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "duplicate_tuple_union.rsl",
+                "package demo\n"
+                "tuple Item { value Integer }\n"
+                "tuple Other { value String }\n"
+                "type Selection { choice [Item, Other, Item] }\n",
+            )
+        )
+
+        self.process(sm)
+        self.assertIn("duplicate type Item in union", mh.error_messages())
+
+    def test_union_tuple_member_checks_are_performed(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "tuple_union_checks.rsl",
+                "package demo\n"
+                "type Requirement {}\n"
+                "tuple Item_ID {\n  id Integer\n}\n"
+                'checks Item_ID {\n  id > 0, "ID must be positive"\n}\n'
+                "type With_Union {\n  value [Requirement, Item_ID]\n}\n",
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "tuple_union_checks.trlc",
+                "package demo\n"
+                "Requirement req_obj {}\n"
+                "With_Union valid { value = (1) }\n"
+                "With_Union invalid { value = (-1) }\n"
+                "With_Union record_value { value = req_obj }\n",
+            )
+        )
+
+        sm.process()
+
+        self.assertIn("ID must be positive", mh.error_messages())
+
+    def test_union_tuple_candidate_uses_declared_component_order(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "codebeamer_union.rsl",
+                "package demo\n"
+                "type Requirement {}\n"
+                "tuple Codebeamer_ID {\n"
+                "  prefix String\n"
+                "  separator :\n"
+                "  id Integer\n"
+                "  separator @\n"
+                "  version optional Integer\n"
+                "}\n"
+                "type With_Union { value [Requirement, Codebeamer_ID] }\n",
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "codebeamer_union.trlc",
+                "package demo\n"
+                'With_Union with_version { value = "EXTERNAL.Codebeamer":123@1 }\n'
+                'With_Union without_version { value = "EXTERNAL.Codebeamer":123 }\n',
+            )
+        )
+
+        stab = self.process(sm)
+        self.assertIsNotNone(stab, mh.error_messages())
+        self.assertFalse(mh.has_error(), mh.error_messages())
+        pkg = stab.lookup_assuming(mh, "demo", ast.Package)
+        with_version = pkg.symbols.lookup_assuming(
+            mh, "with_version", ast.Record_Object
+        ).field["value"]
+        without_version = pkg.symbols.lookup_assuming(
+            mh, "without_version", ast.Record_Object
+        ).field["value"]
+        self.assertIsInstance(with_version, ast.Tuple_Aggregate)
+        self.assertIsInstance(without_version, ast.Tuple_Aggregate)
+        self.assertEqual(with_version.value["prefix"].value, "EXTERNAL.Codebeamer")
+        self.assertEqual(with_version.value["id"].value, 123)
+        self.assertEqual(with_version.value["version"].value, 1)
+        self.assertEqual(without_version.value["prefix"].value, "EXTERNAL.Codebeamer")
+        self.assertEqual(without_version.value["id"].value, 123)
+        self.assertIsInstance(without_version.value["version"], ast.Implicit_Null)
+
+    def test_union_rejects_ambiguous_generic_tuple_value(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "ambiguous_tuple_union.rsl",
+                "package demo\n"
+                "tuple First {\n  item Integer\n  version Integer\n}\n"
+                "tuple Second {\n  item Integer\n  version Integer\n}\n"
+                "type Selection { choice [First, Second] }\n",
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "ambiguous_tuple_union.trlc",
+                "package demo\nSelection choice_value { choice = (1, 2) }\n",
+            )
+        )
+
+        self.assertIsNone(self.process(sm))
+        self.assertIn(
+            "tuple value is ambiguous for union type [First, Second]",
+            mh.error_messages(),
+        )
+
+    def test_union_selects_generic_tuple_using_all_field_types(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "typed_tuple_union.rsl",
+                "package demo\n"
+                "tuple Integer_String {\n"
+                "  first Integer\n"
+                "  second String\n"
+                "}\n"
+                "tuple Integer_Integer {\n"
+                "  first Integer\n"
+                "  second Integer\n"
+                "}\n"
+                "type Selection { choice [Integer_String, Integer_Integer] }\n",
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "typed_tuple_union.trlc",
+                "package demo\n"
+                'Selection string_value { choice = (1, "hello") }\n'
+                "Selection integer_value { choice = (2, 3) }\n",
+            )
+        )
+
+        stab = self.process(sm)
+        self.assertIsNotNone(stab)
+        self.assertFalse(mh.has_error(), mh.error_messages())
+        pkg = stab.lookup_assuming(mh, "demo", ast.Package)
+        string_value = pkg.symbols.lookup_assuming(
+            mh, "string_value", ast.Record_Object
+        ).field["choice"]
+        integer_value = pkg.symbols.lookup_assuming(
+            mh, "integer_value", ast.Record_Object
+        ).field["choice"]
+        self.assertIsInstance(string_value, ast.Tuple_Aggregate)
+        self.assertIsInstance(integer_value, ast.Tuple_Aggregate)
+        self.assertEqual(string_value.typ.name, "Integer_String")
+        self.assertEqual(integer_value.typ.name, "Integer_Integer")
+
     def test_tuple_type_forward_reference(self):
         """A tuple type may be referenced before its later declaration in the same file."""
         sm, mh = make_source_manager()
@@ -252,9 +590,14 @@ class Test_Parser_Forward_References(unittest.TestCase):
                         )
                     )
                     sm.process()
+                    expected_message = (
+                        "Tuple_Type Severity must be declared before its use in a union"
+                        if kind == "Tuple_Type"
+                        else f"{kind} Severity is not a Record_Type"
+                    )
                     self.assertEqual(
                         mh.error_messages(),
-                        [f"{kind} Severity is not a Record_Type"],
+                        [expected_message],
                     )
 
     def test_union_forward_enum_field_access_does_not_crash(self):
