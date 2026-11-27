@@ -27,6 +27,7 @@ generated in the following situations:
 
 ### 3.1.4-dev
 
+* [TRLC] Remove the `--error-on-warnings` option.
 
 
 ### 3.1.3
