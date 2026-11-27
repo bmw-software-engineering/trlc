@@ -84,7 +84,7 @@ however there is significant overlap in dataflow.
 * The Source_Manager registers files and decides on the parse
   order. For all modes of operation all `.rsl` files are parsed first.
 
-* Then (unless `--no-lint` mode is active) the
+* Then the
   [lint.py](../trlc/lint.py) and [vcg.py](../trlc/vcg.py) modules are
   used to sanity check types and user checks, and we then stop with
   messages and a return code of 0 or 1.

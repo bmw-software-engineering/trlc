@@ -1,2 +1,3 @@
 duplicate-imports/bar.trlc:4:8: trlc warning: duplicate import of package Foo
-Processed 1 model and 1 requirement file and found 1 warning
+duplicate-imports/bar.trlc:3:8: trlc issue: unused import Foo [unused_imports]
+Processed 1 model and 1 requirement file and found 2 warnings

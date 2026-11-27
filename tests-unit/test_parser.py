@@ -236,7 +236,7 @@ class Test_Parser_Forward_References(unittest.TestCase):
         self.assertTrue(any("is not a Record_Type" in msg for _, msg in mh.messages))
 
     def test_union_forward_non_record_is_error_without_lint(self):
-        """--no-lint must not make an enum or tuple union member valid."""
+        """Union members must be record types regardless of lint_mode."""
         cases = {
             "Enumeration_Type": "enum Severity {\n  HIGH\n}\n",
             "Tuple_Type": "tuple Severity {\n  x Integer\n  y Integer\n}\n",

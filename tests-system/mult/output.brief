@@ -1,5 +1,7 @@
+mult/bar.rsl:24:19: trlc issue: upper bound must be at least 5 [impossible_array_types]
+mult/bar.rsl:19:19: trlc issue: this array makes no sense [impossible_array_types]
 mult/instances.trlc:6:22: trlc error: this array requires at least 5 elements (only 2 provided)
 mult/instances.trlc:16:22: trlc error: this array requires at least 5 elements (only 2 provided)
 mult/instances.trlc:21:22: trlc error: this array requires at least 3 elements (only 2 provided)
 mult/instances.trlc:4:12: trlc check error: mult must have 3 elements
-Processed 1 model and 1 requirement file and found 4 errors
+Processed 1 model and 1 requirement file and found 2 warnings and 4 errors

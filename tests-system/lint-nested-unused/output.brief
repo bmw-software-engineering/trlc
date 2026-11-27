@@ -1,1 +1,2 @@
-Processed 3 models and 0 requirement files and found no issues
+lint-nested-unused/app.rsl:2:8: trlc issue: unused import ns.pkg [unused_imports]
+Processed 3 models and 0 requirement files and found 1 warning

@@ -27,10 +27,10 @@ all: $(TARGETS) bulk/output bulk/output.brief bulk/output.json
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
 		../trlc.py $(file < $(dir $@)options) \
-			--no-lint --brief $(dir $@) > $@ 2>&1
+			--brief $(dir $@) > $@ 2>&1
 
 %/output.json:
 	-@coverage run -p --rcfile=../coverage.cfg --branch \
 		--data-file ../.coverage \
 		../trlc.py $(file < $(dir $@)options) \
-			--no-lint --debug-api-dump $(dir $@) > $@ 2>&1
+			--debug-api-dump $(dir $@) > $@ 2>&1

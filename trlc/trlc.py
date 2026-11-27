@@ -848,12 +848,6 @@ def trlc():
     )
     og_lint = ap.add_argument_group("analysis options")
     og_lint.add_argument(
-        "--no-lint",
-        default=False,
-        action="store_true",
-        help="Disable additional, optional warnings.",
-    )
-    og_lint.add_argument(
         "--skip-trlc-files",
         default=False,
         action="store_true",
@@ -1031,7 +1025,7 @@ def trlc():
 
     sm = Source_Manager(
         mh=mh,
-        lint_mode=not options.no_lint,
+        lint_mode=True,
         parse_trlc=not options.skip_trlc_files,
         verify_mode=options.verify,
         debug_vcg=options.debug_vcg,

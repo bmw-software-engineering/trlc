@@ -19,6 +19,5 @@ trlc_requirements_test(
 
 trlc_specification_test(
     name = "bzl-api-args-spec-test",
-    args = ["--no-lint"],
     reqs = [":spec"],
 )

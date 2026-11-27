@@ -1,1 +1,2 @@
-Processed 0 models and 3 requirement files and found no issues
+rbt-late-package-declarations/baz.trlc:3:8: trlc issue: unused import Foo [unused_imports]
+Processed 0 models and 3 requirement files and found 1 warning

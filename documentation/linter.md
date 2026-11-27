@@ -12,8 +12,6 @@ The linter is enabled by default, so running `trlc filename.rsl` will
 also run the linter. The static analyser can be enabled with the
 `--verify` option, i.e: `trlc --verify filename.rsl`.
 
-You can explicitly turn the linter off with the `--no-lint` option.
-
 ## Checks
 
 ### Linter checks
