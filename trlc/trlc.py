@@ -980,11 +980,6 @@ def trlc():
             " Bazel build action."
         ),
     )
-    og_output.add_argument(
-        "--error-on-warnings",
-        action="store_true",
-        help=("If there are warnings, return status code 1 instead of 0."),
-    )
 
     og_debug = ap.add_argument_group("debug options")
     og_debug.add_argument(
@@ -1174,7 +1169,7 @@ def trlc():
                 )
 
     if ok:
-        if (options.error_on_warnings and mh.warnings) or mh.errors:  # pragma: no cover
+        if mh.errors:  # pragma: no cover
             rv = 1
         else:
             rv = 0

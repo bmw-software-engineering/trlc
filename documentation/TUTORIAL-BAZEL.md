@@ -59,7 +59,7 @@ of the built-in CLI (see [TUTORIAL-API.md](TUTORIAL-API.md)).
 | `reqs` | `trlc_requirements` targets to validate. |
 | `srcs` | Override the entry-point script (optional). |
 | `main` | Filename of the entry point (required when `srcs` is set). |
-| `args` | Extra command-line arguments, e.g. `["--error-on-warnings"]`; placed after `--verify` and before the requirement files (optional). |
+| `args` | Extra command-line arguments, e.g. `["--show-file-list"]`; placed after `--verify` and before the requirement files (optional). |
 
 ---
 
