@@ -1,0 +1,5 @@
+package Test
+
+With_Union example {
+  value = "EXTERNAL.Codebeamer":123@1
+}

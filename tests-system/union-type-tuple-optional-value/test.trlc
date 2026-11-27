@@ -1,0 +1,9 @@
+package Test
+
+With_Union with_version {
+  value = 123@1
+}
+
+With_Union without_version {
+  value = 123
+}

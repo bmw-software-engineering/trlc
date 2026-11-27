@@ -353,6 +353,78 @@ class Test_Parser_Forward_References(unittest.TestCase):
         self.process(sm)
         self.assertIn("duplicate type Item in union", mh.error_messages())
 
+    def test_union_tuple_member_checks_are_performed(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "tuple_union_checks.rsl",
+                "package demo\n"
+                "type Requirement {}\n"
+                "tuple Item_ID {\n  id Integer\n}\n"
+                'checks Item_ID {\n  id > 0, "ID must be positive"\n}\n'
+                "type With_Union {\n  value [Requirement, Item_ID]\n}\n",
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "tuple_union_checks.trlc",
+                "package demo\n"
+                "Requirement req_obj {}\n"
+                "With_Union valid { value = (1) }\n"
+                "With_Union invalid { value = (-1) }\n"
+                "With_Union record_value { value = req_obj }\n",
+            )
+        )
+
+        sm.process()
+
+        self.assertIn("ID must be positive", mh.error_messages())
+
+    def test_union_tuple_candidate_uses_declared_component_order(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "codebeamer_union.rsl",
+                "package demo\n"
+                "type Requirement {}\n"
+                "tuple Codebeamer_ID {\n"
+                "  prefix String\n"
+                "  separator :\n"
+                "  id Integer\n"
+                "  separator @\n"
+                "  version optional Integer\n"
+                "}\n"
+                "type With_Union { value [Requirement, Codebeamer_ID] }\n",
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "codebeamer_union.trlc",
+                "package demo\n"
+                'With_Union with_version { value = "EXTERNAL.Codebeamer":123@1 }\n'
+                'With_Union without_version { value = "EXTERNAL.Codebeamer":123 }\n',
+            )
+        )
+
+        stab = self.process(sm)
+        self.assertIsNotNone(stab, mh.error_messages())
+        self.assertFalse(mh.has_error(), mh.error_messages())
+        pkg = stab.lookup_assuming(mh, "demo", ast.Package)
+        with_version = pkg.symbols.lookup_assuming(
+            mh, "with_version", ast.Record_Object
+        ).field["value"]
+        without_version = pkg.symbols.lookup_assuming(
+            mh, "without_version", ast.Record_Object
+        ).field["value"]
+        self.assertIsInstance(with_version, ast.Tuple_Aggregate)
+        self.assertIsInstance(without_version, ast.Tuple_Aggregate)
+        self.assertEqual(with_version.value["prefix"].value, "EXTERNAL.Codebeamer")
+        self.assertEqual(with_version.value["id"].value, 123)
+        self.assertEqual(with_version.value["version"].value, 1)
+        self.assertEqual(without_version.value["prefix"].value, "EXTERNAL.Codebeamer")
+        self.assertEqual(without_version.value["id"].value, 123)
+        self.assertIsInstance(without_version.value["version"], ast.Implicit_Null)
+
     def test_union_rejects_ambiguous_generic_tuple_value(self):
         sm, mh = make_source_manager()
         sm.register_rsl_file(
@@ -376,6 +448,47 @@ class Test_Parser_Forward_References(unittest.TestCase):
             "tuple value is ambiguous for union type [First, Second]",
             mh.error_messages(),
         )
+
+    def test_union_selects_generic_tuple_using_all_field_types(self):
+        sm, mh = make_source_manager()
+        sm.register_rsl_file(
+            self.write(
+                "typed_tuple_union.rsl",
+                "package demo\n"
+                "tuple Integer_String {\n"
+                "  first Integer\n"
+                "  second String\n"
+                "}\n"
+                "tuple Integer_Integer {\n"
+                "  first Integer\n"
+                "  second Integer\n"
+                "}\n"
+                "type Selection { choice [Integer_String, Integer_Integer] }\n",
+            )
+        )
+        sm.register_trlc_file(
+            self.write(
+                "typed_tuple_union.trlc",
+                "package demo\n"
+                'Selection string_value { choice = (1, "hello") }\n'
+                "Selection integer_value { choice = (2, 3) }\n",
+            )
+        )
+
+        stab = self.process(sm)
+        self.assertIsNotNone(stab)
+        self.assertFalse(mh.has_error(), mh.error_messages())
+        pkg = stab.lookup_assuming(mh, "demo", ast.Package)
+        string_value = pkg.symbols.lookup_assuming(
+            mh, "string_value", ast.Record_Object
+        ).field["choice"]
+        integer_value = pkg.symbols.lookup_assuming(
+            mh, "integer_value", ast.Record_Object
+        ).field["choice"]
+        self.assertIsInstance(string_value, ast.Tuple_Aggregate)
+        self.assertIsInstance(integer_value, ast.Tuple_Aggregate)
+        self.assertEqual(string_value.typ.name, "Integer_String")
+        self.assertEqual(integer_value.typ.name, "Integer_Integer")
 
     def test_tuple_type_forward_reference(self):
         """A tuple type may be referenced before its later declaration in the same file."""

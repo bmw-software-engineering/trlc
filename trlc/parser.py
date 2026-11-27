@@ -767,6 +767,7 @@ class Parser(Parser_Base):
             n_tuple.location = name.location
             n_tuple.components = ast.Symbol_Table()
             n_tuple.separators = []
+            n_tuple.declaration_order = []
             if used_by_tuple_field:
                 # A tuple field may not refer forward to a tuple. This
                 # also rules out cycles between tuples (A -> B -> A),
@@ -814,6 +815,7 @@ class Parser(Parser_Base):
             optional_required=False,
         )
         n_tuple.components.register(self.mh, n_field)
+        n_tuple.declaration_order.append(n_field)
 
         has_separators = False
         optional_required = False
@@ -850,6 +852,7 @@ class Parser(Parser_Base):
                 optional_required=optional_required,
             )
             n_tuple.components.register(self.mh, n_field)
+            n_tuple.declaration_order.append(n_field)
             # lobster-trace: LRM.Tuple_Optional_Fields
             optional_required |= n_field.optional
 
@@ -885,7 +888,7 @@ class Parser(Parser_Base):
         """
         # lobster-trace: LRM.union_type
         # lobster-trace: LRM.Union_Type_No_Duplicates
-        # lobster-trace: LRM.Union_Type_Record_Or_Tuple_Types
+        # lobster-trace: LRM.Union_Type_Record_Types_Only
         self.match("S_BRA")
         t_s_bra = self.ct
 
@@ -2273,19 +2276,10 @@ class Parser(Parser_Base):
             candidates = [
                 t
                 for t in tuple_types
-                if t.has_separators() and self.has_tuple_separators(t)
+                if t.has_separators() and self.value_end_offset(t) is not None
             ]
 
-        value_offset = 1 if self.peek("BRA") else 0
-        candidates = [
-            t
-            for t in candidates
-            if t.components.table
-            and self.value_starts_with_type(
-                next(t.components.values()).n_typ,
-                value_offset,
-            )
-        ]
+        candidates = [t for t in candidates if self.value_end_offset(t) is not None]
         if len(candidates) == 1:
             return candidates[0]
         if len(candidates) > 1:
@@ -2409,7 +2403,8 @@ class Parser(Parser_Base):
         if isinstance(typ, ast.Tuple_Type):
             if typ.has_separators():
                 offset = start
-                for item in typ.iter_sequence():
+                sequence = list(typ.iter_sequence())
+                for index, item in enumerate(sequence):
                     if isinstance(item, ast.Composite_Component):
                         offset = self.value_end_offset(item.n_typ, offset)
                         if offset is None:
@@ -2421,24 +2416,33 @@ class Parser(Parser_Base):
                             or separator.kind != item.token.kind
                             or separator.value != item.token.value
                         ):
+                            if (
+                                index + 1 < len(sequence)
+                                and isinstance(
+                                    sequence[index + 1],
+                                    ast.Composite_Component,
+                                )
+                                and sequence[index + 1].optional
+                            ):
+                                return offset
                             return None
                         offset += 1
                 return offset
 
             if token.kind != "BRA":
                 return None
-            depth = 1
             offset = start + 1
-            while depth:
-                current = self.token_at_offset(offset)
-                if current is None:
+            for index, component in enumerate(typ.iter_components()):
+                if index:
+                    comma = self.token_at_offset(offset)
+                    if comma is None or comma.kind != "COMMA":
+                        return None
+                    offset += 1
+                offset = self.value_end_offset(component.n_typ, offset)
+                if offset is None:
                     return None
-                if current.kind == "BRA":
-                    depth += 1
-                elif current.kind == "KET":
-                    depth -= 1
-                offset += 1
-            return offset
+            closing = self.token_at_offset(offset)
+            return offset + 1 if closing is not None and closing.kind == "KET" else None
 
         if isinstance(typ, ast.Union_Type):
             tuple_ends = {

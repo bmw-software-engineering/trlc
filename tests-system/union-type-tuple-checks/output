@@ -1,0 +1,3 @@
+value = (-1)
+        ^ union-type-tuple-checks/test.trlc:10: check error: ID must be positive
+Processed 1 model and 1 requirement file and found 1 error

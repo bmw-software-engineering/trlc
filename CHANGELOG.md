@@ -24,15 +24,13 @@ generated in the following situations:
 
 ## Changelog
 
-
-### 3.1.4-dev
-
-
-
-### 3.1.3
+### Development
 
 * [LRM, TRLC] Union types can include previously declared tuple types as
   alternatives alongside record types.
+
+
+### 3.1.3
 
 * [BAZEL] `trlc_requirements_test` and `trlc_specification_test` accept an
   `args` list with extra TRLC command-line arguments (for example

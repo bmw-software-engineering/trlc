@@ -727,8 +727,8 @@ section "Type declarations" {
         described_name [ 'optional' ]
         ( qualified_name_COMPONENT_TYPE | union_type ) [ array_declaration ]
 
-      union_type ::= '[' qualified_name_COMPONENT_TYPE
-                     { ',' qualified_name_COMPONENT_TYPE } ']'
+      union_type ::= '[' qualified_name_RECORD_TYPE
+                     { ',' qualified_name_RECORD_TYPE } ']'
 
       array_declaration ::= '[' INTEGER_lower '..' '*' ']'
                           | '[' INTEGER_lower '..' INTEGER_upper ']'
@@ -779,8 +779,8 @@ section "Type declarations" {
     }
 
     Static_Semantics Union_Type_No_Duplicates {
-      text = '''Each record or tuple type in a union type shall appear at most
-              once. It is an error to list the same type more than once.'''
+      text = '''Each record type in a union type shall appear at most once.
+              It is an error to list the same type more than once.'''
     }
 
     Recommendation Union_Type_No_Subtype_Relations {
@@ -790,12 +790,10 @@ section "Type declarations" {
               gives a false impression of independent alternatives.'''
     }
 
-    Static_Semantics Union_Type_Record_Or_Tuple_Types {
-      text = '''All types listed in a union type shall be record types or
-              tuple types. Builtin types, enumeration types, and array types
-              may not appear in a union type. Tuple types shall be declared
-              before they are used as union members. Record types retain the
-              usual record-type forward-reference rules.'''
+    Static_Semantics Union_Type_Record_Types_Only {
+      text = '''All types listed in a union type shall be record types.
+              Builtin types, enumeration types, tuple types, and array
+              types may not appear in a union type.'''
     }
 
     Static_Semantics Union_Type_Field_Access_Validity {

@@ -1,0 +1,15 @@
+package Test
+
+Requirement req_obj {}
+
+With_Union valid_tuple {
+  value = (1)
+}
+
+With_Union example {
+  value = (-1)
+}
+
+With_Union record_value {
+  value = req_obj
+}

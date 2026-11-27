@@ -2780,7 +2780,7 @@ class Array_Type(Type):
 class Union_Type(Type):
     # lobster-trace: LRM.union_type
     # lobster-trace: LRM.Union_Type_Minimum_Members
-    # lobster-trace: LRM.Union_Type_Record_Or_Tuple_Types
+    # lobster-trace: LRM.Union_Type_Record_Types_Only
     """Anonymous union type for record references and tuple values.
 
     These are declared implicitly when a record component specifies
@@ -2909,6 +2909,8 @@ class Union_Type(Type):
                     "expected one of the tuple types in %s, but value is of type %s"
                     % (self.name, value.typ.name),
                 )
+                return False
+            return value.typ.perform_type_checks(mh, value, gstab)
         elif isinstance(value, Record_Reference):
             if value.target is not None and not self.is_compatible(value.target.n_typ):
                 mh.error(
@@ -3299,6 +3301,14 @@ class Tuple_Type(Composite_Type):
         # lobster-trace: LRM.Tuple_Declaration
         super().__init__(name, description, location, package)
         self.separators = []
+        self.declaration_order = []
+
+    def iter_components(self):
+        """Iterate over tuple components in declaration order."""
+        if self.declaration_order:
+            yield from self.declaration_order
+        else:
+            yield from self.components.table.values()
 
     def add_separator(self, n_separator):
         # lobster-exclude: utility method
@@ -3315,12 +3325,12 @@ class Tuple_Type(Composite_Type):
         """Iterate over all components and separators in syntactic order"""
         # lobster-exclude: utility method
         if self.separators:
-            for i, n_component in enumerate(self.components.table.values()):
+            for i, n_component in enumerate(self.iter_components()):
                 yield n_component
                 if i < len(self.separators):
                     yield self.separators[i]
         else:
-            yield from self.components.table.values()
+            yield from self.iter_components()
 
     def has_separators(self):
         """Returns true if a tuple type requires separators"""

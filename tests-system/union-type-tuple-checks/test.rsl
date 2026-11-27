@@ -1,0 +1,15 @@
+package Test
+
+type Requirement {}
+
+tuple Item_ID {
+  id Integer
+}
+
+checks Item_ID {
+  id > 0, "ID must be positive"
+}
+
+type With_Union {
+  value [Requirement, Item_ID]
+}

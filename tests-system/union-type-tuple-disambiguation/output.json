@@ -1,0 +1,15 @@
+{
+  "integer_value": {
+    "choice": {
+      "first": 2,
+      "second": 3
+    }
+  },
+  "string_value": {
+    "choice": {
+      "first": 1,
+      "second": "hello"
+    }
+  }
+}
+Processed 1 model and 1 requirement file and found no issues
