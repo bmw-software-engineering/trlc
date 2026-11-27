@@ -1,6 +1,9 @@
 pyvcg==1.0.9
 cvc5>=1.3.2
 bigtree
+bmw-lobster-core
+bmw-lobster-tool-python
+bmw-lobster-tool-trlc
 
 # Development tools
 pycodestyle>=2.12
