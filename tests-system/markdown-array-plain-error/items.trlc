@@ -1,0 +1,5 @@
+package MdPlainArrayTest
+
+Item item_a {
+  description = "Item A"
+}

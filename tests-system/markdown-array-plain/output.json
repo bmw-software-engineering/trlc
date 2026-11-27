@@ -1,0 +1,146 @@
+{
+  "REQ_FIELD_COMMA": {
+    "description": "Field blocks using comma separation",
+    "flags": [
+      true,
+      false
+    ],
+    "levels": [
+      1.5,
+      2.5
+    ],
+    "modes": [
+      "Fast",
+      "Slow"
+    ],
+    "numbers": [
+      1,
+      2,
+      3
+    ],
+    "refs": [
+      "MdPlainArrayTest.item_a",
+      "MdPlainArrayTest.item_b"
+    ],
+    "tags": [
+      "alpha",
+      "beta"
+    ]
+  },
+  "REQ_FIELD_NEWLINE": {
+    "description": "Field blocks using one entry per line",
+    "flags": [
+      false,
+      true
+    ],
+    "levels": [
+      0.1,
+      0.2
+    ],
+    "modes": [
+      "Slow",
+      "Fast"
+    ],
+    "numbers": [
+      4,
+      5,
+      6
+    ],
+    "refs": [
+      "MdPlainArrayTest.item_a",
+      "MdPlainArrayTest.item_b",
+      "MdPlainArrayTest.item_c"
+    ],
+    "tags": [
+      "gamma",
+      "delta"
+    ]
+  },
+  "REQ_FIELD_SINGLE": {
+    "description": "A single-element array in each field, no comma needed",
+    "flags": [
+      true
+    ],
+    "levels": [
+      3.14
+    ],
+    "modes": [
+      "Fast"
+    ],
+    "numbers": [
+      42
+    ],
+    "refs": [
+      "MdPlainArrayTest.item_a"
+    ],
+    "tags": [
+      "solo"
+    ]
+  },
+  "REQ_TABLE_BR": {
+    "description": "All fields using &lt;br&gt;-separated table cells",
+    "flags": [
+      false,
+      false
+    ],
+    "levels": [
+      0.1,
+      0.2
+    ],
+    "modes": [
+      "Slow",
+      "Fast"
+    ],
+    "numbers": [
+      4,
+      5,
+      6
+    ],
+    "refs": [
+      "MdPlainArrayTest.item_a",
+      "MdPlainArrayTest.item_b"
+    ],
+    "tags": [
+      "gamma",
+      "delta"
+    ]
+  },
+  "REQ_TABLE_COMMA": {
+    "description": "All fields as comma-separated table cells",
+    "flags": [
+      true,
+      false
+    ],
+    "levels": [
+      1.5,
+      2.5
+    ],
+    "modes": [
+      "Fast",
+      "Slow"
+    ],
+    "numbers": [
+      1,
+      2,
+      3
+    ],
+    "refs": [
+      "MdPlainArrayTest.item_a",
+      "MdPlainArrayTest.item_b"
+    ],
+    "tags": [
+      "alpha",
+      "beta"
+    ]
+  },
+  "item_a": {
+    "description": "Item A"
+  },
+  "item_b": {
+    "description": "Item B"
+  },
+  "item_c": {
+    "description": "Item C"
+  }
+}
+Processed 1 model and 3 requirement files and found no issues

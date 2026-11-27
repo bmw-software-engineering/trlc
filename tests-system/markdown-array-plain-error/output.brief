@@ -1,0 +1,11 @@
+markdown-array-plain-error/req_errors.trlc.md:9:1: trlc error: bracket notation for array fields is not supported
+markdown-array-plain-error/req_errors.trlc.md:23:1: trlc error: bracket notation for array fields is not supported
+markdown-array-plain-error/req_errors.trlc.md:33:1: trlc error: invalid entry 'two' in array field 'numbers'
+markdown-array-plain-error/req_errors.trlc.md:44:1: trlc error: invalid entry 'item_a @ 1' in array field 'refs'
+markdown-array-plain-error/req_errors.trlc.md:64:1: trlc error: array field 'pair' has no elements
+markdown-array-plain-error/req_errors.trlc.md:3:1: trlc error: required component refs (see model.rsl:10) is not defined
+markdown-array-plain-error/req_errors.trlc.md:13:1: trlc error: required component refs (see model.rsl:10) is not defined
+markdown-array-plain-error/req_errors.trlc.md:27:1: trlc error: required component refs (see model.rsl:10) is not defined
+markdown-array-plain-error/req_errors.trlc.md:44:1: trlc error: this array requires at least 1 elements (only 0 provided)
+markdown-array-plain-error/req_errors.trlc.md:54:1: trlc error: this array requires at least 2 elements (only 1 provided)
+Processed 1 model and 2 requirement files and found 10 errors

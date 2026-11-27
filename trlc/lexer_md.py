@@ -388,23 +388,22 @@ class MD_Lexer(TRLC_Lexer):
         return component.n_typ if component is not None else None
 
     @staticmethod
-    def _is_tuple_array_field(record_type_ast, field_name):
-        """Return True when *field_name* is declared as an array of tuples."""
-        typ = MD_Lexer._get_field_type(record_type_ast, field_name)
-        return isinstance(typ, trlc_ast.Array_Type) and isinstance(
-            typ.element_type, trlc_ast.Tuple_Type
+    def _is_tuple_array_field(field_type):
+        """Return True when *field_type* is declared as an array of tuples."""
+        return isinstance(field_type, trlc_ast.Array_Type) and isinstance(
+            field_type.element_type, trlc_ast.Tuple_Type
         )
 
     @staticmethod
-    def _integer_tuple_array_arity(record_type_ast, field_name):
-        """Return the arity of a separator-form array of integer tuples."""
-        typ = MD_Lexer._get_field_type(record_type_ast, field_name)
-        if not isinstance(typ, trlc_ast.Array_Type) or not isinstance(
-            typ.element_type, trlc_ast.Tuple_Type
-        ):
-            return None
+    def _integer_tuple_arity_of(tuple_type):
+        """Return the arity of *tuple_type* if it is a separator-form tuple
+        of all-``Integer`` components, or None otherwise.
 
-        tuple_type = typ.element_type
+        Used to recognise the numeric tuple-array shape handled by
+        :meth:`_maybe_emit_integer_tuple_array` /
+        :meth:`_looks_like_integer_tuple_array` (e.g. ``1234 @ 25``), as
+        opposed to a generic tuple-reference array.
+        """
         components = list(tuple_type.components.table.values())
         if not tuple_type.has_separators() or not components:
             return None
@@ -416,10 +415,24 @@ class MD_Lexer(TRLC_Lexer):
         return len(components)
 
     @staticmethod
-    def _is_string_field(record_type_ast, field_name):
-        """Return True when *field_name* is declared as a plain String."""
-        typ = MD_Lexer._get_field_type(record_type_ast, field_name)
-        return typ is not None and isinstance(typ, trlc_ast.Builtin_String)
+    def _is_string_field(field_type):
+        """Return True when *field_type* is a plain String."""
+        return isinstance(field_type, trlc_ast.Builtin_String)
+
+    @staticmethod
+    def _plain_array_element_type(field_type):
+        """Return the element type of a non-tuple array type, or None.
+
+        Used for arrays such as ``Integer [1 .. *]``, ``String [1 .. *]``,
+        a plain record-reference array, or an enum array -- i.e. any array
+        type whose element type is *not* a tuple (those are handled by
+        ``_is_tuple_array_field`` instead).
+        """
+        if isinstance(field_type, trlc_ast.Array_Type) and not isinstance(
+            field_type.element_type, trlc_ast.Tuple_Type
+        ):
+            return field_type.element_type
+        return None
 
     def _emit_field_value(
         self, raw_value, location, record_type_ast=None, field_name=None
@@ -429,17 +442,22 @@ class MD_Lexer(TRLC_Lexer):
         Dispatch rules when RSL type info is available:
         - String field       → emit STRING directly (never try array/tuple)
         - Tuple-array field  → type-confirmed array tokenisation
+        - Plain array field  → type-confirmed element-wise tokenisation
         - Any other field    → existing _emit_value() heuristics
 
         Falls back to _emit_value() heuristics when type is unknown.
         """
         if record_type_ast is not None:
-            if self._is_string_field(record_type_ast, field_name):
+            # Resolved once and threaded through the branches below,
+            # instead of each helper re-deriving it via its own
+            # (record_type_ast, field_name) lookup.
+            field_type = self._get_field_type(record_type_ast, field_name)
+            if self._is_string_field(field_type):
                 self._emit(location, "STRING", raw_value.strip())
                 return
-            if self._is_tuple_array_field(record_type_ast, field_name):
-                integer_tuple_arity = self._integer_tuple_array_arity(
-                    record_type_ast, field_name
+            if self._is_tuple_array_field(field_type):
+                integer_tuple_arity = self._integer_tuple_arity_of(
+                    field_type.element_type
                 )
                 if self._check_bracket_array(raw_value, location, integer_tuple_arity):
                     return
@@ -459,6 +477,30 @@ class MD_Lexer(TRLC_Lexer):
                     raw_value, location, allow_unqualified=True
                 ):
                     self._report_invalid_array_entry(raw_value, location, field_name)
+                return
+            plain_element_type = self._plain_array_element_type(field_type)
+            if plain_element_type is not None:
+                if self._check_bracket_array_plain(raw_value, location, field_type):
+                    return
+                if not self._split_array_elements(raw_value) and (
+                    field_type.lower_bound == 0
+                ):
+                    # The field is simply left blank and the array is
+                    # allowed to be empty (lower bound 0) -- this is a
+                    # valid empty array, not a missing/invalid value.
+                    self._emit(location, "S_BRA")
+                    self._emit(location, "S_KET")
+                    return
+                if not self._maybe_emit_plain_array(
+                    raw_value, location, plain_element_type
+                ):
+                    self._report_invalid_plain_array_entry(
+                        raw_value,
+                        location,
+                        field_type,
+                        field_name,
+                        plain_element_type,
+                    )
                 return
         self._emit_value(raw_value, location)
 
@@ -924,6 +966,14 @@ class MD_Lexer(TRLC_Lexer):
         Bracket syntax like ``[Pkg.item @ 1, Pkg.item @ 2]`` is not supported
         because brackets conflict with Markdown URL syntax.
 
+        Note: unlike :meth:`_check_bracket_array_plain`, this does not emit a
+        recovery array after the error -- the existing system test
+        ``tests-system/markdown-array-bracket-error`` (predating this
+        change, owned by another contributor) already pins the current
+        "no tokens emitted" behavior and its resulting parser cascade, so
+        that is intentionally left as-is here rather than changed as a
+        side effect of unrelated work.
+
         Returns True when bracket array syntax was detected (error was emitted),
         so the caller can skip further processing of this value.
         """
@@ -1067,6 +1117,312 @@ class MD_Lexer(TRLC_Lexer):
         )
         self._emit(location, "S_BRA")
         self._emit(location, "S_KET")
+
+    # ------------------------------------------------------------------ #
+    # Plain (non-tuple) array helpers                                      #
+    # ------------------------------------------------------------------ #
+
+    # A plain identifier chain, used for both enum literals
+    # (``Pkg.Enum.Literal``) and record references (``Pkg.item`` or, for
+    # the same package, just ``item``). No separator/version suffix is
+    # accepted here -- that is only valid for tuple elements.
+    _PLAIN_ARRAY_IDENT_RE = re.compile(r"[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*")
+
+    # A signed integer literal: decimal, hex, or binary.
+    _PLAIN_ARRAY_INT_RE = re.compile(
+        r"[+-]?(?:0[xX][0-9a-fA-F][0-9a-fA-F_]*|0[bB][01][01_]*|[0-9][0-9_]*)"
+    )
+
+    # A signed decimal literal.
+    _PLAIN_ARRAY_DECIMAL_RE = re.compile(r"[+-]?[0-9][0-9_]*\.[0-9][0-9_]*")
+
+    @staticmethod
+    def _split_top_level_commas(text):
+        """Split *text* on commas, except commas inside a quoted string.
+
+        This keeps a quoted String array element such as ``"a, b"`` intact
+        while still splitting ``item_a, item_b`` into two entries. A
+        backslash-escaped quote (``\\"``) inside a string does not toggle
+        the quoted state, so a string containing an escaped quote followed
+        by a comma (e.g. ``"a\\", b"``) is also kept intact rather than
+        being mis-split at that comma.
+        """
+        parts = []
+        current = []
+        in_string = False
+        i = 0
+        n = len(text)
+        while i < n:
+            ch = text[i]
+            if in_string and ch == "\\" and i + 1 < n:
+                current.append(ch)
+                current.append(text[i + 1])
+                i += 2
+                continue
+            if ch == '"':
+                in_string = not in_string
+                current.append(ch)
+            elif ch == "," and not in_string:
+                parts.append("".join(current))
+                current = []
+            else:
+                current.append(ch)
+            i += 1
+        parts.append("".join(current))
+        return parts
+
+    @staticmethod
+    def _split_array_elements(raw_value):
+        """Split a plain-array field value into its individual elements.
+
+        Handles Markdown link labels (``[label](url)`` -> ``label``),
+        ``<br>`` tags, and newlines the same way as tuple arrays, then
+        splits each resulting line on top-level commas (see
+        :meth:`_split_top_level_commas`).
+        """
+        normalized = MD_Lexer._strip_array_link_targets(raw_value)
+        normalized = MD_Lexer._BREAK_TAG_RE.sub("\n", normalized)
+
+        elements = []
+        for line in normalized.split("\n"):
+            for piece in MD_Lexer._split_top_level_commas(line):
+                trimmed = piece.strip()
+                if trimmed:
+                    elements.append(trimmed)
+        return elements
+
+    @staticmethod
+    def _unquote_string(text):
+        """Strip surrounding double quotes and unescape ``\\"``, if present.
+
+        Elements are also accepted without quotes (consistent with how a
+        plain, non-array String field is handled), in which case the text
+        is used verbatim.
+        """
+        if len(text) >= 2 and text.startswith('"') and text.endswith('"'):
+            return text[1:-1].replace('\\"', '"')
+        return text
+
+    @staticmethod
+    def _parse_plain_element(text, element_type):
+        """Classify one array element against *element_type*.
+
+        Returns a ``(kind, text)`` pair on success, or ``None`` when *text*
+        does not look like a valid value of *element_type*.
+        """
+        value = text.strip()
+        if not value:
+            return None
+
+        if isinstance(element_type, trlc_ast.Builtin_Boolean):
+            return ("BOOL", value) if value in ("true", "false") else None
+
+        if isinstance(element_type, trlc_ast.Builtin_Integer):
+            if MD_Lexer._PLAIN_ARRAY_INT_RE.fullmatch(value):
+                return ("INT", value)
+            return None
+
+        if isinstance(element_type, trlc_ast.Builtin_Decimal):
+            if MD_Lexer._PLAIN_ARRAY_DECIMAL_RE.fullmatch(value):
+                return ("DEC", value)
+            return None
+
+        if isinstance(element_type, trlc_ast.Builtin_String):
+            # Any text is a valid String value (quotes are optional).
+            return ("STR", value)
+
+        if isinstance(
+            element_type,
+            (trlc_ast.Enumeration_Type, trlc_ast.Record_Type, trlc_ast.Union_Type),
+        ):
+            if MD_Lexer._PLAIN_ARRAY_IDENT_RE.fullmatch(value):
+                return ("IDENT", value)
+            return None
+
+        return None
+
+    def _emit_plain_element(self, parsed_element, location):
+        """Emit the token(s) for one ``(kind, text)`` pair from
+        :meth:`_parse_plain_element`."""
+        kind, text = parsed_element
+
+        if kind == "BOOL":
+            self._emit(location, "KEYWORD", text)
+            return
+
+        if kind in ("INT", "DEC"):
+            body = text
+            sign = None
+            if body and body[0] in "+-":
+                sign, body = body[0], body[1:]
+            if sign:
+                self._emit(location, "OPERATOR", sign)
+            if kind == "INT":
+                self._emit(location, "INTEGER", self._parse_number(body))
+            else:
+                self._emit(location, "DECIMAL", Fraction(body.replace("_", "")))
+            return
+
+        if kind == "STR":
+            self._emit(location, "STRING", self._unquote_string(text))
+            return
+
+        # kind == "IDENT": enum literal or (qualified/unqualified) record
+        # reference -- both are a plain IDENTIFIER/DOT chain.
+        self._emit_qualified_identifier(location, text)
+
+    def _maybe_emit_plain_array(self, raw_value, location, element_type):
+        """Try to emit array tokens for a non-tuple array field.
+
+        Splits *raw_value* into elements (comma/newline/``<br>``-separated)
+        and validates each one against *element_type*. Returns True and
+        emits ``S_BRA elem [, elem]* S_KET`` on success, or False (emitting
+        nothing) when any element does not match.
+        """
+        elements = self._split_array_elements(raw_value)
+        if not elements:
+            return False
+
+        parsed = [self._parse_plain_element(e, element_type) for e in elements]
+        if any(p is None for p in parsed):
+            return False
+
+        self._emit(location, "S_BRA")
+        for idx, parsed_element in enumerate(parsed):
+            if idx:
+                self._emit(location, "COMMA")
+            self._emit_plain_element(parsed_element, location)
+        self._emit(location, "S_KET")
+        return True
+
+    # Element types whose Type.get_example_value() is guaranteed to
+    # resolve/parse on its own -- i.e. it never names another record
+    # instance that might not actually exist in the model (unlike e.g.
+    # Record_Type.get_example_value(), which fabricates a plausible but
+    # unresolved identifier such as "Item_instance").
+    _SAFE_EXAMPLE_VALUE_TYPES = (
+        trlc_ast.Builtin_Boolean,
+        trlc_ast.Builtin_Integer,
+        trlc_ast.Builtin_Decimal,
+        trlc_ast.Builtin_String,
+        trlc_ast.Enumeration_Type,
+    )
+
+    def _emit_recovery_array(self, location, array_type_ast):
+        """Emit array tokens to recover after a rejected plain-array value
+        (bracket notation, an invalid entry, or tuple syntax on a
+        plain-ref field).
+
+        When the element type is one of :data:`_SAFE_EXAMPLE_VALUE_TYPES`,
+        emit enough placeholder elements (via ``Type.get_example_value()``)
+        to satisfy the field's minimum element count. This avoids the
+        generic array-length check in the parser also reporting a
+        misleading "only 0 provided" cascade for a value that in fact had
+        entries -- they were just rejected for a different reason.
+
+        Falls back to an empty array otherwise (e.g. a record/union/tuple
+        reference element, whose generated example name might not exist
+        in the model): fabricating an unresolved reference there would
+        just trade one confusing cascade for another.
+        """
+        placeholder = None
+        count = 0
+        if isinstance(array_type_ast, trlc_ast.Array_Type) and isinstance(
+            array_type_ast.element_type, MD_Lexer._SAFE_EXAMPLE_VALUE_TYPES
+        ):
+            element_type = array_type_ast.element_type
+            placeholder = self._parse_plain_element(
+                element_type.get_example_value(), element_type
+            )
+            count = array_type_ast.lower_bound if placeholder is not None else 0
+
+        self._emit(location, "S_BRA")
+        for idx in range(count):
+            if idx:
+                self._emit(location, "COMMA")
+            self._emit_plain_element(placeholder, location)
+        self._emit(location, "S_KET")
+
+    def _check_bracket_array_plain(self, raw_value, location, array_type_ast):
+        """Reject bracket notation for a plain (non-tuple) array field.
+
+        Mirrors :meth:`_check_bracket_array`, but the element shape is
+        irrelevant here: the field's type is already confirmed to be an
+        array, so any bracket-wrapped value is rejected unconditionally.
+        """
+        value = raw_value.strip()
+        if not (value.startswith("[") and value.endswith("]")):
+            return False
+        self.mh.error(
+            location,
+            "bracket notation for array fields is not supported",
+            explanation=(
+                "Use comma-separated or newline-separated values without "
+                "brackets instead, e.g. '1, 2, 3'."
+            ),
+            fatal=False,
+        )
+        self._emit_recovery_array(location, array_type_ast)
+        return True
+
+    _PLAIN_ARRAY_EXAMPLE = {
+        trlc_ast.Builtin_Boolean: "true, false",
+        trlc_ast.Builtin_Integer: "1, 2, 3",
+        trlc_ast.Builtin_Decimal: "1.0, 2.5",
+        trlc_ast.Builtin_String: '"foo", "bar"',
+    }
+
+    @staticmethod
+    def _plain_array_example(element_type):
+        """Return a short example value list for *element_type*'s error text."""
+        for typ, example in MD_Lexer._PLAIN_ARRAY_EXAMPLE.items():
+            if isinstance(element_type, typ):
+                return example
+        if isinstance(element_type, trlc_ast.Enumeration_Type):
+            return f"{element_type.name}.<Literal>"
+        return "item_a, item_b"
+
+    def _report_invalid_plain_array_entry(
+        self, raw_value, location, array_type_ast, field_name, element_type
+    ):
+        """Report why a plain-array value could not be parsed: either it
+        has no elements at all, or one of its entries does not match the
+        declared element type.
+
+        Emits a recovery array afterwards (see :meth:`_emit_recovery_array`)
+        so the parser does not add a misleading "only 0 provided" cascade
+        for a value that in fact had entries, when a safe placeholder can
+        be fabricated for the element type.
+        """
+        elements = self._split_array_elements(raw_value)
+        example = self._plain_array_example(element_type)
+        if not elements:
+            message = f"array field '{field_name}' has no elements"
+            explanation = (
+                f"Provide at least one value of type '{element_type.name}', "
+                f"separated by commas or newlines, e.g. '{example}'."
+            )
+        else:
+            invalid = next(
+                (
+                    e
+                    for e in elements
+                    if self._parse_plain_element(e, element_type) is None
+                ),
+                raw_value.strip(),
+            )
+            message = f"invalid entry '{invalid}' in array field '{field_name}'"
+            explanation = (
+                f"Expected a value of type '{element_type.name}', separated by "
+                f"commas or newlines, e.g. '{example}'."
+            )
+        self.mh.error(
+            location,
+            message,
+            explanation=explanation,
+            fatal=False,
+        )
+        self._emit_recovery_array(location, array_type_ast)
 
     def _emit_value(self, raw_value, location):
         """Emit one or more tokens representing a property value.

@@ -112,6 +112,55 @@ def make_record_type(record_name="ReqType"):
     return stab, record_type
 
 
+def make_record_type_with_plain_arrays():
+    """Build a record type with non-tuple (plain) array fields of every
+    element kind: Integer, Decimal, Boolean, String, an enum, and a plain
+    record reference (no tuple)."""
+    stab = trlc_ast.Symbol_Table()
+    package = trlc_ast.Package("DemoPkg", Location("test"), stab, False)
+
+    item_type = trlc_ast.Record_Type(
+        "Item", None, Location("test"), package, None, False
+    )
+
+    mode_type = trlc_ast.Enumeration_Type("Mode", None, Location("test"), package)
+    for lit_name in ("Fast", "Slow"):
+        mode_type.literals.table[trlc_ast.Symbol_Table.simplified_name(lit_name)] = (
+            trlc_ast.Enumeration_Literal_Spec(
+                lit_name, None, Location("test"), mode_type
+            )
+        )
+
+    record_type = trlc_ast.Record_Type(
+        "ReqType", None, Location("test"), package, None, False
+    )
+
+    def add_array_field(name, element_type):
+        array_type = trlc_ast.Array_Type(
+            Location("test"), element_type, Location("test"), 0, Location("test"), None
+        )
+        record_type.components.table[name] = trlc_ast.Composite_Component(
+            name, None, Location("test"), record_type, array_type, False
+        )
+
+    add_array_field("numbers", trlc_ast.Builtin_Integer())
+    add_array_field("levels", trlc_ast.Builtin_Decimal())
+    add_array_field("flags", trlc_ast.Builtin_Boolean())
+    add_array_field("tags", trlc_ast.Builtin_String())
+    add_array_field("modes", mode_type)
+    add_array_field("refs", item_type)
+
+    package.symbols.table[trlc_ast.Symbol_Table.simplified_name("ReqType")] = (
+        record_type
+    )
+    package.symbols.table[trlc_ast.Symbol_Table.simplified_name("Item")] = item_type
+    package.symbols.table[trlc_ast.Symbol_Table.simplified_name("Mode")] = mode_type
+
+    outer_stab = trlc_ast.Symbol_Table()
+    outer_stab.table[trlc_ast.Symbol_Table.simplified_name(package.name)] = package
+    return outer_stab, record_type
+
+
 class TestLexerMd(unittest.TestCase):
     def setUp(self):
         self.mh = ListHandler()
@@ -862,6 +911,450 @@ class TestLexerMd(unittest.TestCase):
         self.assertEqual(
             self.mh.pop_message()[2],
             "invalid entry 'req 1' in tuple-reference array field 'refs'",
+        )
+
+    def test_plain_array_fields_every_element_kind(self):
+        _stab, record_type = make_record_type_with_plain_arrays()
+
+        cases = [
+            (
+                "numbers",
+                "1, 2, 3",
+                [
+                    ("S_BRA", None),
+                    ("INTEGER", 1),
+                    ("COMMA", None),
+                    ("INTEGER", 2),
+                    ("COMMA", None),
+                    ("INTEGER", 3),
+                    ("S_KET", None),
+                ],
+            ),
+            (
+                "levels",
+                "1.5\n2.5",
+                [
+                    ("S_BRA", None),
+                    ("DECIMAL", Fraction("1.5")),
+                    ("COMMA", None),
+                    ("DECIMAL", Fraction("2.5")),
+                    ("S_KET", None),
+                ],
+            ),
+            (
+                "flags",
+                "true, false",
+                [
+                    ("S_BRA", None),
+                    ("KEYWORD", "true"),
+                    ("COMMA", None),
+                    ("KEYWORD", "false"),
+                    ("S_KET", None),
+                ],
+            ),
+            (
+                "tags",
+                '"alpha", "beta"',
+                [
+                    ("S_BRA", None),
+                    ("STRING", "alpha"),
+                    ("COMMA", None),
+                    ("STRING", "beta"),
+                    ("S_KET", None),
+                ],
+            ),
+            (
+                "modes",
+                "Mode.Fast <br> Mode.Slow",
+                [
+                    ("S_BRA", None),
+                    ("IDENTIFIER", "Mode"),
+                    ("DOT", None),
+                    ("IDENTIFIER", "Fast"),
+                    ("COMMA", None),
+                    ("IDENTIFIER", "Mode"),
+                    ("DOT", None),
+                    ("IDENTIFIER", "Slow"),
+                    ("S_KET", None),
+                ],
+            ),
+            (
+                "refs",
+                "item_a, DemoPkg.item_b",
+                [
+                    ("S_BRA", None),
+                    ("IDENTIFIER", "item_a"),
+                    ("COMMA", None),
+                    ("IDENTIFIER", "DemoPkg"),
+                    ("DOT", None),
+                    ("IDENTIFIER", "item_b"),
+                    ("S_KET", None),
+                ],
+            ),
+        ]
+
+        for field_name, raw_value, expected in cases:
+            with self.subTest(field=field_name):
+                lexer = MD_Lexer(self.mh, "test", "")
+                lexer._emit_field_value(
+                    raw_value, Location("test"), record_type, field_name
+                )
+                self.assertEqual(token_pairs(lexer), expected)
+
+    def test_plain_array_single_element_needs_no_comma(self):
+        _stab, record_type = make_record_type_with_plain_arrays()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("42", Location("test"), record_type, "numbers")
+        self.assertEqual(
+            token_pairs(lexer), [("S_BRA", None), ("INTEGER", 42), ("S_KET", None)]
+        )
+
+    def test_plain_array_bracket_notation_is_rejected(self):
+        _stab, record_type = make_record_type_with_plain_arrays()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("[1, 2, 3]", Location("test"), record_type, "numbers")
+        self.assertEqual(token_pairs(lexer), [("S_BRA", None), ("S_KET", None)])
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "bracket notation for array fields is not supported",
+        )
+
+    def test_plain_array_bracket_rejection_fills_min_count_for_safe_type(self):
+        # When the field has a minimum element count and a safe
+        # (fabricatable) element type, the rejected bracket value should
+        # not also trigger a misleading "only 0 provided" cascade: enough
+        # placeholder elements are emitted to satisfy the minimum.
+        stab = trlc_ast.Symbol_Table()
+        package = trlc_ast.Package("DemoPkg", Location("test"), stab, False)
+        record_type = trlc_ast.Record_Type(
+            "ReqType", None, Location("test"), package, None, False
+        )
+        array_type = trlc_ast.Array_Type(
+            Location("test"),
+            trlc_ast.Builtin_Integer(),
+            Location("test"),
+            2,
+            Location("test"),
+            None,
+        )
+        record_type.components.table["numbers"] = trlc_ast.Composite_Component(
+            "numbers", None, Location("test"), record_type, array_type, False
+        )
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("[1, 2, 3]", Location("test"), record_type, "numbers")
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("INTEGER", 100),
+                ("COMMA", None),
+                ("INTEGER", 100),
+                ("S_KET", None),
+            ],
+        )
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "bracket notation for array fields is not supported",
+        )
+        self.assertEqual(self.mh.messages, [])
+
+    def test_plain_array_bracket_rejection_stays_empty_for_unsafe_type(self):
+        # A record-reference element type has no safely-fabricatable
+        # placeholder value (an invented identifier might not resolve),
+        # so the rejected bracket value still emits an empty array and
+        # the generic "only 0 provided" cascade is kept.
+        stab = trlc_ast.Symbol_Table()
+        package = trlc_ast.Package("DemoPkg", Location("test"), stab, False)
+        item_type = trlc_ast.Record_Type(
+            "Item", None, Location("test"), package, None, False
+        )
+        record_type = trlc_ast.Record_Type(
+            "ReqType", None, Location("test"), package, None, False
+        )
+        array_type = trlc_ast.Array_Type(
+            Location("test"), item_type, Location("test"), 1, Location("test"), None
+        )
+        record_type.components.table["refs"] = trlc_ast.Composite_Component(
+            "refs", None, Location("test"), record_type, array_type, False
+        )
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("[item_a @ 1]", Location("test"), record_type, "refs")
+        self.assertEqual(token_pairs(lexer), [("S_BRA", None), ("S_KET", None)])
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "bracket notation for array fields is not supported",
+        )
+        self.assertEqual(self.mh.messages, [])
+
+    def test_plain_array_invalid_entry_is_reported(self):
+        _stab, record_type = make_record_type_with_plain_arrays()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("1, two, 3", Location("test"), record_type, "numbers")
+        self.assertEqual(token_pairs(lexer), [("S_BRA", None), ("S_KET", None)])
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "invalid entry 'two' in array field 'numbers'",
+        )
+
+    def test_plain_array_empty_value_is_valid_for_optional_array(self):
+        # "numbers" has lower bound 0 in this fixture, so a field left
+        # blank is simply a valid empty array -- not an error.
+        _stab, record_type = make_record_type_with_plain_arrays()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("", Location("test"), record_type, "numbers")
+        self.assertEqual(token_pairs(lexer), [("S_BRA", None), ("S_KET", None)])
+        self.assertEqual(self.mh.messages, [])
+
+    def test_plain_array_empty_value_reports_no_elements_when_mandatory(self):
+        # When the array's lower bound is >= 1, a genuinely empty value
+        # (the field is present but blank) is a different problem than an
+        # invalid entry among several written ones, so it gets its own,
+        # more accurate message.
+        stab = trlc_ast.Symbol_Table()
+        package = trlc_ast.Package("DemoPkg", Location("test"), stab, False)
+        record_type = trlc_ast.Record_Type(
+            "ReqType", None, Location("test"), package, None, False
+        )
+        array_type = trlc_ast.Array_Type(
+            Location("test"),
+            trlc_ast.Builtin_Integer(),
+            Location("test"),
+            1,
+            Location("test"),
+            None,
+        )
+        record_type.components.table["numbers"] = trlc_ast.Composite_Component(
+            "numbers", None, Location("test"), record_type, array_type, False
+        )
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("", Location("test"), record_type, "numbers")
+        # Recovery fills the minimum element count with a placeholder
+        # value for safe element types (same as the invalid-entry case).
+        self.assertEqual(
+            token_pairs(lexer),
+            [("S_BRA", None), ("INTEGER", 100), ("S_KET", None)],
+        )
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "array field 'numbers' has no elements",
+        )
+
+    def test_plain_array_invalid_entry_fills_min_count_for_safe_type(self):
+        # Same recovery behaviour as the bracket-rejection case: an
+        # invalid entry still had *some* entries written, so a safe
+        # element type gets placeholders instead of an empty array.
+        stab = trlc_ast.Symbol_Table()
+        package = trlc_ast.Package("DemoPkg", Location("test"), stab, False)
+        record_type = trlc_ast.Record_Type(
+            "ReqType", None, Location("test"), package, None, False
+        )
+        array_type = trlc_ast.Array_Type(
+            Location("test"),
+            trlc_ast.Builtin_Integer(),
+            Location("test"),
+            1,
+            Location("test"),
+            None,
+        )
+        record_type.components.table["numbers"] = trlc_ast.Composite_Component(
+            "numbers", None, Location("test"), record_type, array_type, False
+        )
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("1, two, 3", Location("test"), record_type, "numbers")
+        self.assertEqual(
+            token_pairs(lexer), [("S_BRA", None), ("INTEGER", 100), ("S_KET", None)]
+        )
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "invalid entry 'two' in array field 'numbers'",
+        )
+        self.assertEqual(self.mh.messages, [])
+
+    def test_plain_array_does_not_accept_tuple_syntax(self):
+        # A plain record-reference array must not accept "item @ version"
+        # (that syntax is reserved for tuple-array fields).
+        _stab, record_type = make_record_type_with_plain_arrays()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("item_a @ 1", Location("test"), record_type, "refs")
+        self.assertEqual(token_pairs(lexer), [("S_BRA", None), ("S_KET", None)])
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "invalid entry 'item_a @ 1' in array field 'refs'",
+        )
+
+    def test_plain_array_negative_numbers(self):
+        _stab, record_type = make_record_type_with_plain_arrays()
+
+        cases = [
+            (
+                "numbers",
+                "-3, 5, -7",
+                [
+                    ("S_BRA", None),
+                    ("OPERATOR", "-"),
+                    ("INTEGER", 3),
+                    ("COMMA", None),
+                    ("INTEGER", 5),
+                    ("COMMA", None),
+                    ("OPERATOR", "-"),
+                    ("INTEGER", 7),
+                    ("S_KET", None),
+                ],
+            ),
+            (
+                "levels",
+                "-1.5, 2.5",
+                [
+                    ("S_BRA", None),
+                    ("OPERATOR", "-"),
+                    ("DECIMAL", Fraction("1.5")),
+                    ("COMMA", None),
+                    ("DECIMAL", Fraction("2.5")),
+                    ("S_KET", None),
+                ],
+            ),
+        ]
+
+        for field_name, raw_value, expected in cases:
+            with self.subTest(field=field_name):
+                lexer = MD_Lexer(self.mh, "test", "")
+                lexer._emit_field_value(
+                    raw_value, Location("test"), record_type, field_name
+                )
+                self.assertEqual(token_pairs(lexer), expected)
+
+    def test_plain_array_string_elements_allow_unquoted_and_embedded_comma(self):
+        # A quoted String element may contain a comma without being split,
+        # while an unquoted element is still accepted verbatim.
+        _stab, record_type = make_record_type_with_plain_arrays()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value('"a, b", plain', Location("test"), record_type, "tags")
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("STRING", "a, b"),
+                ("COMMA", None),
+                ("STRING", "plain"),
+                ("S_KET", None),
+            ],
+        )
+
+    def test_plain_array_enum_unqualified_literal(self):
+        # An enum array element may omit the "Mode." qualifier.
+        _stab, record_type = make_record_type_with_plain_arrays()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value("Fast, Slow", Location("test"), record_type, "modes")
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("IDENTIFIER", "Fast"),
+                ("COMMA", None),
+                ("IDENTIFIER", "Slow"),
+                ("S_KET", None),
+            ],
+        )
+
+    def test_plain_array_record_ref_with_markdown_link_syntax(self):
+        # A record-reference array element may be written as a Markdown
+        # link, same as tuple-reference arrays; only the label is kept.
+        _stab, record_type = make_record_type_with_plain_arrays()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(
+            "[item_a](somewhere), item_b", Location("test"), record_type, "refs"
+        )
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("IDENTIFIER", "item_a"),
+                ("COMMA", None),
+                ("IDENTIFIER", "item_b"),
+                ("S_KET", None),
+            ],
+        )
+
+    def test_plain_array_multiple_invalid_entries_reports_first_only(self):
+        _stab, record_type = make_record_type_with_plain_arrays()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(
+            "1, two, three", Location("test"), record_type, "numbers"
+        )
+        self.assertEqual(token_pairs(lexer), [("S_BRA", None), ("S_KET", None)])
+        self.assertEqual(
+            self.mh.pop_message()[2],
+            "invalid entry 'two' in array field 'numbers'",
+        )
+        self.assertEqual(self.mh.messages, [])
+
+    def test_plain_array_quoted_string_with_escaped_quote_keeps_comma(self):
+        # A quoted String element containing an escaped quote followed by
+        # a comma must not be split at that comma: the backslash-escaped
+        # `"` should not toggle the "inside a string" state.
+        _stab, record_type = make_record_type_with_plain_arrays()
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(r'"a\", b", "c"', Location("test"), record_type, "tags")
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("STRING", 'a", b'),
+                ("COMMA", None),
+                ("STRING", "c"),
+                ("S_KET", None),
+            ],
+        )
+
+    def test_plain_array_union_type_element(self):
+        # A plain array whose element type is a Union_Type (declared via
+        # ``parent [TypeA, TypeB]`` bracket syntax) is handled the same
+        # way as a plain Record_Type reference array.
+        stab = trlc_ast.Symbol_Table()
+        package = trlc_ast.Package("DemoPkg", Location("test"), stab, False)
+        item_type = trlc_ast.Record_Type(
+            "Item", None, Location("test"), package, None, False
+        )
+        union_type = trlc_ast.Union_Type(Location("test"), [item_type])
+        record_type = trlc_ast.Record_Type(
+            "ReqType", None, Location("test"), package, None, False
+        )
+        array_type = trlc_ast.Array_Type(
+            Location("test"), union_type, Location("test"), 1, Location("test"), None
+        )
+        record_type.components.table["refs"] = trlc_ast.Composite_Component(
+            "refs", None, Location("test"), record_type, array_type, False
+        )
+
+        lexer = MD_Lexer(self.mh, "test", "")
+        lexer._emit_field_value(
+            "item_a, OtherPkg.item_b", Location("test"), record_type, "refs"
+        )
+        self.assertEqual(
+            token_pairs(lexer),
+            [
+                ("S_BRA", None),
+                ("IDENTIFIER", "item_a"),
+                ("COMMA", None),
+                ("IDENTIFIER", "OtherPkg"),
+                ("DOT", None),
+                ("IDENTIFIER", "item_b"),
+                ("S_KET", None),
+            ],
         )
 
     def test_preamble_nested_package_and_wildcard_import(self):
